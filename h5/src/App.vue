@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <!--<Ad v-show="false" @hideTabbarFn="hideTabbarFn"></Ad>-->
-    <mt-tabbar v-model="activeTab" v-show="!hideTabbar">
+    <mt-tabbar v-model="activeTab" v-show="!navHide">
       <mt-tab-item id="main">
         <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'main' }"></i>
         {{ $t('basic.main') }}
@@ -17,6 +17,8 @@
 
 <script>
 import Ad from '@/components/common/Ad'
+import { mapState, mapMutations } from 'vuex';
+import { SET_NAV_STATUS } from './store/mutation-types';
 
 export default {
   name: 'App',
@@ -30,6 +32,16 @@ export default {
   components: {
     Ad
   },
+  mounted(){
+      if(this.user.loginStatus){
+          this.SET_NAV_STATUS(false);
+      }else{
+          this.SET_NAV_STATUS(true);
+      }
+  },
+  computed: {
+      ...mapState(['user','navHide'])
+  },
   watch: {
       activeTab:function (val) {
           switch (val){
@@ -40,6 +52,10 @@ export default {
       }
   },
   methods:{
+      ...mapMutations({
+          SET_NAV_STATUS
+      }),
+
       hideTabbarFn:function (data) {
           this.hideTabbar = data;
       }

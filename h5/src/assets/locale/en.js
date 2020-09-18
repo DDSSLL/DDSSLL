@@ -1,6 +1,10 @@
 module.exports = {
     basic:{
         "main":"Main",
-        "settings":"Settings"
+        "settings":"Settings",
+        "login":"Login"
+    },
+    tip:{
+        "authSuccess":"Auth Success"
     }
 };

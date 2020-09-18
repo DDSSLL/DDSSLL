@@ -5,5 +5,7 @@ export default {
     // 版本号
     versionNumber: '0.09.25',
     // 账户信息
-    user: {}
+    user: {},
+    //导航显示状态
+    navHide: true
 }
