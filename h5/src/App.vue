@@ -25,8 +25,7 @@ export default {
   data(){
     return{
         name: 'app',
-        activeTab: 'main',
-        hideTabbar: false
+        activeTab: 'main'
     }
   },
   components: {
@@ -64,14 +63,17 @@ export default {
 </script>
 
 <style>
+html,body{
+  height: 100%;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  text-align: left;
+  color: #000000;
   font-size: .14rem;
+  height: 100%;
 }
 .tab{
   display: block;

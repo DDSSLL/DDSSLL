@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Ad from '@/components/common/Ad'
 import Login from '@/components/common/Login'
-import Main from '@/components/main/HelloWorld'
+import Main from '@/components/main/Main'
 import Settings from '@/components/settings/Settings'
 
 //解决(in promise) NavigationDuplicated: Avoided redundant navigation问题

@@ -1,16 +1,16 @@
 <template>
-    <div>
-        <mt-header fixed v-bind:title="title">
+    <div class="page">
+        <!--<mt-header fixed v-bind:title="title">-->
             <!--<mt-button slot="left" @click.native="back"> < </mt-button>-->
-        </mt-header>
+        <!--</mt-header>-->
         <div id="body">
-            <mt-cell title="User">
+            <mt-cell title="用户名">
                 <input type="text" v-model="user.login_name">
             </mt-cell>
-            <mt-cell title="Password">
+            <mt-cell title="密码">
                 <input type="password" v-model="user.password">
             </mt-cell>
-            <mt-button type="primary" size="large" plain="plain" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
+            <mt-button size="large" plain="plain" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
         </div>
     </div>
 </template>
@@ -112,5 +112,23 @@
 </script>
 
 <style scoped>
-
+    .page{
+        height: 100%;
+    }
+    #body{
+        height: 100%;
+        background-color: #212227;
+        color: #6FAAA3;
+        padding-top: 2rem;
+        padding-left: .2rem;
+        padding-right: .2rem;
+    }
+    .mint-cell{
+        background-color: #212227;
+        color: #6FAAA3;
+    }
+    .mint-button{
+        margin-top: .3rem;
+        color: #6FAAA3;
+    }
 </style>
