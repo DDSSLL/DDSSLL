@@ -114,10 +114,12 @@
 <style scoped>
     .page{
         height: 100%;
+        overflow: hidden;
     }
     #body{
         height: 100%;
-        background-color: #212227;
+        box-sizing: border-box;
+        background-color: #2c3e50;
         color: #6FAAA3;
         padding-top: 2rem;
         padding-left: .2rem;

@@ -148,7 +148,7 @@ export default {
   }
   /*当前频点*/
   .channels{
-    margin-top: .4rem;
+    margin-top: 40px;
   }
   .activeChannel{
     overflow: hidden;

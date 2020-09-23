@@ -42,11 +42,18 @@ export default {
       ...mapState(['user','navHide'])
   },
   watch: {
-      activeTab:function (val) {
-          switch (val){
-              case 'main': this.$router.push("/main");break;
-              case 'settings': this.$router.push("/settings");break;
-              default: return null;
+      activeTab(val){
+          if(this.user.loginStatus){
+              switch (val){
+                  case 'main': this.$router.push("/main");break;
+                  case 'settings': this.$router.push("/settings");break;
+                  default: return null;
+              }
+          }
+      },
+      user(val){
+          if(!Boolean(val.loginStatus)){
+              this.activeTab = 'main';
           }
       }
   },
@@ -65,6 +72,7 @@ export default {
 <style>
 html,body{
   height: 100%;
+  overflow: hidden;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -74,6 +82,7 @@ html,body{
   color: #000000;
   font-size: .14rem;
   height: 100%;
+  background-color: #FFFFFF;
 }
 .tab{
   display: block;

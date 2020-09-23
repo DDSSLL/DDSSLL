@@ -133,3 +133,19 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
+
+/*for ios11+ (iphoneX)*/
+html,body{
+    /* Status bar height on iOS 11.0 */
+    padding-top: constant(safe-area-inset-top);
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-right: constant(safe-area-inset-right);
+    padding-left: constant(safe-area-inset-left);
+    /* Status bar height on iOS 11+ */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-right: env(safr-area-inset-right);
+    padding-left: env(safr-area-inset-left);
+    height: 100%;
+    background-color: #2c3e50;  /* iPhoneX等刘海屏安全区外颜色设置(建议设置为系统主色) */
+}

@@ -156,7 +156,7 @@
                 setTimeout(() => {
                     that.SET_USER(null);
                     that.SET_NAV_STATUS(true);
-                    that.$router.push("/login");
+                    that.$router.replace("/login");
                 }, 1000);
             },
 
