@@ -42,7 +42,7 @@
             <param name="ios-package" value="CDVWKWebViewEngine" />
         </feature>
         <preference name="CordovaWebViewEngine" value="CDVWKWebViewEngine" />
-        <preference name="AllowBackForwardNavigationGestures" value="true" />
+        <preference name="AllowBackForwardNavigationGestures" value="false" />
         <splash width="1125" height="2436" src="resources/PhoneX.png"></splash>
     </platform>
 </widget>

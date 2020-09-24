@@ -144,7 +144,7 @@ export default {
     overflow-y: auto;
   }
   .mint-header{
-    background-color: #2c3e50;
+    background-color: #212227;
   }
   /*当前频点*/
   .channels{
