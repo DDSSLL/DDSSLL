@@ -7,5 +7,7 @@ export default {
     // 账户信息
     user: {},
     //导航显示状态
-    navHide: true
+    navHide: true,
+    //当前设备
+    ActiveDevice: null
 }

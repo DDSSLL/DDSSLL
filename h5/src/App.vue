@@ -2,13 +2,25 @@
   <div id="app">
     <!--<Ad v-show="false" @hideTabbarFn="hideTabbarFn"></Ad>-->
     <mt-tabbar v-model="activeTab" v-show="!navHide">
-      <mt-tab-item id="main">
-        <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'main' }"></i>
-        {{ $t('basic.main') }}
+      <mt-tab-item id="status">
+        <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'status' }"></i>
+        {{ $t('basic.status') }}
+      </mt-tab-item>
+      <mt-tab-item id="control">
+        <i class="tab tab-control" v-bind:class="{ 'tab-control-active': activeTab == 'control' }"></i>
+        {{ $t('basic.control') }}
+      </mt-tab-item>
+      <mt-tab-item id="live">
+        <i class="tab tab-live" v-bind:class="{ 'tab-live-active': activeTab == 'live' }"></i>
+        {{ $t('basic.live') }}
       </mt-tab-item>
       <mt-tab-item id="settings">
         <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab == 'settings' }"></i>
         {{ $t('basic.settings') }}
+      </mt-tab-item>
+      <mt-tab-item id="me">
+        <i class="tab tab-me" v-bind:class="{ 'tab-me-active': activeTab == 'me' }"></i>
+        {{ $t('basic.me') }}
       </mt-tab-item>
     </mt-tabbar>
     <router-view/>
@@ -25,7 +37,7 @@ export default {
   data(){
     return{
         name: 'app',
-        activeTab: 'main'
+        activeTab: 'status'
     }
   },
   components: {
@@ -45,15 +57,18 @@ export default {
       activeTab(val){
           if(this.user.loginStatus){
               switch (val){
-                  case 'main': this.$router.push("/main");break;
+                  case 'status': this.$router.push("/status");break;
+                  case 'control': this.$router.push("/control");break;
+                  case 'live': this.$router.push("/live");break;
                   case 'settings': this.$router.push("/settings");break;
+                  case 'me': this.$router.push("/me");break;
                   default: return null;
               }
           }
       },
       user(val){
           if(!Boolean(val.loginStatus)){
-              this.activeTab = 'main';
+              this.activeTab = 'status';
           }
       }
   },
@@ -96,13 +111,31 @@ html,body{
 .tab-main{
   background-position: -.26rem -.49rem;
 }
-.tab-settings{
+.tab-control{
   background-position: -.84rem -.49rem;
+}
+.tab-live{
+  background-position: -1.42rem -.49rem;
+}
+.tab-settings{
+  background-position: -2.58rem -.49rem;
+}
+.tab-me{
+  background-position: -2rem -.49rem;
 }
 .tab-main-active{
   background-position: -.26rem -1.22rem;
 }
-.tab-settings-active{
+.tab-control-active{
   background-position: -.84rem -1.22rem;
+}
+.tab-live-active{
+  background-position: -1.42rem -1.22rem;
+}
+.tab-settings-active{
+  background-position: -2.58rem -1.22rem;
+}
+.tab-me-active{
+  background-position: -2rem -1.22rem;
 }
 </style>

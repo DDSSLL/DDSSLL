@@ -1,7 +1,7 @@
 <template>
     <div class="page">
-        <!--<mt-header fixed v-bind:title="title"></mt-header>-->
-        <div class="Group">
+        <Device></Device>
+        <div class="Group" style="margin-top: 60px;">
             <div class="GroupTitle">本机网络</div>
             <div class="GroupItem">
                 <div class="GroupItemField">
@@ -81,18 +81,13 @@
                 <mt-button type="primary" size="small" @click.native="apply">立即生效</mt-button>
             </div>
         </div>
-        <div class="Group">
-            <div class="GroupTitle">系统</div>
-            <div class="GroupItem">
-                <mt-button size="large" type="primary" @click="logout">登出</mt-button>
-            </div>
-        </div>
     </div>
 </template>
 
 <script>
     import { mapState, mapMutations } from 'vuex';
     import { SET_USER,SET_NAV_STATUS } from '../../store/mutation-types';
+    import Device from '../basic/Device';
     export default {
         name: "Settings",
         data(){
@@ -138,6 +133,9 @@
                 ]
             }
         },
+        components: {
+            Device
+        },
         computed: {
             ...mapState(['navHide'])
         },
@@ -146,19 +144,6 @@
                 SET_USER,
                 SET_NAV_STATUS
             }),
-
-            logout(){
-                var that = this;
-                this.$toast({
-                    message: '操作成功',
-                    iconClass: 'icon icon-success'
-                });
-                setTimeout(() => {
-                    that.SET_USER(null);
-                    that.SET_NAV_STATUS(true);
-                    that.$router.replace("/login");
-                }, 1000);
-            },
 
             refresh(){},
 
@@ -175,7 +160,7 @@
         overflow-y: auto;
     }
     .Group{
-
+        margin-top: 0px;
     }
     .GroupTitle{
         border: 1px solid #BBBBBB;
@@ -230,5 +215,9 @@
     }
     .GroupBtns .mint-button--default{
         color: #000000;
+    }
+
+    .mint-switch-core{
+        z-index: 1;
     }
 </style>

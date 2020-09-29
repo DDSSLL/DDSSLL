@@ -11,4 +11,8 @@ export default {
     [types.SET_NAV_STATUS]: (state, datas) => {
         state.navHide = datas
     },
+    // 设置当前设备
+    [types.SET_ACTIVE_DEVICE]: (state, datas) => {
+        state.ActiveDevice = datas
+    },
 }

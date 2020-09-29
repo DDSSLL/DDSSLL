@@ -55,6 +55,11 @@
         computed: {
             ...mapState(['navHide'])
         },
+        mounted(){
+            if(localStorage.getItem("LOGIN")){
+                this.$router.push("/status");
+            }
+        },
         methods:{
             ...mapMutations({
                 SET_USER,
@@ -122,11 +127,12 @@
                     message: this.$t( 'tip.authSuccess' ),
                     position: 'middle',
                     duration: 600
-                })
+                });
                 setTimeout(function(){
-                    that.$router.push("/main");
+                    that.$router.push("/status");
                     that.SET_NAV_STATUS(false);
                     that.SET_USER(that.user);
+                    localStorage.setItem("LOGIN",true);
                 },2000)
             }
         }
