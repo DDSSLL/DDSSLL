@@ -91,7 +91,7 @@
                     {status:0,us:'-',ds:'-',T:"100034(宋世杰)",R:"Vir-Huawei",TStatus:0,RStatus:1},
                     {status:0,us:'-',ds:'-',T:"100035(移动香港)",R:"Vir-Huawei",TStatus:0,RStatus:1}
                 ];
-                if(!this.ActiveDevice.T){
+                if(!this.ActiveDevice || !this.ActiveDevice.T){
                     this.SET_ACTIVE_DEVICE(this.deviceList[0]);
                 }
             },

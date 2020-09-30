@@ -31,6 +31,8 @@
     <preference name="StatusBarDefaultScrollToTop" value="false" />
     <preference name="Fullscreen" value="False" />
     <preference name="android-windowSoftInputMode" value="adjustPan" />
+    <preference name="scheme" value="app" />
+    <preference name="hostname" value="localhost" />
     <platform name="android">
         <allow-intent href="market:*" />
     </platform>
