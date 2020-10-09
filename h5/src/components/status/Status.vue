@@ -8,7 +8,7 @@
     <div class="chartArea">
       <div class="mainChart">
         <div class="chartTitle">概览</div>
-        <div id="mainChart" class="chart"></div>
+        <div id="mainChart" class="totalChart"></div>
       </div>
       <div class="lteChart">
         <div class="chartTitle">LTE1</div>
@@ -97,6 +97,7 @@ export default {
   .main{
     height: 92%;
     overflow-y: auto;
+    background-color: #272D33;
   }
   .mint-header{
     background-color: #212227;
@@ -186,26 +187,34 @@ export default {
   .chartArea{
     overflow: hidden;
     margin-top: 60px;
+    height: 91%;
   }
   .mainChart{
     float: left;
     width: 100%;
+    height: 30%;
   }
   .lteChart{
     float: left;
     width: 50%;
+    height: 23%;
   }
   .chartTitle{
-    border: 1px solid #BBBBBB;
-    color: #000;
+    border: 1px solid #272D33;
     text-align: left;
     text-indent: .1rem;
     padding: .1rem .08rem;
-    background-color: #EEEEEE;
+    background-color: #212227;
     border-radius: 5px;
-    font-size: .12rem;
+    font-size: .16rem;
+    color: #59B1A5;
+    height: 8%;
+  }
+  .totalChart{
+    width: 100%;
+    height: 80%;
   }
   .chart{
-    height: 1.6rem;
+    height: 78%;
   }
 </style>

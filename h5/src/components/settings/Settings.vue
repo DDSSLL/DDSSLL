@@ -158,19 +158,20 @@
     .page{
         height: 92%;
         overflow-y: auto;
+        background-color: #272D33;
     }
     .Group{
         margin-top: 0px;
     }
     .GroupTitle{
-        border: 1px solid #BBBBBB;
-        color: #000;
+        border: 1px solid #272D33;
         text-align: left;
         text-indent: .1rem;
         padding: .1rem .08rem;
-        background-color: #EEEEEE;
+        background-color: #212227;
         border-radius: 5px;
         font-size: .16rem;
+        color: #59B1A5;
     }
     .GroupItem{
         padding: .1rem .2rem;
@@ -181,16 +182,20 @@
         line-height: .3rem;
         text-align: left;
         font-size: .16rem;
+        color: #FFFFFF;
     }
     .GroupItemValue{
         width: 75%;
         float: left;
         text-align: left;
     }
+    .GroupItemValue p{
+        color: #FFFFFF;
+    }
     .ItemIpt{
         width: 85%;
-        height: .28rem;
-        line-height: .28rem;
+        height: .22rem;
+        line-height: .22rem;
         outline: none;
         border:1px solid #b8bbbf;
         border-radius: 5px;
@@ -219,5 +224,8 @@
 
     .mint-switch-core{
         z-index: 1;
+    }
+    .mint-switch{
+        transform: scale(.9);
     }
 </style>

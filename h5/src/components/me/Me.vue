@@ -1,6 +1,30 @@
 <template>
     <div class="me">
         <div class="Group">
+            <div class="GroupTitle">背包信息</div>
+            <div class="GroupItem">
+
+            </div>
+        </div>
+        <div class="Group">
+            <div class="GroupTitle">接收机信息</div>
+            <div class="GroupItem">
+
+            </div>
+        </div>
+        <div class="Group">
+            <div class="GroupTitle">账号信息</div>
+            <div class="GroupItem">
+
+            </div>
+        </div>
+        <div class="Group">
+            <div class="GroupTitle">权限信息</div>
+            <div class="GroupItem">
+
+            </div>
+        </div>
+        <div class="Group">
             <div class="GroupTitle">系统</div>
             <div class="GroupItem">
                 <mt-button size="large" type="primary" @click="logout">登出</mt-button>
@@ -47,20 +71,21 @@
 
 <style scoped>
     .me{
-
+        background-color: #272D33;
+        height: 100%;
     }
     .Group{
         margin-top: 0px;
     }
     .GroupTitle{
-        border: 1px solid #BBBBBB;
-        color: #000;
+        border: 1px solid #272D33;
         text-align: left;
         text-indent: .1rem;
         padding: .1rem .08rem;
-        background-color: #EEEEEE;
+        background-color: #212227;
         border-radius: 5px;
         font-size: .16rem;
+        color: #59B1A5;
     }
     .GroupItem{
         padding: .1rem .2rem;
