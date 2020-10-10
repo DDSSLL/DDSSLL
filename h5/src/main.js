@@ -8,6 +8,7 @@ import VueCordova from 'vue-cordova'
 import Config from './config'
 import axios from 'axios'
 import store from './store'
+import 'font-awesome/css/font-awesome.min.css'
 
 Vue.use(MintUI)
 Vue.use(VueI18n)

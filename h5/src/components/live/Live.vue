@@ -36,11 +36,23 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">推流地址</div>
                     <div class="GroupItemValue">
-                        <mt-button type="default" class="ItemBtn" size="mini">添加</mt-button>
-                        <mt-button type="default" class="ItemBtn" size="mini" style="margin-left: .2rem;">一键开启</mt-button>
+                        <mt-button type="default" class="ItemBtn">添加</mt-button>
+                        <mt-button type="default" class="ItemBtn" style="margin-left: .2rem;">一键开启</mt-button>
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="addressGroup">
+            <template v-for="(item,i) in address">
+                <div class="address">
+                    <div class="title">{{ item.name }}</div>
+                    <div class="buttons">
+                        <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true"></i>
+                        <i class="iconBtn fa fa-trash-o" aria-hidden="true"></i>
+                        <i class="iconBtn fa fa-play" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </template>
         </div>
     </div>
 </template>
@@ -54,7 +66,11 @@
                 live:{
                     rate:1,
                     resolution:'1080p'
-                }
+                },
+                address:[
+                    {name:'deli'},
+                    {name:'推流地址二'}
+                ]
             }
         },
         components: {
@@ -137,5 +153,37 @@
         display: inline-block;
         background-color: #454B56;
         color: #FFFFFF;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        box-shadow: none;
+    }
+    .addressGroup{
+        border-top: 1px solid #FFFFFF;
+        margin: 0.05rem 0;
+        padding-top: .05rem;
+    }
+    .address{
+        color: #FFFFFF;
+        line-height: .4rem;
+        overflow: hidden;
+    }
+    .address .title{
+        font-size: .18rem;
+        text-indent: .2rem;
+        float: left;
+        width: 60%;
+        font-weight: 500;
+    }
+    .address .buttons{
+        float: left;
+        width: 38%;
+        padding-right: 2%;
+        text-align: right;
+    }
+    .iconBtn{
+        cursor: pointer;
+        font-size: .24rem;
+        margin-right: .12rem;
     }
 </style>
