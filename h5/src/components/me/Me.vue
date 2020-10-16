@@ -35,7 +35,7 @@
 
 <script>
     import { mapState, mapMutations } from 'vuex';
-    import { SET_USER,SET_NAV_STATUS } from '../../store/mutation-types';
+    import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE } from '../../store/mutation-types';
     export default {
         name: "Me",
         data(){
@@ -49,7 +49,8 @@
         methods:{
             ...mapMutations({
                 SET_USER,
-                SET_NAV_STATUS
+                SET_NAV_STATUS,
+                SET_ACTIVE_DEVICE
             }),
 
             logout(){
@@ -61,6 +62,7 @@
                 setTimeout(() => {
                     that.SET_USER(null);
                     that.SET_NAV_STATUS(true);
+                    that.SET_ACTIVE_DEVICE(null);
                     that.$router.replace("/login");
                     localStorage.removeItem('LOGIN');
                 }, 1000);

@@ -57,7 +57,9 @@
         },
         mounted(){
             if(localStorage.getItem("LOGIN")){
-                this.$router.push("/status");
+                this.user.login_name = localStorage.getItem("USERNAME");
+                this.user.password = localStorage.getItem("PASSWORD");
+                this.login();
             }
         },
         methods:{
@@ -69,72 +71,65 @@
             back(){
                 this.$router.go(-1)
             },
-            // login(){
-            //     var that = this;
-            //     this.$axios({
-            //         method: 'post',
-            //         url:this.$Config.SERVER + this.$Config.LOGIN,
-            //         data:this.$qs.stringify({
-            //             login_name: that.user.login_name,
-            //             password: that.$md5(that.user.password)
-            //         })
-            //     })
-            //         .then(function (response) {
-            //             let res = response.data;
-            //             if(res.header.opCode && res.body.data === 'auth success'){
-            //                 that.$toast({
-            //                     message: that.$t( 'tip.authSuccess' ),
-            //                     position: 'middle',
-            //                     duration: 2000
-            //                 })
-            //                 that.$root.loginStatus = 1;
-            //                 that.$Storage.saveStorage('login',{
-            //                     status:1,
-            //                     login_name:that.user.login_name,
-            //                     password:that.$md5(that.user.password)
-            //                 });
-            //                 that.getProfile();
-            //                 setTimeout(function(){
-            //                     that.$router.push( '/me' );
-            //                 },2000)
-            //             }else if(res.body.data === 'password error'){
-            //                 that.$toast({
-            //                     message: that.$t( 'tip.passwordError' ),
-            //                     position: 'middle',
-            //                     duration: 3000
-            //                 })
-            //             }else if(res.body.data === 'need register'){
-            //                 that.$toast({
-            //                     message: that.$t( 'tip.needRegister' ),
-            //                     position: 'middle',
-            //                     duration: 3000
-            //                 })
-            //             }
-            //         })
-            //         .catch(function (error) {
-            //             console.log(error)
-            //             that.$toast({
-            //                 message: that.$t( 'tip.serverError' ),
-            //                 position: 'middle',
-            //                 duration: 3000
-            //             })
-            //         })
-            // },
             login(){
                 var that = this;
-                this.user.loginStatus = true;
-                this.$toast({
-                    message: this.$t( 'tip.authSuccess' ),
-                    position: 'middle',
-                    duration: 600
-                });
-                setTimeout(function(){
-                    that.$router.push("/status");
-                    that.SET_NAV_STATUS(false);
-                    that.SET_USER(that.user);
-                    localStorage.setItem("LOGIN",true);
-                },2000)
-            }
+                this.$axios({
+                    method: 'post',
+                    url:"/login/login.php",
+                    data:this.$qs.stringify({
+                        loginId: that.user.login_name,
+                        pwd: that.user.password,
+                        curTime: that.$moment(new Date()).format("YYYY-MM-DD HH:MM:SS")
+                    })
+                })
+                    .then(function (response) {
+                        let res = response.data;
+                        if(res.res.success){
+                            that.$toast({
+                                message: "登录成功",
+                                position: 'middle',
+                                duration: 2000
+                            });
+                            setTimeout(function(){
+                                that.$router.push("/status");
+                                that.SET_NAV_STATUS(false);
+                                that.SET_USER(res.res.data);
+                                localStorage.setItem("LOGIN",true);
+                                localStorage.setItem("USERNAME",that.user.login_name);
+                                localStorage.setItem("PASSWORD",that.user.password);
+                            },800)
+                        }else{
+                            that.$toast({
+                                message: "登录失败",
+                                position: 'middle',
+                                duration: 3000
+                            })
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                        that.$toast({
+                            message: "登录失败",
+                            position: 'middle',
+                            duration: 3000
+                        })
+                    })
+            },
+            // login(){
+            //     var that = this;
+            //     this.user.loginStatus = true;
+            //     this.$toast({
+            //         message: this.$t( 'tip.authSuccess' ),
+            //         position: 'middle',
+            //         duration: 600
+            //     });
+            //     setTimeout(function(){
+            //         that.$router.push("/status");
+            //         that.SET_NAV_STATUS(false);
+            //         that.SET_USER(that.user);
+            //         localStorage.setItem("LOGIN",true);
+            //     },2000)
+            // }
         }
     }
 </script>

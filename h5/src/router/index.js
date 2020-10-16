@@ -25,37 +25,58 @@ export default new Router({
         {
             path: '/ad',
             name: 'Ad',
-            component: Ad
+            component: Ad,
+            meta: {
+                keepAlive: false
+            }
         },
         {
             path: '/login',
             name: 'Login',
-            component: Login
+            component: Login,
+            meta: {
+                keepAlive: false
+            }
         },
         {
             path: '/status',
             name: 'Status',
-            component: Status
+            component: Status,
+            meta: {
+                keepAlive: true
+            }
         },
         {
             path: '/control',
             name: 'Control',
-            component: Control
+            component: Control,
+            meta: {
+                keepAlive: true
+            }
         },
         {
             path: '/live',
             name: 'Live',
-            component: Live
+            component: Live,
+            meta: {
+                keepAlive: true
+            }
         },
         {
             path: '/settings',
             name: "Settings",
-            component: Settings
+            component: Settings,
+            meta: {
+                keepAlive: true
+            }
         },
         {
             path: '/me',
             name: "Me",
-            component: Me
+            component: Me,
+            meta: {
+                keepAlive: false
+            }
         }
     ]
 })

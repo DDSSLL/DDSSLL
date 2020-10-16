@@ -1,5 +1,7 @@
 const Config = {
-    LOGIN: '/login'
+    SERVER: 'http://117.131.178.104:8088/'
 }
 
-export default Config
+export default {
+    Config
+}

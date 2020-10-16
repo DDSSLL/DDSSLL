@@ -23,7 +23,10 @@
         {{ $t('basic.me') }}
       </mt-tab-item>
     </mt-tabbar>
-    <router-view/>
+    <keep-alive v-if="isLoggedIn">
+      <router-view v-if="$route.meta.keepAlive"></router-view>
+    </keep-alive>
+    <router-view v-if="!$route.meta.keepAlive || !isLoggedIn"></router-view>
   </div>
 </template>
 
@@ -37,14 +40,15 @@ export default {
   data(){
     return{
         name: 'app',
-        activeTab: 'status'
+        activeTab: 'status',
+        isLoggedIn: false
     }
   },
   components: {
     Ad
   },
   mounted(){
-      if(this.user.loginStatus){
+      if(this.user.id){
           this.SET_NAV_STATUS(false);
       }else{
           this.SET_NAV_STATUS(true);
@@ -55,7 +59,7 @@ export default {
   },
   watch: {
       activeTab(val){
-          if(this.user.loginStatus){
+          if(this.user.id){
               switch (val){
                   case 'status': this.$router.push("/status");break;
                   case 'control': this.$router.push("/control");break;
@@ -67,8 +71,18 @@ export default {
           }
       },
       user(val){
-          if(!Boolean(val.loginStatus)){
+          if(!Boolean(val.id)){
               this.activeTab = 'status';
+          }
+      },
+      $route() {
+          // if the route changes...
+          let token = localStorage.getItem("LOGIN")||''
+          if (token) {
+              // firebase returns null if user logged out
+              this.isLoggedIn = true;
+          } else {
+              this.isLoggedIn = false;
           }
       }
   },

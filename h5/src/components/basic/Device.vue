@@ -75,10 +75,13 @@
             }
         },
         computed: {
-            ...mapState(['ActiveDevice'])
+            ...mapState(['user','ActiveDevice'])
         },
         created(){
-            this.getDeviceList();
+            console.warn(this.ActiveDevice)
+            if(!this.ActiveDevice){
+                this.getDeviceList();
+            }
         },
         methods:{
             ...mapMutations({
@@ -94,6 +97,27 @@
                 if(!this.ActiveDevice || !this.ActiveDevice.T){
                     this.SET_ACTIVE_DEVICE(this.deviceList[0]);
                 }
+                var that = this;
+                this.$axios({
+                    method: 'post',
+                    url:"/page/index/indexData.php",
+                    data:this.$qs.stringify({
+                        getDevAndMatch:true,
+                        userId: that.user.id,
+                        userGroup: that.user.userGroup
+                    })
+                })
+                .then(function (response) {
+                    let res = response.data;
+                    if(res.res.success){
+                        console.log(res.data);
+                    }else{
+
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
             },
             showDeviceList(){
                 this.popupVisible = true;

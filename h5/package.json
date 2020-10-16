@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve --port 8088",
+    "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -12,6 +12,8 @@
     "core-js": "^3.6.5",
     "font-awesome": "^4.7.0",
     "mint-ui": "^2.2.13",
+    "moment": "^2.29.1",
+    "qs": "^6.9.4",
     "vue": "^2.6.12",
     "vue-cordova": "^0.1.2",
     "vue-i18n": "^8.21.1",

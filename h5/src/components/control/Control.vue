@@ -1,6 +1,37 @@
 <template>
     <div class="control">
-        <Device></Device>
+        <keep-alive>
+            <Device></Device>
+        </keep-alive>
+        <div class="Group">
+            <div class="GroupTitle">网卡设置</div>
+            <div class="GroupItem" style="padding: .1rem">
+                <table class="netBoardTable">
+                    <thead>
+                    <tr>
+                        <th>网卡</th>
+                        <th>启用/禁用</th>
+                        <th>上传<br>Mbps</th>
+                        <th>RTT<br>ms</th>
+                        <th>强度<br>dBm</th>
+                        <th>运营商</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <template v-for="item in netBoard">
+                        <tr>
+                            <td class="td" :class="[item.switch == true ? 'green': 'gray']">{{ item.card }}</td>
+                            <td class="td"><mt-switch v-model="item.switch"></mt-switch></td>
+                            <td class="td">{{ item.up }}</td>
+                            <td class="td">{{ item.rtt }}</td>
+                            <td class="td">{{ item.value }}</td>
+                            <td class="td">{{ item.provider }}</td>
+                        </tr>
+                    </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <div class="Group">
             <div class="GroupTitle">常用设置</div>
             <div class="GroupItem">
@@ -46,35 +77,6 @@
                         <input type="text" class="ItemIpt byteIpt" v-model.number="common.delay">
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="Group">
-            <div class="GroupTitle">网卡设置</div>
-            <div class="GroupItem" style="padding: .1rem">
-                <table class="netBoardTable">
-                    <thead>
-                    <tr>
-                        <th>网卡</th>
-                        <th>启用/禁用</th>
-                        <th>上传<br>Mbps</th>
-                        <th>RTT<br>ms</th>
-                        <th>强度<br>dBm</th>
-                        <th>运营商</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <template v-for="item in netBoard">
-                        <tr>
-                            <td class="td" :class="[item.switch == true ? 'green': 'gray']">{{ item.card }}</td>
-                            <td class="td"><mt-switch v-model="item.switch"></mt-switch></td>
-                            <td class="td">{{ item.up }}</td>
-                            <td class="td">{{ item.rtt }}</td>
-                            <td class="td">{{ item.value }}</td>
-                            <td class="td">{{ item.provider }}</td>
-                        </tr>
-                    </template>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>

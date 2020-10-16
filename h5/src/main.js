@@ -8,14 +8,19 @@ import VueCordova from 'vue-cordova'
 import Config from './config'
 import axios from 'axios'
 import store from './store'
+import qs from 'qs'
+import moment from 'moment'
 import 'font-awesome/css/font-awesome.min.css'
 
 Vue.use(MintUI)
 Vue.use(VueI18n)
 Vue.use(VueCordova)
 
+axios.defaults.baseURL = ""
 Vue.prototype.$Config = Config
 Vue.prototype.$axios = axios
+Vue.prototype.$qs = qs
+Vue.prototype.$moment = moment
 Vue.config.productionTip = false
 
 //i18n
