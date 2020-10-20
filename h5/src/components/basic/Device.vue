@@ -101,11 +101,14 @@
                 this.$axios({
                     method: 'post',
                     url:"/page/index/indexData.php",
-                    data:this.$qs.stringify({
+                    data:{
                         getDevAndMatch:true,
                         userId: that.user.id,
                         userGroup: that.user.userGroup
-                    })
+                    },
+                    Api:"getDevAndMatch",
+                    AppId:"android",
+                    UserId:that.user.login_name
                 })
                 .then(function (response) {
                     let res = response.data;

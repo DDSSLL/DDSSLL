@@ -2,7 +2,7 @@ const path = require("path");
 const resolve = dir => path.join(__dirname, dir);
 module.exports = {
     // 公共路径(必须有的)
-    publicPath: "./",
+    publicPath: process.env.VUE_APP_PUBLIC_PATH,
     // 输出文件目录
     outputDir: "../www",
     // 静态资源存放的文件夹(相对于ouputDir)
@@ -16,7 +16,6 @@ module.exports = {
     devServer: {
         open: true,  // npm run serve后自动打开页面
         host: '0.0.0.0',  // 匹配本机IP地址(默认是0.0.0.0)
-        port: 8086, // 开发服务器运行端口号
-        proxy: 'http://117.131.178.104:8088/' // 配置跨域
+        port: 8086 // 开发服务器运行端口号
     }
 }

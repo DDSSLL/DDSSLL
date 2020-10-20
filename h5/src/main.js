@@ -6,21 +6,35 @@ import router from './router'
 import VueI18n from 'vue-i18n'
 import VueCordova from 'vue-cordova'
 import Config from './config'
-import axios from 'axios'
+import axios from './api/axios.init'
 import store from './store'
 import qs from 'qs'
 import moment from 'moment'
+import md5 from 'md5'
 import 'font-awesome/css/font-awesome.min.css'
+import global from './global/global'
 
 Vue.use(MintUI)
 Vue.use(VueI18n)
 Vue.use(VueCordova)
 
-axios.defaults.baseURL = ""
+switch (process.env.VUE_APP_ENV) {
+    case 'serve':
+        axios.defaults.baseURL = "http://47.104.164.249"; //开发环境
+        break
+    case 'build':
+        axios.defaults.baseURL = "http://47.104.164.249"; //生产环境
+        break
+    default:
+        break
+}
+
 Vue.prototype.$Config = Config
 Vue.prototype.$axios = axios
 Vue.prototype.$qs = qs
 Vue.prototype.$moment = moment
+Vue.prototype.$md5 = md5
+Vue.prototype.$global = global
 Vue.config.productionTip = false
 
 //i18n
