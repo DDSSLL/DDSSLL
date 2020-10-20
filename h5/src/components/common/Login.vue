@@ -14,8 +14,9 @@
 
             <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
             <div class="loginGroup">
-                <mt-button class="deviceLogin">设备1</mt-button>
-                <mt-button class="deviceLogin">设备2</mt-button>
+                <mt-button class="deviceLogin" :class="[ActiveDevice == 'DV4000' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV4000')">DV4000</mt-button>
+                <mt-button class="deviceLogin" :class="[ActiveDevice == 'DV1080' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV1080')">DV1080</mt-button>
+                <mt-button class="deviceLogin" :class="[ActiveDevice == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
             </div>
             <div class="loginBottom">
                 <div class="copyright">
@@ -49,7 +50,8 @@
                     login_name:'',
                     password:'',
                     loginStatus:false
-                }
+                },
+                ActiveDevice:'DV1080'
             }
         },
         computed: {
@@ -59,6 +61,7 @@
             if(localStorage.getItem("LOGIN")){
                 this.user.login_name = localStorage.getItem("USERNAME");
                 this.user.password = localStorage.getItem("PASSWORD");
+                this.ActiveDevice = localStorage.getItem("DEVICE");
                 this.login();
             }
         },
@@ -97,6 +100,7 @@
                                 localStorage.setItem("LOGIN",true);
                                 localStorage.setItem("USERNAME",that.user.login_name);
                                 localStorage.setItem("PASSWORD",that.user.password);
+                                localStorage.setItem("DEVICE",that.ActiveDevice);
                             },800)
                         }else{
                             that.$toast({
@@ -115,6 +119,10 @@
                         })
                     })
             },
+
+            ChoseDevice(val){
+                this.ActiveDevice = val;
+            }
             // login(){
             //     var that = this;
             //     this.user.loginStatus = true;
@@ -200,7 +208,10 @@
         color: #FFFFFF;
         box-shadow: none;
         font-size: .14rem;
-        width: 45%;
+        width: 30%;
         height: .3rem;
+    }
+    .deviceLoginActive{
+      background-color: rgb(90, 177, 167);
     }
 </style>
