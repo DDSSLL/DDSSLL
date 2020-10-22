@@ -3,7 +3,7 @@
         <div class="channels">
             <div class="activeDevice" @click="showDeviceList">
                 <div class="status">
-                    <span class="statusCircle" :class="[ActiveDevice.status == 0 ? 'gray': '',ActiveDevice.status == 1 ? 'green': '',ActiveDevice.status == 2 ? 'red': '']"></span>
+                    <span class="statusCircle" :class="[ActiveDevice.online == 0 ? 'gray': '',ActiveDevice.online == 1 ? 'green': '',ActiveDevice.online == 2 ? 'red': '']"></span>
                 </div>
                 <div class="rate">
                     <span class="us">{{ ActiveDevice.us }}</span>
@@ -11,12 +11,12 @@
                 </div>
                 <div class="info">
             <span class="T">
-              <span class="TCircle" :class="[ActiveDevice.TStatus == 0 ? 'gray': '',ActiveDevice.TStatus == 1 ? 'green': '',ActiveDevice.TStatus == 2 ? 'red': '']"></span>
-              T: {{ ActiveDevice.T }}
+              <span class="TCircle" :class="[ActiveDevice.dev_push_status == 0 ? 'gray': '',ActiveDevice.dev_push_status == 1 ? 'green': '',ActiveDevice.dev_push_status == 2 ? 'red': '']"></span>
+              T: {{ ActiveDevice.dev_name }}
             </span>
                     <span class="R">
-              <span class="RCircle" :class="[ActiveDevice.RStatus == 0 ? 'gray': '',ActiveDevice.RStatus == 1 ? 'green': '',ActiveDevice.RStatus == 2 ? 'red': '']"></span>
-              R: {{ ActiveDevice.R }}
+              <span class="RCircle" :class="[ActiveDevice.rcv_online == 0 ? 'gray': '',ActiveDevice.rcv_online == 1 ? 'green': '',ActiveDevice.rcv_online == 2 ? 'red': '']"></span>
+              R: {{ ActiveDevice.rcv_name }}
             </span>
                     <span class="B" v-if="ActiveDevice.B">
               <span class="BCircle" :class="[ActiveDevice.BStatus == 0 ? 'gray': '',ActiveDevice.BStatus == 1 ? 'green': '',ActiveDevice.BStatus == 2 ? 'red': '']"></span>
@@ -34,7 +34,7 @@
                     <template v-for="(item,i) in deviceList">
                         <div class="listChannel" @click="changeActiveDevice(item)">
                             <div class="status">
-                                <span class="statusCircle" :class="[item.status == 0 ? 'gray': '',item.status == 1 ? 'green': '',item.status == 2 ? 'red': '']"></span>
+                                <span class="statusCircle" :class="[item.online == 0 ? 'gray': '',item.online == 1 ? 'green': '',item.online == 2 ? 'red': '']"></span>
                             </div>
                             <div class="rate">
                                 <span class="us">{{ item.us }}</span>
@@ -42,12 +42,12 @@
                             </div>
                             <div class="info">
             <span class="T">
-              <span class="TCircle" :class="[item.TStatus == 0 ? 'gray': '',item.TStatus == 1 ? 'green': '',item.TStatus == 2 ? 'red': '']"></span>
-              T: {{ item.T }}
+              <span class="TCircle" :class="[item.dev_push_status == 0 ? 'gray': '',item.dev_push_status == 1 ? 'green': '',item.dev_push_status == 2 ? 'red': '']"></span>
+              T: {{ item.dev_name }}
             </span>
                                 <span class="R">
-              <span class="RCircle" :class="[item.RStatus == 0 ? 'gray': '',item.RStatus == 1 ? 'green': '',item.RStatus == 2 ? 'red': '']"></span>
-              R: {{ item.R }}
+              <span class="RCircle" :class="[item.rcv_online == 0 ? 'gray': '',item.rcv_online == 1 ? 'green': '',item.rcv_online == 2 ? 'red': '']"></span>
+              R: {{ item.rcv_name }}
             </span>
                                 <span class="B" v-if="item.B">
               <span class="BCircle" :class="[item.BStatus == 0 ? 'gray': '',item.BStatus == 1 ? 'green': '',item.BStatus == 2 ? 'red': '']"></span>
@@ -69,19 +69,24 @@
         name: "Device",
         data(){
             return{
+                timer:null,
                 popupVisible:false,
-                deviceList:[],
+                deviceList:[{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}],
                 active:{}
             }
         },
         computed: {
             ...mapState(['user','ActiveDevice'])
         },
-        created(){
+        created(){  //生命周期-页面创建后
             console.warn(this.ActiveDevice)
-            if(!this.ActiveDevice){
+            var that = this;
+            // if(!this.ActiveDevice){
                 this.getDeviceList();
-            }
+            // }
+            // this.timer = setInterval(function(){
+            //     that.getDeviceList();
+            // },5000);
         },
         methods:{
             ...mapMutations({
@@ -89,23 +94,16 @@
             }),
 
             getDeviceList(){
-                this.deviceList = [
-                    {status:0,us:'2.931',ds:'2.649',T:"100028",R:"R6",B:"2",TStatus:2,RStatus:1,BStatus:2},
-                    {status:0,us:'-',ds:'-',T:"100034(宋世杰)",R:"Vir-Huawei",TStatus:0,RStatus:1},
-                    {status:0,us:'-',ds:'-',T:"100035(移动香港)",R:"Vir-Huawei",TStatus:0,RStatus:1}
-                ];
-                if(!this.ActiveDevice || !this.ActiveDevice.T){
-                    this.SET_ACTIVE_DEVICE(this.deviceList[0]);
-                }
+                // this.deviceList = [];
                 var that = this;
                 this.$axios({
                     method: 'post',
                     url:"/page/index/indexData.php",
-                    data:{
-                        getDevAndMatch:true,
-                        userId: that.user.id,
-                        userGroup: that.user.userGroup
-                    },
+                    data:this.$qs.stringify({
+                      getDevAndMatch:true,
+                      userId: that.user.id,
+                      userGroup: that.user.userGroup
+                    }),
                     Api:"getDevAndMatch",
                     AppId:"android",
                     UserId:that.user.login_name
@@ -113,9 +111,12 @@
                 .then(function (response) {
                     let res = response.data;
                     if(res.res.success){
-                        console.log(res.data);
+                      that.deviceList = res.data;
+                      if(!that.ActiveDevice || !that.ActiveDevice.dev_name){
+                        that.SET_ACTIVE_DEVICE(that.deviceList[0]);
+                      }
                     }else{
-
+                      that.deviceList = [];
                     }
                 })
                 .catch(function (error) {
@@ -124,6 +125,7 @@
             },
             showDeviceList(){
                 this.popupVisible = true;
+                this.getDeviceList();
             },
             changeActiveDevice(item){
                 this.SET_ACTIVE_DEVICE(item);

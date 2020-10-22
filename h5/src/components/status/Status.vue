@@ -47,12 +47,17 @@
 
 <script>
 import Device from '../basic/Device';
+import { mapState } from 'vuex';
 export default {
     name: 'Status',
     data(){
         return{
-
+          ActiveDevice:null,
+          timer:null
         }
+    },
+    computed: {
+      ...mapState(['user'])
     },
     components: {
         Device
@@ -61,11 +66,27 @@ export default {
         '$store.state.ActiveDevice': {
             immediate: true,
             handler(val) {
-                console.warn(val)
+              console.warn(val)
+              if(val){
+                this.ActiveDevice = val;
+                this.getChartData();
+              }
             }
         }
     },
-    methods:{
+    activated(){  //生命周期-缓存页面激活
+
+    },
+    deactivated(){   //生命周期-缓存页面失活
+
+    },
+    mounted() { //生命周期-页面初始化完成
+        // var that = this;
+        // this.timer = setInterval(function(){   //每1s请求一次图表数据
+        //   that.getChartData();
+        // },1000);
+    },
+  methods:{
         testMint(){
             this.$toast({
                 message: '操作成功',
@@ -87,6 +108,33 @@ export default {
         sub_log(val) {
             console.log('sub_log', val);
             this.$refs.target_1.collapse();
+        },
+
+        getChartData(){
+            var that = this;
+            this.$axios({
+              method: 'post',
+              url:"/page/index/chartData.php",
+              data:this.$qs.stringify({
+                getChartsData:true,
+                userId: that.user.id,
+                devSNs: that.ActiveDevice.dev_sn
+              }),
+              Api:"getChartsData",
+              AppId:"android",
+              UserId:that.user.id
+            })
+              .then(function (response) {
+                let res = response.data;
+                if(res.res.success){
+                  that.deviceList = res.data;
+                }else{
+                  that.deviceList = [];
+                }
+              })
+              .catch(function (error) {
+                console.log(error)
+              })
         }
     }
 }

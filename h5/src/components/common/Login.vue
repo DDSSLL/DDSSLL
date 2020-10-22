@@ -14,9 +14,9 @@
 
             <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
             <div class="loginGroup">
-                <mt-button class="deviceLogin" :class="[ActiveDevice == 'DV4000' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV4000')">DV4000</mt-button>
-                <mt-button class="deviceLogin" :class="[ActiveDevice == 'DV1080' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV1080')">DV1080</mt-button>
-                <mt-button class="deviceLogin" :class="[ActiveDevice == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
+                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV4000' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV4000')">DV4000</mt-button>
+                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV1080' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV1080')">DV1080</mt-button>
+                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
             </div>
             <div class="loginBottom">
                 <div class="copyright">
@@ -51,7 +51,7 @@
                     password:'',
                     loginStatus:false
                 },
-                ActiveDevice:'DV1080'
+              ActiveDeviceType:'DV1080'
             }
         },
         computed: {
@@ -61,7 +61,7 @@
             if(localStorage.getItem("LOGIN")){
                 this.user.login_name = localStorage.getItem("USERNAME");
                 this.user.password = localStorage.getItem("PASSWORD");
-                this.ActiveDevice = localStorage.getItem("DEVICE");
+                this.ActiveDeviceType = localStorage.getItem("DEVICE");
                 this.login();
             }
         },
@@ -104,7 +104,7 @@
                                 localStorage.setItem("LOGIN",true);
                                 localStorage.setItem("USERNAME",that.user.login_name);
                                 localStorage.setItem("PASSWORD",that.user.password);
-                                localStorage.setItem("DEVICE",that.ActiveDevice);
+                                localStorage.setItem("DEVICE",that.ActiveDeviceType);
                             },800)
                         }else{
                             that.$toast({
@@ -138,7 +138,7 @@
             },
 
             ChoseDevice(val){
-                this.ActiveDevice = val;
+                this.ActiveDeviceType = val;
             }
             // login(){
             //     var that = this;

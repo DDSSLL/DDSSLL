@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { Toast } from 'mint-ui'
 import md5 from 'md5'
+import qs from 'qs'
 // 创建axios实例
 const service = axios.create({
     // 请求超时
@@ -22,7 +23,7 @@ service.interceptors.request.use(config => {
     var AccessKey = "hr58kfyr1q786luziekv8dg6hmte42dy";
     var date =  new Date();
     var TimeStamp = date.getTime();
-    var data = config.data;
+    var data = qs.parse(config.data);
     for(let key in data){
         if(data[key] != null && typeof(data[key]) === 'object'){
             //data[key]为数组
@@ -43,7 +44,6 @@ service.interceptors.request.use(config => {
         body;
     var Signature = md5(stringToSign);
 
-    config.data = body;
     config.headers = {
         'Content-Type':'application/x-www-form-urlencoded', //配置请求头
         "Accept":"application/json; charset=utf-8",
@@ -52,8 +52,10 @@ service.interceptors.request.use(config => {
         "Api":Api,
         "TimeStamp":TimeStamp,
         "SignatureNonce":SignatureNonce,
-        "AppId":AppId
+        "AppId":AppId,
+        "X-Requested-With":"XMLHttpRequest"
     }
+
     return config
 }, error => {
     Promise.reject(error)

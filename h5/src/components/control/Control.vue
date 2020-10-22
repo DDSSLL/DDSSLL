@@ -84,10 +84,12 @@
 
 <script>
     import Device from '../basic/Device';
+    import { mapState } from 'vuex';
     export default {
         name: "Control",
         data(){
             return{
+                ActiveDevice:null,
                 common:{
                     switch:true,
                     byte:20,
@@ -104,11 +106,53 @@
                 ]
             }
         },
+        computed: {
+          ...mapState(['user'])
+        },
         components: {
             Device
         },
-        methods:{
+        watch:{   //监听当前设备值变化
+          '$store.state.ActiveDevice': {
+            immediate: true,
+            handler(val) {
+              this.ActiveDevice = val;
+              this.getNetBoard();
+            }
+          }
+        },
+        activated(){  //生命周期-缓存页面激活
+          this.getNetBoard();
+        },
+        deactivated(){   //生命周期-缓存页面失活
 
+        },
+        methods:{
+          getNetBoard(){
+              var that = this;
+              this.$axios({
+                method: 'post',
+                url:"/page/index/chartData.php",
+                data:this.$qs.stringify({
+                  getDevCardParam:true,
+                  devSN: that.ActiveDevice.dev_sn
+                }),
+                Api:"getDevCardParam",
+                AppId:"android",
+                UserId:that.user.id
+              })
+              .then(function (response) {
+                let res = response.data;
+                if(res.res.success){
+                  console.log(res.data)
+                }else{
+                  that.netBoard = [];
+                }
+              })
+              .catch(function (error) {
+                console.log(error)
+              })
+          }
         }
     }
 </script>
