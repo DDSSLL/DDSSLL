@@ -76,6 +76,11 @@
             },
             login(){
                 var that = this;
+                switch(this.ActiveDeviceType){
+                  case "DV1080":this.$axios.defaults.baseURL = "http://47.104.164.249";break;
+                  case "DV4000":this.$axios.defaults.baseURL = "http://117.131.178.104:8088";break;
+                  case "OTHER":this.$axios.defaults.baseURL = "http://47.104.164.249";break;
+                }
 
                 this.$axios({
                     method: 'post',
