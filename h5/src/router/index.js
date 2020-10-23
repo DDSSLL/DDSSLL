@@ -16,6 +16,8 @@ Router.prototype.push = function push(location) {
 
 Vue.use(Router)
 
+//以下是页面跳转配置，meta中为当前页参数设置
+//keepAlive定义了页面是否缓存在内存，为true时页面缓存并遵循vue缓存页面的生命周期函数
 export default new Router({
     routes: [
         {

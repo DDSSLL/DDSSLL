@@ -1,3 +1,5 @@
+//项目公共方法或常量
+//代码中使用 this.$global.xxx 来访问方法或常量
 function getCurrentTime() {
     var date = new Date();
     var year = '' + date.getFullYear();
