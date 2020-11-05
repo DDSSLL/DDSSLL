@@ -110,6 +110,11 @@
                                 localStorage.setItem("USERNAME",that.user.login_name);
                                 localStorage.setItem("PASSWORD",that.user.password);
                                 localStorage.setItem("DEVICE",that.ActiveDeviceType);
+                                //每次重新登录echarts图都重新画
+                                localStorage.removeItem("cardData");
+                                localStorage.removeItem("chartKey");
+                                localStorage.removeItem("curChart");
+                                localStorage.removeItem("allChartData");
                             },800)
                         }else{
                             that.$toast({

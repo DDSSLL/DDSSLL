@@ -52,8 +52,8 @@ service.interceptors.request.use(config => {
         "Api":Api,
         "TimeStamp":TimeStamp,
         "SignatureNonce":SignatureNonce,
-        "AppId":AppId,
-        "X-Requested-With":"XMLHttpRequest"
+        "AppId":AppId/*,
+        "X-Requested-With":"XMLHttpRequest"*/
     }
 
     return config
