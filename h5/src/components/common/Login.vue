@@ -18,22 +18,22 @@
                 <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV1080' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV1080')">DV1080</mt-button>
                 <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
             </div>
-            <div class="loginBottom">
-                <div class="copyright">
-                    <span>版权所有：</span>
-                    <span>天津德力仪器设备有限公司 本网站所有下载资料仅供参考  </span>
-                </div>
-                <div class="address">
-                    <span>地址：</span>
-                    <span>天津市西青区高新技术产业园区 (外环) 海泰创新三路8号 </span>
-                    <span><a style="color: #5AB1A7;" href="https://beian.miit.gov.cn" target="_blank">津ICP备16000820号</a></span>
-                </div>
-                <div class="tel">
-                    <span>总机：022-27645003</span>
-                    <span>传真：022-27645002</span>
-                    <span>E-mail：market@deviser.com.cn</span>
-                </div>
-            </div>
+            <!--<div class="loginBottom">-->
+                <!--<div class="copyright">-->
+                    <!--<span>版权所有：</span>-->
+                    <!--<span>天津德力仪器设备有限公司 本网站所有下载资料仅供参考  </span>-->
+                <!--</div>-->
+                <!--<div class="address">-->
+                    <!--<span>地址：</span>-->
+                    <!--<span>天津市西青区高新技术产业园区 (外环) 海泰创新三路8号 </span>-->
+                    <!--<span><a style="color: #5AB1A7;" href="https://beian.miit.gov.cn" target="_blank">津ICP备16000820号</a></span>-->
+                <!--</div>-->
+                <!--<div class="tel">-->
+                    <!--<span>总机：022-27645003</span>-->
+                    <!--<span>传真：022-27645002</span>-->
+                    <!--<span>E-mail：market@deviser.com.cn</span>-->
+                <!--</div>-->
+            <!--</div>-->
         </div>
     </div>
 </template>
