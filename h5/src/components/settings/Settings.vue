@@ -244,7 +244,7 @@
 <style scoped>
     .settings{
         margin-top: 60px;
-        background-color: #272D33;
+        /*background-color: #272D33;*/
         height: 84%;
         padding-bottom: 62px;
         overflow-y: auto;
@@ -253,14 +253,16 @@
         margin-top: 0px;
     }
     .GroupTitle{
-        border: 1px solid #272D33;
+        border-top: 1px solid #DDDDDD;
+        border-bottom: 1px solid #DDDDDD;
         text-align: left;
         text-indent: .1rem;
         padding: .1rem .08rem;
-        background-color: #212227;
-        border-radius: 5px;
-        font-size: .16rem;
-        color: #59B1A5;
+        background-color: #ecf0f4;
+        /*border-radius: 5px;*/
+        font-size: .15rem;
+        font-weight:500;
+        color: #000000;
     }
     .GroupItem{
         padding: .05rem .2rem;
@@ -270,15 +272,15 @@
         /*margin-bottom: .1rem;*/
     }
     .GroupItemTitle{
-        width: 25%;
+        width: 35%;
         float: left;
         line-height: .3rem;
         text-align: left;
-        font-size: .16rem;
-        color: #FFFFFF;
+        font-size: .14rem;
+        color: #000000;
     }
     .GroupItemValue{
-        width: 75%;
+        width: 65%;
         float: left;
         text-align: left;
     }
@@ -299,36 +301,37 @@
         border-bottom-right-radius: 5px;
     }
     .btnSelect{
-        background-color: #59B1A5;
+        background-color: #3d81f1;
         color: #FFFFFF;
     }
     .ItemSelect{
         width: 1.8rem;
         height: .26rem;
-        border: none;
+        border: 1px solid #3d81f1;
         outline: none;
         box-shadow: none;
         border-radius: 5px;
-        font-size: .16rem;
+        font-size: .12rem;
+        background-color: #FFFFFF;
     }
     .x2Ipt{
         width: 1.2rem;
         height: .24rem;
         border-radius: 5px;
-        border: none;
+        border: 1px solid #3d81f1;
         outline: none;
         box-shadow: none;
-        font-size: .16rem;
+        font-size: .12rem;
     }
     .x1Ipt{
         width: .6rem;
         height: .24rem;
         border-radius: 5px;
         margin-left: .1rem;
-        border: none;
+        border: 1px solid #3d81f1;
         outline: none;
         box-shadow: none;
-        font-size: .16rem;
+        font-size: .12rem;
     }
     .x2Btn{
         width: 1.25rem;
@@ -337,9 +340,9 @@
         border: none;
         outline: none;
         box-shadow: none;
-        background-color: #454B56;
+        background-color: #3d81f1;
         color: #FFFFFF;
-        font-size: .16rem;
+        font-size: .14rem;
     }
     .x1Btn{
         width: .64rem;
@@ -349,8 +352,14 @@
         border: none;
         outline: none;
         box-shadow: none;
-        background-color: #454B56;
+        background-color: #3d81f1;
         color: #FFFFFF;
-        font-size: .16rem;
+        font-size: .14rem;
+    }
+    .Group:nth-last-of-type(1){
+        margin-bottom: .2rem;
+    }
+    .mint-switch{
+        margin-left: -.34rem;
     }
 </style>

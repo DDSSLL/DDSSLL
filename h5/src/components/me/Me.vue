@@ -27,7 +27,7 @@
         <div class="Group">
             <div class="GroupTitle">系统</div>
             <div class="GroupItem">
-                <mt-button size="large" type="primary" @click="logout">登出</mt-button>
+                <mt-button size="large" class="logout" @click="logout">登出</mt-button>
             </div>
         </div>
     </div>
@@ -35,7 +35,7 @@
 
 <script>
     import { mapState, mapMutations } from 'vuex';
-    import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE } from '../../store/mutation-types';
+    import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE,SET_TIMER_CLEAR } from '../../store/mutation-types';
     export default {
         name: "Me",
         data(){
@@ -44,22 +44,25 @@
             }
         },
         computed: {
-            ...mapState(['navHide'])
+            ...mapState(['navHide','DeviceTimer','ChartTimer'])
         },
         methods:{
             ...mapMutations({
                 SET_USER,
                 SET_NAV_STATUS,
-                SET_ACTIVE_DEVICE
+                SET_ACTIVE_DEVICE,
+                SET_TIMER_CLEAR
             }),
 
             logout(){
+                clearInterval(this.DeviceTimer);
+                clearInterval(this.ChartTimer);
+                this.SET_TIMER_CLEAR();
                 var that = this;
                 this.$toast({
-                    message: '操作成功',
-                    iconClass: 'icon icon-success'
+                    message: '操作成功'
                 });
-                setTimeout(() => {
+                setTimeout(function(){
                     that.SET_USER(null);
                     that.SET_NAV_STATUS(true);
                     that.SET_ACTIVE_DEVICE(null);
@@ -73,23 +76,29 @@
 
 <style scoped>
     .me{
-        background-color: #272D33;
+        /*background-color: #272D33;*/
         height: 100%;
     }
     .Group{
         margin-top: 0px;
     }
     .GroupTitle{
-        border: 1px solid #272D33;
+        border-top: 1px solid #DDDDDD;
+        border-bottom: 1px solid #DDDDDD;
         text-align: left;
         text-indent: .1rem;
         padding: .1rem .08rem;
-        background-color: #212227;
-        border-radius: 5px;
-        font-size: .16rem;
-        color: #59B1A5;
+        background-color: #ecf0f4;
+        /*border-radius: 5px;*/
+        font-size: .15rem;
+        font-weight:500;
+        color: #000000;
     }
     .GroupItem{
         padding: .1rem .2rem;
+    }
+    .logout{
+        background-color: #3d81f1;
+        color: #FFFFFF;
     }
 </style>

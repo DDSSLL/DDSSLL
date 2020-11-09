@@ -177,8 +177,8 @@
     #body{
         height: 100%;
         box-sizing: border-box;
-        background-color: #212227;
-        color: #FFFFFF;
+        background-color: #FFFFFF;
+        color: #000000;
         padding-top: 1.8rem;
         padding-left: .3rem;
         padding-right: .3rem;
@@ -186,8 +186,8 @@
     .title{
         font-size: .36rem;
         text-align: center;
-        font-weight: 500;
-        color: #FFFFFF;
+        font-weight: 600;
+        color: #3d81f1;
         font-family: inherit;
         margin-bottom: .4rem;
     }
@@ -195,9 +195,9 @@
         margin-bottom: 5px;
     }
     .loginIpt{
-        background: #2B2E33;
-        border: .1em solid #4B5056;
-        color: #fff;
+        background: #FFFFFF;
+        border: .1em solid #DDDDDD;
+        color: #333333;
         text-indent: 10px;
         padding-left: 0;
         padding-right: 0;
@@ -208,7 +208,7 @@
         font-size: .15rem;
     }
     .loginBtn{
-        background-color: #484D57;
+        background-color: #3d81f1;
         color: #FFFFFF;
         box-shadow: none;
         margin-top: .3rem;
@@ -239,6 +239,6 @@
         height: .3rem;
     }
     .deviceLoginActive{
-      background-color: rgb(90, 177, 167);
+      background-color: #3d81f1;
     }
 </style>

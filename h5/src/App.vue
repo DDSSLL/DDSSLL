@@ -121,6 +121,7 @@ html,body{
   background-repeat: no-repeat;
   width: .35rem;
   height: .35rem;
+  transform: scale(.75);
 }
 .tab-main{
   background-position: -.26rem -.49rem;
@@ -151,5 +152,12 @@ html,body{
 }
 .tab-me-active{
   background-position: -2rem -1.22rem;
+}
+.mint-tab-item{
+  padding: 4px 0;
+}
+.mint-tabbar>.mint-tab-item.is-selected {
+  background-color: #eaeaea;
+  color: #106fb1;
 }
 </style>

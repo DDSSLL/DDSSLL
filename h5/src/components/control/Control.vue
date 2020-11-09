@@ -38,7 +38,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">传输开关</div>
                     <div class="GroupItemValue">
-                        <mt-switch v-model="common.switch"></mt-switch>
+                        <mt-switch v-model="common.switch" style="margin-left: -.34rem;"></mt-switch>
                     </div>
                 </div>
             </div>
@@ -53,8 +53,8 @@
                                 :max="80"
                                 :step="1"
                                 :bar-height="5">
-                            <div style="color: #FFFFFF;padding: .01rem;" slot="start">1</div>
-                            <div style="color: #FFFFFF;padding: .01rem;" slot="end">80</div>
+                            <div style="color: #333333;padding: .01rem;margin-right: .12rem;" slot="start">1</div>
+                            <div style="color: #333333;padding: .01rem;" slot="end">80</div>
                         </mt-range>
                         <input type="text" class="ItemIpt byteIpt" v-model.number="common.byte">
                     </div>
@@ -71,8 +71,8 @@
                                 :max="20"
                                 :step=".1"
                                 :bar-height="5">
-                            <div style="color: #FFFFFF;padding: .01rem;" slot="start">0.1</div>
-                            <div style="color: #FFFFFF;padding: .01rem;" slot="end">20</div>
+                            <div style="color: #333333;padding: .01rem;" slot="start">0.1</div>
+                            <div style="color: #333333;padding: .01rem;" slot="end">20</div>
                         </mt-range>
                         <input type="text" class="ItemIpt byteIpt" v-model.number="common.delay">
                     </div>
@@ -161,20 +161,22 @@
     .control{
         margin-top: 60px;
         height: 100%;
-        background-color: #272D33;
+        /*background-color: #272D33;*/
     }
     .Group{
         margin-top: 0px;
     }
     .GroupTitle{
-        border: 1px solid #272D33;
+        border-top: 1px solid #DDDDDD;
+        border-bottom: 1px solid #DDDDDD;
         text-align: left;
         text-indent: .1rem;
         padding: .1rem .08rem;
-        background-color: #212227;
-        border-radius: 5px;
-        font-size: .16rem;
-        color: #59B1A5;
+        background-color: #ecf0f4;
+        /*border-radius: 5px;*/
+        font-size: .15rem;
+        font-weight:500;
+        color: #000000;
     }
     .GroupItem{
         padding: .1rem .2rem;
@@ -184,15 +186,15 @@
         /*margin-bottom: .1rem;*/
     }
     .GroupItemTitle{
-        width: 25%;
+        width: 35%;
         float: left;
         line-height: .3rem;
         text-align: left;
-        font-size: .16rem;
-        color: #FFFFFF;
+        font-size: .14rem;
+        color: #000000;
     }
     .GroupItemValue{
-        width: 75%;
+        width: 65%;
         float: left;
         text-align: left;
     }
@@ -212,14 +214,18 @@
     .byteIpt{
         float: left;
         margin-top: .02rem;
+        border: 1px solid #3d81f1;
+        outline: none;
+        box-shadow: none;
+        font-size: .12rem;
     }
     .byteRange{
         float: left;
     }
     .netBoardTable{
         width: 100%;
-        color: #FFFFFF;
-        font-size: .16rem;
+        color: #333333;
+        font-size: .15rem;
         font-weight: 500;
     }
     .td{
@@ -227,21 +233,30 @@
         vertical-align: middle;
     }
     .green{
-        color: #00FB02;
+        color: #3dcb64;
     }
     .gray{
         color: #7E7E7E;
     }
     .mint-switch{
-        transform: scale(.9);
+        transform: scale(.7);
     }
 </style>
 <style>
     .mint-switch-input:checked + .mint-switch-core{
-        border-color: #69ACA0;
-        background-color: #69ACA0;
+        border-color: #3d81f1;
+        background-color: #3d81f1;
     }
     .mt-range-progress{
-        background-color: #69ACA0;
+        background-color: #3d81f1;
+    }
+    .mint-switch{
+        transform: scale(.7);
+    }
+    .mt-range-thumb{
+        width: 10px;
+        height: 10px;
+        top:0.05rem;
+        border: 5px solid #3d81f1;
     }
 </style>

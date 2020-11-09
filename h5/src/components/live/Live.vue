@@ -14,8 +14,8 @@
                                 :max="80"
                                 :step=".1"
                                 :bar-height="5">
-                            <div style="color: #FFFFFF;padding: .01rem;" slot="start">0.5</div>
-                            <div style="color: #FFFFFF;padding: .01rem;" slot="end">80</div>
+                            <div style="color: #333333;padding: .01rem;" slot="start">0.5</div>
+                            <div style="color: #333333;padding: .01rem;" slot="end">80</div>
                         </mt-range>
                         <input type="text" class="ItemIpt byteIpt" v-model.number="live.rate">
                     </div>
@@ -83,20 +83,22 @@
     .live{
         margin-top: 60px;
         height: 100%;
-        background-color: #272D33;
+        /*background-color: #272D33;*/
     }
     .Group{
         margin-top: 0px;
     }
     .GroupTitle{
-        border: 1px solid #272D33;
+        border-top: 1px solid #DDDDDD;
+        border-bottom: 1px solid #DDDDDD;
         text-align: left;
         text-indent: .1rem;
         padding: .1rem .08rem;
-        background-color: #212227;
-        border-radius: 5px;
-        font-size: .16rem;
-        color: #59B1A5;
+        background-color: #ecf0f4;
+        /*border-radius: 5px;*/
+        font-size: .15rem;
+        font-weight:500;
+        color: #000000;
     }
     .GroupItem{
         padding: .1rem .2rem;
@@ -106,15 +108,15 @@
         /*margin-bottom: .1rem;*/
     }
     .GroupItemTitle{
-        width: 25%;
+        width: 35%;
         float: left;
         line-height: .3rem;
         text-align: left;
-        font-size: .16rem;
-        color: #FFFFFF;
+        font-size: .14rem;
+        color: #000000;
     }
     .GroupItemValue{
-        width: 75%;
+        width: 65%;
         float: left;
         text-align: left;
     }
@@ -127,18 +129,18 @@
         height: .22rem;
         line-height: .22rem;
         outline: none;
-        border:1px solid #b8bbbf;
+        border: 1px solid #3d81f1;
         border-radius: 5px;
-        font-size: .16rem;
+        font-size: .12rem;
     }
     .ItemSel{
         width: 35%;
         height: .3rem;
         line-height: .3rem;
         outline: none;
-        border:1px solid #b8bbbf;
+        border: 1px solid #3d81f1;
         border-radius: 5px;
-        font-size: .16rem;
+        font-size: .12rem;
     }
     .byteIpt{
         float: left;
@@ -151,25 +153,26 @@
         width: 40%;
         height: .3rem;
         display: inline-block;
-        background-color: #454B56;
+        background-color: #3d81f1;
         color: #FFFFFF;
         border: none;
         outline: none;
         border-radius: 5px;
         box-shadow: none;
+        font-size: .12rem;
     }
     .addressGroup{
-        border-top: 1px solid #FFFFFF;
+        border-top: 2px solid #DDDDDD;
         margin: 0.05rem 0;
         padding-top: .05rem;
     }
     .address{
-        color: #FFFFFF;
+        color: #333333;
         line-height: .4rem;
         overflow: hidden;
     }
     .address .title{
-        font-size: .18rem;
+        font-size: .12rem;
         text-indent: .2rem;
         float: left;
         width: 60%;
@@ -183,7 +186,7 @@
     }
     .iconBtn{
         cursor: pointer;
-        font-size: .24rem;
+        font-size: .18rem;
         margin-right: .12rem;
     }
 </style>

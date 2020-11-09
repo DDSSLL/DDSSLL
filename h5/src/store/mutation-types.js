@@ -1,3 +1,6 @@
 export const SET_USER = 'SET_USER'
 export const SET_NAV_STATUS = 'SET_NAV_STATUS'
 export const SET_ACTIVE_DEVICE = 'SET_ACTIVE_DEVICE'
+export const SET_TIMER_CLEAR = 'SET_TIMER_CLEAR'
+export const SET_DEVICE_TIMER = 'SET_DEVICE_TIMER'
+export const SET_CHART_TIMER = 'SET_CHART_TIMER'

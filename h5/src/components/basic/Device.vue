@@ -80,7 +80,7 @@
 
 <script>
     import { mapState, mapMutations } from 'vuex';
-    import { SET_ACTIVE_DEVICE } from '../../store/mutation-types';
+    import { SET_ACTIVE_DEVICE,SET_DEVICE_TIMER } from '../../store/mutation-types';
     export default {
         name: "Device",
         data(){
@@ -104,7 +104,7 @@
             }
         },
         computed: {
-            ...mapState(['user','ActiveDevice'])
+            ...mapState(['user','ActiveDevice','DeviceTimer'])
         },
         created(){  //生命周期-页面创建后
             console.warn(this.ActiveDevice)
@@ -112,13 +112,17 @@
             // if(!this.ActiveDevice){
             this.getDeviceList();
             // }
+
+            clearInterval(this.DeviceTimer);
             this.timer = setInterval(function(){
-                that.getDeviceList();
+              that.getDeviceList();
             },1000);
+            this.SET_DEVICE_TIMER(this.timer);
         },
         methods:{
             ...mapMutations({
-                SET_ACTIVE_DEVICE
+                SET_ACTIVE_DEVICE,
+                SET_DEVICE_TIMER
             }),
             refreshCurDevParam(datas){
               //更新当前设备参数
@@ -202,7 +206,7 @@
     .activeDevice{
         overflow: hidden;
         height: .5rem;
-        background-color: #212227;
+        background-color: #106fb1;
         padding: .05rem 0;
     }
     .listChannel{
@@ -331,7 +335,7 @@
     .red{background-color: #FC0E1B;}
     /*右侧弹出窗口(频点列表)*/
     .mint-popup{
-        background-color: #212227;
+        background-color: #FFFFFF;
         width: 100%;
         height: 100%;
     }

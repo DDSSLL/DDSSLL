@@ -15,4 +15,17 @@ export default {
     [types.SET_ACTIVE_DEVICE]: (state, datas) => {
         state.ActiveDevice = datas
     },
+    // 设置设备定时器
+    [types.SET_DEVICE_TIMER]: (state, datas) => {
+        state.DeviceTimer = datas;
+    },
+    // 设置图表定时器
+    [types.SET_CHART_TIMER]: (state, datas) => {
+        state.ChartTimer = datas;
+    },
+    // 清空定时器ID池
+    [types.SET_TIMER_CLEAR]: (state, datas) => {
+        state.DeviceTimer = null;
+        state.ChartTimer = null;
+    },
 }

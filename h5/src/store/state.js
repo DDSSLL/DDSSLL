@@ -9,5 +9,9 @@ export default {
     //导航显示状态
     navHide: true,
     //当前设备
-    ActiveDevice: null
+    ActiveDevice: null,
+    //设备定时器ID
+    DeviceTimer:null,
+    //图表定时器ID
+    ChartTimer:null
 }
