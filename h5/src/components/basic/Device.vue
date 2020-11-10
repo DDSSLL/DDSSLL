@@ -114,10 +114,10 @@
             // }
 
             clearInterval(this.DeviceTimer);
-            this.timer = setInterval(function(){
-              that.getDeviceList();
-            },1000);
-            this.SET_DEVICE_TIMER(this.timer);
+//            this.timer = setInterval(function(){
+//              that.getDeviceList();
+//            },1000);
+//            this.SET_DEVICE_TIMER(this.timer);
         },
         methods:{
             ...mapMutations({
@@ -193,6 +193,7 @@
         width: 100%;
         height: 60px;
         z-index: 9;
+        background-color: #106fb1;
     }
     .popup{
         position: fixed;

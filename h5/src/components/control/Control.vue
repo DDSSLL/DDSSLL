@@ -20,12 +20,12 @@
                     <tbody>
                     <template v-for="item in netBoard">
                         <tr>
-                            <td class="td" :class="[item.switch == true ? 'green': 'gray']">{{ item.card }}</td>
-                            <td class="td"><mt-switch v-model="item.switch"></mt-switch></td>
-                            <td class="td">{{ item.up }}</td>
-                            <td class="td">{{ item.rtt }}</td>
-                            <td class="td">{{ item.value }}</td>
-                            <td class="td">{{ item.provider }}</td>
+                            <td class="td" :class="[item.used == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
+                            <td class="td"><mt-switch v-model="item.usedVal" @change="switchCard(item)"></mt-switch></td>
+                            <td class="td">{{ item.send_br }}</td>
+                            <td class="td">{{ item.card_rtt }}</td>
+                            <td class="td">{{ item.rssi }}</td>
+                            <td class="td">{{ transOperator(item.operator) }}</td>
                         </tr>
                     </template>
                     </tbody>
@@ -38,7 +38,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">传输开关</div>
                     <div class="GroupItemValue">
-                        <mt-switch v-model="common.switch" style="margin-left: -.34rem;"></mt-switch>
+                        <mt-switch v-model="common.dev_push_enableVal" style="margin-left: -.34rem;" @change="setDeviceParam('dev_push_enable')"></mt-switch>
                     </div>
                 </div>
             </div>
@@ -47,16 +47,17 @@
                     <div class="GroupItemTitle">视频比特率(Mbps)</div>
                     <div class="GroupItemValue">
                         <mt-range
-                                v-model="common.byte"
+                                v-model="common.dev_srVal"
                                 class="ItemRange byteRange"
                                 :min="1"
                                 :max="80"
                                 :step="1"
-                                :bar-height="5">
+                                :bar-height="5"
+                                @change="setDeviceParam('dev_sr')">
                             <div style="color: #333333;padding: .01rem;margin-right: .12rem;" slot="start">1</div>
                             <div style="color: #333333;padding: .01rem;" slot="end">80</div>
                         </mt-range>
-                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.byte">
+                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal" @blur="setDeviceParam('dev_sr')">
                     </div>
                 </div>
             </div>
@@ -65,16 +66,17 @@
                     <div class="GroupItemTitle">延时(s)</div>
                     <div class="GroupItemValue">
                         <mt-range
-                                v-model="common.delay"
+                                v-model="common.dev_delayVal"
                                 class="ItemRange byteRange"
                                 :min="0.1"
                                 :max="20"
-                                :step=".1"
-                                :bar-height="5">
+                                :step.number="0.1"
+                                :bar-height="5"
+                                @change="setDeviceParam('dev_delay')">
                             <div style="color: #333333;padding: .01rem;" slot="start">0.1</div>
                             <div style="color: #333333;padding: .01rem;" slot="end">20</div>
                         </mt-range>
-                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.delay">
+                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal" @blur="setDeviceParam('dev_delay')">
                     </div>
                 </div>
             </div>
@@ -91,19 +93,14 @@
             return{
                 ActiveDevice:null,
                 common:{
-                    switch:true,
-                    byte:20,
-                    delay:2.5
+                    dev_push_enable:"0",
+                    dev_push_enableVal:false,
+                    dev_sr:0,
+                    dev_srVal:0,
+                    dev_delay:0,
+                    dev_delayVal:0
                 },
-                netBoard:[
-                    {card:'ETH0 ',switch:false,up:'-',rtt:'-',value:'-',provider:'-'},
-                    {card:'1:LTE',switch:false,up:'-',rtt:'-',value:'-',provider:'-'},
-                    {card:'2:LTE',switch:false,up:'-',rtt:'-',value:'-',provider:'-'},
-                    {card:'3:LTE',switch:false,up:'-',rtt:'-',value:'-',provider:'-'},
-                    {card:'4:5G-NSA',switch:true, up:10.66,rtt:29,value:-95,provider:'移动'},
-                    {card:'5:5G-NSA',switch:true, up:11.249,rtt:32,value:-76,provider:'移动'},
-                    {card:'6:5G-NSA',switch:false,up:0,rtt:0,value:-53,provider:'电信'}
-                ]
+                netBoard:[]
             }
         },
         computed: {
@@ -116,23 +113,25 @@
           '$store.state.ActiveDevice': {
             immediate: true,
             handler(val) {
-              this.ActiveDevice = val;
-              this.getNetBoard();
+                this.ActiveDevice = val;
+                this.getNetBoard();
+                this.getDeviceParam();
             }
           }
         },
         activated(){  //生命周期-缓存页面激活
-          this.getNetBoard();
+            this.getNetBoard();
+            this.getDeviceParam();
         },
         deactivated(){   //生命周期-缓存页面失活
 
         },
         methods:{
-          getNetBoard(){
+            getNetBoard(){
               var that = this;
               this.$axios({
                 method: 'post',
-                url:"/page/index/chartData.php",
+                url:"/page/index/indexData.php",
                 data:this.$qs.stringify({
                   getDevCardParam:true,
                   devSN: that.ActiveDevice.dev_sn
@@ -144,7 +143,7 @@
               .then(function (response) {
                 let res = response.data;
                 if(res.res.success){
-                  console.log(res.data)
+                    that.netBoard = formatSwitch(res.data[0]);
                 }else{
                   that.netBoard = [];
                 }
@@ -152,7 +151,134 @@
               .catch(function (error) {
                 console.log(error)
               })
-          }
+
+            function formatSwitch(arr){
+                arr.forEach(function(item){
+                    if(item.used == '0'){
+                        item.usedVal = false;
+                    }else if(item.used == '1'){
+                        item.usedVal = true;
+                    }
+                })
+                return arr;
+            }
+          },
+            transOperator(operator){
+                if (operator == "CMCC" || operator == "CHINA MOBILE CMCC" || operator == "CHINA MOBILE") {
+                    operator = "移动";
+                } else if (operator == "CHN-CT"|| operator == "Mi Mobile") {
+                    operator = "电信";
+                } else if (operator == "CHN-UNICOM") {
+                    operator = "联通";
+                } else if (operator == "CHN-BN" || operator == "CBN") {
+                    operator = "广电";
+                }
+                return operator;
+            },
+            switchCard(card){
+                var that = this;
+                this.$axios({
+                    method: 'post',
+                    url:"/page/index/indexData.php",
+                    data:this.$qs.stringify({
+                        setCardEnable:true,
+                        cardId: card.card_id,
+                        devSN: that.ActiveDevice.dev_sn,
+                        used: card.usedVal ? "1" : "0"
+                    }),
+                    Api:"setCardEnable",
+                    AppId:"android",
+                    UserId:that.user.id
+                })
+                .then(function (response) {
+                    let res = response.data;
+                    if(res.res.success){
+                        that.getNetBoard();
+                    }else{
+                        that.getNetBoard();
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
+            },
+            getDeviceParam(){
+                var that = this;
+                this.$axios({
+                    method: 'post',
+                    url:"/page/index/indexData.php",
+                    data:this.$qs.stringify({
+                        getDevParam:true,
+                        devSN: that.ActiveDevice.dev_sn
+                    }),
+                    Api:"getDevParam",
+                    AppId:"android",
+                    UserId:that.user.id
+                })
+                .then(function (response) {
+                    let res = response.data;
+                    if(res.res.success){
+                        that.common = formatData(res.data[0]);
+                    }else{
+                        that.common = {
+                            dev_push_enable:"0",
+                            dev_sr:0,
+                            dev_srVal:0,
+                            dev_delay:0,
+                            dev_delayVal:0
+                        };
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
+
+                function formatData(data){
+                    data.dev_srVal = data.dev_sr / 1000; //(Mbps)
+                    data.dev_delayVal = data.dev_delay / 1000; //(s)
+                    if(data.dev_push_enable == '0'){  //推流开关
+                        data.dev_push_enableVal = false;
+                    }else if(data.dev_push_enable == '1'){
+                        data.dev_push_enableVal = true;
+                    }
+                    return data;
+                }
+            },
+            setDeviceParam(key){
+                var that = this;
+                var devParamCol = key;
+                var value;
+                if(key == "dev_push_enable"){
+                    value = that.common.dev_push_enableVal? "1" : "0";
+                }else if(key == "dev_sr"){
+                    value = parseFloat(that.common.dev_srVal) * 1000;
+                }else if(key == "dev_delay"){
+                    value = parseFloat(that.common.dev_delayVal) * 1000;
+                }
+                this.$axios({
+                    method: 'post',
+                    url:"/page/index/indexData.php",
+                    data:this.$qs.stringify({
+                        devSN: that.ActiveDevice.dev_sn,
+                        devParamCol: devParamCol,
+                        value: value
+                    }),
+                    Api:"SetDevParam",
+                    AppId:"android",
+                    UserId:that.user.id
+                })
+                .then(function (response) {
+                    let res = response.data;
+                    if(res.res.success){
+                        that.getDeviceParam();
+                    }else{
+                        that.getDeviceParam();
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
+            }
         }
     }
 </script>
@@ -160,7 +286,9 @@
 <style scoped>
     .control{
         margin-top: 60px;
-        height: 100%;
+        height: 84%;
+        padding-bottom: 62px;
+        overflow-y: auto;
         /*background-color: #272D33;*/
     }
     .Group{
@@ -240,6 +368,9 @@
     }
     .mint-switch{
         transform: scale(.7);
+    }
+    .Group:nth-last-of-type(1){
+        margin-bottom: .2rem;
     }
 </style>
 <style>

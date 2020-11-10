@@ -36,8 +36,8 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">推流地址</div>
                     <div class="GroupItemValue">
-                        <mt-button type="default" class="ItemBtn">添加</mt-button>
-                        <mt-button type="default" class="ItemBtn" style="margin-left: .2rem;">一键开启</mt-button>
+                        <!--<mt-button type="default" class="ItemBtn">添加</mt-button>-->
+                        <mt-button type="default" class="ItemBtn">一键开启</mt-button>
                     </div>
                 </div>
             </div>
@@ -45,36 +45,134 @@
         <div class="addressGroup">
             <template v-for="(item,i) in address">
                 <div class="address">
-                    <div class="title">{{ item.name }}</div>
+                    <div class="title">{{ item.remark }}</div>
                     <div class="buttons">
-                        <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true"></i>
-                        <i class="iconBtn fa fa-trash-o" aria-hidden="true"></i>
-                        <i class="iconBtn fa fa-play" aria-hidden="true"></i>
+                        <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item)"></i>
+                        <!--<i class="iconBtn fa fa-trash-o" aria-hidden="true"></i>-->
+                        <i class="iconBtn fa" :class="[item.push_status == 'running'? 'fa-stop' : 'fa-play']" aria-hidden="true"></i>
                     </div>
                 </div>
             </template>
         </div>
+        <mt-popup
+                v-model="pushUrlsEditVisible"
+                popup-transition="popup-fade">
+            <div class="pushEditModal">
+                <div class="modalTitle">
+                    推流地址
+                    <i class="closeBtn fa fa-close" @click="hideEditUrls"></i>
+                </div>
+                <div class="formContainer">
+                    <div class="formItem">
+                        <div class="formItemTitle">备注名</div>
+                        <div class="formItemVal"><input type="text" v-model="activePushObj.remark"></div>
+                    </div>
+                    <div class="formItem">
+                        <div class="formItemTitle">推流地址</div>
+                        <div class="formItemVal">
+                            <span class="rtmp">RTMP</span><input type="text" v-model="activePushObj.push_url" style="width: 65%;">
+                            <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265</p>
+                        </div>
+                    </div>
+                    <div class="formItem" style="text-align: right;margin-bottom: 0;">
+                        <button class="modalBtn" @click="hideEditUrls">取消</button>
+                        <button class="modalBtn">确定</button>
+                    </div>
+                </div>
+            </div>
+        </mt-popup>
     </div>
 </template>
 
 <script>
     import Device from '../basic/Device';
+    import { mapState } from 'vuex';
     export default {
         name: "Live",
         data(){
             return{
+                pushUrlsEditVisible:false,
+                activePushObj:{},
                 live:{
                     rate:1,
                     resolution:'1080p'
                 },
                 address:[
-                    {name:'deli'},
-                    {name:'推流地址二'}
+                    {
+                        boardList_id: "286",
+                        board_id: "0",
+                        id: "2449868",
+                        push_sel: "0",
+                        push_status: "running",
+                        push_url: "rtmp://4567891",
+                        rcv_sn: "1000412141",
+                        remark: "deli"
+                    }
                 ]
             }
         },
+        computed: {
+            ...mapState(['user','ActiveDevice'])
+        },
+        watch:{   //监听当前设备值变化
+            '$store.state.ActiveDevice': {
+                immediate: true,
+                handler(val) {
+                    console.warn(val)
+                    if(val){
+                        var that = this;
+                        that.getPushUrls();
+                    }
+                }
+            }
+        },
+        activated(){  //生命周期-缓存页面激活
+            this.getPushUrls();
+        },
+        deactivated(){   //生命周期-缓存页面失活
+
+        },
         components: {
             Device
+        },
+        methods:{
+            getPushUrls(){
+                var that = this;
+                this.$axios({
+                    method: 'post',
+                    url:"/page/index/indexData.php",
+                    data:this.$qs.stringify({
+                        getBoardUrl:true,
+                        rcvSn: that.ActiveDevice.rcv_sn,
+                        boardId: that.ActiveDevice.board_id
+                    }),
+                    Api:"getBoardUrl",
+                    AppId:"android",
+                    UserId:that.user.id
+                })
+                .then(function (response) {
+                    let res = response.data;
+                    if(res.res.success){
+                        that.formatChartData(res.data);
+                        var cardData = localStorage.cardData ? JSON.parse(localStorage.cardData) : {};
+                        that.initChartStyle(cardData);
+                        that.getChartShowContent(cardData);
+                    }else{
+                        console.log(error)
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
+            },
+            showEditUrls(obj){
+                this.pushUrlsEditVisible = true;
+                this.activePushObj = obj;
+            },
+            hideEditUrls(){
+                this.pushUrlsEditVisible = false;
+                this.activePushObj = {};
+            }
         }
     }
 </script>
@@ -82,7 +180,9 @@
 <style scoped>
     .live{
         margin-top: 60px;
-        height: 100%;
+        height: 84%;
+        padding-bottom: 62px;
+        overflow-y: auto;
         /*background-color: #272D33;*/
     }
     .Group{
@@ -165,6 +265,7 @@
         border-top: 2px solid #DDDDDD;
         margin: 0.05rem 0;
         padding-top: .05rem;
+        margin-bottom: .2rem;
     }
     .address{
         color: #333333;
@@ -188,5 +289,74 @@
         cursor: pointer;
         font-size: .18rem;
         margin-right: .12rem;
+    }
+    .pushEditModal{
+        width: 3rem;
+    }
+    .modalTitle{
+        padding: .1rem;
+        background-color: #DDDDDD;
+        font-size: .14rem;
+        font-weight: 500;
+        line-height: .14rem;
+    }
+    .closeBtn{
+        float: right;
+        margin-right: 0;
+        display: inline-block;
+        margin-top: -2px;
+    }
+    .formContainer{
+        padding: .1rem;
+
+    }
+    .formItem{
+        overflow: hidden;
+        margin-bottom: .1rem;
+    }
+    .formItemTitle{
+        float:left;
+        width: 30%;
+        color: #333;
+        line-height: .28rem;
+        font-size: .13rem;
+    }
+    .formItemVal{
+        float: left;
+        width: 70%;
+    }
+    .formItemVal input{
+        display: inline-block;
+        width: 93%;
+        background: #FFFFFF;
+        border: 1px solid #ccc;
+        color: #333333;
+        height: .24rem;
+        line-height: .24rem;
+        font-size: .13rem;
+        outline:none;
+        border-radius: 4px;
+    }
+    .modalBtn{
+        width: .6rem;
+        border: none;
+        outline: none;
+        box-shadow: none;
+        height: .26rem;
+        margin-top: .02rem;
+        margin-right: .05rem;
+    }
+    .rtmp{
+        background: #4C5157;
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+        color: #FFF;
+        text-align: center;
+        display: inline-block;
+        padding: .06rem .08rem;
+    }
+    .rtmpTip{
+        color: #f88a22;
+        font-size: .12rem;
     }
 </style>

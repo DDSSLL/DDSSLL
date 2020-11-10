@@ -147,5 +147,5 @@ html,body{
     padding-right: env(safr-area-inset-right);
     padding-left: env(safr-area-inset-left);
     height: 100%;
-    background-color: #212227;  /* iPhoneX等刘海屏安全区外颜色设置(建议设置为系统主色) */
+    background-color: #FFFFFF;  /* iPhoneX等刘海屏安全区外颜色设置(建议设置为系统主色) */
 }

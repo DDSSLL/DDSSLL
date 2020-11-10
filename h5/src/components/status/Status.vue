@@ -471,10 +471,10 @@ export default {
           var devSns = initData.devSns;
           that.getChartData(devSns);
           clearInterval(that.ChartTimer);
-          that.timer = setInterval(function(){
-            that.getChartData(devSns);
-          },1000)
-          that.SET_CHART_TIMER(that.timer);
+//          that.timer = setInterval(function(){
+//            that.getChartData(devSns);
+//          },1000)
+//          that.SET_CHART_TIMER(that.timer);
         }
       }
     }
@@ -605,8 +605,8 @@ export default {
         url:"/page/index/chartData.php",
         data:this.$qs.stringify({
           getChartsData:true,
-          userId: that.user.id,
-          devSNs: devSns
+          devSNs: devSns,
+          userId: that.user.id
         }),
         Api:"getChartsData",
         AppId:"android",
@@ -1514,8 +1514,10 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .main{
-    height: 93.5%;
-    overflow-y: auto;
+      margin-top: 60px;
+      height: 84%;
+      padding-bottom: 62px;
+      overflow-y: auto;
     /*background-color: #272D33;*/
   }
   .mint-header{
@@ -1604,9 +1606,7 @@ export default {
   }
   /*图表*/
   .chartArea{
-    overflow: hidden;
-    margin-top: 60px;
-    height: 91%;
+      height: 100%;
   }
   .mainChart{
     float: left;
@@ -1633,11 +1633,9 @@ export default {
     height: 33%;
   }*/
   
-  /*.lteChart{
+  .lteChart{
     float: left;
-    width: 50%;
-    height: 23%;
-  }*/
+  }
   .cardsChart >>> .chartTitle,
   .mainChart .chartTitle{
     border-top: 1px solid #DDDDDD;

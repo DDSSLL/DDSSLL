@@ -153,6 +153,9 @@ html,body{
 .tab-me-active{
   background-position: -2rem -1.22rem;
 }
+.mint-tabbar{
+  z-index: 1;
+}
 .mint-tab-item{
   padding: 4px 0;
 }

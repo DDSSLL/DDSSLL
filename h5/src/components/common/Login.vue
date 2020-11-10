@@ -40,7 +40,7 @@
 
 <script>
     import { mapState, mapMutations } from 'vuex';
-    import { SET_USER,SET_NAV_STATUS } from '../../store/mutation-types';
+    import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE_TYPE } from '../../store/mutation-types';
     export default {
         name: "Login",
         data(){
@@ -68,7 +68,8 @@
         methods:{
             ...mapMutations({
                 SET_USER,
-                SET_NAV_STATUS
+                SET_NAV_STATUS,
+                SET_ACTIVE_DEVICE_TYPE
             }),
 
             back(){
@@ -106,6 +107,7 @@
                                 that.$router.push("/status");
                                 that.SET_NAV_STATUS(false);
                                 that.SET_USER(res.res.data);
+                                that.SET_ACTIVE_DEVICE_TYPE(that.ActiveDeviceType);
                                 localStorage.setItem("LOGIN",true);
                                 localStorage.setItem("USERNAME",that.user.login_name);
                                 localStorage.setItem("PASSWORD",that.user.password);

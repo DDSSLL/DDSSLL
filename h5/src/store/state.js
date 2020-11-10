@@ -13,5 +13,7 @@ export default {
     //设备定时器ID
     DeviceTimer:null,
     //图表定时器ID
-    ChartTimer:null
+    ChartTimer:null,
+    //当前登录设备型号
+    ActiveDeviceType:null
 }

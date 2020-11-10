@@ -28,4 +28,8 @@ export default {
         state.DeviceTimer = null;
         state.ChartTimer = null;
     },
+    // 设置当前设备状态
+    [types.SET_ACTIVE_DEVICE_TYPE]: (state, datas) => {
+        state.ActiveDeviceType = datas
+    },
 }
