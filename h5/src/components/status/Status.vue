@@ -471,10 +471,10 @@ export default {
           var devSns = initData.devSns;
           that.getChartData(devSns);
           clearInterval(that.ChartTimer);
-//          that.timer = setInterval(function(){
-//            that.getChartData(devSns);
-//          },1000)
-//          that.SET_CHART_TIMER(that.timer);
+          that.timer = setInterval(function(){
+            that.getChartData(devSns);
+          },1000)
+          that.SET_CHART_TIMER(that.timer);
         }
       }
     }

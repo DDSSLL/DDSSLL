@@ -3,7 +3,7 @@
         <Device></Device>
         <div class="Group">
             <div class="GroupTitle">直播设置</div>
-            <div class="GroupItem">
+            <div class="GroupItem" v-if="ActiveDeviceType == 'DV4000'">
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">传输速率(Mbps)</div>
                     <div class="GroupItemValue">
@@ -21,7 +21,7 @@
                     </div>
                 </div>
             </div>
-            <div class="GroupItem">
+            <div class="GroupItem" v-if="ActiveDeviceType == 'DV4000'">
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">分辨率</div>
                     <div class="GroupItemValue">
@@ -32,15 +32,15 @@
                     </div>
                 </div>
             </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">推流地址</div>
-                    <div class="GroupItemValue">
-                        <!--<mt-button type="default" class="ItemBtn">添加</mt-button>-->
-                        <mt-button type="default" class="ItemBtn">一键开启</mt-button>
-                    </div>
-                </div>
-            </div>
+            <!--<div class="GroupItem">-->
+                <!--<div class="GroupItemField">-->
+                    <!--<div class="GroupItemTitle">推流地址</div>-->
+                    <!--<div class="GroupItemValue">-->
+                        <!--&lt;!&ndash;<mt-button type="default" class="ItemBtn">添加</mt-button>&ndash;&gt;-->
+                        <!--<mt-button type="default" class="ItemBtn">一键开启</mt-button>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
         </div>
         <div class="addressGroup">
             <template v-for="(item,i) in address">
@@ -49,7 +49,7 @@
                     <div class="buttons">
                         <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item)"></i>
                         <!--<i class="iconBtn fa fa-trash-o" aria-hidden="true"></i>-->
-                        <i class="iconBtn fa" :class="[item.push_status == 'running'? 'fa-stop' : 'fa-play']" aria-hidden="true"></i>
+                        <i class="iconBtn fa" :class="[item.push_status == 'running'? 'fa-stop' : 'fa-play']" aria-hidden="true" @click="switchPush(item)"></i>
                     </div>
                 </div>
             </template>
@@ -76,7 +76,7 @@
                     </div>
                     <div class="formItem" style="text-align: right;margin-bottom: 0;">
                         <button class="modalBtn" @click="hideEditUrls">取消</button>
-                        <button class="modalBtn">确定</button>
+                        <button class="modalBtn" @click="saveEditUrls">确定</button>
                     </div>
                 </div>
             </div>
@@ -97,22 +97,11 @@
                     rate:1,
                     resolution:'1080p'
                 },
-                address:[
-                    {
-                        boardList_id: "286",
-                        board_id: "0",
-                        id: "2449868",
-                        push_sel: "0",
-                        push_status: "running",
-                        push_url: "rtmp://4567891",
-                        rcv_sn: "1000412141",
-                        remark: "deli"
-                    }
-                ]
+                address:[]
             }
         },
         computed: {
-            ...mapState(['user','ActiveDevice'])
+            ...mapState(['user','ActiveDevice','ActiveDeviceType'])
         },
         watch:{   //监听当前设备值变化
             '$store.state.ActiveDevice': {
@@ -153,12 +142,9 @@
                 .then(function (response) {
                     let res = response.data;
                     if(res.res.success){
-                        that.formatChartData(res.data);
-                        var cardData = localStorage.cardData ? JSON.parse(localStorage.cardData) : {};
-                        that.initChartStyle(cardData);
-                        that.getChartShowContent(cardData);
+                        that.address = res.data;
                     }else{
-                        console.log(error)
+                        that.address = [];
                     }
                 })
                 .catch(function (error) {
@@ -172,6 +158,62 @@
             hideEditUrls(){
                 this.pushUrlsEditVisible = false;
                 this.activePushObj = {};
+            },
+            saveEditUrls(){
+                var that = this;
+                this.$axios({
+                    method: 'post',
+                    url:"/page/index/indexData.php",
+                    data:this.$qs.stringify({
+                        editUrlRemark:that.activePushObj.id,
+                        rcvSn: that.activePushObj.rcv_sn,
+                        boardId: that.activePushObj.board_id,
+                        url: that.activePushObj.push_url,
+                        remark: that.activePushObj.remark
+                    }),
+                    Api:"editUrl",
+                    AppId:"android",
+                    UserId:that.user.id
+                })
+                .then(function (response) {
+                    let res = response.data;
+                    that.pushUrlsEditVisible = false;
+                    if(res.res.success){
+                        that.getPushUrls();
+                    }else{
+                        that.getPushUrls();
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
+            },
+            switchPush(item){
+                var value =  (item.push_status == 'running' ? 0 : 1);
+                var that = this;
+                this.$axios({
+                    method: 'post',
+                    url:"/page/index/indexData.php",
+                    data:this.$qs.stringify({
+                        editUrl:item.id,
+                        col: "push_sel",
+                        value: value
+                    }),
+                    Api:"editUrlStatus",
+                    AppId:"android",
+                    UserId:that.user.id
+                })
+                .then(function (response) {
+                    let res = response.data;
+                    if(res.res.success){
+                        that.getPushUrls();
+                    }else{
+                        that.getPushUrls();
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
             }
         }
     }
@@ -263,7 +305,7 @@
     }
     .addressGroup{
         border-top: 2px solid #DDDDDD;
-        margin: 0.05rem 0;
+        margin: 0;
         padding-top: .05rem;
         margin-bottom: .2rem;
     }
