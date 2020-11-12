@@ -107,8 +107,8 @@
                         <div class="GroupItemField">
                             <div class="GroupItemTitle" style="width:28%;">颜色样式</div>
                             <div class="GroupItemValue" style="width:72%;">
-                                <button :class="[ChartConf.card.id == '1' ? 'btnSelect' : '']" class="lan">样式一</button>
-                                <button :class="[ChartConf.card.id == '2' ? 'btnSelect' : '']" class="wan">样式二</button>
+                                <button :class="[ChartConf.card.id == '1' ? 'btnSelect' : '']" class="lan" @click="setCardChartStyle('1')">样式一</button>
+                                <button :class="[ChartConf.card.id == '2' ? 'btnSelect' : '']" class="wan" @click="setCardChartStyle('2')">样式二</button>
                             </div>
                         </div>
                     </div>
@@ -221,7 +221,7 @@
                     url:"/page/index/chartData.php",
                     data:this.$qs.stringify({
                         getChartParam:true,
-                        devSN: that.ActiveDevice.dev_sn
+                        devSn: that.ActiveDevice.dev_sn
                     }),
                     Api:"getChartParam",
                     AppId:"android",
@@ -254,7 +254,7 @@
                     url:"/page/index/chartData.php",
                     data:this.$qs.stringify({
                         setChartParam:true,
-                        devSN: that.ActiveDevice.dev_sn,
+                        devSn: that.ActiveDevice.dev_sn,
                         chartAuto: that.ChartConf.unit.chartAutoVal? "1": "0",
                         chartMax: that.ChartConf.unit.chartMax,
                         chartInterval: that.ChartConf.unit.chartInterval
@@ -266,9 +266,9 @@
                 .then(function (response) {
                     let res = response.data;
                     if(res.res.success){
-                        that.getCardConfUnit();
+                        that.getChartConfUnit();
                     }else{
-                        that.getCardConfUnit();
+                        that.getChartConfUnit();
                     }
                 })
                 .catch(function (error) {
@@ -283,7 +283,7 @@
                     url:"/page/index/chartData.php",
                     data:this.$qs.stringify({
                         getChartShowContent:true,
-                        devSN: that.ActiveDevice.dev_sn,
+                        devSn: that.ActiveDevice.dev_sn,
                         prefix: that.ActiveDevice.prefix
                     }),
                     Api:"getChartShowContent",
@@ -309,7 +309,7 @@
                     url:"/page/index/chartData.php",
                     data:this.$qs.stringify({
                         setChartShowContent:true,
-                        devSN: that.ActiveDevice.dev_sn,
+                        devSn: that.ActiveDevice.dev_sn,
                         up: that.ChartConf.total.up,
                         down: that.ChartConf.total.down,
                         lossDev: that.ChartConf.total.lossDev,
@@ -322,9 +322,9 @@
                 .then(function (response) {
                     let res = response.data;
                     if(res.res.success){
-                        that.getTotalConfUnit();
+                        that.getChartConfTotal();
                     }else{
-                        that.getTotalConfUnit();
+                        that.getChartConfTotal();
                     }
                 })
                 .catch(function (error) {
@@ -332,6 +332,9 @@
                 })
             },
 
+            setCardChartStyle(type){
+                this.ChartConf.card.id = type;
+            },
             getChartConfCard(){
                 var that = this;
                 this.$axios({
@@ -339,7 +342,7 @@
                     url:"/page/index/chartData.php",
                     data:this.$qs.stringify({
                         getCardChartShowContent:true,
-                        devSN: that.ActiveDevice.dev_sn
+                        devSn: that.ActiveDevice.dev_sn
                     }),
                     Api:"getCardChartShowContent",
                     AppId:"android",
@@ -374,27 +377,27 @@
             },
             setChartConfCard(){
                 var that = this;
-                console.log(that.ChartConf.card)
                 var paramData = {
                     "eth0":that.ChartConf.card.eth0Val.join(","),
-                    "wifi":that.ChartConf.card.wifiVal.join(","),
-                    "sim1":that.ChartConf.card.sim1Val.join(","),
-                    "sim2":that.ChartConf.card.sim2Val.join(","),
-                    "sim3":that.ChartConf.card.sim3Val.join(","),
-                    "sim4":that.ChartConf.card.sim4Val.join(","),
-                    "sim5":that.ChartConf.card.sim5Val.join(","),
-                    "sim6":that.ChartConf.card.sim6Val.join(","),
-                    "usb-5g1":that.ChartConf.card["usb-5g1Val"].join(","),
-                    "usb-5g2":that.ChartConf.card["usb-5g2Val"].join(","),
-                    "usb-lan":that.ChartConf.card["usb-lanVal"].join(","),
-                    "usb-lan2":that.ChartConf.card["usb-lan2Val"].join(",")
+                    "wifi":that.ChartConf.card.eth0Val.join(","),
+                    "sim1":that.ChartConf.card.eth0Val.join(","),
+                    "sim2":that.ChartConf.card.eth0Val.join(","),
+                    "sim3":that.ChartConf.card.eth0Val.join(","),
+                    "sim4":that.ChartConf.card.eth0Val.join(","),
+                    "sim5":that.ChartConf.card.eth0Val.join(","),
+                    "sim6":that.ChartConf.card.eth0Val.join(","),
+                    "usb-5g1":that.ChartConf.card.eth0Val.join(","),
+                    "usb-5g2":that.ChartConf.card.eth0Val.join(","),
+                    "usb-lan":that.ChartConf.card.eth0Val.join(","),
+                    "usb-lan2":that.ChartConf.card.eth0Val.join(","),
+                    "id":that.ChartConf.card.id
                 };
                 this.$axios({
                     method: 'post',
                     url:"/page/index/chartData.php",
                     data:this.$qs.stringify({
                         setCardChartShowContent:true,
-                        devSN: that.ActiveDevice.dev_sn,
+                        devSn: that.ActiveDevice.dev_sn,
                         data: paramData
                     }),
                     Api:"setCardChartShowContent",
