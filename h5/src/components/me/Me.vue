@@ -25,7 +25,7 @@
             </div>
         </div>
          <div class="Group">
-            <div class="GroupTitle">图标配置</div>
+            <div class="GroupTitle">图表配置</div>
             <div class="GroupItem">
                 <mt-navbar v-model="ChartConfTab">
                     <mt-tab-item id="1">单位</mt-tab-item>
