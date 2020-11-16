@@ -49,7 +49,7 @@
                     <div class="buttons">
                         <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item)"></i>
                         <!--<i class="iconBtn fa fa-trash-o" aria-hidden="true"></i>-->
-                        <i class="iconBtn fa" :class="[item.push_status == 'running'? 'fa-stop' : 'fa-play']" aria-hidden="true" @click="switchPush(item)"></i>
+                        <i class="iconBtn fa" :class="[item.push_sel == '1'? 'fa-pause' : 'fa-play']" aria-hidden="true" @click="switchPush(item)"></i>
                     </div>
                 </div>
             </template>
