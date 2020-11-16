@@ -49,13 +49,13 @@
                         <mt-range
                                 v-model="common.dev_srVal"
                                 class="ItemRange byteRange"
-                                :min="1"
-                                :max="80"
+                                :min="0.5"
+                                :max="20"
                                 :step="1"
                                 :bar-height="5"
                                 @change="setDeviceParam('dev_sr')">
-                            <div style="color: #333333;padding: .01rem;margin-right: .12rem;" slot="start">1</div>
-                            <div style="color: #333333;padding: .01rem;" slot="end">80</div>
+                            <div style="color: #333333;padding: .01rem;margin-right: .12rem;" slot="start">0.5</div>
+                            <div style="color: #333333;padding: .01rem;" slot="end">20</div>
                         </mt-range>
                         <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal" @blur="setDeviceParam('dev_sr')">
                     </div>

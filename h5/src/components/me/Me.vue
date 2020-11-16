@@ -18,12 +18,12 @@
 
             </div>
         </div>
-        <div class="Group">
+        <!-- <div class="Group">
             <div class="GroupTitle">权限信息</div>
             <div class="GroupItem">
 
             </div>
-        </div>
+        </div> -->
          <div class="Group">
             <div class="GroupTitle">图表配置</div>
             <div class="GroupItem">
