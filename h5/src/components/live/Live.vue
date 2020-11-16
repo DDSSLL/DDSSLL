@@ -44,7 +44,7 @@
         </div>
         <div class="addressGroup">
             <template v-for="(item,i) in address">
-                <div class="address">
+                <div class="address" :key="i">
                     <div class="title">{{ item.remark?item.remark : "推流地址"+(i+1) }}</div>
                     <div class="buttons">
                         <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item)"></i>
