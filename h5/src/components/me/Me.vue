@@ -24,25 +24,40 @@
 
             </div>
         </div> -->
-         <div class="Group">
-            <div class="GroupTitle">图表配置</div>
+        <div class="Group">
+          <div class="GroupTitle">图表配置</div>
             <div class="GroupItem">
-                <mt-navbar v-model="ChartConfTab">
-                    <mt-tab-item id="1">单位</mt-tab-item>
-                    <mt-tab-item id="2">概览图</mt-tab-item>
-                    <mt-tab-item id="3">网卡图</mt-tab-item>
-                </mt-navbar>
-                <mt-tab-container v-model="ChartConfTab">
+              <mt-navbar v-model="ChartConfTab">
+                <mt-tab-item id="1">单位</mt-tab-item>
+                <mt-tab-item id="2">概览图</mt-tab-item>
+                <mt-tab-item id="3">网卡图</mt-tab-item>
+              </mt-navbar>
+              <mt-tab-container v-model="ChartConfTab">
                 <mt-tab-container-item id="1">
-                    <div class="GroupItem">
-                        <div class="GroupItemField">
-                            <div class="GroupItemTitle">自适应</div>
-                            <div class="GroupItemValue">
-                                <mt-switch v-model="ChartConf.unit.chartAutoVal">
-                                </mt-switch>
-                            </div>
-                        </div>
+                  <div class="GroupItem">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">自适应</div>
+                      <div class="GroupItemValue">
+                        <mt-switch v-model="ChartConf.unit.chartAutoVal"></mt-switch>
+                      </div>
                     </div>
+                  </div>
+                  <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">速率最大值</div>
+                      <div class="GroupItemValue">
+                        <input type="text" class="" v-model.number="ChartConf.unit.chartMax">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">Mbps/每格</div>
+                      <div class="GroupItemValue">
+                        <input type="text" class="" v-model.number="ChartConf.unit.chartInterval">
+                      </div>
+                    </div>
+                  </div>
                     <div class="GroupItem">
                         <div class="GroupItemBtns">
                             <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfUnit">确定</button>
@@ -221,7 +236,7 @@
                     url:"/page/index/chartData.php",
                     data:this.$qs.stringify({
                         getChartParam:true,
-                        devSn: that.ActiveDevice.dev_sn
+                        devSN: that.ActiveDevice.dev_sn
                     }),
                     Api:"getChartParam",
                     AppId:"android",
@@ -254,7 +269,7 @@
                     url:"/page/index/chartData.php",
                     data:this.$qs.stringify({
                         setChartParam:true,
-                        devSn: that.ActiveDevice.dev_sn,
+                        devSN: that.ActiveDevice.dev_sn,
                         chartAuto: that.ChartConf.unit.chartAutoVal? "1": "0",
                         chartMax: that.ChartConf.unit.chartMax,
                         chartInterval: that.ChartConf.unit.chartInterval
@@ -266,7 +281,11 @@
                 .then(function (response) {
                     let res = response.data;
                     if(res.res.success){
-                        that.getChartConfUnit();
+                      that.$toast({
+                        message: "操作成功",
+                        position: 'middle',
+                        duration: 2000
+                      });
                     }else{
                         that.getChartConfUnit();
                     }
@@ -472,7 +491,7 @@
         /*margin-bottom: .1rem;*/
     }
     .GroupItemTitle{
-        width: 25%;
+        width: 35%;
         float: left;
         line-height: .3rem;
         text-align: left;
@@ -480,7 +499,7 @@
         color: #000000;
     }
     .GroupItemValue{
-        width: 75%;
+        width: 65%;
         float: left;
         text-align: left;
     }
@@ -538,6 +557,9 @@
     .mint-checklist>>>.mint-cell-wrapper{padding-left: 0;}
     .mint-checklist>>>.mint-cell{min-height: .3rem;}
     .mint-cell:last-child{background-image: none;}
+    .mint-switch{
+        margin-left: -.34rem;
+    }
 </style>
 <style>
     .me .mint-cell-wrapper{background-image: none;}
