@@ -1,22 +1,63 @@
 <template>
     <div class="me">
         <div class="Group">
-            <div class="GroupTitle">背包信息</div>
-            <div class="GroupItem">
-
+            <div class="GroupTitle" @click="DeviceShow=!DeviceShow">
+                背包信息
+                <i class="titleIcon fa" :class="[DeviceShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+                <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addDevice"></i>
             </div>
+            <transition name="slide-fade">
+                <div class="GroupItem" v-show="DeviceShow">
+                    <template v-for="(item,i) in deviceList" :key="item.id">
+                        <mt-cell-swipe
+                                :right="[
+                                {content: '编辑',style: { background: 'lightblue', color: '#fff' },handler:() => editDevice(item)},
+                                {content: '删除',style: { background: 'red', color: '#fff' },handler:() => deleteDevice(item)},
+                                ]">
+                            <div class="cellItem">
+                                <span class="cellName" style="font-weight: 600;">{{ item.dev_name }}</span>
+                                <span class="cellNameR" style="font-weight: 600;">{{ item.dev_sn }}</span>
+                            </div>
+                            <div class="cellItem">
+                                <span class="cellName" style="width: 40%;">{{ item.dev_model }}</span>
+                                <span class="cellNameR" style="width: 30%;">{{ item.hardVer }}</span>
+                                <span class="cellNameR" style="width: 30%;text-align: center;">{{ item.softVer.split('-')[0] }}</span>
+                            </div>
+                            <div class="cellItem">
+                                <p class="cellCard">{{ item.datetime }}</p>
+                            </div>
+                            <div class="cellItem">
+                                <p class="cellCard">{{ item.match_board }}</p>
+                            </div>
+                            <div class="cellItem">
+                                <p class="cellAddr">{{ item.addr }}</p>
+                            </div>
+                        </mt-cell-swipe>
+                    </template>
+                </div>
+            </transition>
         </div>
-        <div class="Group">
-            <div class="GroupTitle">接收机信息</div>
-            <div class="GroupItem">
-
+        <div class="Group" @click="ReceiverShow=!ReceiverShow">
+            <div class="GroupTitle">
+                接收机信息
+                <i class="titleIcon fa" :class="[ReceiverShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
             </div>
+            <transition name="slide-fade">
+                <div class="GroupItem" v-show="ReceiverShow">
+
+                </div>
+            </transition>
         </div>
-        <div class="Group">
-            <div class="GroupTitle">账号信息</div>
-            <div class="GroupItem">
-
+        <div class="Group" @click="AccountShow=!AccountShow">
+            <div class="GroupTitle">
+                账号信息
+                <i class="titleIcon fa" :class="[AccountShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
             </div>
+            <transition name="slide-fade">
+                <div class="GroupItem" v-show="AccountShow">
+
+                </div>
+            </transition>
         </div>
         <!-- <div class="Group">
             <div class="GroupTitle">权限信息</div>
@@ -25,134 +66,144 @@
             </div>
         </div> -->
         <div class="Group">
-          <div class="GroupTitle">图表配置</div>
-            <div class="GroupItem">
-              <mt-navbar v-model="ChartConfTab">
-                <mt-tab-item id="1">单位</mt-tab-item>
-                <mt-tab-item id="2">概览图</mt-tab-item>
-                <mt-tab-item id="3">网卡图</mt-tab-item>
-              </mt-navbar>
-              <mt-tab-container v-model="ChartConfTab">
-                <mt-tab-container-item id="1">
-                  <div class="GroupItem">
-                    <div class="GroupItemField">
-                      <div class="GroupItemTitle">自适应</div>
-                      <div class="GroupItemValue">
-                        <mt-switch v-model="ChartConf.unit.chartAutoVal"></mt-switch>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
-                    <div class="GroupItemField">
-                      <div class="GroupItemTitle">速率最大值</div>
-                      <div class="GroupItemValue">
-                        <input type="text" class="" v-model.number="ChartConf.unit.chartMax">
-                      </div>
-                    </div>
-                  </div>
-                  <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
-                    <div class="GroupItemField">
-                      <div class="GroupItemTitle">Mbps/每格</div>
-                      <div class="GroupItemValue">
-                        <input type="text" class="" v-model.number="ChartConf.unit.chartInterval">
-                      </div>
-                    </div>
-                  </div>
-                    <div class="GroupItem">
-                        <div class="GroupItemBtns">
-                            <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfUnit">确定</button>
-                            <button class="setBtn" @click="getChartConfUnit">恢复当前值</button>
-                        </div>
-                    </div>
-                </mt-tab-container-item>
-                <mt-tab-container-item id="2">
-                    <div class="GroupItem">
-                        <div class="GroupItemField">
-                            <div class="GroupItemTitle">上传速率</div>
-                            <div class="GroupItemValue">
-                                <select class="ItemSelect" v-model="ChartConf.total.up">
-                                        <option value="Total">Total</option>
-                                        <option value=" ">Null</option>
-                                </select>
+          <div class="GroupTitle" @click="ChartConfShow=!ChartConfShow">
+              图表配置
+              <i class="titleIcon fa" :class="[ChartConfShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+          </div>
+            <transition name="slide-fade">
+                <div class="GroupItem" v-show="ChartConfShow">
+                    <mt-navbar v-model="ChartConfTab">
+                        <mt-tab-item id="1">单位</mt-tab-item>
+                        <mt-tab-item id="2">概览图</mt-tab-item>
+                        <mt-tab-item id="3">网卡图</mt-tab-item>
+                    </mt-navbar>
+                    <mt-tab-container v-model="ChartConfTab">
+                        <mt-tab-container-item id="1">
+                            <div class="GroupItem">
+                                <div class="GroupItemField">
+                                    <div class="GroupItemTitle">自适应</div>
+                                    <div class="GroupItemValue">
+                                        <mt-switch v-model="ChartConf.unit.chartAutoVal"></mt-switch>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="GroupItem">
-                        <div class="GroupItemField">
-                            <div class="GroupItemTitle">下载速率</div>
-                            <div class="GroupItemValue">
-                                <select class="ItemSelect" v-model="ChartConf.total.down">
-                                        <option value="Total">Total</option>
-                                         <option value=" ">Null</option>
-                                </select>
+                            <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
+                                <div class="GroupItemField">
+                                    <div class="GroupItemTitle">速率最大值</div>
+                                    <div class="GroupItemValue">
+                                        <input type="text" class="" v-model.number="ChartConf.unit.chartMax">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="GroupItem">
-                        <div class="GroupItemField">
-                            <div class="GroupItemTitle">传输丢包</div>
-                            <div class="GroupItemValue">
-                                <select class="ItemSelect" v-model="ChartConf.total.lossDev">
-                                        <option value="Total">Total</option>
-                                         <option value=" ">Null</option>
-                                </select>
+                            <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
+                                <div class="GroupItemField">
+                                    <div class="GroupItemTitle">Mbps/每格</div>
+                                    <div class="GroupItemValue">
+                                        <input type="text" class="" v-model.number="ChartConf.unit.chartInterval">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="GroupItem">
-                        <div class="GroupItemField">
-                            <div class="GroupItemTitle">业务丢包</div>
-                            <div class="GroupItemValue">
-                                <select class="ItemSelect" v-model="ChartConf.total.lossRcv">
-                                        <option value="Total">Total</option>
-                                         <option value=" ">Null</option>
-                                </select>
+                            <div class="GroupItem">
+                                <div class="GroupItemBtns">
+                                    <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfUnit">确定</button>
+                                    <button class="setBtn" @click="getChartConfUnit">恢复当前值</button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="GroupItem">
-                        <div class="GroupItemBtns">
-                            <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
-                            <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
-                        </div>
-                    </div>
-                </mt-tab-container-item>
-                <mt-tab-container-item id="3">
-                    <div class="GroupItem">
-                        <div class="GroupItemField">
-                            <div class="GroupItemTitle" style="width:28%;">颜色样式</div>
-                            <div class="GroupItemValue" style="width:72%;">
-                                <button :class="[ChartConf.card.id == '1' ? 'btnSelect' : '']" class="lan" @click="setCardChartStyle('1')">样式一</button>
-                                <button :class="[ChartConf.card.id == '2' ? 'btnSelect' : '']" class="wan" @click="setCardChartStyle('2')">样式二</button>
+                        </mt-tab-container-item>
+                        <mt-tab-container-item id="2">
+                            <div class="GroupItem">
+                                <div class="GroupItemField">
+                                    <div class="GroupItemTitle">上传速率</div>
+                                    <div class="GroupItemValue">
+                                        <select class="ItemSelect" v-model="ChartConf.total.up">
+                                            <option value="Total">Total</option>
+                                            <option value=" ">Null</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="GroupItem">
-                        <div class="GroupItemField">
-                            <div class="GroupItemTitle">批量选择</div>
-                            <div class="GroupItemValue">
-                                <mt-checklist
-                                    v-model="ChartConf.card.eth0Val"
-                                    :options="[{label:'上传速率',value:'up'},{label:'下载速率',value:'down'},{label:'传输丢包',value:'lossDev'}]">
-                                </mt-checklist>
+                            <div class="GroupItem">
+                                <div class="GroupItemField">
+                                    <div class="GroupItemTitle">下载速率</div>
+                                    <div class="GroupItemValue">
+                                        <select class="ItemSelect" v-model="ChartConf.total.down">
+                                            <option value="Total">Total</option>
+                                            <option value=" ">Null</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="GroupItem">
-                        <div class="GroupItemBtns">
-                            <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfCard">确定</button>
-                            <button class="setBtn" @click="getChartConfCard">恢复当前值</button>
-                        </div>
-                    </div>
-                </mt-tab-container-item>
-                </mt-tab-container>
-            </div>
+                            <div class="GroupItem">
+                                <div class="GroupItemField">
+                                    <div class="GroupItemTitle">传输丢包</div>
+                                    <div class="GroupItemValue">
+                                        <select class="ItemSelect" v-model="ChartConf.total.lossDev">
+                                            <option value="Total">Total</option>
+                                            <option value=" ">Null</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="GroupItem">
+                                <div class="GroupItemField">
+                                    <div class="GroupItemTitle">业务丢包</div>
+                                    <div class="GroupItemValue">
+                                        <select class="ItemSelect" v-model="ChartConf.total.lossRcv">
+                                            <option value="Total">Total</option>
+                                            <option value=" ">Null</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="GroupItem">
+                                <div class="GroupItemBtns">
+                                    <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
+                                    <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
+                                </div>
+                            </div>
+                        </mt-tab-container-item>
+                        <mt-tab-container-item id="3">
+                            <div class="GroupItem">
+                                <div class="GroupItemField">
+                                    <div class="GroupItemTitle" style="width:28%;">颜色样式</div>
+                                    <div class="GroupItemValue" style="width:72%;">
+                                        <button :class="[ChartConf.card.id == '1' ? 'btnSelect' : '']" class="lan" @click="setCardChartStyle('1')">样式一</button>
+                                        <button :class="[ChartConf.card.id == '2' ? 'btnSelect' : '']" class="wan" @click="setCardChartStyle('2')">样式二</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="GroupItem">
+                                <div class="GroupItemField">
+                                    <div class="GroupItemTitle">批量选择</div>
+                                    <div class="GroupItemValue">
+                                        <mt-checklist
+                                                v-model="ChartConf.card.eth0Val"
+                                                :options="[{label:'上传速率',value:'up'},{label:'下载速率',value:'down'},{label:'传输丢包',value:'lossDev'}]">
+                                        </mt-checklist>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="GroupItem">
+                                <div class="GroupItemBtns">
+                                    <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfCard">确定</button>
+                                    <button class="setBtn" @click="getChartConfCard">恢复当前值</button>
+                                </div>
+                            </div>
+                        </mt-tab-container-item>
+                    </mt-tab-container>
+                </div>
+            </transition>
         </div>
         <div class="Group">
-            <div class="GroupTitle">系统</div>
-            <div class="GroupItem">
-                <mt-button size="large" class="logout" @click="logout">登出</mt-button>
+            <div class="GroupTitle" @click="SystemShow=!SystemShow">
+                系统
+                <i class="titleIcon fa" :class="[SystemShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
             </div>
+            <transition name="slide-fade">
+                <div class="GroupItem" v-show="SystemShow">
+                    <mt-button size="large" class="logout" @click="logout">登出</mt-button>
+                </div>
+            </transition>
         </div>
     </div>
 </template>
@@ -196,7 +247,15 @@
                         "usb-lan2Val": ["up","down","lossDev"],
                         id: "1"
                     }
-                }
+                },
+                ChartConfShow:true,
+                DeviceShow:true,
+                ReceiverShow:true,
+                AccountShow:true,
+                SystemShow:true,
+                deviceList:[
+
+                ]
             }
         },
         computed: {
@@ -210,6 +269,7 @@
                     this.getChartConfUnit();
                     this.getChartConfTotal();
                     this.getChartConfCard();
+                    this.getDeviceList();
                 }
             }
         },
@@ -217,6 +277,7 @@
             this.getChartConfUnit();
             this.getChartConfTotal();
             this.getChartConfCard();
+            this.getDeviceList();
         },
         deactivated(){   //生命周期-缓存页面失活
 
@@ -436,6 +497,38 @@
                 })
             },
 
+            getDeviceList(){
+                var that = this;
+                this.$axios({
+                    method: 'post',
+                    url:"/page/dev/devData.php",
+                    data:this.$qs.stringify({
+                        getDevices:true,
+                        userId: that.user.id
+                    }),
+                    Api:"getDevices",
+                    AppId:"android",
+                    UserId:that.user.id
+                })
+                .then(function (response) {
+                    let res = response.data;
+                    if(res.res.success){
+                        that.deviceList = res.data;
+                    }else{
+                        that.deviceList = [];
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
+            },
+            deleteDevice(item){
+                console.log(item)
+            },
+            editDevice(item){
+                console.log(item)
+            },
+            addDevice(){},
             logout(){
                 clearInterval(this.DeviceTimer);
                 clearInterval(this.ChartTimer);
@@ -560,9 +653,36 @@
     .mint-switch{
         margin-left: -.34rem;
     }
+
+    .titleIcon{
+        width: .2rem;
+        height: .2rem;
+        display: inline-block;
+        color:#000;
+        vertical-align: text-top;
+        margin-top: 2px;
+    }
+    .cellItem{overflow:hidden}
+    .cellItem .cellName{float: left;text-align: left;}
+    .cellItem .cellNameR{float: right;text-align: right;}
+    .cellItem .cellAddr{color:#888;font-size:13px;}
+    .cellItem .cellCard{color:#444}
+    .slide-fade-enter-active {transition: all 1s ease;}
+    .slide-fade-leave-active {transition: all 1s cubic-bezier(1.0, 0.5, 0.8, 1.0);}
+    .slide-fade-enter, .slide-fade-leave-to{transform: translateY(5px);opacity: 0;}
+
+    .addBtn{
+        float: right;
+        width: .3rem;
+        text-align: center;
+    }
 </style>
 <style>
     .me .mint-cell-wrapper{background-image: none;}
     .me .mint-cell:last-child{background-image: none;}
+    .me .mint-cell-swipe{border-bottom:1px solid #ddd;}
+    .me .mint-cell-swipe:last-child{border-bottom: 0;}
     .me .mint-checkbox-label{font-size: .12rem;}
+    .me .mint-cell-value{display: block;color: #000;padding: .1rem 0;width:100%;}
+    .me .mint-cell-swipe-button{line-height: .9rem}
 </style>
