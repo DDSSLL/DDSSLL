@@ -8,7 +8,7 @@
             </div>
             <transition name="slide-fade">
                 <div class="GroupItem" v-show="DeviceShow">
-                    <template v-for="(item,i) in deviceList" :key="item.id">
+                    <template v-for="(item,i) in deviceList">
                         <mt-cell-swipe
                                 :right="[
                                 {content: '网卡',style: { background: 'rgb(43,162,69)', color: '#fff' },handler:() => showDeviceCard(item)},
@@ -214,7 +214,7 @@
                     网卡信息
                     <i class="popupCloseBtn fa fa-times" @click="deviceCardVisible = false"></i>
                 </div>
-                <template v-for="(item,i) in deviceCardList" :key="i">
+                <template v-for="(item,i) in deviceCardList">
                     <div class="deviceCardItem">
                         <mt-cell title="网卡" :value="item.card_name"></mt-cell>
                         <mt-cell title="状态" :value="item.online == '1'?'在线':'离线'"></mt-cell>
@@ -250,7 +250,7 @@
                     <div class="deviceConfItemTitle">用户</div>
                     <div class="deviceConfItemValue">
                         <select class="ItemSelect" v-model="deviceConfigForm.devUser">
-                            <template v-for="(item,i) in deviceConfigUserOptions" :key="i">
+                            <template v-for="(item,i) in deviceConfigUserOptions">
                                 <option :value="item.value">{{ item.label }}</option>
                             </template>
                         </select>
@@ -260,7 +260,7 @@
                     <div class="deviceConfItemTitle">汇聚服务器</div>
                     <div class="deviceConfItemValue">
                         <select class="ItemSelect" v-model="deviceConfigForm.server" style="margin-bottom: 5px;">
-                            <template v-for="(item,i) in deviceConfigServerOptions" :key="i">
+                            <template v-for="(item,i) in deviceConfigServerOptions">
                                 <option :value="item.value">{{ item.label }}</option>
                             </template>
                         </select>
