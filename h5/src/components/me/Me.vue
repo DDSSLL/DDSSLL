@@ -11,12 +11,13 @@
                     <template v-for="(item,i) in deviceList" :key="item.id">
                         <mt-cell-swipe
                                 :right="[
+                                {content: '网卡',style: { background: 'rgb(43,162,69)', color: '#fff' },handler:() => showDeviceCard(item)},
                                 {content: '编辑',style: { background: 'lightblue', color: '#fff' },handler:() => editDevice(item)},
                                 {content: '删除',style: { background: 'red', color: '#fff' },handler:() => deleteDevice(item)},
                                 ]">
                             <div class="cellItem">
                                 <span class="cellName" style="font-weight: 600;">{{ item.dev_name }}</span>
-                                <span class="cellNameR" style="font-weight: 600;">{{ item.dev_sn }}</span>
+                                <span class="cellNameR">{{ item.dev_sn }}</span>
                             </div>
                             <div class="cellItem">
                                 <span class="cellName" style="width: 40%;">{{ item.dev_model }}</span>
@@ -205,6 +206,75 @@
                 </div>
             </transition>
         </div>
+        <mt-popup
+                v-model="deviceCardVisible"
+                popup-transition="popup-fade">
+            <div class="deviceCardContainer">
+                <div class="deviceCardTitle">
+                    网卡信息
+                    <i class="popupCloseBtn fa fa-times" @click="deviceCardVisible = false"></i>
+                </div>
+                <template v-for="(item,i) in deviceCardList" :key="i">
+                    <div class="deviceCardItem">
+                        <mt-cell title="网卡" :value="item.card_name"></mt-cell>
+                        <mt-cell title="状态" :value="item.online == '1'?'在线':'离线'"></mt-cell>
+                        <mt-cell title="IP" :value="item.card_ip"></mt-cell>
+                        <mt-cell title="MAC" :value="item.card_mac"></mt-cell>
+                    </div>
+                </template>
+            </div>
+        </mt-popup>
+        <mt-popup
+                v-model="deviceConfigVisible"
+                popup-transition="popup-fade">
+            <div class="deviceCardContainer">
+                <div class="deviceCardTitle">
+                    背包配置
+                    <i class="popupCloseBtn fa fa-times" @click="deviceConfigVisible = false"></i>
+                </div>
+                <form action="" @submit.prevent="submitDeviceConfig">
+                <div class="deviceConfItem">
+                    <div class="deviceConfItemTitle">背包名称</div>
+                    <div class="deviceConfItemValue">
+                        <input type="text" class="ItemInput" v-model="deviceConfigForm.devName" required pattern="[A-z0-9+-@()]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格">
+                        <p style="font-size: 12px;color: #666;text-align: left;">仪器名(长度1-15,仅支持中文,字母,数字,+,-,@,()和空格)</p>
+                    </div>
+                </div>
+                <div class="deviceConfItem">
+                    <div class="deviceConfItemTitle">序列号</div>
+                    <div class="deviceConfItemValue">
+                        <input type="text" class="ItemInput" v-model="deviceConfigForm.editDev" required>
+                    </div>
+                </div>
+                <div class="deviceConfItem">
+                    <div class="deviceConfItemTitle">用户</div>
+                    <div class="deviceConfItemValue">
+                        <select class="ItemSelect" v-model="deviceConfigForm.devUser">
+                            <template v-for="(item,i) in deviceConfigUserOptions" :key="i">
+                                <option :value="item.value">{{ item.label }}</option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+                <div class="deviceConfItem" v-if="deviceConfigType == 'edit'">
+                    <div class="deviceConfItemTitle">汇聚服务器</div>
+                    <div class="deviceConfItemValue">
+                        <select class="ItemSelect" v-model="deviceConfigForm.server" style="margin-bottom: 5px;">
+                            <template v-for="(item,i) in deviceConfigServerOptions" :key="i">
+                                <option :value="item.value">{{ item.label }}</option>
+                            </template>
+                        </select>
+                        <button>保存绑定</button>
+                        <button>解除绑定</button>
+                    </div>
+                </div>
+                <div class="deviceConfItem" style="text-align: right">
+                    <button @click="deviceConfigVisible = false" style="margin-right: .06rem;">取消</button>
+                    <button type="submit">确定</button>
+                </div>
+                </form>
+            </div>
+        </mt-popup>
     </div>
 </template>
 
@@ -255,7 +325,46 @@
                 SystemShow:true,
                 deviceList:[
 
-                ]
+                ],
+                deviceCardVisible:false,
+                deviceCardList:[
+                    {
+                        "id": "715",
+                        "card_id": "lte3",
+                        "card_name": "LTE3",
+                        "card_mac": "02:0C:29:A3:9B:6D",
+                        "card_ip": "192.168.45.100",
+                        "used": "1",
+                        "online": "1",
+                        "rssi": "-51dBm",
+                        "operator": "CHN-UNICOM",
+                        "sim_mode": "LTE",
+                        "module_type": "EC200T"
+                    },
+                    {
+                        "id": "711",
+                        "card_id": "eth0",
+                        "card_name": "ETH0",
+                        "card_mac": "94:F7:20:04:7D:1B",
+                        "card_ip": "192.168.1.1",
+                        "used": "1",
+                        "online": "0",
+                        "rssi": "",
+                        "operator": "",
+                        "sim_mode": "",
+                        "module_type": ""
+                    },
+                ],
+                deviceConfigVisible:false,
+                deviceConfigType:'add',
+                deviceConfigForm:{
+                    devName:"",
+                    editDev:"",
+                    devUser:"1080test",
+                    server:"1"
+                },
+                deviceConfigUserOptions:[{label:'1080test',value:'1080test'}],
+                deviceConfigServerOptions:[{label:'dv1080-Vir',value:'1'}]
             }
         },
         computed: {
@@ -522,13 +631,145 @@
                     console.log(error)
                 })
             },
+            showDeviceCard(item){
+                this.deviceCardList = [];
+                this.deviceCardVisible = true;
+                var that = this;
+                this.$axios({
+                    method: 'post',
+                    url:"/page/dev/devData.php",
+                    data:this.$qs.stringify({
+                        getCardByDevSn:true,
+                        devSn: item.dev_sn
+                    }),
+                    Api:"getCardByDevSn",
+                    AppId:"android",
+                    UserId:that.user.id
+                })
+                .then(function (response) {
+                    let res = response.data;
+                    if(res.res.success){
+                        that.deviceCardList = res.data;
+                    }else{
+                        that.deviceCardList = [];
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
+            },
             deleteDevice(item){
-                console.log(item)
+                var that = this;
+                this.$messagebox.confirm("确定删除此背包?").then(action => {
+                    this.$axios({
+                        method: 'post',
+                        url:"/page/dev/devData.php",
+                        data:this.$qs.stringify({
+                            delDev:true,
+                            delDevSns:item.dev_sn,
+                            userId:that.user.id
+                        }),
+                        Api:"delDev",
+                        AppId:"android",
+                        UserId:that.user.id
+                    })
+                    .then(function (response) {
+                        let res = response.data;
+                        if(res.res.success){
+                            that.$toast({
+                                message: '操作成功'
+                            });
+                            that.getDeviceList();
+                        }else{
+                            that.$toast({
+                                message: '操作失败'
+                            });
+                            that.getDeviceList();
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                    })
+                });
             },
             editDevice(item){
                 console.log(item)
+                this.deviceConfigVisible = true;
+                this.deviceConfigType = "edit";
+                this.deviceConfigForm = {
+                    devName:item.dev_name,
+                    editDev:item.dev_sn,
+                    devUser:item.prefix,
+                    server:"1"
+                }
             },
-            addDevice(){},
+            addDevice(){
+                this.deviceConfigVisible = true;
+                this.deviceConfigType = "add";
+                this.deviceConfigForm = {
+                    devName:"",
+                    editDev:"",
+                    devUser:"",
+                    server:"1"
+                }
+            },
+            submitDeviceConfig(){
+                console.log(this.deviceConfigType)
+                console.log(this.deviceConfigForm)
+                if(this.deviceConfigType == "add"){
+                    var that = this;
+                    this.$axios({
+                        method: 'post',
+                        url:"/page/dev/devData.php",
+                        data:this.$qs.stringify({
+                            addDev:true,
+                            devName:that.deviceConfigForm.devName,
+                            devSn:that.deviceConfigForm.editDev,
+                            devModel:"DV1080"
+                        }),
+                        Api:"addDev",
+                        AppId:"android",
+                        UserId:that.user.id
+                    })
+                    .then(function (response) {
+                        let res = response.data;
+                        if(res.res.success){
+                            that.getDeviceList();
+                        }else{
+                            that.getDeviceList();
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                    })
+                }else if(this.deviceConfigType == "edit"){
+                    var that = this;
+                    this.$axios({
+                        method: 'post',
+                        url:"/page/dev/devData.php",
+                        data:this.$qs.stringify({
+                            editDev:true,
+                            devName:that.deviceConfigForm.devName,
+                            devSn:that.deviceConfigForm.editDev,
+                            devUser:that.deviceConfigForm.devUser
+                        }),
+                        Api:"editDev",
+                        AppId:"android",
+                        UserId:that.user.id
+                    })
+                    .then(function (response) {
+                        let res = response.data;
+                        if(res.res.success){
+                            that.getDeviceList();
+                        }else{
+                            that.getDeviceList();
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                    })
+                }
+            },
             logout(){
                 clearInterval(this.DeviceTimer);
                 clearInterval(this.ChartTimer);
@@ -595,6 +836,16 @@
         width: 65%;
         float: left;
         text-align: left;
+    }
+    .ItemInput{
+        width: 1.75rem;
+        height: .22rem;
+        border: 1px solid #3d81f1;
+        outline: none;
+        box-shadow: none;
+        border-radius: 5px;
+        font-size: .12rem;
+        background-color: #FFFFFF;
     }
     .ItemSelect{
         width: 1.8rem;
@@ -676,6 +927,26 @@
         width: .3rem;
         text-align: center;
     }
+    .deviceCardTitle{
+        padding: .1rem;
+        font-size: .14rem;
+        background-color: #DDDEEE;
+    }
+    .popupCloseBtn{
+        float: right;
+        width: .24rem;
+        height: .24rem;
+        color: #B00;
+        font-size: .16rem;
+        margin-top: -2px;
+    }
+    .deviceCardItem{border-bottom: 2px solid #AAA;}
+    .deviceCardItem:last-child{border-bottom: 0;}
+
+    .deviceConfItem{overflow: hidden;padding: .1rem;}
+    .deviceConfItemTitle{width: 35%;float: left;  text-align: left;}
+    .deviceConfItemValue{width: 65%;float: left; text-align: right}
+    .deviceConfItem button{padding: .02rem .1rem;}
 </style>
 <style>
     .me .mint-cell-wrapper{background-image: none;}
@@ -685,4 +956,8 @@
     .me .mint-checkbox-label{font-size: .12rem;}
     .me .mint-cell-value{display: block;color: #000;padding: .1rem 0;width:100%;}
     .me .mint-cell-swipe-button{line-height: .9rem}
+    .me .mint-popup{width: 90%;max-height: 90%;overflow-y: auto;}
+    .me .deviceCardContainer .mint-cell-title{width:40%;text-align: left;}
+    .me .deviceCardContainer .mint-cell-value{width:60%;text-align: right;padding:0;}
+    .me .deviceCardContainer .mint-cell{min-height:24px;}
 </style>
