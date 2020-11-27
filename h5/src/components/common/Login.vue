@@ -4,19 +4,29 @@
             <!--<mt-button slot="left" @click.native="back"> < </mt-button>-->
         <!--</mt-header>-->
         <div id="body">
-            <h1 class="title">UHDXpress</h1>
+            <h1 class="title">{{ title }}</h1>
             <div class="form-item">
                 <input type="text" class="loginIpt" v-model="user.login_name" placeholder="登录账号">
             </div>
             <div class="form-item">
                 <input type="password" class="loginIpt" v-model="user.password" placeholder="登录密码">
             </div>
-
-            <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
-            <div class="loginGroup">
+            <div class="form-item" style="overflow: hidden;">
+                <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
+            </div>
+            <div class="form-item">
+                <span class="forgetPwd">忘记密码了?</span>
+                <span style="float: left;width:4%;text-align: center;margin-top:0.05rem;">|</span>
+                <span class="registerBtn">注册一个新账号</span>
+            </div>
+            <div class="setBtn" @click="showConfig = !showConfig">
+                <i class="fa fa-cog fa-2x" aria-hidden="true"></i>
+            </div>
+            <div class="loginGroup" v-show="showConfig">
                 <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV4000' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV4000')">DV4000</mt-button>
                 <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV1080' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV1080')">DV1080</mt-button>
                 <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
+                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'WIFI' ? 'deviceLoginActive': '']" @click="connectWifi()">本机WiFi</mt-button>
             </div>
             <!--<div class="loginBottom">-->
                 <!--<div class="copyright">-->
@@ -35,6 +45,26 @@
                 <!--</div>-->
             <!--</div>-->
         </div>
+        <mt-popup
+                v-model="wifiUrlsEditVisible"
+                popup-transition="popup-fade">
+            <div class="pushEditModal">
+                <div class="modalTitle">
+                    连接本机WiFi
+                    <i class="closeBtn fa fa-close" @click="wifiUrlsEditVisible = false"></i>
+                </div>
+                <div class="formContainer">
+                    <div class="formItem">
+                        <div class="formItemTitle">http://</div>
+                        <div class="formItemVal"><input type="text" v-model="wifiUrl"></div>
+                    </div>
+                    <div class="formItem" style="text-align: right;margin-bottom: 0;">
+                        <button class="modalBtn" @click="wifiUrlsEditVisible = false">取消</button>
+                        <button class="modalBtn" @click="setWifiUrl" style="background-color: #3d81f1;color:#fff;">确定</button>
+                    </div>
+                </div>
+            </div>
+        </mt-popup>
     </div>
 </template>
 
@@ -45,13 +75,16 @@
         name: "Login",
         data(){
             return {
-                title : this.$t( 'basic.login' ),
+                title : "HDXpress",
                 user:{
                     login_name:'',
                     password:'',
                     loginStatus:false
                 },
-              ActiveDeviceType:'DV1080'
+                ActiveDeviceType:'DV1080',
+                showConfig:false,
+                wifiUrlsEditVisible:false,
+                wifiUrl:""
             }
         },
         computed: {
@@ -59,6 +92,7 @@
         },
         mounted(){
             if(localStorage.getItem("LOGIN")){
+                this.$axios.defaults.baseURL = "http://47.104.164.249";
                 this.user.login_name = localStorage.getItem("USERNAME");
                 this.user.password = localStorage.getItem("PASSWORD");
                 this.ActiveDeviceType = localStorage.getItem("DEVICE");
@@ -77,11 +111,6 @@
             },
             login(){
                 var that = this;
-                switch(this.ActiveDeviceType){
-                  case "DV1080":this.$axios.defaults.baseURL = "http://47.104.164.249";break;
-                  case "DV4000":this.$axios.defaults.baseURL = "http://117.131.178.104:8088";break;
-                  case "OTHER":this.$axios.defaults.baseURL = "http://47.104.164.249";break;
-                }
 
                 this.$axios({
                     method: 'post',
@@ -148,9 +177,27 @@
                   return res;
                 }
             },
+            register(){},
 
             ChoseDevice(val){
                 this.ActiveDeviceType = val;
+                switch(this.ActiveDeviceType){
+                    case "DV1080":this.title = "HDXpress";this.$axios.defaults.baseURL = "http://47.104.164.249";break;
+                    case "DV4000":this.title = "UHDXpress";this.$axios.defaults.baseURL = "http://117.131.178.104:8088";break;
+                    case "OTHER":this.title = "UHDXpress";this.$axios.defaults.baseURL = "http://47.104.164.249";break;
+                }
+                this.showConfig = false;
+            },
+
+            connectWifi(){
+                this.wifiUrlsEditVisible = true;
+            },
+
+            setWifiUrl(){
+                this.$axios.defaults.baseURL = "http://" + this.wifiUrl;
+                this.ActiveDeviceType = "WIFI";
+                this.wifiUrlsEditVisible = false;
+                this.showConfig = false;
             }
             // login(){
             //     var that = this;
@@ -179,8 +226,10 @@
     #body{
         height: 100%;
         box-sizing: border-box;
-        background-color: #FFFFFF;
-        color: #000000;
+        /*background-color: #FFFFFF;*/
+        /*color: #000000;*/
+        background-color: #212227;
+        color: #FFFFFF;
         padding-top: 1.8rem;
         padding-left: .3rem;
         padding-right: .3rem;
@@ -189,7 +238,7 @@
         font-size: .36rem;
         text-align: center;
         font-weight: 600;
-        color: #3d81f1;
+        color: #FFFFFF;
         font-family: inherit;
         margin-bottom: .4rem;
     }
@@ -197,6 +246,9 @@
         margin-bottom: 5px;
     }
     .loginIpt{
+        /*background: #FFFFFF;*/
+        /*border: .1em solid #DDDDDD;*/
+        /*color: #333333;*/
         background: #FFFFFF;
         border: .1em solid #DDDDDD;
         color: #333333;
@@ -211,9 +263,29 @@
     }
     .loginBtn{
         background-color: #3d81f1;
+        /*background-color: #484D57;*/
         color: #FFFFFF;
         box-shadow: none;
-        margin-top: .3rem;
+        margin-top: .1rem;
+        margin-left: 1%;
+    }
+    .registerBtn{
+        float: left;
+        color: #3d81f1;
+        margin-top: .05rem;
+        width:48%;
+        font-weight: 600;
+        text-align: left;
+        font-size:.14rem;
+    }
+    .forgetPwd{
+        float: left;
+        color: #3d81f1;
+        font-weight: 600;
+        margin-top: .05rem;
+        width:48%;
+        text-align: right;
+        font-size:.15rem;
     }
     .loginBottom{
         position: absolute;
@@ -228,19 +300,94 @@
         line-height: .16rem;
     }
     .loginGroup{
-        margin-top: .16rem;
+        position: fixed;
+        right: .72rem;
+        bottom: .6rem;
         display: flex;
         justify-content: space-between;
+        flex-direction: column;
     }
     .deviceLogin{
         background-color: #484D57;
         color: #FFFFFF;
         box-shadow: none;
         font-size: .14rem;
-        width: 30%;
-        height: .3rem;
+        width: 1rem;
+        height: .36rem;
     }
     .deviceLoginActive{
       background-color: #3d81f1;
     }
+    .setBtn{
+        position: fixed;
+        z-index: 1;
+        right: .3rem;
+        bottom: .4rem;
+        width: .5rem;
+        height: .5rem;
+        border-radius: 50%;
+        color: #FFF;
+        text-align: center;
+        line-height: .64rem;
+    }
+
+    .pushEditModal{
+        width: 3rem;
+    }
+    .modalTitle{
+        padding: .1rem;
+        font-size: .14rem;
+        font-weight: 500;
+        line-height: .14rem;
+    }
+    .closeBtn{
+        float: right;
+        margin-right: 0;
+        display: inline-block;
+        margin-top: -2px;
+        color: #F33;
+    }
+    .formContainer{
+        padding: .1rem;
+
+    }
+    .formItem{
+        overflow: hidden;
+        margin-bottom: .1rem;
+    }
+    .formItemTitle{
+        float:left;
+        width: 25%;
+        color: #333;
+        line-height: .28rem;
+        font-size: .13rem;
+        text-align: right;
+        margin-right: 5%;
+    }
+    .formItemVal{
+        float: left;
+        width: 70%;
+    }
+    .formItemVal input{
+        display: inline-block;
+        width: 93%;
+        background: #FFFFFF;
+        border: 1px solid #ccc;
+        color: #333333;
+        height: .24rem;
+        line-height: .24rem;
+        font-size: .13rem;
+        outline:none;
+        border-radius: 4px;
+    }
+    .modalBtn{
+        width: .6rem;
+        border: none;
+        outline: none;
+        box-shadow: none;
+        height: .26rem;
+        margin-top: .02rem;
+        margin-right: .05rem;
+    }
+    .mint-popup{border-radius: 6px;}
 </style>
