@@ -417,13 +417,13 @@
                   <option :value="item.value" :style="'color:'+item.color+''">{{ item.text }}</option>
                 </template>
               </select>
-              <button @click.prevent="editMatchRow">保存绑定</button>
-              <button @click.prevent="deleteMatchRow">解除绑定</button>
+              <button @click.prevent="editMatchRow" style="border:1px solid #666;">保存绑定</button>
+              <button @click.prevent="deleteMatchRow" style="border:1px solid #666;">解除绑定</button>
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
-            <button @click="deviceConfigVisible = false" style="margin-right: .06rem;">取消</button>
-            <button type="submit">确定</button>
+            <button class="modalBtn" @click="deviceConfigVisible = false" style="margin-right: .06rem;">取消</button>
+            <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
         </form>
       </div>
@@ -449,8 +449,8 @@
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
-            <button @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
-            <button type="submit">确定</button>
+            <button class="modalBtn" @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
+            <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
         </form>
       </div>
@@ -1451,7 +1451,7 @@
 
 <style scoped>
     .me{
-        /*background-color: #272D33;*/
+        background-color: #212227;
         height: calc(100% - 54px);
         overflow:auto;
     }
@@ -1459,23 +1459,23 @@
         margin-top: 0px;
     }
     .GroupTitle{
-        border-top: 1px solid #DDDDDD;
-        border-bottom: 1px solid #DDDDDD;
+        border-top: 1px solid #222;
+        border-bottom: 1px solid #222;
         text-align: left;
         text-indent: .1rem;
         padding: .1rem .08rem;
-        background-color: #ecf0f4;
+        background: linear-gradient(270deg,#111 0,#333 50%);
         /*border-radius: 5px;*/
         font-size: .15rem;
         font-weight:500;
-        color: #000000;
+        color: #B7B7B7;
     }
     .logout{
         background-color: #3d81f1;
         color: #FFFFFF;
     }
     .GroupItem{
-        padding: .05rem .2rem;
+        padding: .05rem .08rem;
     }
     .GroupItem0{
         padding: .05rem 0rem;
@@ -1489,8 +1489,8 @@
         float: left;
         line-height: .3rem;
         text-align: left;
-        font-size: .12rem;
-        color: #000000;
+        font-size: .14rem;
+        color: #EEEEEE;
     }
     .GroupItemValue{
         width: 70%;
@@ -1580,7 +1580,7 @@
         width: .2rem;
         height: .2rem;
         display: inline-block;
-        color:#000;
+        color:#B7B7B7;
         vertical-align: text-top;
         margin-top: 2px;
     }
@@ -1601,7 +1601,6 @@
     .popupTitle{
         padding: .1rem;
         font-size: .14rem;
-        background-color: #DDDEEE;
     }
     .popupCloseBtn{
         float: right;
@@ -1610,6 +1609,7 @@
         color: #B00;
         font-size: .16rem;
         margin-top: -2px;
+        text-align: right;
     }
     .deviceCardItem,.deviceItem{
       border-bottom: 2px solid #AAA;
@@ -1624,9 +1624,18 @@
     }
     .popupContainer{padding-bottom:15px;}
     .popupContainer .fGrp{overflow: hidden;padding: .1rem;}
-    .popupContainer .fGrp .tl{width: 40%;float: left;  text-align: left;padding-top:0.07rem;}
-    .popupContainer .fGrp .vl{width: 60%;float: left; text-align: right}
-    .popupContainer .fGrp button{padding: .02rem .1rem;}
+    .popupContainer .fGrp .tl{width: 30%;float: left;  text-align: right;padding-top:0.07rem;margin-right: 5%;}
+    .popupContainer .fGrp .vl{width: 65%;float: left; text-align: right}
+    .popupContainer .fGrp button{padding: .02rem .1rem;width: .8rem;outline: none;border-radius: 4px;box-shadow:none;margin-top: .02rem;margin-right: .05rem;}
+    .modalBtn{
+        width: .6rem;
+        border: none;
+        outline: none;
+        box-shadow: none;
+        height: .26rem;
+        margin-top: .02rem;
+        margin-right: .05rem;
+    }
     /*.deviceConfItem{overflow: hidden;padding: .1rem;}
     .deviceConfItemTitle{width: 40%;float: left;  text-align: left;padding-top:0.07rem;}
     .deviceConfItemValue{width: 60%;float: left; text-align: right}
@@ -1634,9 +1643,9 @@
 
 </style>
 <style>
-    .me .mint-cell-wrapper{background-image: none;}
+    .me .mint-cell-wrapper{background-image: none;color: #EEEEEE;}
     .me .mint-cell:last-child{background-image: none;}
-    .me .mint-cell-swipe{border-bottom:1px solid #ddd;}
+    .me .mint-cell-swipe{border-bottom:4px solid #212227;}
     .me .mint-cell-swipe:last-child{border-bottom: 0;}
     .me .mint-checkbox-label{font-size: .12rem;margin-left:0;}
     .me .mint-checklist-label{padding:0;}
@@ -1644,7 +1653,7 @@
     .GroupItemValue1 .mint-checklist-title{display:none;}
     .me .mint-cell-value{
       display: block;
-      color: #000;
+      color: #EEEEEE;
       padding: .1rem 0;
       width:100%;
       font-size:.16rem;
@@ -1672,7 +1681,8 @@
       border-top-right-radius:4px;
       border-bottom-right-radius:4px;
     }
-    .me .mint-popup{width: 90%;max-height: 90%;overflow-y: auto;}
+    .mint-popup{border-radius: 6px;background-color: #EEE;}
+    .me .mint-popup{width: 90%;max-height: 90%;overflow-y: auto;border-radius: 4px;}
     .me .popupContainer .mint-cell-title{width:40%;text-align: left;}
     .me .popupContainer .mint-cell-value{width:60%;text-align: right;padding:0;}
     .me .popupContainer .mint-cell{min-height:24px;}
@@ -1696,4 +1706,7 @@
     .mint-toast{
       z-index:2002;
     }
+    .me .mint-navbar{background-color: #222;}
+    .me .mint-cell{background-color: #35363a;}
+    .me .mint-checklist .mint-cell-value{display: none;}
 </style>

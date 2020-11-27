@@ -76,7 +76,7 @@
                     </div>
                     <div class="formItem" style="text-align: right;margin-bottom: 0;">
                         <button class="modalBtn" @click="hideEditUrls">取消</button>
-                        <button class="modalBtn" @click="saveEditUrls">确定</button>
+                        <button class="modalBtn" @click="saveEditUrls" style="background-color: #3d81f1;color:#fff;">确定</button>
                     </div>
                 </div>
             </div>
@@ -225,22 +225,22 @@
         height: 84%;
         padding-bottom: 62px;
         overflow-y: auto;
-        /*background-color: #272D33;*/
+        background-color: #212227;
     }
     .Group{
         margin-top: 0px;
     }
     .GroupTitle{
-        border-top: 1px solid #DDDDDD;
-        border-bottom: 1px solid #DDDDDD;
+        border-top: 1px solid #222;
+        border-bottom: 1px solid #222;
         text-align: left;
         text-indent: .1rem;
         padding: .1rem .08rem;
-        background-color: #ecf0f4;
+        background: linear-gradient(270deg,#111 0,#333 50%);
         /*border-radius: 5px;*/
         font-size: .15rem;
         font-weight:500;
-        color: #000000;
+        color: #B7B7B7;
     }
     .GroupItem{
         padding: .1rem .2rem;
@@ -255,7 +255,7 @@
         line-height: .3rem;
         text-align: left;
         font-size: .14rem;
-        color: #000000;
+        color: #EEEEEE;
     }
     .GroupItemValue{
         width: 65%;
@@ -304,18 +304,18 @@
         font-size: .12rem;
     }
     .addressGroup{
-        border-top: 2px solid #DDDDDD;
+        /* border-top: 2px solid #DDDDDD; */
         margin: 0;
         padding-top: .05rem;
         margin-bottom: .2rem;
     }
     .address{
-        color: #333333;
+        color: #EEEEEE;
         line-height: .4rem;
         overflow: hidden;
     }
     .address .title{
-        font-size: .12rem;
+        font-size: .14rem;
         text-indent: .2rem;
         float: left;
         width: 60%;
@@ -331,14 +331,14 @@
         cursor: pointer;
         font-size: .18rem;
         margin-right: .12rem;
+        margin-top: .08rem;
     }
     .pushEditModal{
         width: 3rem;
     }
     .modalTitle{
         padding: .1rem;
-        background-color: #DDDDDD;
-        font-size: .14rem;
+        font-size: .13rem;
         font-weight: 500;
         line-height: .14rem;
     }
@@ -347,6 +347,7 @@
         margin-right: 0;
         display: inline-block;
         margin-top: -2px;
+        color: #F33;
     }
     .formContainer{
         padding: .1rem;
@@ -358,10 +359,12 @@
     }
     .formItemTitle{
         float:left;
-        width: 30%;
+        width: 25%;
         color: #333;
         line-height: .28rem;
         font-size: .13rem;
+        text-align: right;
+        margin-right: 5%;
     }
     .formItemVal{
         float: left;
@@ -388,6 +391,7 @@
         margin-top: .02rem;
         margin-right: .05rem;
     }
+    .mint-popup{border-radius: 6px;background-color: #EEE;}
     .rtmp{
         background: #4C5157;
         border-top-left-radius: 4px;

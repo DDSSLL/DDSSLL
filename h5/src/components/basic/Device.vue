@@ -39,39 +39,49 @@
         position="right"
         popup-transition="popup-slide">
         <div class="channelList">
-          <template v-for="(item,i) in deviceList">
-            <div class="listChannel" @click="changeActiveDevice(item)" :class="[!!ActiveDevice?(ActiveDevice.dev_name == item.dev_name ? 'activeChanel' : ''):'']">
-              <div class="status">
-                <span class="statusCircle" :class="[item.match_used == 0 ? 'gray': item.dev_push_status!=0 ? 'sk-spinner sk-spinner-three-bounce': 'green']">
-                  <span class="sk-bounce1"></span>
-                </span>
-              </div>
-              <div class="rate">
-                <div v-if="item['match_used']=='1' && item['dev_push_status']!='0'">
-                  <span class="us">{{ (+item['dev_push_br'] / 1000).toFixed(3) }}</span>
-                  <span class="ds">{{ (+item['rcv_br'] / 1000).toFixed(3) }}</span>
-                  <span class="rl" v-if="item['TotalLossRate']!=0" >{{ (+item['TotalLossRate'] / 10).toFixed(1) + '%' }}</span>  
-                </div>
-                <div v-else class="noSpeedInfo">--</div>
-              </div>
-              <div class="info">
-                <div>
-                  <span class="T">
-                    <span class="TCircle" :class="[item.online== 1 ? (item.dev_push_status!=0 ? 'red' : 'green') : 'gray']"></span>
-                    T: {{ item.dev_name }}
-                  </span>
-                  <span class="R">
-                    <span class="RCircle" :class="[item.rcv_online == 1 ? (item.dev_push_status != '0' ? 'red' : 'green') : 'gray']"></span>
-                    R: {{ item.rcv_name }}
-                  </span>
-                  <span class="B" v-if="ActiveDeviceType=='DV4000'">
-                    <span class="BCircle" :class="[!ActiveDevice.board_online||ActiveDevice.board_online=='0' ? 'gray': ActiveDevice.dev_push_status!='0'?'red':'green']"></span>
-                    B: {{ ActiveDevice.board_id }}
+          <div class="deviceTypeSelect" style="text-align:right;">
+            <select v-model="deviceTypeSelect" class="TypeSelect" :class="{'White':deviceTypeSelect == '1','Red':deviceTypeSelect == '2','Green':deviceTypeSelect == '3','Gray':deviceTypeSelect == '4'}">
+              <option value="1" class="White"><span>全部设备</span></option>
+              <option value="2" class="Red"><span>推流设备</span></option>
+              <option value="3" class="Green"><span>在线设备</span></option>
+              <option value="4" class="Gray"><span>离线设备</span></option>
+            </select>
+          </div>
+          <mt-loadmore :top-method="getDeviceList" ref="loadmore">
+            <template v-for="(item,i) in deviceList">
+              <div class="listChannel" @click="changeActiveDevice(item)" :class="[!!ActiveDevice?(ActiveDevice.dev_name == item.dev_name ? 'activeChanel' : ''):'']">
+                <div class="status">
+                  <span class="statusCircle" :class="[item.match_used == 0 ? 'gray': item.dev_push_status!=0 ? 'sk-spinner sk-spinner-three-bounce': 'green']">
+                    <span class="sk-bounce1"></span>
                   </span>
                 </div>
+                <div class="rate">
+                  <div v-if="item['match_used']=='1' && item['dev_push_status']!='0'">
+                    <span class="us">{{ (+item['dev_push_br'] / 1000).toFixed(3) }}</span>
+                    <span class="ds">{{ (+item['rcv_br'] / 1000).toFixed(3) }}</span>
+                    <span class="rl" v-if="item['TotalLossRate']!=0" >{{ (+item['TotalLossRate'] / 10).toFixed(1) + '%' }}</span>  
+                  </div>
+                  <div v-else class="noSpeedInfo">--</div>
+                </div>
+                <div class="info">
+                  <div>
+                    <span class="T">
+                      <span class="TCircle" :class="[item.online== 1 ? (item.dev_push_status!=0 ? 'red' : 'green') : 'gray']"></span>
+                      T: {{ item.dev_name }}
+                    </span>
+                    <span class="R">
+                      <span class="RCircle" :class="[item.rcv_online == 1 ? (item.dev_push_status != '0' ? 'red' : 'green') : 'gray']"></span>
+                      R: {{ item.rcv_name }}
+                    </span>
+                    <span class="B" v-if="ActiveDeviceType=='DV4000'">
+                      <span class="BCircle" :class="[!ActiveDevice.board_online||ActiveDevice.board_online=='0' ? 'gray': ActiveDevice.dev_push_status!='0'?'red':'green']"></span>
+                      B: {{ ActiveDevice.board_id }}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </template>
+            </template>
+          </mt-loadmore>
         </div>
       </mt-popup>
     </div>
@@ -100,7 +110,9 @@
                 AD_rcv_online: null,
                 AD_rcv_name: null,
                 AD_board_online: null,
-                AD_board_id: null
+                AD_board_id: null,
+
+                deviceTypeSelect:"1"
             }
         },
         computed: {
@@ -156,6 +168,7 @@
                     let res = response.data;
                     if(res.res.success){
                       that.deviceList = res.data;
+                      that.$refs.loadmore.onTopLoaded();
                       if(!that.ActiveDevice){
                         that.SET_ACTIVE_DEVICE(that.deviceList[0]);
                       }
@@ -218,7 +231,7 @@
         padding: .05rem 0;
     }
     .activeChanel{
-      background-color:#3E4247;
+      background: linear-gradient(to top, #106fb1 0%,#000 30%);
     }
     .status,.rate,.info{
         float: left;
@@ -336,7 +349,7 @@
     .red{background-color: #FC0E1B;}
     /*右侧弹出窗口(频点列表)*/
     .mint-popup{
-        background-color: #FFFFFF;
+        background-color: #212227;
         width: 100%;
         height: 100%;
     }
@@ -344,4 +357,22 @@
         height: 100%;
         overflow-y: auto;
     }
+    .TypeSelect{
+      height: .3rem;
+      background: #3F4551;
+      color: #FFF;
+      width: .9rem;
+      border: none;
+      outline: none;
+      border-radius: 5px;
+      padding-left: .1rem;
+      margin: 1px 1px 0 0;
+    }
+    .White{color: #FFFFFF;}
+    .Red{color: #FF0000;}
+    .Green{color: #00FF00}
+    .Gray{color: #B7B7B7;}
+</style>
+<style>
+  .channelList .mint-loadmore-text{color: #FFF;}
 </style>

@@ -7,56 +7,55 @@
     <Device></Device>
     <div class="chartArea">
       <div class="mainChart" id="mainChart">
-        <div class="chartTitle">概览</div>
         <div id="totalChart" class="totalChart"></div>
       </div>
       <div id="cardsChart" class="cardsChart">
         <div class="lteChart" v-if="eth0Show" :class="chartStyle">
-          <div class="chartTitle">ETH0</div>
+          <div class="chartTitle"></div>
           <div id="chart_eth0" class="chart"></div>
         </div>
         <div class="lteChart" v-if="lte1Show" :class="chartStyle">
-          <div class="chartTitle">LTE1</div>
+          <div class="chartTitle"></div>
           <div id="chart_lte1" class="chart"></div>
         </div>
        <div class="lteChart" v-if="lte2Show" :class="chartStyle">
-          <div class="chartTitle">LTE2</div>
+          <div class="chartTitle"></div>
           <div id="chart_lte2" class="chart"></div>
         </div>
         <div class="lteChart" v-if="lte3Show" :class="chartStyle">
-          <div class="chartTitle">LTE3</div>
+          <div class="chartTitle"></div>
           <div id="chart_lte3" class="chart"></div>
         </div>
         <div class="lteChart" v-if="lte4Show" :class="chartStyle">
-          <div class="chartTitle">LTE4</div>
+          <div class="chartTitle"></div>
           <div id="chart_lte4" class="chart"></div>
         </div>
         <div class="lteChart" v-if="lte5Show" :class="chartStyle">
-          <div class="chartTitle">LTE5</div>
+          <div class="chartTitle"></div>
           <div id="chart_lte5" class="chart"></div>
         </div>
         <div class="lteChart" v-if="lte6Show" :class="chartStyle">
-          <div class="chartTitle">LTE6</div>
+          <div class="chartTitle"></div>
           <div id="chart_lte6" class="chart"></div>
         </div>
         <div class="lteChart" v-if="usblanShow" :class="chartStyle">
-          <div class="chartTitle">USB-LAN</div>
+          <div class="chartTitle"></div>
           <div id="chart_usb-lan" class="chart"></div>
         </div>
         <div class="lteChart" v-if="usblan2Show" :class="chartStyle">
-          <div class="chartTitle">USB-LAN2</div>
+          <div class="chartTitle"></div>
           <div id="chart_usb-lan2" class="chart"></div>
         </div>
         <div class="lteChart" v-if="usb5g1Show" :class="chartStyle">
-          <div class="chartTitle">USB-5G1</div>
+          <div class="chartTitle"></div>
           <div id="chart_usb-5g1" class="chart"></div>
         </div>
         <div class="lteChart" v-if="usb5g2Show" :class="chartStyle">
-          <div class="chartTitle">USB-5G2</div>
+          <div class="chartTitle"></div>
           <div id="chart_usb-5g2" class="chart"></div>
         </div>
         <div class="lteChart" v-if="wifiShow" :class="chartStyle">
-          <div class="chartTitle">WIFI</div>
+          <div class="chartTitle"></div>
           <div id="chart_wifi" class="chart"></div>
         </div>
       </div>
@@ -157,7 +156,7 @@ export default {
           //interval:3,
           inside: false,
           textStyle: {
-            color: '#333333',
+            color: '#BFBFBF',
             fontWeight: 'normal',
             fontSize: '14'
           }
@@ -180,7 +179,7 @@ export default {
         /*min:0,
         max:80,*/
         nameTextStyle: {
-          color: '#333'
+          color: '#BFBFBF'
         },
         axisTick: {
           show: false
@@ -199,7 +198,7 @@ export default {
         },
         axisLabel: {
           textStyle: {
-            color: '#333333',
+            color: '#BFBFBF',
             fontWeight: 'normal',
             fontSize: '14'
           },
@@ -212,7 +211,7 @@ export default {
         min: 0,
         max: 100,
         nameTextStyle: {
-          color: '#333'
+          color: '#BFBFBF'
         },
         axisTick: {
           show: false
@@ -231,7 +230,7 @@ export default {
         },
         axisLabel: {
           textStyle: {
-            color: '#333333',
+            color: '#BFBFBF',
             fontWeight: 'normal',
             fontSize: '14'
           },
@@ -240,7 +239,7 @@ export default {
       },
       commonOptionTitle : [{
         text: "",
-        left: this.marginTitleLeft,
+        left: 10,
         top: 0,
         textStyle: {
           color: '#fff',
@@ -254,7 +253,7 @@ export default {
         //right: marginTitleRight,
         top: 2,
         textStyle: {
-          color: '#333',
+          color: '#BFBFBF',
           fontSize: '14',
           fontWeight: 'normal',
           rich: {
@@ -441,7 +440,7 @@ export default {
         itemGap: 5,
         itemWidth: 5,
         textStyle: {
-          color: '#333',
+          color: '#BFBFBF',
           fontSize: '10'
         },
         tooltip: {
@@ -1023,7 +1022,7 @@ export default {
           itemGap: 5,
           itemWidth: 5,
           textStyle: {
-            color: '#333',
+            color: '#DDD',
             fontSize: '10'
           },
           tooltip: {
@@ -1038,7 +1037,7 @@ export default {
         series: series,
         animation: false
       };
-      /*option.title[0].text = "概览";*/
+      option.title[0].text = "概览";
       option.grid.top = '60';
       option.legend.top = 20;
       option.title[1].top = 5;
@@ -1278,7 +1277,7 @@ export default {
           right: 10,
           top: 0,
           textStyle: {
-            color: '#333',
+            color: '#BFBFBF',
             fontSize: '10',
             fontWeight: 'normal',
             rich: {
@@ -1366,7 +1365,7 @@ export default {
           /*min:0,
           max:80,*/
           nameTextStyle: {
-            color: '#333'
+            color: '#BFBFBF'
           },
           axisTick: {
             show: false
@@ -1385,7 +1384,7 @@ export default {
           },
           axisLabel: {
             textStyle: {
-              color: '#333333',
+              color: '#BFBFBF',
               fontWeight: 'normal',
               fontSize: '14'
             },
@@ -1680,7 +1679,7 @@ export default {
       height: calc(100% - 114px);
       padding-bottom: 62px;
       overflow-y: auto;
-    /*background-color: #272D33;*/
+      background-color: #212227;
   }
   .mint-header{
     background-color: #212227;
@@ -1800,24 +1799,28 @@ export default {
   }
   .cardsChart >>> .chartTitle,
   .mainChart .chartTitle{
-    border-top: 1px solid #DDDDDD;
-    border-bottom: 1px solid #DDDDDD;
+    border-top: 1px solid #222;
+    border-bottom: 1px solid #222;
     text-align: left;
     text-indent: .1rem;
-    padding: .1rem .08rem;
-    background-color: #ecf0f4;
+    /* padding: .1rem .08rem; */
+    /* background-color: #ecf0f4; */
+    background: linear-gradient(to left, #111 0%,#333 50%);
     /*border-radius: 5px;*/
-    font-size: .15rem;
+    font-size: .14rem;
+    line-height: 120%;
     font-weight:500;
     color: #000000;
-    height: 8%;
+    height: .01rem;
+    padding: 1% .08rem;
   }
   .totalChart{
     width: 100%;
-    height: 80%;
+    height: 95%;
+    margin-top: 1%;
   }
   .chart{
-    height: 78%;
+    height: 90%;
     width:100%;
     /*height:100%;*/
   }

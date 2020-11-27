@@ -445,7 +445,7 @@
 <style scoped>
     .settings{
         margin-top: 60px;
-        /*background-color: #272D33;*/
+        background-color: #212227;
         height: 84%;
         padding-bottom: 62px;
         overflow-y: auto;
@@ -454,19 +454,23 @@
         margin-top: 0px;
     }
     .GroupTitle{
-        border-top: 1px solid #DDDDDD;
-        border-bottom: 1px solid #DDDDDD;
+        border-top: 1px solid #222;
+        border-bottom: 1px solid #222;
         text-align: left;
         text-indent: .1rem;
         padding: .1rem .08rem;
-        background-color: #ecf0f4;
+        background: linear-gradient(270deg,#111 0,#333 50%);
         /*border-radius: 5px;*/
         font-size: .15rem;
         font-weight:500;
-        color: #000000;
+        color: #B7B7B7;
+    }
+    .Group .GroupItem:last-child{
+        border-bottom: 0;
     }
     .GroupItem{
         padding: .05rem .2rem;
+        border-bottom: 1px solid #333;
     }
     .GroupItemField{
         overflow: hidden;
@@ -478,7 +482,7 @@
         line-height: .3rem;
         text-align: left;
         font-size: .14rem;
-        color: #000000;
+        color: #EEEEEE;
     }
     .GroupItemValue{
         width: 65%;

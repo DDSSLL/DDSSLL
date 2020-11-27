@@ -5,7 +5,7 @@
         </keep-alive>
         <div class="Group">
             <div class="GroupTitle">网卡设置</div>
-            <div class="GroupItem" style="padding: .1rem">
+            <div class="GroupItem" style="padding: .1rem;border-bottom:0;">
                 <table class="netBoardTable">
                     <thead>
                     <tr>
@@ -19,7 +19,7 @@
                     </thead>
                     <tbody>
                     <template v-for="item in netBoard">
-                        <tr>
+                        <tr v-if="item.used == '1'">
                             <td class="td" :class="[item.used == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
                             <td class="td"><mt-switch v-model="item.usedVal" @change="switchCard(item)"></mt-switch></td>
                             <td class="td">{{ item.send_br }}</td>
@@ -38,7 +38,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">传输开关</div>
                     <div class="GroupItemValue">
-                        <mt-switch v-model="common.dev_push_enableVal" style="margin-left: -.34rem;" @change="setDeviceParam('dev_push_enable')"></mt-switch>
+                        <mt-switch v-model="common.dev_push_enableVal" style="margin-left: -.34rem;transform:scale(1);" @change="setDeviceParam('dev_push_enable')"></mt-switch>
                     </div>
                 </div>
             </div>
@@ -54,8 +54,8 @@
                                 :step="1"
                                 :bar-height="5"
                                 @change="setDeviceParam('dev_sr')">
-                            <div style="color: #333333;padding: .01rem;margin-right: .12rem;" slot="start">0.5</div>
-                            <div style="color: #333333;padding: .01rem;" slot="end">20</div>
+                            <div style="color: #EEEEEE;padding: .01rem;" slot="start">0.5</div>
+                            <div style="color: #EEEEEE;padding: .01rem;" slot="end">20</div>
                         </mt-range>
                         <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal" @blur="setDeviceParam('dev_sr')">
                     </div>
@@ -73,8 +73,8 @@
                                 :step.number="0.1"
                                 :bar-height="5"
                                 @change="setDeviceParam('dev_delay')">
-                            <div style="color: #333333;padding: .01rem;" slot="start">0.1</div>
-                            <div style="color: #333333;padding: .01rem;" slot="end">20</div>
+                            <div style="color: #EEEEEE;padding: .01rem;" slot="start">0.1</div>
+                            <div style="color: #EEEEEE;padding: .01rem;" slot="end">20</div>
                         </mt-range>
                         <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal" @blur="setDeviceParam('dev_delay')">
                     </div>
@@ -104,7 +104,7 @@
             }
         },
         computed: {
-          ...mapState(['user'])
+          ...mapState(['user',"ActiveDeviceType"])
         },
         components: {
             Device
@@ -158,6 +158,14 @@
                         item.usedVal = false;
                     }else if(item.used == '1'){
                         item.usedVal = true;
+                    }
+                    // DV1080 SIM4，5，6隐藏
+                    if(that.ActiveDeviceType == "DV1080" && item.card_id == "lte4"){
+                        item.used = "0";
+                    }else if(that.ActiveDeviceType == "DV1080" && item.card_id == "lte5"){
+                        item.used = "0";
+                    }else if(that.ActiveDeviceType == "DV1080" && item.card_id == "lte6"){
+                        item.used = "0";
                     }
                 })
                 return arr;
@@ -289,25 +297,26 @@
         height: 84%;
         padding-bottom: 62px;
         overflow-y: auto;
-        /*background-color: #272D33;*/
+        background-color: #212227;
     }
     .Group{
         margin-top: 0px;
     }
     .GroupTitle{
-        border-top: 1px solid #DDDDDD;
-        border-bottom: 1px solid #DDDDDD;
+        border-top: 1px solid #222;
+        border-bottom: 1px solid #222;
         text-align: left;
         text-indent: .1rem;
-        padding: .1rem .08rem;
-        background-color: #ecf0f4;
+        padding: .06rem .00rem;
+        background: linear-gradient(270deg,#111 0,#333 50%);
         /*border-radius: 5px;*/
         font-size: .15rem;
         font-weight:500;
-        color: #000000;
+        color: #B7B7B7
     }
     .GroupItem{
-        padding: .1rem .2rem;
+        padding: .1rem .12rem;
+        border-bottom: 1px solid #333;
     }
     .GroupItemField{
         overflow: hidden;
@@ -319,7 +328,7 @@
         line-height: .3rem;
         text-align: left;
         font-size: .14rem;
-        color: #000000;
+        color: #EEEEEE;
     }
     .GroupItemValue{
         width: 65%;
@@ -345,14 +354,15 @@
         border: 1px solid #3d81f1;
         outline: none;
         box-shadow: none;
-        font-size: .12rem;
+        font-size: .14rem;
+        font-weight: 600;
     }
     .byteRange{
         float: left;
     }
     .netBoardTable{
         width: 100%;
-        color: #333333;
+        color: #EEE;
         font-size: .15rem;
         font-weight: 500;
     }
@@ -385,9 +395,9 @@
         transform: scale(.7);
     }
     .mt-range-thumb{
-        width: 10px;
-        height: 10px;
-        top:0.05rem;
+        width: 14px;
+        height: 14px;
+        top:0.03rem;
         border: 5px solid #3d81f1;
     }
 </style>

@@ -6,10 +6,14 @@
         <div id="body">
             <h1 class="title">{{ title }}</h1>
             <div class="form-item">
-                <input type="text" class="loginIpt" v-model="user.login_name" placeholder="登录账号">
+                <input type="text" autocomplete="false" class="loginIpt" v-model="user.login_name" placeholder="登录账号">
             </div>
             <div class="form-item">
-                <input type="password" class="loginIpt" v-model="user.password" placeholder="登录密码">
+                <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" placeholder="登录密码">
+            </div>
+            <div class="form-item" style="text-align: right;padding-right: .2rem;margin-bottom:0;">
+                <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe">
+                <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
             </div>
             <div class="form-item" style="overflow: hidden;">
                 <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
@@ -79,7 +83,8 @@
                 user:{
                     login_name:'',
                     password:'',
-                    loginStatus:false
+                    loginStatus:false,
+                    saveMe:false
                 },
                 ActiveDeviceType:'DV1080',
                 showConfig:false,
@@ -91,13 +96,16 @@
             ...mapState(['navHide'])
         },
         mounted(){
-            if(localStorage.getItem("LOGIN")){
+            // if(localStorage.getItem("LOGIN")){
                 this.$axios.defaults.baseURL = "http://47.104.164.249";
-                this.user.login_name = localStorage.getItem("USERNAME");
-                this.user.password = localStorage.getItem("PASSWORD");
-                this.ActiveDeviceType = localStorage.getItem("DEVICE");
-                this.login();
-            }
+                this.user.saveMe = localStorage.getItem("SAVEME")?eval(localStorage.getItem("SAVEME")):false;
+                if(this.user.saveMe){
+                    this.user.login_name = localStorage.getItem("USERNAME");
+                    this.user.password = localStorage.getItem("PASSWORD");
+                    this.ActiveDeviceType = localStorage.getItem("DEVICE");
+                    // this.login();
+                }
+            // }
         },
         methods:{
             ...mapMutations({
@@ -141,6 +149,7 @@
                                 localStorage.setItem("USERNAME",that.user.login_name);
                                 localStorage.setItem("PASSWORD",that.user.password);
                                 localStorage.setItem("DEVICE",that.ActiveDeviceType);
+                                localStorage.setItem("SAVEME",that.user.saveMe);
                                 //每次重新登录echarts图都重新画
                                 localStorage.removeItem("cardData");
                                 localStorage.removeItem("chartKey");
@@ -267,7 +276,7 @@
         color: #FFFFFF;
         box-shadow: none;
         margin-top: .1rem;
-        margin-left: 1%;
+        /* margin-left: 1%; */
     }
     .registerBtn{
         float: left;
@@ -314,6 +323,7 @@
         font-size: .14rem;
         width: 1rem;
         height: .36rem;
+        border-radius: 0;
     }
     .deviceLoginActive{
       background-color: #3d81f1;
@@ -336,7 +346,7 @@
     }
     .modalTitle{
         padding: .1rem;
-        font-size: .14rem;
+        font-size: .13rem;
         font-weight: 500;
         line-height: .14rem;
     }
@@ -389,5 +399,5 @@
         margin-top: .02rem;
         margin-right: .05rem;
     }
-    .mint-popup{border-radius: 6px;}
+    .mint-popup{border-radius: 6px;background-color: #EEE;}
 </style>

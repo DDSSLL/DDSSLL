@@ -155,12 +155,15 @@ html,body{
 }
 .mint-tabbar{
   z-index: 1;
+  background-color: #353535;
+  background-image: none;
 }
 .mint-tab-item{
   padding: 4px 0;
+  color: #FFFFFF;
 }
 .mint-tabbar>.mint-tab-item.is-selected {
-  background-color: #eaeaea;
-  color: #106fb1;
+  background-color: #585e6d;
+  color: #FFFFFF;
 }
 </style>
