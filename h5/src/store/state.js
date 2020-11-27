@@ -15,5 +15,21 @@ export default {
     //图表定时器ID
     ChartTimer:null,
     //当前登录设备型号
-    ActiveDeviceType:null
+    ActiveDeviceType:null,
+    //图表样式
+    cardLineStyle:'old',
+    chartCardView : {
+        "eth0": "",
+        "sim1": "",
+        "sim2": "",
+        "sim3": "",
+        "sim4": "",
+        "sim5": "",
+        "sim6": "",
+        "usb-5g1": "",
+        "usb-5g2": "",
+        "usb-lan": "",
+        "usb-lan2": "",
+        "wifi": ""
+      },
 }

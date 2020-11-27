@@ -25,11 +25,119 @@ function getCurrentTime() {
     }
     return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
 }
-
-
+//数组合并去重
+function MergeArray(arr1, arr2) {
+  var _arr = new Array();
+  for (var i = 0; i < arr1.length; i++) {
+    _arr.push(arr1[i]);
+  }
+  for (var i = 0; i < arr2.length; i++) {
+    var flag = true;
+    for (var j = 0; j < arr1.length; j++) {
+      if (arr2[i] == arr1[j]) {
+        flag = false;
+        break;
+      }
+    }
+    if (flag) {
+      _arr.push(arr2[i]);
+    }
+  }
+  return _arr;
+}
+//获取设备类型
+function getDevMode(sn) {
+    var res = false;
+    for (var i = 0; i < DEV_MODE.length; i++) {
+        if (sn == DEV_MODE[i].sn) {
+            res = DEV_MODE[i].name;
+            break;
+        }
+    }
+    return res;
+}
+function getRcvMode(sn){
+    var res = false;
+    for (var i = 0; i < RCV_MODE.length; i++) {
+        if (sn == RCV_MODE[i].sn) {
+            res = RCV_MODE[i].name;
+            break;
+        }
+    }
+    return res;
+}
+//获取接收机列表
+function getRcvList(content, row, cb) {
+  var that = this;
+  content.$axios({
+    method: 'post',
+    url:"/page/index/indexData.php",
+    data:content.$qs.stringify({
+      getAllRcvName:'rcv',
+      userId:content.user.id,
+      userGroup:1,
+      prefix:content.user.id
+    }),
+    Api:"getAllRcvName",
+    AppId:"android",
+    UserId:content.user.id
+  })
+  .then(function (response) {
+    let res = response.data;
+    if(res.res.success){
+      var data = res.data;
+      var result = [];
+      if (data.length == 0) {
+        result.push({
+          value: row.rcv_sn,
+          text: row.rcv_name
+        });
+      }else{
+        var bFind = false;
+        for (var k = 0; k < data.length; k++) {
+          if (data[k].rcv_sn == row.rcv_sn) {
+            bFind = true;
+            break;
+          }
+        }
+        if (!bFind) {
+          result.push({
+            value: row.rcv_sn?row.rcv_sn:"",
+            text: row.rcv_name?row.rcv_name:""
+          });
+        }
+        for(var key in data){
+          result.push({
+            value: data[key].rcv_sn,
+            text: data[key].rcv_name,
+            color: data[key].color=="#ffffff"?"#000000":data[key].color
+          });
+        }
+      }
+      cb(result);
+    }else{
+      that.$toast({
+        message: res.res.reason,
+        position: 'middle',
+        duration: 2000
+      });
+    }
+  })
+  .catch(function (error) {
+    console.log(error)
+  })
+}
 window.cardIdArr = ['eth0', 'lte1', 'lte2', 'lte3', 'lte4', 'lte5',
     'lte6', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'
 ];
+var DEV_MODE = [{sn: 2146,name: 'DV1080'},
+                {sn: 2150,name: 'QUK100'}];
+var RCV_MODE = [{sn: 2141,name: 'DV4000R'}, 
+                {sn: 2143,name: 'DV4001R'}, 
+                {sn: 2144,name: 'DV4002R'}, 
+                {sn: 2145,name: 'DV4008R'}, 
+                {sn: 2147,name: 'DV4000PCIE'},
+                {sn: 2999,name: 'DV4000RV'}];
 window.xSplit = 300;
 window.ADMIN = '1'; //管理员用户组
 window.ADVANCE = '2'; //高级用户组
@@ -118,5 +226,5 @@ window.colorObj = {
     "USB-LAN2↑":'USB-LAN2Up',"USB-LAN2↓":'USB-LAN2Down',"USB-LAN2传输丢包":'USB-LAN2LossDev',"USB-LAN2业务丢包":'USB-LAN2LossRcv'
 };
 export default {
-    getCurrentTime
+    getCurrentTime, MergeArray, getDevMode, getRcvList, getRcvMode
 }

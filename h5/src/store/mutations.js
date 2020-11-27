@@ -32,4 +32,9 @@ export default {
     [types.SET_ACTIVE_DEVICE_TYPE]: (state, datas) => {
         state.ActiveDeviceType = datas
     },
+    // 设置网卡图颜色样式
+    [types.SET_CHART_STYLE]: (state, datas) => {
+        state.cardLineStyle = datas
+    },
+    
 }
