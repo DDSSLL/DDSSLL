@@ -206,7 +206,7 @@
     <div class="GroupItem">
     <div class="GroupItemBtns">
     <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfUnit">确定</button>
-    <button class="setBtn" @click="getChartConfUnit">恢复当前值</button>
+    <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfUnit">恢复当前值</button>
     </div>
     </div>
     </mt-tab-container-item>
@@ -296,7 +296,7 @@
     <div class="GroupItem">
     <div class="GroupItemBtns">
     <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfCard">确定</button>
-    <button class="setBtn" @click="getChartConfCard">恢复当前值</button>
+    <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfCard">恢复当前值</button>
     </div>
     </div>
     </mt-tab-container-item>
@@ -1533,6 +1533,8 @@
         height: .26rem;
         margin-top: .02rem;
         font-size: .12rem;
+        background-color: #EEE;
+        color: #000;
     }
     .lan{
         border-top-left-radius: 5px;
@@ -1624,8 +1626,8 @@
     }
     .popupContainer{padding-bottom:15px;}
     .popupContainer .fGrp{overflow: hidden;padding: .1rem;}
-    .popupContainer .fGrp .tl{width: 30%;float: left;  text-align: right;padding-top:0.07rem;margin-right: 5%;}
-    .popupContainer .fGrp .vl{width: 65%;float: left; text-align: right}
+    .popupContainer .fGrp .tl{width: 25%;float: left;  text-align: right;padding-top:0.07rem;margin-right: 5%;}
+    .popupContainer .fGrp .vl{width: 62%;float: left; text-align: right}
     .popupContainer .fGrp button{padding: .02rem .1rem;width: .8rem;outline: none;border-radius: 4px;box-shadow:none;margin-top: .02rem;margin-right: .05rem;}
     .modalBtn{
         width: .6rem;

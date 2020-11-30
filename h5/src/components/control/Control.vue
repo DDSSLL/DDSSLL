@@ -38,7 +38,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">传输开关</div>
                     <div class="GroupItemValue">
-                        <mt-switch v-model="common.dev_push_enableVal" style="margin-left: -.34rem;transform:scale(1);" @change="setDeviceParam('dev_push_enable')"></mt-switch>
+                        <mt-switch v-model="common.dev_push_enableVal" style="transform:scale(1);" @change="setDeviceParam('dev_push_enable')"></mt-switch>
                     </div>
                 </div>
             </div>
@@ -315,7 +315,7 @@
         color: #B7B7B7
     }
     .GroupItem{
-        padding: .1rem .12rem;
+        padding: .1rem .1rem;
         border-bottom: 1px solid #333;
     }
     .GroupItemField{
@@ -323,7 +323,7 @@
         /*margin-bottom: .1rem;*/
     }
     .GroupItemTitle{
-        width: 35%;
+        width: 30%;
         float: left;
         line-height: .3rem;
         text-align: left;
@@ -331,12 +331,12 @@
         color: #EEEEEE;
     }
     .GroupItemValue{
-        width: 65%;
+        width: 70%;
         float: left;
         text-align: left;
     }
     .ItemRange{
-        width: 68%;
+        width: 65%;
         margin-right: .08rem;
     }
     .ItemIpt{

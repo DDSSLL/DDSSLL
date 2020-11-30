@@ -496,6 +496,8 @@
         box-shadow: none;
         height: .26rem;
         margin-top: .02rem;
+        background-color: #EEE;
+        color: #000;
     }
     .lan{
         border-top-left-radius: 5px;
