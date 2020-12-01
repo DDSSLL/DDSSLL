@@ -480,7 +480,7 @@ export default {
     }
   },
   activated(){  //生命周期-缓存页面激活
-    console.log("dd status activated："+this.cardLineStyle)
+    //console.log("dd status activated："+this.cardLineStyle)
     this.initColorGV(this.cardLineStyle);
   },
   deactivated(){   //生命周期-缓存页面失活

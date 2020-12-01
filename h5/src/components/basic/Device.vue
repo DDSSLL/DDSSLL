@@ -3,31 +3,31 @@
     <div class="channels">
       <div class="activeDevice" @click="showDeviceList" v-if="!!ActiveDevice">
         <div class="status">
-          <span class="statusCircle" :class="[this.AD_match_used == 0 ? 'gray': this.AD_dev_push_status!=0 ? 'sk-spinner sk-spinner-three-bounce': 'green']">
+          <span class="statusCircle" :class="[this.ActiveDevice.match_used == 0 ? 'gray': this.ActiveDevice.dev_push_status!=0 ? 'sk-spinner sk-spinner-three-bounce': 'green']">
             <span class="sk-bounce1"></span>
           </span>
         </div>
         <div class="rate">
-          <div v-if="this.AD_match_used=='1' && this.AD_dev_push_status!='0'">
-            <span class="us">{{ (+this.AD_dev_push_br / 1000).toFixed(3) }}</span>
-            <span class="ds">{{ (+this.AD_rcv_br / 1000).toFixed(3) }}</span>
-            <span class="rl" v-if="this.AD_TotalLossRate!=0" >{{ (+this.AD_TotalLossRate / 10).toFixed(1) + '%' }}</span>  
+          <div v-if="this.ActiveDevice.match_used=='1' && this.ActiveDevice.dev_push_status!='0'">
+            <span class="us">{{ (+this.ActiveDevice.dev_push_br / 1000).toFixed(3) }}</span>
+            <span class="ds">{{ (+this.ActiveDevice.rcv_br / 1000).toFixed(3) }}</span>
+            <span class="rl" v-if="this.ActiveDevice.TotalLossRate!=0" >{{ (+this.ActiveDevice.TotalLossRate / 10).toFixed(1) + '%' }}</span>  
           </div>
           <div v-else class="noSpeedInfo">--</div>
         </div>
         <div class="info">
           <div>
             <span class="T">
-              <span class="TCircle" :class="[this.AD_online== 1 ? (this.AD_dev_push_status!=0 ? 'red' : 'green') : 'gray']"></span>
-              T: {{ this.AD_dev_name }}
+              <span class="TCircle" :class="[this.ActiveDevice.online== 1 ? (this.ActiveDevice.dev_push_status!=0 ? 'red' : 'green') : 'gray']"></span>
+              T: {{ this.ActiveDevice.dev_name }}
             </span>
             <span class="R">
-              <span class="RCircle" :class="[this.AD_rcv_online == 1 ? (this.AD_dev_push_status != '0' ? 'red' : 'green') : 'gray']"></span>
-              R: {{ this.AD_rcv_name }}
+              <span class="RCircle" :class="[this.ActiveDevice.rcv_online == 1 ? (this.ActiveDevice.dev_push_status != '0' ? 'red' : 'green') : 'gray']"></span>
+              R: {{ this.ActiveDevice.rcv_name }}
             </span>
             <span class="B" v-if="ActiveDeviceType=='DV4000'">
-              <span class="BCircle" :class="[!this.AD_board_online||this.AD_board_online=='0' ? 'gray': this.AD_dev_push_status!='0'?'red':'green']"></span>
-              B: {{ this.AD_board_id }}
+              <span class="BCircle" :class="[!this.ActiveDevice.board_online||this.ActiveDevice.board_online=='0' ? 'gray': this.ActiveDevice.dev_push_status!='0'?'red':'green']"></span>
+              B: {{ this.ActiveDevice.board_id }}
             </span>
           </div>
         </div>
@@ -100,17 +100,6 @@
                 deviceList:[{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}],
                 active:{},
                 //当前选中设备的相关参数
-                AD_match_used: null,
-                AD_dev_push_status: null,
-                AD_dev_push_br: null,
-                AD_rcv_br: null,
-                AD_TotalLossRate : null,
-                AD_online: null,
-                AD_dev_name: null,
-                AD_rcv_online: null,
-                AD_rcv_name: null,
-                AD_board_online: null,
-                AD_board_id: null,
 
                 deviceTypeSelect:"1"
             }
@@ -137,18 +126,8 @@
                 SET_DEVICE_TIMER
             }),
             refreshCurDevParam(datas){
+              this.SET_ACTIVE_DEVICE(datas);
               //更新当前设备参数
-              this.AD_match_used = datas.match_used;
-              this.AD_dev_push_status = datas.dev_push_status;
-              this.AD_dev_push_br = datas.dev_push_br;
-              this.AD_rcv_br = datas.rcv_br;
-              this.AD_TotalLossRate = datas.TotalLossRate;
-              this.AD_online = datas.online;
-              this.AD_dev_name = datas.dev_name;
-              this.AD_rcv_online = datas.rcv_online;
-              this.AD_rcv_name = datas.rcv_name;
-              this.AD_board_online = datas.board_online;
-              this.AD_board_id = datas.board_id;
             },
             getDeviceList(){
                 var that = this;
