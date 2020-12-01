@@ -599,7 +599,6 @@ export default {
       return resData;
     },
     getChartData(devSns){
-      console.log("getChartData")
       var that = this;
       this.$axios({
         method: 'post',
@@ -815,8 +814,6 @@ export default {
       var downArr = Object.keys(dataDownShow); //有下载数据的网卡
       var showCard = that.MergeArray(upArr, downArr); //所有有数据的网卡名称
       var cardNum = showCard.length;
-      console.log("showCard")
-      console.log(showCard)
       switch(cardNum){
         case 1:
           $("#mainChart").css("height","50%");
@@ -1232,8 +1229,6 @@ export default {
             legendName.push("传输丢包");
             title1Text += "{"+colorObj[keyName+'传输丢包']+"|" + dataUpLoss[0] + "}%";
           }
-          console.log("title1Text")
-          console.log(title1Text)
           colorName = keyName + typeFormat(seriesName);
           series.push({
             name: seriesName,
@@ -1409,7 +1404,6 @@ export default {
       option.yAxis[1]["axisLabel"]["textStyle"]["fontSize"] = 10;
 
       option.legend.data = legendName;
-      console.log(option)
       that.myChartCards[devSn][chartName].setOption(option, true);
       //that.lteChart.setOption(option, true);
 
@@ -1432,14 +1426,11 @@ export default {
       .then(function (response) {
         let res = response.data;
         if(res.res.success){
-          //console.log("getChartShowContent")
           var data = res.data[0];
-          //console.log(data);
           that.chartGeneralView["up"] = data["up"].split(",").map(function(x){return that.formatCardShow(x)});
           that.chartGeneralView["down"] = data["down"].split(",").map(function(x){return that.formatCardShow(x)});
           that.chartGeneralView["trans"] = data["lossDev"].split(",").map(function(x){return that.formatCardShow(x)});//传输丢包
           that.chartGeneralView["buss"] = data["lossRcv"].split(",").map(function(x){return that.formatCardShow(x)});//业务丢包
-          //console.log(that.chartGeneralView)
           that.getCardChartShowContent(devSn,cardData)
         }else{
           console.log(res)
@@ -1466,16 +1457,13 @@ export default {
       .then(function (response) {
         let res = response.data;
         if(res.res.success){
-          //console.log('getCardChartShowContent')
           var data = res.data[0];
-          //console.log(data)
           for(var key in data){
             if(key == "dev_sn" || key=="id"){
               continue;
             }
             that.chartCardView[key] = data[key];
           }
-          //console.log(that.chartCardView);
           that.initChartTotal(cardData);
           that.initChartCards(cardData);
         }else{

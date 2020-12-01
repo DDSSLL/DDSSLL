@@ -127,6 +127,17 @@ function getRcvList(content, row, cb) {
     console.log(error)
   })
 }
+//判断是否是有效邮箱
+function isValidMail(address) {
+    if (address != "") {
+        var regInvalid = /(@.*@)|(\.\.)|(@\.)|(\.@)|(^\.)/;
+        var regValid = /^.+\@(\[?)[a-zA-Z0-9\-\.]+\.([a-zA-Z]{2,3}|[0-9]{1,3})(\]?)$/;
+        return (!regInvalid.test(address) && regValid.test(address));
+    } else {
+        return true;
+    }
+}
+
 window.cardIdArr = ['eth0', 'lte1', 'lte2', 'lte3', 'lte4', 'lte5',
     'lte6', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'
 ];
@@ -226,5 +237,5 @@ window.colorObj = {
     "USB-LAN2↑":'USB-LAN2Up',"USB-LAN2↓":'USB-LAN2Down',"USB-LAN2传输丢包":'USB-LAN2LossDev',"USB-LAN2业务丢包":'USB-LAN2LossRcv'
 };
 export default {
-    getCurrentTime, MergeArray, getDevMode, getRcvList, getRcvMode
+    getCurrentTime, MergeArray, getDevMode, getRcvList, getRcvMode, isValidMail
 }

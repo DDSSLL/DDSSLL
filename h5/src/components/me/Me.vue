@@ -1,5 +1,6 @@
 <template>
   <div class="me">
+    <!-- 背包 -->
     <div class="Group">
       <div class="GroupTitle" @click="DeviceShow=!DeviceShow">
         背包信息
@@ -56,6 +57,7 @@
         </div>
       </transition>
     </div>
+    <!-- 汇聚服务器 -->
     <div class="Group">
       <div class="GroupTitle" @click="ReceiverShow=!ReceiverShow">
         汇聚服务器信息
@@ -112,10 +114,12 @@
         </div>
       </transition>
     </div>
+    <!-- 用户 -->
     <div class="Group">
       <div class="GroupTitle" @click="AccountShow=!AccountShow">
         用户信息
         <i class="titleIcon fa" :class="[AccountShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+        <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addUser" v-if="user.id==SUPER"></i>
       </div>
       <transition name="slide-fade">
         <div class="GroupItem" v-if="AccountShow">
@@ -123,7 +127,8 @@
             <mt-cell-swipe
               :right="[ 
               {content: '设备权限',handler:() => showDevAuthority(item)},
-              {content: '编辑',handler:() => editUser(item)}
+              {content: '编辑',handler:() => editUser(item)},
+              {content: '删除',style:{display:(user.id!=SUPER || item.id==SUPER)?'none':''}, handler:() => deleteUser(item)}
               ]">
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">用户名称</span>
@@ -159,150 +164,139 @@
         </div>
       </transition>
     </div>
-    <!-- <div class="Group">
-    <div class="GroupTitle">权限信息</div>
-    <div class="GroupItem">
-
-    </div>
-    </div> -->
     <div class="Group">
-    <div class="GroupTitle" @click="ChartConfShow=!ChartConfShow">
-    图表配置
-    <i class="titleIcon fa" :class="[ChartConfShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
-    </div>
-    <transition name="slide-fade">
-    <div class="GroupItem" v-show="ChartConfShow">
-    <mt-navbar v-model="ChartConfTab">
-    <mt-tab-item id="1">单位</mt-tab-item>
-    <!-- <mt-tab-item id="2">概览图</mt-tab-item> -->
-    <mt-tab-item id="3">网卡图</mt-tab-item>
-    </mt-navbar>
-    <mt-tab-container v-model="ChartConfTab">
-    <mt-tab-container-item id="1">
-    <div class="GroupItem">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle">自适应</div>
-    <div class="GroupItemValue">
-    <mt-switch v-model="ChartConf.unit.chartAutoVal"></mt-switch>
-    </div>
-    </div>
-    </div>
-    <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle">速率最大值</div>
-    <div class="GroupItemValue">
-    <input type="text" class="" v-model.number="ChartConf.unit.chartMax">
-    </div>
-    </div>
-    </div>
-    <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle">Mbps/每格</div>
-    <div class="GroupItemValue">
-    <input type="text" class="" v-model.number="ChartConf.unit.chartInterval">
-    </div>
-    </div>
-    </div>
-    <div class="GroupItem">
-    <div class="GroupItemBtns">
-    <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfUnit">确定</button>
-    <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfUnit">恢复当前值</button>
-    </div>
-    </div>
-    </mt-tab-container-item>
+      <div class="GroupTitle" @click="ChartConfShow=!ChartConfShow">
+        图表配置
+        <i class="titleIcon fa" :class="[ChartConfShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+      </div>
+      <transition name="slide-fade">
+        <div class="GroupItem" v-show="ChartConfShow">
+          <mt-navbar v-model="ChartConfTab">
+            <mt-tab-item id="1">单位</mt-tab-item>
+            <!-- <mt-tab-item id="2">概览图</mt-tab-item> -->
+            <mt-tab-item id="3">网卡图</mt-tab-item>
+          </mt-navbar>
+          <mt-tab-container v-model="ChartConfTab">
+            <mt-tab-container-item id="1">
+              <div class="GroupItem">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">自适应</div>
+                  <div class="GroupItemValue">
+                    <mt-switch v-model="ChartConf.unit.chartAutoVal"></mt-switch>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">速率最大值</div>
+                  <div class="GroupItemValue">
+                    <input type="text" class="" v-model.number="ChartConf.unit.chartMax">
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem" v-show="!ChartConf.unit.chartAutoVal">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">Mbps/每格</div>
+                  <div class="GroupItemValue">
+                    <input type="text" class="" v-model.number="ChartConf.unit.chartInterval">
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem">
+                <div class="GroupItemBtns">
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfUnit">确定</button>
+                  <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfUnit">恢复当前值</button>
+                </div>
+              </div>
+            </mt-tab-container-item>
     <!-- <mt-tab-container-item id="2">
-    <div class="GroupItem">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle">上传速率</div>
-    <div class="GroupItemValue">
-    <select class="ItemSelect">
-    <option v-for="item in ChartConf.total.up" :value="item">{{item}}</option>
-    </select>
-    </div>
-    </div>
-    </div>
-    <div class="GroupItem">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle">下载速率</div>
-    <div class="GroupItemValue">
-    <select class="ItemSelect">
-    <option v-for="item in ChartConf.total.down" :value="item">{{item}}</option>
-    </select>
-    </div>
-    </div>
-    </div>
-    <div class="GroupItem">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle">传输丢包</div>
-    <div class="GroupItemValue">
-    <select class="ItemSelect">
-    <option v-for="item in ChartConf.total.lossDev" :value="item">{{item}}</option>
-    </select>
-    </div>
-    </div>
-    </div>
-    <div class="GroupItem">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle">业务丢包</div>
-    <div class="GroupItemValue">
-    <select class="ItemSelect">
-    <option v-for="item in ChartConf.total.lossRcv" :value="item">{{item}}</option>
-    </select>
-    </div>
-    </div>
-    </div>
-    <div class="GroupItem">
-    <div class="GroupItemBtns">
-    <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
-    <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
-    </div>
-    </div>
+      <div class="GroupItem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">上传速率</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect">
+              <option v-for="item in ChartConf.total.up" :value="item">{{item}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">下载速率</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect">
+              <option v-for="item in ChartConf.total.down" :value="item">{{item}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">传输丢包</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect">
+              <option v-for="item in ChartConf.total.lossDev" :value="item">{{item}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+        <div class="GroupItem">
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">业务丢包</div>
+            <div class="GroupItemValue">
+              <select class="ItemSelect">
+                <option v-for="item in ChartConf.total.lossRcv" :value="item">{{item}}</option>
+              </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem">
+        <div class="GroupItemBtns">
+          <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
+          <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
+        </div>
+      </div>
     </mt-tab-container-item> -->
-    <mt-tab-container-item id="3">
-    <div class="GroupItem GroupItem0">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle" style="width:28%;">颜色样式</div>
-    <div class="GroupItemValue" style="width:72%;">
-    <button :class="[cardLineStyle == 'old' ? 'btnSelect' : '']" class="lan" @click="setCardChartStyle('old')">样式一</button>
-    <button :class="[cardLineStyle == 'new' ? 'btnSelect' : '']" class="wan" @click="setCardChartStyle('new')">样式二</button>
-    </div>
-    </div>
-    </div>
-    <template v-for="item in ChartConf.showCard">
-    <div class="GroupItem GroupItem0">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle GroupItemTitle1">{{item.name}}</div>
-    <div class="GroupItemValue GroupItemValue1">
-    <mt-checklist 
-    v-model="item.value"
-    :options="ChartConf.simCheckList">
-    </mt-checklist>
-    </div>
-    </div>
-    </div>
-    </template>
-    <div class="GroupItem GroupItem0">
-    <div class="GroupItemField">
-    <div class="GroupItemTitle GroupItemTitle1">批量选择</div>
-    <div class="GroupItemValue GroupItemValue1">
-    <mt-checklist
-      v-model="ChartConf.selectBat"
-      :options="ChartConf.simCheckList"
-      @change="setLineContent">
-    </mt-checklist>
-    </div>
-    </div>
-    </div>
-    <div class="GroupItem">
-    <div class="GroupItemBtns">
-    <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfCard">确定</button>
-    <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfCard">恢复当前值</button>
-    </div>
-    </div>
-    </mt-tab-container-item>
-    </mt-tab-container>
-    </div>
-    </transition>
+            <mt-tab-container-item id="3">
+              <div class="GroupItem GroupItem0">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle" style="width:28%;">颜色样式</div>
+                  <div class="GroupItemValue" style="width:72%;">
+                    <button :class="[cardLineStyle == 'old' ? 'btnSelect' : '']" class="lan" @click="setCardChartStyle('old')">样式一</button>
+                    <button :class="[cardLineStyle == 'new' ? 'btnSelect' : '']" class="wan" @click="setCardChartStyle('new')">样式二</button>
+                  </div>
+                </div>
+              </div>
+              <template v-for="item in ChartConf.showCard">
+                <div class="GroupItem GroupItem0">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle GroupItemTitle1">{{item.name}}</div>
+                    <div class="GroupItemValue GroupItemValue1">
+                      <mt-checklist v-model="item.value" :options="ChartConf.simCheckList">
+                      </mt-checklist>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <div class="GroupItem GroupItem0">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle GroupItemTitle1">批量选择</div>
+                  <div class="GroupItemValue GroupItemValue1">
+                    <mt-checklist v-model="ChartConf.selectBat" :options="ChartConf.simCheckList" @change="setLineContent">
+                    </mt-checklist>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem">
+                <div class="GroupItemBtns">
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfCard">确定</button>
+    		  <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfCard">恢复当前值</button>
+                </div>
+              </div>
+            </mt-tab-container-item>
+          </mt-tab-container>
+        </div>
+      </transition>
     </div>
     <div class="Group">
       <div class="GroupTitle" @click="SystemShow=!SystemShow">
@@ -315,6 +309,7 @@
         </div>
       </transition>
     </div>
+    <!-- 网卡信息 -->
     <mt-popup v-model="deviceCardVisible" popup-transition="popup-fade">
       <div class="popupContainer">
         <div class="popupTitle">
@@ -359,6 +354,7 @@
         </template>
       </div>
     </mt-popup>
+    <!-- 背包信息 -->
     <mt-popup v-model="deviceVisible" popup-transition="popup-fade">
       <div class="popupContainer">
         <div class="popupTitle">
@@ -379,6 +375,7 @@
         </template>
       </div>
     </mt-popup>
+    <!-- 背包配置 -->
     <mt-popup v-model="deviceConfigVisible" popup-transition="popup-fade">
       <div class="popupContainer">
         <div class="popupTitle">
@@ -428,6 +425,7 @@
         </form>
       </div>
     </mt-popup>
+    <!-- 汇聚服务器配置 -->
     <mt-popup v-model="receiverConfigVisible" popup-transition="popup-fade">
       <div class="popupContainer">
         <div class="popupTitle">
@@ -438,7 +436,7 @@
           <div class="fGrp">
             <div class="tl">名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="receiverConfigForm.rcvName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="user.id == SUPER">
+              <input type="text" class="ItemInput" v-model="receiverConfigForm.rcvName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="receiverConfigType=="edit" && user.id == SUPER">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()和空格</p>
             </div>
           </div>
@@ -449,13 +447,121 @@
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
-            <button class="modalBtn" @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
+            <button @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
+            <button type="submit">确定</button>
+          </div>
+        </form>
+      </div>
+    </mt-popup>
+    <!-- 用户管理 -->
+    <mt-popup v-model="userConfigVisible" popup-transition="popup-fade">
+      <div class="popupContainer">
+        <div class="popupTitle">
+          用户管理
+          <i class="popupCloseBtn fa fa-times" @click="userConfigVisible = false"></i>
+        </div>
+        <form action="" @submit.prevent="submitUserConfig">
+          <input type="password" style="display:none" id="loginPassword"/>
+          <input type="text" style="display:none" id="loginUserName"/>
+          <div class="fGrp">
+            <div class="tl">用户名</div>
+            <div class="vl">
+              <input type="text" class="ItemInput" v-model="userConfigForm.name" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()">
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()</p>
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">登录密码</div>
+            <div class="vl">
+              <input type="password" class="ItemInput" v-model="userConfigForm.pwd" required pattern="^[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合"/> 
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
+                6~16位字母,数字,下划线和@组合
+              </p>
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">确认密码</div>
+            <div class="vl">
+              <input type="password" class="ItemInput" v-model="userConfigForm.pwd2" required pattern="^[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合" clearable autocomplete="off" />
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">手机号</div>
+            <div class="vl">
+              <input type="text" class="ItemInput" v-model="userConfigForm.mobilePhone" pattern="^1[3|4|5|8][0-9]\d{8}$" title="请输入正确手机号" >
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">邮箱</div>
+            <div class="vl">
+              <input type="text" class="ItemInput" v-model="userConfigForm.emailAddress">
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">备注</div>
+            <div class="vl">
+              <input type="text" class="ItemInput" v-model="userConfigForm.remark">
+            </div>
+          </div>
+          <div class="fGrp" style="text-align: right">
+            <button @click="userConfigVisible = false" style="margin-right: .06rem;">取消</button>
             <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
         </form>
       </div>
     </mt-popup>
-    </div>
+    <!-- 设备权限 -->
+    <mt-popup v-model="devRightsVisible" popup-transition="popup-fade">
+      <div class="popupContainer">
+        <div class="popupTitle">
+          设备权限
+          <i class="popupCloseBtn fa fa-times" @click="devRightsVisible = false"></i>
+        </div>
+        <!-- <template v-for="(item,i) in devRightsList">
+          <div class="devRightsItem">
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">设备</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.dev_name }}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">序列号</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.dev_sn}}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">状态</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.online }}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">型号</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.dev_model }}</span>
+            </div>
+          </div>
+        </template> -->
+        <div class="devRightsTable">
+          <table>
+            <thead>
+              <tr>
+                <th>设备</th>
+                <th>序列号</th>
+                <th>状态</th>
+                <th>型号</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="(item,i) in devRightsList">
+                <tr>
+                  <td>{{ item.dev_name }}</td>
+                  <td>{{ item.dev_sn }}</td>
+                  <td>{{ item.online }}</td>
+                  <td>{{ item.dev_model }}</td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </mt-popup>
+  </div>
 </template>
 
 <script>
@@ -511,7 +617,7 @@
         ReceiverShow:false,
         AccountShow:false,
         SystemShow:false,
-        
+        /*背包*/
         deviceList:[],
         deviceCardVisible:false,
         deviceCardList:[],
@@ -525,7 +631,8 @@
         },
         deviceConfigUserOptions:[],
         deviceConfigServerOptions:[],
-      
+        editMatchChange: false,
+        /*接收机*/
         receiverList:[],
         receiverConfigVisible:false,
         receiverConfigType:'add',
@@ -535,9 +642,21 @@
         },
         deviceVisible:false,
         devicePopupList:[],
-        editMatchChange: false,
-        accountList:[]
-        
+        /*用户*/
+        accountList:[],
+        userConfigVisible:false,
+        userConfigType:"add",
+        userConfigForm:{
+          id:"",
+          name:"",
+          pwd:"",
+          pwd2:"",
+          mobilePhone:"",
+          emailAddress:"",
+          remark:""
+        },
+        devRightsVisible:false,
+        devRightsList:[]
       }
     },
     computed: {
@@ -592,7 +711,7 @@
               url:"/page/index/chartData.php",
               data:this.$qs.stringify({
                   getChartParam:true,
-                  devSN: that.ActiveDevice.dev_sn
+                  devSN: that.ActiveDevice?that.ActiveDevice.dev_sn:""
               }),
               Api:"getChartParam",
               AppId:"android",
@@ -657,8 +776,8 @@
               url:"/page/index/chartData.php",
               data:this.$qs.stringify({
                   getChartShowContent:true,
-                  devSn: that.ActiveDevice.dev_sn,
-                  prefix: that.ActiveDevice.prefix
+                  devSn: that.ActiveDevice?that.ActiveDevice.dev_sn:"",
+                  prefix: that.ActiveDevice?that.ActiveDevice.prefix:""
               }),
               Api:"getChartShowContent",
               AppId:"android",
@@ -906,8 +1025,6 @@
           let res = response.data;
           if(res.res.success){
             that.receiverList = res.data;
-            console.log("bbbbbbbbbbbbbbbb")
-            console.log(that.receiverList)
           }else{
             that.receiverList = [];
           }
@@ -943,24 +1060,21 @@
           console.log(error)
         })
       },
-      addReceiver(){
-        this.receiverConfigVisible = true;
-        this.receiverConfigType = "add";
-        this.clearRcvPopup();
-      },
-      editReceiver(item){
-        this.receiverConfigVisible = true;
-        this.receiverConfigType = "edit";
-        this.receiverConfigForm = {
-            rcvName:item.rcv_name,
-            rcvSn:item.rcv_sn
-        }
-      },
       addDevice(){
         this.getUserList();
         this.deviceConfigVisible = true;
         this.deviceConfigType = "add";
         this.clearDevPopup();
+      },
+      addReceiver(){
+        this.receiverConfigVisible = true;
+        this.receiverConfigType = "add";
+        this.clearRcvPopup();
+      },
+      addUser(){
+        this.userConfigVisible = true;
+        this.userConfigType = "add";
+        this.clearUserPopup();
       },
       editDevice(item){
         this.getUserList();
@@ -972,6 +1086,27 @@
             devSn:item.dev_sn,
             devUser:item.prefix,
             server:item.rcv_sn
+        }
+      },
+      editReceiver(item){
+        this.receiverConfigVisible = true;
+        this.receiverConfigType = "edit";
+        this.receiverConfigForm = {
+            rcvName:item.rcv_name,
+            rcvSn:item.rcv_sn
+        }
+      },
+      editUser(item){
+        this.userConfigVisible = true;
+        this.userConfigType = "edit";
+        this.userConfigForm = {
+            id:item.id,
+            name: item.name,
+            pwd: item.pwd,
+            pwd2: item.pwd,
+            mobilePhone: item.mobilePhone,
+            emailAddress: item.emailAddress,
+            remark: item.remark
         }
       },
       getUserList(){
@@ -1151,6 +1286,13 @@
         this.receiverConfigForm.rcvName = "";
         this.receiverConfigForm.rcvSn = "";
       },
+      clearUserPopup(){
+        this.userConfigForm.name = "";
+        this.userConfigForm.pwd = "";
+        this.userConfigForm.mobilePhone = "";
+        this.userConfigForm.emailAddress = "";
+        this.userConfigForm.remark = "";
+      },
       submitDeviceConfig(){
         if(this.deviceConfigType == "add"){
           var that = this;
@@ -1225,67 +1367,6 @@
           })
         }
       },
-      showDeviceCard(item){
-        var that = this;
-        this.deviceCardList = [];
-        this.deviceCardVisible = true;
-        this.$axios({
-          method: 'post',
-          url:"/page/dev/devData.php",
-          data:this.$qs.stringify({
-            getCardByDevSn:true,
-            devSN: item.dev_sn
-          }),
-          Api:"getCardByDevSn",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.deviceCardList = res.data;
-          }else{
-            that.deviceCardList = [];
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
-      deleteDevice(item){
-        var that = this;
-        this.$messagebox.confirm("确定删除此背包?").then(
-          action => {
-            this.$axios({
-              method: 'post',
-              url:"/page/dev/devData.php",
-              data:this.$qs.stringify({
-                delDevSns:item.dev_sn,
-                userId:that.user.id
-              }),
-              Api:"delDev",
-              AppId:"android",
-              UserId:that.user.id
-            })
-            .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                that.$toast({
-                  message: '操作成功'
-                });
-              }else{
-                that.$toast({
-                  message: '操作失败'
-                });
-              }
-              that.getDeviceList();
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
-        });
-      },
-
       submitReceiverConfig(){
         var that = this;
         var rcvSn = this.receiverConfigForm.rcvSn;
@@ -1345,6 +1426,244 @@
         .catch(function (error) {
           console.log(error)
         })
+      },
+      submitUserConfig(){
+        var that = this;
+        var name = this.userConfigForm.name;
+        var mobilePhone = this.userConfigForm.mobilePhone;
+        var emailAddress = this.userConfigForm.emailAddress;
+        var remark = this.userConfigForm.remark;
+        var pwd = this.userConfigForm.pwd;
+        if (this.userConfigForm.pwd != this.userConfigForm.pwd2) {
+          that.$toast({
+            message: "密码不一致!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if (this.userConfigType == "add") {
+          for (var i = 0; i < this.accountList.length; i++) {
+            if (this.accountList[i].id == name) {
+              that.$toast({
+                message: "该用户已添加!",
+                position: 'middle',
+                duration: 2000
+              });
+              return;
+            }
+          }
+        }
+        if (!this.$global.isValidMail(emailAddress)) {
+          that.$toast({
+            message: "请输入合法邮箱!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+
+        if (this.userConfigType == "add") {//只有001-admin可以添加
+          this.$axios({
+            method: 'post',
+            url:"/page/users/users.php",
+            data:this.$qs.stringify({
+              addUser: name,
+              pwd: pwd,
+              group: 1,
+              prefix: name,
+              prefixName: name,
+              addPrefix: 1,
+              loginId: name,
+              enable: 1,
+              mobilePhone: mobilePhone,
+              emailAddress: emailAddress,
+              remark: remark
+            }),
+            Api:"addUser",
+            AppId:"android",
+            UserId:that.user.id
+          })
+          .then(function (response) {
+            let res = response.data;
+            if(res.res.success){
+              that.getUserList();
+              that.userConfigVisible = false;
+            }else{
+              that.$toast({
+                message: res.res.reason,
+                position: 'middle',
+                duration: 2000
+              });
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+        } else {
+          console.log(this.userConfigForm)
+          var oldName = this.userConfigForm.id;
+          this.$axios({
+            method: 'post',
+            url:"/page/users/users.php",
+            data:this.$qs.stringify({
+              addUser: name,
+              oldUser: oldName,
+              pwd: pwd,
+              group: 1,
+              prefix: name,
+              loginId: oldName,
+              enable: 1,
+              mobilePhone: mobilePhone,
+              emailAddress: emailAddress,
+              remark: remark
+            }),
+            Api:"addUser",
+            AppId:"android",
+            UserId:that.user.id
+          })
+          .then(function (response) {
+            let res = response.data;
+            if(res.res.success){
+              that.getUserList();
+              that.userConfigVisible = false;
+            }else{
+              that.$toast({
+                message: res.res.reason,
+                position: 'middle',
+                duration: 2000
+              });
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+        }
+      },
+      showDeviceCard(item){
+        var that = this;
+        this.deviceCardList = [];
+        this.deviceCardVisible = true;
+        this.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:this.$qs.stringify({
+            getCardByDevSn:true,
+            devSN: item.dev_sn
+          }),
+          Api:"getCardByDevSn",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.deviceCardList = res.data;
+          }else{
+            that.deviceCardList = [];
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      showDevAuthority(item){
+        console.log("showDevAuthority")
+        console.log(item)
+        var that = this;
+        this.devRightsList = [];
+        this.devRightsVisible = true;
+        this.$axios({
+          method: 'post',
+          url:"/page/users/users.php",
+          data:this.$qs.stringify({
+            getDevList: true,
+            userId: item.name,
+            userGroup: 1,
+            prefix: item.name,
+            logId: item.name,
+            logGroup: 1
+          }),
+          Api:"getDevList",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.devRightsList = res.data;
+          }else{
+            that.devRightsList = [];
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      deleteDevice(item){
+        var that = this;
+        this.$messagebox.confirm("确定删除此背包?").then(
+          action => {
+            this.$axios({
+              method: 'post',
+              url:"/page/dev/devData.php",
+              data:this.$qs.stringify({
+                delDevSns:item.dev_sn,
+                userId:that.user.id
+              }),
+              Api:"delDev",
+              AppId:"android",
+              UserId:that.user.id
+            })
+            .then(function (response) {
+              let res = response.data;
+              if(res.res.success){
+                that.$toast({
+                  message: '操作成功'
+                });
+              }else{
+                that.$toast({
+                  message: '操作失败'
+                });
+              }
+              that.getDeviceList();
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+        });
+      },
+      deleteUser(item){
+        var that = this;
+        this.$messagebox.confirm("确定删除此用户?").then(
+          action => {
+            this.$axios({
+              method: 'post',
+              url:"/page/users/users.php",
+              data:this.$qs.stringify({
+                delUserIds:"'"+item.id+"'"
+              }),
+              Api:"delUser",
+              AppId:"android",
+              UserId:that.user.id
+            })
+            .then(function (response) {
+              let res = response.data;
+              if(res.res.success){
+                that.$toast({
+                  message: '操作成功'
+                });
+              }else{
+                that.$toast({
+                  message: '操作失败'
+                });
+              }
+              that.getAccountList();
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+        });
       },
       showDevice(item){
         console.log("showDevice")
@@ -1613,7 +1932,7 @@
         margin-top: -2px;
         text-align: right;
     }
-    .deviceCardItem,.deviceItem{
+    .deviceCardItem,.deviceItem,.devRightsItem{
       border-bottom: 2px solid #AAA;
       padding:2px 20px;
     }
@@ -1711,4 +2030,14 @@
     .me .mint-navbar{background-color: #222;}
     .me .mint-cell{background-color: #35363a;}
     .me .mint-checklist .mint-cell-value{display: none;}
+    .devRightsTable{
+      width:100%; 
+      padding:5px 10px;
+    }
+    .devRightsTable table{
+      width:100%;
+    }
+    .devRightsTable table td,.devRightsTable table th{
+      padding:5px;
+    }
 </style>
