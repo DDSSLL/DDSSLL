@@ -3,15 +3,15 @@
         <Device></Device>
         <div class="Group">
             <div class="GroupTitle">传输控制</div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">传输IP</div>
-                    <div class="GroupItemValue">
-                        <button :class="[options.dev_push_ip == '1' ? 'btnSelect' : '']" class="lan" @click="setDeviceParam('dev_push_ip','1')">内网</button>
-                        <button :class="[options.dev_push_ip == '0' ? 'btnSelect' : '']" class="wan" @click="setDeviceParam('dev_push_ip','0')">外网</button>
-                    </div>
-                </div>
-            </div>
+            <!--<div class="GroupItem">-->
+                <!--<div class="GroupItemField">-->
+                    <!--<div class="GroupItemTitle">传输IP</div>-->
+                    <!--<div class="GroupItemValue">-->
+                        <!--<button :class="[options.dev_push_ip == '1' ? 'btnSelect' : '']" class="lan" @click="setDeviceParam('dev_push_ip','1')">内网</button>-->
+                        <!--<button :class="[options.dev_push_ip == '0' ? 'btnSelect' : '']" class="wan" @click="setDeviceParam('dev_push_ip','0')">外网</button>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
             <div class="GroupItem">
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">录制开关</div>
@@ -514,12 +514,10 @@
     .ItemSelect{
         width: 1.8rem;
         height: .26rem;
-        border: 1px solid #3d81f1;
         outline: none;
         box-shadow: none;
         border-radius: 5px;
         font-size: .12rem;
-        background-color: #FFFFFF;
     }
     .x2Ipt{
         width: 1.2rem;

@@ -248,8 +248,8 @@
         text-align: center;
         font-weight: 600;
         color: #FFFFFF;
-        font-family: inherit;
-        margin-bottom: .4rem;
+        font-family: Arial;
+        padding-bottom: .4rem;
     }
     .form-item{
         margin-bottom: 5px;
@@ -258,10 +258,6 @@
         /*background: #FFFFFF;*/
         /*border: .1em solid #DDDDDD;*/
         /*color: #333333;*/
-        background: #FFFFFF;
-        border: .1em solid #DDDDDD;
-        color: #333333;
-        text-indent: 10px;
         padding-left: 0;
         padding-right: 0;
         display: block;
@@ -294,7 +290,7 @@
         margin-top: .05rem;
         width:48%;
         text-align: right;
-        font-size:.15rem;
+        font-size:.14rem;
     }
     .loginBottom{
         position: absolute;
@@ -331,8 +327,8 @@
     .setBtn{
         position: fixed;
         z-index: 1;
-        right: .3rem;
-        bottom: .4rem;
+        right: .2rem;
+        bottom: .2rem;
         width: .5rem;
         height: .5rem;
         border-radius: 50%;

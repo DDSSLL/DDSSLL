@@ -45,11 +45,15 @@
         <div class="addressGroup">
             <template v-for="(item,i) in address">
                 <div class="address" :key="i">
-                    <div class="title">{{ item.remark?item.remark : "推流地址"+(i+1) }}</div>
+                    <div class="title">
+                        <p :class="[item.push_url ? 'addressTitleLineH' : '']">{{ item.remark?item.remark : "推流地址"+(i+1) }}</p>
+                        <p :class="[item.push_url ? 'addressTitleLineH' : '']" class="addressUrl" v-if="item.push_url">{{ item.push_url }}</p>
+                        <!--<p class="addressUrl">smtp://192.168.2.2</p>-->
+                    </div>
                     <div class="buttons">
                         <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item)"></i>
                         <!--<i class="iconBtn fa fa-trash-o" aria-hidden="true"></i>-->
-                        <i class="iconBtn fa" :class="[item.push_sel == '1'? 'fa-pause' : 'fa-play']" aria-hidden="true" @click="switchPush(item)"></i>
+                        <i v-if="ActiveDeviceType == 'DV4000'" class="iconBtn fa" :class="[item.push_sel == '1'? 'fa-pause' : 'fa-play']" aria-hidden="true" @click="switchPush(item)"></i>
                     </div>
                 </div>
             </template>
@@ -313,13 +317,25 @@
         color: #EEEEEE;
         line-height: .4rem;
         overflow: hidden;
+        border-bottom: 1px solid #333;
+        padding: 0.06rem 0;
     }
+    .address:last-child{border-bottom: none;}
     .address .title{
-        font-size: .14rem;
-        text-indent: .2rem;
         float: left;
         width: 60%;
+    }
+    .address .title p{
+        font-size: .16rem;
+        text-indent: .2rem;
         font-weight: 500;
+    }
+    .addressTitleLineH{
+        line-height: .22rem;
+    }
+    .address .title .addressUrl{
+        font-size: .14rem;
+        font-weight: 300;
     }
     .address .buttons{
         float: left;
@@ -329,7 +345,7 @@
     }
     .iconBtn{
         cursor: pointer;
-        font-size: .18rem;
+        font-size: .21rem;
         margin-right: .12rem;
         margin-top: .08rem;
     }

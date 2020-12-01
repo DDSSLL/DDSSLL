@@ -3,7 +3,7 @@ module.exports = {
         "status":"状态",
         "control":"控制",
         "live":"直播",
-        "settings":"设置",
+        "settings":"参数",
         "me":"我的",
         "login":"登录"
     },

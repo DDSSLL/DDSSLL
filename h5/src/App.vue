@@ -48,11 +48,11 @@ export default {
     Ad
   },
   mounted(){
-      if(this.user.id){
-          this.SET_NAV_STATUS(false);
-      }else{
+//      if(this.user.id){
+//          this.SET_NAV_STATUS(false);
+//      }else{
           this.SET_NAV_STATUS(true);
-      }
+//      }
   },
   computed: {
       ...mapState(['user','navHide'])
@@ -165,5 +165,19 @@ html,body{
 .mint-tabbar>.mint-tab-item.is-selected {
   background-color: #585e6d;
   color: #FFFFFF;
+}
+
+input,select{
+  background:#2B2E33;
+  border:1px solid #4B5056;
+  color:#FFF;
+  text-indent:10px;
+}
+::-webkit-input-placeholder {
+  padding-left: 10px;
+}
+.mint-switch-core{border:1px solid #333;}
+.mint-switch-core:before{
+  background-color:#2B2E33;
 }
 </style>
