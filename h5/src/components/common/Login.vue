@@ -199,7 +199,8 @@
             },
 
             connectWifi(){
-                this.wifiUrlsEditVisible = true;
+//                this.wifiUrlsEditVisible = true;
+                this.$router.push("/wifi");
             },
 
             setWifiUrl(){
@@ -306,8 +307,8 @@
     }
     .loginGroup{
         position: fixed;
-        right: .72rem;
-        bottom: .6rem;
+        right: .55rem;
+        bottom: .55rem;
         display: flex;
         justify-content: space-between;
         flex-direction: column;

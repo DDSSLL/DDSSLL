@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Ad from '@/components/common/Ad'
 import Login from '@/components/common/Login'
+import Wifi from '@/components/common/Wifi'
 import Status from '@/components/status/Status'
 import Control from '@/components/control/Control'
 import Live from '@/components/live/Live'
@@ -36,6 +37,14 @@ export default new Router({
             path: '/login',
             name: 'Login',
             component: Login,
+            meta: {
+                keepAlive: false
+            }
+        },
+        {
+            path: '/wifi',
+            name: 'Wifi',
+            component: Wifi,
             meta: {
                 keepAlive: false
             }
