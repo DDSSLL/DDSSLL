@@ -40,7 +40,7 @@
         popup-transition="popup-slide">
         <div class="channelList">
           <div class="deviceTypeSelect" style="text-align:right;">
-            <select v-model="deviceTypeSelect" class="TypeSelect" :class="{'White':deviceTypeSelect == '1','Red':deviceTypeSelect == '2','Green':deviceTypeSelect == '3','Gray':deviceTypeSelect == '4'}">
+            <select v-model="deviceType" class="TypeSelect" :class="{'White':deviceTypeSelect == '1','Red':deviceTypeSelect == '2','Green':deviceTypeSelect == '3','Gray':deviceTypeSelect == '4'}" style="width:1.1rem" @change="filterDevice">
               <option value="1" class="White"><span>全部设备</span></option>
               <option value="2" class="Red"><span>推流设备</span></option>
               <option value="3" class="Green"><span>在线设备</span></option>
@@ -48,7 +48,7 @@
             </select>
           </div>
           <mt-loadmore :top-method="getDeviceList" ref="loadmore">
-            <template v-for="(item,i) in deviceList">
+            <template v-for="(item,i) in deviceListShow">
               <div class="listChannel" @click="changeActiveDevice(item)" :class="[!!ActiveDevice?(ActiveDevice.dev_name == item.dev_name ? 'activeChanel' : ''):'']">
                 <div class="status">
                   <span class="statusCircle" :class="[item.match_used == 0 ? 'gray': item.dev_push_status!=0 ? 'sk-spinner sk-spinner-three-bounce': 'green']">
@@ -90,7 +90,7 @@
 
 <script>
     import { mapState, mapMutations } from 'vuex';
-    import { SET_ACTIVE_DEVICE,SET_DEVICE_TIMER } from '../../store/mutation-types';
+    import { SET_ACTIVE_DEVICE,SET_DEVICE_TIMER,SET_DEVICE_TYPE_SELECT } from '../../store/mutation-types';
     export default {
         name: "Device",
         data(){
@@ -100,15 +100,15 @@
                 deviceList:[{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}],
                 active:{},
                 //当前选中设备的相关参数
-
-                deviceTypeSelect:"1"
+                deviceListShow:[],
+                deviceType:"1"
             }
         },
         computed: {
-            ...mapState(['user','ActiveDevice','DeviceTimer'])
+            ...mapState(['user','ActiveDevice','DeviceTimer','deviceTypeSelect'])
         },
         created(){  //生命周期-页面创建后
-            console.warn(this.ActiveDevice)
+
             var that = this;
             // if(!this.ActiveDevice){
             this.getDeviceList();
@@ -119,11 +119,16 @@
               that.getDeviceList();
             },1000);
             this.SET_DEVICE_TIMER(this.timer);
+            that.deviceType = that.deviceTypeSelect;
+        },
+        activated(){
+          this.deviceType = this.deviceTypeSelect;
         },
         methods:{
             ...mapMutations({
                 SET_ACTIVE_DEVICE,
-                SET_DEVICE_TIMER
+                SET_DEVICE_TIMER,
+                SET_DEVICE_TYPE_SELECT
             }),
             refreshCurDevParam(datas){
               this.SET_ACTIVE_DEVICE(datas);
@@ -147,6 +152,7 @@
                     let res = response.data;
                     if(res.res.success){
                       that.deviceList = res.data;
+                      that.filterDevice(that.deviceTypeSelect);
                       that.$refs.loadmore.onTopLoaded();
                       if(!that.ActiveDevice){
                         that.SET_ACTIVE_DEVICE(that.deviceList[0]);
@@ -173,6 +179,34 @@
                 this.SET_ACTIVE_DEVICE(item);
                 this.refreshCurDevParam(item);
                 this.popupVisible = false;
+            },
+            filterDevice(){
+              var that = this;
+              var deviceList = this.deviceList;
+              this.SET_DEVICE_TYPE_SELECT(that.deviceType);
+              switch (that.deviceType){
+                case "1":
+                  that.deviceListShow = that.deviceList;
+                  break;
+                case "2":
+                  that.deviceListShow = that.deviceList.filter(function(item){
+                    return (item.online == 1 && (item.dev_push_status == 1 || item.dev_push_status == 2))
+                  });
+                  break;
+                case "3":
+                  that.deviceListShow = that.deviceList.filter(function(item){
+                    return (item.online == 1)
+                  });
+                  break;
+                case "4":
+                  that.deviceListShow = that.deviceList.filter(function(item){
+                    return (item.online == 0)
+                  });
+                  break;
+                default:
+                  that.deviceListShow = that.deviceList;
+                  break;
+              }
             }
         }
     }

@@ -36,5 +36,9 @@ export default {
     [types.SET_CHART_STYLE]: (state, datas) => {
         state.cardLineStyle = datas
     },
-    
+    // 设置设备列表显示类型
+    [types.SET_DEVICE_TYPE_SELECT]: (state, datas) => {
+        state.deviceTypeSelect = datas
+        console.log("state.deviceTypeSelect:"+state.deviceTypeSelect)
+    },
 }

@@ -612,11 +612,11 @@
             {label: '传输丢包',value: 'lossDev'}],
           selectBat:[]
         },
-        ChartConfShow:true,
+        ChartConfShow:false,
         DeviceShow:false,
         ReceiverShow:false,
         AccountShow:false,
-        SystemShow:false,
+        SystemShow:true,
         /*背包*/
         deviceList:[],
         deviceCardVisible:false,
@@ -1956,6 +1956,12 @@
         height: .26rem;
         margin-top: .02rem;
         margin-right: .05rem;
+    }
+    .popupContainer input,.popupContainer select{
+      color:#000;
+    }
+    .popupContainer .modalBtn{
+      border: 1px solid rgb(61, 129, 241);
     }
     /*.deviceConfItem{overflow: hidden;padding: .1rem;}
     .deviceConfItemTitle{width: 40%;float: left;  text-align: left;padding-top:0.07rem;}

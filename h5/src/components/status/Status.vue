@@ -460,21 +460,21 @@ export default {
     '$store.state.ActiveDevice': {
       immediate: true,
       handler(val) {
-        console.warn(val)
+        //console.warn(val)
         if(val){
           var that = this;
           that.ActiveDevice = val;
           that.myChartCards = {};
           var initData = that.initChartData();
-          console.log("切换设备，重启定时器");
-          clearInterval(that.timer);
+          //console.log("切换设备，重启定时器");
+          //clearInterval(that.timer);
           var devSns = initData.devSns;
           that.getChartData(devSns);
-          clearInterval(that.ChartTimer);
-          that.timer = setInterval(function(){
+          //clearInterval(that.ChartTimer);
+          /*that.timer = setInterval(function(){
             that.getChartData(devSns);
-          },1000)
-          that.SET_CHART_TIMER(that.timer);
+          },1000)*/
+          //that.SET_CHART_TIMER(that.timer);
         }
       }
     }
