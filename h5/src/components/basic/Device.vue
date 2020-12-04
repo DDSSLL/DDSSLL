@@ -40,6 +40,9 @@
         popup-transition="popup-slide">
         <div class="channelList">
           <div class="deviceTypeSelect" style="text-align:right;">
+            <div class="back" @click="popupVisible=false">
+              <i class="fa fa-arrow-left" aria-hidden="true"></i>
+            </div>
             <select v-model="deviceType" class="TypeSelect" :class="{'White':deviceTypeSelect == '1','Red':deviceTypeSelect == '2','Green':deviceTypeSelect == '3','Gray':deviceTypeSelect == '4'}" style="width:1.1rem" @change="filterDevice">
               <option value="1" class="White"><span>全部设备</span></option>
               <option value="2" class="Red"><span>推流设备</span></option>
@@ -385,6 +388,11 @@
     .Red{color: #FF0000;}
     .Green{color: #00FF00}
     .Gray{color: #B7B7B7;}
+    .back{
+      color: #fff;
+      margin: 10px;
+      position: absolute;
+    }
 </style>
 <style>
   .channelList .mint-loadmore-text{color: #FFF;}

@@ -19,9 +19,9 @@
                     </thead>
                     <tbody>
                     <template v-for="item in netBoard">
-                        <tr v-if="item.used == '1'">
-                            <td class="td" :class="[item.used == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
-                            <td class="td"><mt-switch v-model="item.usedVal" @change="switchCard(item)"></mt-switch></td>
+                        <tr v-if="item.cardShow == '1'">
+                            <td class="td" :class="[item.online == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
+                            <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)"></mt-switch></td>
                             <td class="td">{{ item.send_br }}</td>
                             <td class="td">{{ item.card_rtt }}</td>
                             <td class="td">{{ item.rssi }}</td>
@@ -143,7 +143,7 @@
               .then(function (response) {
                 let res = response.data;
                 if(res.res.success){
-                    that.netBoard = formatSwitch(res.data[0]);
+                    that.netBoard = that.formatSwitch(res.data[0]);
                 }else{
                   that.netBoard = [];
                 }
@@ -151,26 +151,35 @@
               .catch(function (error) {
                 console.log(error)
               })
+          },
 
-            function formatSwitch(arr){
+            formatSwitch(arr){
+                var that = this;
                 arr.forEach(function(item){
-                    if(item.used == '0'){
-                        item.usedVal = false;
-                    }else if(item.used == '1'){
-                        item.usedVal = true;
+                    if ( that.ActiveDeviceType == "DV1080" ){
+                        if( item.card_id == "lte4" || item.card_id == "lte5" || item.card_id == "lte6"){
+                            item.cardShow = '0';
+                        } else if (item.card_id == "eth0" || item.card_id == "lte1" || item.card_id == "lte2" || item.card_id == "lte3"){
+                            item.cardShow = '1';
+                        } else if (item.card_id == "wifi" || item.card_id == "usb-lan" || item.card_id == "usb-5g1" || item.card_id == "usb-5g2") {
+                            if (item.online == "1") {
+                                item.cardShow = 1;
+                            } else {
+                                item.cardShow = 0;
+                            }
+                        }
+                        item.used = item.used=="1"?true:false;
+                        if(item.online == "1"){
+                            item.send_br = (item.send_br/1000.0).toFixed(1)
+                            item.card_rtt = item.card_rtt>999 ? ">999" : item.card_rtt;
+                            item.rssi = item.rssi.split('dBm')[0];
+                            item.operator = that.transOperator(item.operator);
+                        }
                     }
-                    // DV1080 SIM4，5，6隐藏
-                    if(that.ActiveDeviceType == "DV1080" && item.card_id == "lte4"){
-                        item.used = "0";
-                    }else if(that.ActiveDeviceType == "DV1080" && item.card_id == "lte5"){
-                        item.used = "0";
-                    }else if(that.ActiveDeviceType == "DV1080" && item.card_id == "lte6"){
-                        item.used = "0";
-                    }
+
                 })
                 return arr;
-            }
-          },
+            },
             transOperator(operator){
                 if (operator == "CMCC" || operator == "CHINA MOBILE CMCC" || operator == "CHINA MOBILE") {
                     operator = "移动";
@@ -192,7 +201,7 @@
                         setCardEnable:true,
                         cardId: card.card_id,
                         devSN: that.ActiveDevice.dev_sn,
-                        used: card.usedVal ? "1" : "0"
+                        used: card.used ? "1" : "0"
                     }),
                     Api:"setCardEnable",
                     AppId:"android",
@@ -200,11 +209,11 @@
                 })
                 .then(function (response) {
                     let res = response.data;
-                    if(res.res.success){
+                    /*if(res.res.success){
                         that.getNetBoard();
                     }else{
                         that.getNetBoard();
-                    }
+                    }*/
                 })
                 .catch(function (error) {
                     console.log(error)
