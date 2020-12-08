@@ -16,7 +16,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">录制开关</div>
                     <div class="GroupItemValue">
-                        <mt-switch v-model="options.recordVal" @change="setDeviceParam('record',options.recordVal?'1':'0')">
+                        <mt-switch v-model="options.recordVal" @change="setDeviceParam('record',options.recordVal?'1':'0')" :disabled="paramLockAck == '1'?false:true">
                         </mt-switch>
                     </div>
                 </div>
@@ -25,7 +25,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">重传开关</div>
                     <div class="GroupItemValue">
-                        <mt-switch v-model="options.ResendModeVal" @change="setDeviceParam('ResendMode',options.ResendModeVal?'1':'0')">
+                        <mt-switch v-model="options.ResendModeVal" @change="setDeviceParam('ResendMode',options.ResendModeVal?'1':'0')" :disabled="paramLockAck == '1'?false:true">
                         </mt-switch>
                     </div>
                 </div>
@@ -34,7 +34,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">纠错开关</div>
                     <div class="GroupItemValue">
-                        <mt-switch v-model="options.OpenfecModeVal" @change="setDeviceParam('OpenfecMode',options.OpenfecModeVal?'1':'0')">
+                        <mt-switch v-model="options.OpenfecModeVal" @change="setDeviceParam('OpenfecMode',options.OpenfecModeVal?'1':'0')" :disabled="paramLockAck == '1'?false:true">
                         </mt-switch>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">视频输入</div>
                     <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.video_input" @change="setDeviceParam('video_input',options.video_input)">
+                        <select class="ItemSelect" v-model="options.video_input" @change="setDeviceParam('video_input',options.video_input)"  :disabled="paramLockAck == '1'?false:true">
                             <template v-for="item in OPTIONS_VIDEOINPUT">
                                 <option :value="item.value">{{ item.text }}</option>
                             </template>
@@ -58,7 +58,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">音频输入</div>
                     <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.audio_input" @change="setDeviceParam('audio_input',options.audio_input)">
+                        <select class="ItemSelect" v-model="options.audio_input" @change="setDeviceParam('audio_input',options.audio_input)"  :disabled="paramLockAck == '1'?false:true">
                             <template v-for="item in OPTIONS_AUDIOINPUT">
                                 <option :value="item.value">{{ item.text }}</option>
                             </template>
@@ -70,7 +70,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">视频编码</div>
                     <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.video_encode" @change="setDeviceParam('video_encode',options.video_encode)">
+                        <select class="ItemSelect" v-model="options.video_encode" @change="setDeviceParam('video_encode',options.video_encode)" :disabled="paramLockAck == '1'?false:true">
                             <template v-for="item in OPTIONS_VIDEOENCODE">
                                 <option :value="item.value">{{ item.text }}</option>
                             </template>
@@ -82,7 +82,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">音频编码</div>
                     <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.AudioEnc" @change="setDeviceParam('AudioEnc',options.AudioEnc)">
+                        <select class="ItemSelect" v-model="options.AudioEnc" @change="setDeviceParam('AudioEnc',options.AudioEnc)" :disabled="paramLockAck == '1'?false:true">
                             <template v-for="item in OPTIONS_AUDIO_ENCODE">
                                 <option :value="item.value">{{ item.text }}</option>
                             </template>
@@ -94,7 +94,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">音频比特率</div>
                     <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.AudioBitrate" @change="setDeviceParam('AudioBitrate',options.AudioBitrate)">
+                        <select class="ItemSelect" v-model="options.AudioBitrate" @change="setDeviceParam('AudioBitrate',options.AudioBitrate)" :disabled="paramLockAck == '1'?false:true">
                             <template v-for="item in OPTIONS_AUDIO_BR">
                                 <option :value="item.value">{{ item.text }}</option>
                             </template>
@@ -106,7 +106,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">码率控制</div>
                     <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.bitrate_mode" @change="setDeviceParam('bitrate_mode',options.bitrate_mode)">
+                        <select class="ItemSelect" v-model="options.bitrate_mode" @change="setDeviceParam('bitrate_mode',options.bitrate_mode)" :disabled="paramLockAck == '1'?false:true">
                             <template v-for="item in OPTIONS_BITRATEMODE">
                                 <option :value="item.value">{{ item.text }}</option>
                             </template>
@@ -118,7 +118,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">HDR设置</div>
                     <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.hdr" @change="setDeviceParam('hdr',options.hdr)">
+                        <select class="ItemSelect" v-model="options.hdr" @change="setDeviceParam('hdr',options.hdr)" :disabled="paramLockAck == '1'?false:true">
                             <template v-for="item in OPTIONS_HDR">
                                 <option :value="item.value">{{ item.text }}</option>
                             </template>
@@ -130,7 +130,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">时延模式</div>
                     <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.latency" @change="setDeviceParam('latency',options.latency)">
+                        <select class="ItemSelect" v-model="options.latency" @change="setDeviceParam('latency',options.latency)" :disabled="paramLockAck == '1'?false:true">
                             <template v-for="item in OPTIONS_LATENCY">
                                 <option :value="item.value">{{ item.text }}</option>
                             </template>
@@ -142,7 +142,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">编码分辨率</div>
                     <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)">
+                        <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="paramLockAck == '1'?false:true">
                             <template v-for="item in OPTIONS_HDMI_FORMAT">
                                 <option :value="item.value">{{ item.text }}</option>
                             </template>
@@ -318,7 +318,7 @@
             Device
         },
         computed: {
-            ...mapState(['user','navHide','ActiveDeviceType'])
+            ...mapState(['user','navHide','ActiveDeviceType','paramLockAck'])
         },
         watch:{   //监听当前设备值变化
             '$store.state.ActiveDevice': {
@@ -565,6 +565,7 @@
         margin-bottom: .2rem;
     }
     .mint-switch{
-        margin-left: -.34rem;
+        transform: scale(.7);
+        transform-origin:left;
     }
 </style>

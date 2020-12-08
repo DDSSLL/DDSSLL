@@ -21,7 +21,7 @@
                     <template v-for="item in netBoard">
                         <tr v-if="item.cardShow == '1'">
                             <td class="td" :class="[item.online == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
-                            <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)"></mt-switch></td>
+                            <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)" :disabled="paramLockAck == '1'?false:true"></mt-switch></td>
                             <td class="td">{{ item.send_br }}</td>
                             <td class="td">{{ item.card_rtt }}</td>
                             <td class="td">{{ item.rssi }}</td>
@@ -38,7 +38,7 @@
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">传输开关</div>
                     <div class="GroupItemValue">
-                        <mt-switch v-model="common.dev_push_enableVal" style="transform:scale(1);" @change="setDeviceParam('dev_push_enable')"></mt-switch>
+                        <mt-switch v-model="common.dev_push_enableVal" @change="setDeviceParam('dev_push_enable')" :disabled="paramLockAck == '1'?false:true"></mt-switch>
                     </div>
                 </div>
             </div>
@@ -53,11 +53,12 @@
                                 :max="20"
                                 :step="1"
                                 :bar-height="5"
+                                :disabled="paramLockAck == '1'?false:true"
                                 @change="setDeviceParam('dev_sr')">
                             <div style="color: #EEEEEE;padding: .01rem;" slot="start">0.5</div>
                             <div style="color: #EEEEEE;padding: .01rem;" slot="end">20</div>
                         </mt-range>
-                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal" @blur="setDeviceParam('dev_sr')">
+                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal" @blur="setDeviceParam('dev_sr')" :disabled="paramLockAck == '1'?false:true">
                     </div>
                 </div>
             </div>
@@ -72,11 +73,12 @@
                                 :max="20"
                                 :step.number="0.1"
                                 :bar-height="5"
+                                :disabled="paramLockAck == '1'?false:true"
                                 @change="setDeviceParam('dev_delay')">
                             <div style="color: #EEEEEE;padding: .01rem;" slot="start">0.1</div>
                             <div style="color: #EEEEEE;padding: .01rem;" slot="end">20</div>
                         </mt-range>
-                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal" @blur="setDeviceParam('dev_delay')">
+                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal" @blur="setDeviceParam('dev_delay')" :disabled="paramLockAck == '1'?false:true">
                     </div>
                 </div>
             </div>
@@ -87,6 +89,7 @@
 <script>
     import Device from '../basic/Device';
     import { mapState } from 'vuex';
+    import $ from 'jquery';
     export default {
         name: "Control",
         data(){
@@ -104,7 +107,7 @@
             }
         },
         computed: {
-          ...mapState(['user',"ActiveDeviceType"])
+          ...mapState(['user',"ActiveDeviceType",'paramLockAck'])
         },
         components: {
             Device
@@ -387,6 +390,7 @@
     }
     .mint-switch{
         transform: scale(.7);
+        transform-origin:left;
     }
     .Group:nth-last-of-type(1){
         margin-bottom: .2rem;

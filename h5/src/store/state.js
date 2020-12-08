@@ -10,6 +10,9 @@ export default {
     navHide: true,
     //当前设备
     ActiveDevice: null,
+    //背包锁状态
+    paramLockAck:null,
+    paramLock:null,
     //设备列表显示类型
     deviceTypeSelect:1,
     //设备定时器ID

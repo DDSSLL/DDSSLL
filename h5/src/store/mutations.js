@@ -39,6 +39,11 @@ export default {
     // 设置设备列表显示类型
     [types.SET_DEVICE_TYPE_SELECT]: (state, datas) => {
         state.deviceTypeSelect = datas
-        console.log("state.deviceTypeSelect:"+state.deviceTypeSelect)
     },
+    [types.SET_PARAM_LOCK_ACK]: (state, datas) => {
+        state.paramLockAck = datas
+    },
+    [types.SET_PARAM_LOCK]: (state, datas) => {
+        state.paramLock = datas
+    }
 }

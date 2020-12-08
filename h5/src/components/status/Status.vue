@@ -1111,6 +1111,9 @@ export default {
       var that = this;
       var chartName = that.charts[key];
       var devSn = JSON.parse(localStorage.curChart).split("/")[0];
+      if(!document.getElementById('chart_' + key)){
+        return;
+      }
       if (!that.myChartCards[devSn]) {
         that.myChartCards[devSn] = {};
         that.myChartCards[devSn][chartName] = echarts.init(document.getElementById('chart_' + key));

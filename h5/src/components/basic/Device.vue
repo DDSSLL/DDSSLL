@@ -31,6 +31,9 @@
             </span>
           </div>
         </div>
+        <div class="lock">
+          <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState"></i>
+        </div>
       </div>
     </div>
     <div class="popup">
@@ -93,7 +96,8 @@
 
 <script>
     import { mapState, mapMutations } from 'vuex';
-    import { SET_ACTIVE_DEVICE,SET_DEVICE_TIMER,SET_DEVICE_TYPE_SELECT } from '../../store/mutation-types';
+    import { SET_ACTIVE_DEVICE,SET_DEVICE_TIMER,SET_DEVICE_TYPE_SELECT,SET_PARAM_LOCK_ACK,SET_PARAM_LOCK } from '../../store/mutation-types';
+    import $ from 'jquery';
     export default {
         name: "Device",
         data(){
@@ -108,15 +112,12 @@
             }
         },
         computed: {
-            ...mapState(['user','ActiveDevice','DeviceTimer','deviceTypeSelect'])
+            ...mapState(['user','ActiveDevice','DeviceTimer','deviceTypeSelect','paramLockAck','paramLock'])
         },
         created(){  //生命周期-页面创建后
-
             var that = this;
-            // if(!this.ActiveDevice){
             this.getDeviceList();
-            // }
-
+            
             clearInterval(this.DeviceTimer);
             this.timer = setInterval(function(){
               that.getDeviceList();
@@ -131,7 +132,9 @@
             ...mapMutations({
                 SET_ACTIVE_DEVICE,
                 SET_DEVICE_TIMER,
-                SET_DEVICE_TYPE_SELECT
+                SET_DEVICE_TYPE_SELECT,
+                SET_PARAM_LOCK_ACK,
+                SET_PARAM_LOCK
             }),
             refreshCurDevParam(datas){
               this.SET_ACTIVE_DEVICE(datas);
@@ -165,7 +168,7 @@
                           that.refreshCurDevParam(that.deviceList[i]);
                         }
                       }
-                      
+                      that.getDevLockStatus();
                     }else{
                       that.deviceList = [];
                     }
@@ -173,6 +176,74 @@
                 .catch(function (error) {
                     console.log(error)
                 })
+            },
+            //获取背包锁状态
+            getDevLockStatus(){
+              console.log("getDevLockStatus")
+              var that = this;
+              this.$axios({
+                  method: 'post',
+                  url:"/page/index/indexData.php",
+                  data:this.$qs.stringify({
+                    getDevParam:true,
+                    devSN: that.ActiveDevice.dev_sn
+                  }),
+                  Api:"getDevParam",
+                  AppId:"android",
+                  UserId:that.user.login_name
+              })
+              .then(function (response) {
+                  let res = response.data;
+                  that.SET_PARAM_LOCK_ACK(res.data[0]['param_lock_ack'])
+                  that.SET_PARAM_LOCK(res.data[0]['param_lock'])
+                  if(res.data[0]['param_lock_ack'] == "1"){
+                    $("#lockIcon").removeClass("fa-lock").addClass("fa-unlock");
+                  }else{
+                    $("#lockIcon").removeClass("fa-unlock").addClass("fa-lock");
+                  }
+              })
+              .catch(function (error) {
+                  console.log(error)
+              })
+            },
+            //修改锁
+            changeLockState(){
+              var that = this;
+              if (this.paramLockAck == "1") {
+                //已解锁，要加锁,背包不锁定
+                that.setDeviceParam('param_lock',2)
+              } else {
+                //已加锁，要解锁,背包锁定
+                that.setDeviceParam('param_lock',1)
+              }
+            },
+            setDeviceParam(key,val){
+              var that = this;
+              var devParamCol = key;
+              var value = val;
+              this.$axios({
+                method: 'post',
+                url:"/page/index/indexData.php",
+                data:this.$qs.stringify({
+                    devSN: that.ActiveDevice.dev_sn,
+                    devParamCol: devParamCol,
+                    value: value
+                }),
+                Api:"SetDevParam",
+                AppId:"android",
+                UserId:that.user.id
+              })
+              .then(function (response) {
+                let res = response.data;
+                if(res.res.success){
+                    //that.getDeviceParam();
+                }else{
+                    //that.getDeviceParam();
+                }
+              })
+              .catch(function (error) {
+                  console.log(error)
+              })
             },
             showDeviceList(){
                 this.popupVisible = true;
@@ -392,6 +463,19 @@
       color: #fff;
       margin: 10px;
       position: absolute;
+    }
+    .lock{
+      height:100%;
+      display:flex;
+    }
+    .lock i{
+      margin:auto;
+    }
+    .lock .fa-lock{
+      color: #ff9945;
+    }
+    .lock .fa-unlock{
+      color: #75d1c7;
     }
 </style>
 <style>
