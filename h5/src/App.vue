@@ -1,7 +1,8 @@
 <template>
   <div id="app">
     <!--<Ad v-show="false" @hideTabbarFn="hideTabbarFn"></Ad>-->
-    <mt-tabbar v-model="activeTab" v-show="!navHide">
+    <!--DV1080底部菜单-->
+    <mt-tabbar v-model="activeTab" v-if="ActiveDeviceType == 'DV1080'" v-show="!navHide">
       <mt-tab-item id="status">
         <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'status' }"></i>
         {{ $t('basic.status') }}
@@ -20,6 +21,17 @@
       </mt-tab-item>
       <mt-tab-item id="me">
         <i class="tab tab-me" v-bind:class="{ 'tab-me-active': activeTab == 'me' }"></i>
+        {{ $t('basic.me') }}
+      </mt-tab-item>
+    </mt-tabbar>
+    <!--DV4000底部菜单-->
+    <mt-tabbar v-model="activeTab" v-if="ActiveDeviceType == 'DV4000'" v-show="!navHide">
+      <mt-tab-item id="dv4000status">
+        <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'dv4000status' }"></i>
+        {{ $t('basic.status') }}
+      </mt-tab-item>
+      <mt-tab-item id="dv4000me">
+        <i class="tab tab-me" v-bind:class="{ 'tab-me-active': activeTab == 'dv4000me' }"></i>
         {{ $t('basic.me') }}
       </mt-tab-item>
     </mt-tabbar>
@@ -55,17 +67,21 @@ export default {
 //      }
   },
   computed: {
-      ...mapState(['user','navHide'])
+      ...mapState(['user','navHide','ActiveDeviceType'])
   },
   watch: {
       activeTab(val){
           if(this.user.id){
               switch (val){
+                  //DV1080
                   case 'status': this.$router.push("/status");break;
                   case 'control': this.$router.push("/control");break;
                   case 'live': this.$router.push("/live");break;
                   case 'settings': this.$router.push("/settings");break;
                   case 'me': this.$router.push("/me");break;
+                  //DV4000
+                  case 'dv4000status': this.$router.push("/dv4000status");break;
+                  case 'dv4000me': this.$router.push("/dv4000me");break;
                   default: return null;
               }
           }
@@ -74,6 +90,13 @@ export default {
           if(!Boolean(val.id)){
               this.activeTab = 'status';
           }
+      },
+      ActiveDeviceType(val){
+        if(val == "DV1080"){
+          this.activeTab = "status";
+        }else if(val == "DV4000"){
+          this.activeTab = "dv4000status";
+        }
       },
       $route() {
           // if the route changes...

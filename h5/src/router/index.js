@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Ad from '@/components/common/Ad'
+//DV1080 VUE
 import Login from '@/components/common/Login'
 import Wifi from '@/components/common/Wifi'
 import Status from '@/components/status/Status'
@@ -8,6 +9,10 @@ import Control from '@/components/control/Control'
 import Live from '@/components/live/Live'
 import Settings from '@/components/settings/Settings'
 import Me from '@/components/me/Me'
+//DV4000 VUE
+import DV4000Login from '@/components/DV4000/common/Login'
+import DV4000Status from '@/components/DV4000/status/Status'
+import DV4000Me from '@/components/DV4000/me/Me'
 
 //解决(in promise) NavigationDuplicated: Avoided redundant navigation问题
 const originalPush = Router.prototype.push
@@ -41,6 +46,7 @@ export default new Router({
                 keepAlive: false
             }
         },
+        //------------DV1080路由-----------
         {
             path: '/wifi',
             name: 'Wifi',
@@ -85,6 +91,31 @@ export default new Router({
             path: '/me',
             name: "Me",
             component: Me,
+            meta: {
+                keepAlive: false
+            }
+        },
+        //------------DV4000路由-----------
+        {
+            path: '/dv4000login',
+            name: 'DV4000Login',
+            component: DV4000Login,
+            meta: {
+                keepAlive: false
+            }
+        },
+        {
+            path: '/dv4000status',
+            name: 'DV4000Status',
+            component: DV4000Status,
+            meta: {
+                keepAlive: true
+            }
+        },
+        {
+            path: '/dv4000me',
+            name: "DV4000Me",
+            component: DV4000Me,
             meta: {
                 keepAlive: false
             }

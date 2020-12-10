@@ -22,7 +22,7 @@
     <preference name="android-targetSdkVersion" value="26" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="SplashScreen" value="screen" />
-    <preference name="SplashScreenDelay" value="1000" />
+    <preference name="SplashScreenDelay" value="0" />
     <preference name="ShowSplashScreenSpinner" value="false" />
     <preference name="FadeSplashScreen" value="false" />
     <preference name="StatusBarOverlaysWebView" value="true" />

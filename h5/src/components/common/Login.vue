@@ -27,7 +27,7 @@
                 <i class="fa fa-cog fa-2x" aria-hidden="true"></i>
             </div>
             <div class="loginGroup" v-show="showConfig">
-                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV4000' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV4000')">DV4000</mt-button>
+                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV4000' ? 'deviceLoginActive': '']" @click="GoDV4000Login('DV4000')">DV4000</mt-button>
                 <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV1080' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV1080')">DV1080</mt-button>
                 <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
                 <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'WIFI' ? 'deviceLoginActive': '']" @click="connectWifi()">本机WiFi</mt-button>
@@ -190,6 +190,7 @@
 
             ChoseDevice(val){
                 this.ActiveDeviceType = val;
+                this.SET_ACTIVE_DEVICE_TYPE(this.ActiveDeviceType);
                 switch(this.ActiveDeviceType){
                     case "DV1080":this.title = "HDXpress";this.$axios.defaults.baseURL = "http://47.104.164.249";break;
                     case "DV4000":this.title = "UHDXpress";this.$axios.defaults.baseURL = "http://117.131.178.104:8088";break;
@@ -208,6 +209,10 @@
                 this.ActiveDeviceType = "WIFI";
                 this.wifiUrlsEditVisible = false;
                 this.showConfig = false;
+            },
+
+            GoDV4000Login(){
+                this.$router.push("/dv4000login");
             }
             // login(){
             //     var that = this;
