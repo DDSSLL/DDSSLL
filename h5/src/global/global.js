@@ -1,143 +1,3 @@
-//项目公共方法或常量
-//代码中使用 this.$global.xxx 来访问方法或常量
-function getCurrentTime() {
-    var date = new Date();
-    var year = '' + date.getFullYear();
-    var month = '' + (date.getMonth() + 1);
-    var day = '' + date.getDate();
-    var hours = '' + date.getHours();
-    var minutes = '' + date.getMinutes();
-    var seconds = date.getSeconds();
-    if (month.length === 1) {
-        month = '0' + month;
-    }
-    if (day.length === 1) {
-        day = '0' + day;
-    }
-    if (hours.length === 1) {
-        hours = '0' + hours;
-    }
-    if (minutes.length === 1) {
-        minutes = '0' + minutes;
-    }
-    if (seconds.length === 1) {
-        seconds = '0' + seconds;
-    }
-    return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
-}
-//数组合并去重
-function MergeArray(arr1, arr2) {
-  var _arr = new Array();
-  for (var i = 0; i < arr1.length; i++) {
-    _arr.push(arr1[i]);
-  }
-  for (var i = 0; i < arr2.length; i++) {
-    var flag = true;
-    for (var j = 0; j < arr1.length; j++) {
-      if (arr2[i] == arr1[j]) {
-        flag = false;
-        break;
-      }
-    }
-    if (flag) {
-      _arr.push(arr2[i]);
-    }
-  }
-  return _arr;
-}
-//获取设备类型
-function getDevMode(sn) {
-    var res = false;
-    for (var i = 0; i < DEV_MODE.length; i++) {
-        if (sn == DEV_MODE[i].sn) {
-            res = DEV_MODE[i].name;
-            break;
-        }
-    }
-    return res;
-}
-function getRcvMode(sn){
-    var res = false;
-    for (var i = 0; i < RCV_MODE.length; i++) {
-        if (sn == RCV_MODE[i].sn) {
-            res = RCV_MODE[i].name;
-            break;
-        }
-    }
-    return res;
-}
-//获取接收机列表
-function getRcvList(content, row, cb) {
-  var that = this;
-  content.$axios({
-    method: 'post',
-    url:"/page/index/indexData.php",
-    data:content.$qs.stringify({
-      getAllRcvName:'rcv',
-      userId:content.user.id,
-      userGroup:1,
-      prefix:content.user.id
-    }),
-    Api:"getAllRcvName",
-    AppId:"android",
-    UserId:content.user.id
-  })
-  .then(function (response) {
-    let res = response.data;
-    if(res.res.success){
-      var data = res.data;
-      var result = [];
-      if (data.length == 0) {
-        result.push({
-          value: row.rcv_sn,
-          text: row.rcv_name
-        });
-      }else{
-        var bFind = false;
-        for (var k = 0; k < data.length; k++) {
-          if (data[k].rcv_sn == row.rcv_sn) {
-            bFind = true;
-            break;
-          }
-        }
-        if (!bFind) {
-          result.push({
-            value: row.rcv_sn?row.rcv_sn:"",
-            text: row.rcv_name?row.rcv_name:""
-          });
-        }
-        for(var key in data){
-          result.push({
-            value: data[key].rcv_sn,
-            text: data[key].rcv_name,
-            color: data[key].color=="#ffffff"?"#000000":data[key].color
-          });
-        }
-      }
-      cb(result);
-    }else{
-      that.$toast({
-        message: res.res.reason,
-        position: 'middle',
-        duration: 2000
-      });
-    }
-  })
-  .catch(function (error) {
-    console.log(error)
-  })
-}
-//判断是否是有效邮箱
-function isValidMail(address) {
-    if (address != "") {
-        var regInvalid = /(@.*@)|(\.\.)|(@\.)|(\.@)|(^\.)/;
-        var regValid = /^.+\@(\[?)[a-zA-Z0-9\-\.]+\.([a-zA-Z]{2,3}|[0-9]{1,3})(\]?)$/;
-        return (!regInvalid.test(address) && regValid.test(address));
-    } else {
-        return true;
-    }
-}
-
 window.cardIdArr = ['eth0', 'lte1', 'lte2', 'lte3', 'lte4', 'lte5',
     'lte6', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'
 ];
@@ -237,5 +97,173 @@ window.colorObj = {
     "USB-LAN2↑":'USB-LAN2Up',"USB-LAN2↓":'USB-LAN2Down',"USB-LAN2传输丢包":'USB-LAN2LossDev',"USB-LAN2业务丢包":'USB-LAN2LossRcv'
 };
 export default {
-    getCurrentTime, MergeArray, getDevMode, getRcvList, getRcvMode, isValidMail
+  //项目公共方法或常量
+  //代码中使用 this.$global.xxx 来访问方法或常量
+  /*OPTIONS_VIDEOENCODE : [{value: "0",text: "H.264"}],
+  OPTIONS_BITRATEMODE : [{value: "0",text: "CBR"}, {value: "1",text: "AVBR"}],
+  OPTIONS_HDR : [{text: "SDR",value: "0"}],
+  OPTIONS_LATENCY : [{text: "标准时延",value: "0"}],
+  OPTIONS_VIDEOINPUT : [{value: "0",text: "3G-SDI"}, {value: "1",text: "HDMI"}],
+  OPTIONS_AUDIO_ENCODE : [{text: "AAC",value: "0"}],*/
+  getCurrentTime() {
+    var date = new Date();
+    var year = '' + date.getFullYear();
+    var month = '' + (date.getMonth() + 1);
+    var day = '' + date.getDate();
+    var hours = '' + date.getHours();
+    var minutes = '' + date.getMinutes();
+    var seconds = date.getSeconds();
+    if (month.length === 1) {
+        month = '0' + month;
+    }
+    if (day.length === 1) {
+        day = '0' + day;
+    }
+    if (hours.length === 1) {
+        hours = '0' + hours;
+    }
+    if (minutes.length === 1) {
+        minutes = '0' + minutes;
+    }
+    if (seconds.length === 1) {
+        seconds = '0' + seconds;
+    }
+    return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+  },
+  //数组合并去重
+  MergeArray(arr1, arr2) {
+    var _arr = new Array();
+    for (var i = 0; i < arr1.length; i++) {
+      _arr.push(arr1[i]);
+    }
+    for (var i = 0; i < arr2.length; i++) {
+      var flag = true;
+      for (var j = 0; j < arr1.length; j++) {
+        if (arr2[i] == arr1[j]) {
+          flag = false;
+          break;
+        }
+      }
+      if (flag) {
+        _arr.push(arr2[i]);
+      }
+    }
+    return _arr;
+  },
+  //获取设备类型
+  getDevMode(sn) {
+    var res = false;
+    for (var i = 0; i < DEV_MODE.length; i++) {
+      if (sn == DEV_MODE[i].sn) {
+        res = DEV_MODE[i].name;
+        break;
+      }
+    }
+    return res;
+  },
+  getRcvMode(sn){
+    var res = false;
+    for (var i = 0; i < RCV_MODE.length; i++) {
+      if (sn == RCV_MODE[i].sn) {
+        res = RCV_MODE[i].name;
+        break;
+      }
+    }
+    return res;
+  },
+  //获取接收机列表
+  getRcvList(content, row, cb) {
+    var that = this;
+    content.$axios({
+      method: 'post',
+      url:"/page/index/indexData.php",
+      data:content.$qs.stringify({
+        getAllRcvName:'rcv',
+        userId:content.user.id,
+        userGroup:1,
+        prefix:content.user.id
+      }),
+      Api:"getAllRcvName",
+      AppId:"android",
+      UserId:content.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        var data = res.data;
+        var result = [];
+        if (data.length == 0) {
+          result.push({
+            value: row.rcv_sn,
+            text: row.rcv_name
+          });
+        }else{
+          var bFind = false;
+          for (var k = 0; k < data.length; k++) {
+            if (data[k].rcv_sn == row.rcv_sn) {
+              bFind = true;
+              break;
+            }
+          }
+          if (!bFind) {
+            result.push({
+              value: row.rcv_sn?row.rcv_sn:"",
+              text: row.rcv_name?row.rcv_name:""
+            });
+          }
+          for(var key in data){
+            result.push({
+              value: data[key].rcv_sn,
+              text: data[key].rcv_name,
+              color: data[key].color=="#ffffff"?"#000000":data[key].color
+            });
+          }
+        }
+        cb(result);
+      }else{
+        that.$toast({
+          message: res.res.reason,
+          position: 'middle',
+          duration: 2000
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
+  //判断是否是有效邮箱
+  isValidMail(address) {
+    if (address != "") {
+      var regInvalid = /(@.*@)|(\.\.)|(@\.)|(\.@)|(^\.)/;
+      var regValid = /^.+\@(\[?)[a-zA-Z0-9\-\.]+\.([a-zA-Z]{2,3}|[0-9]{1,3})(\]?)$/;
+      return (!regInvalid.test(address) && regValid.test(address));
+    } else {
+      return true;
+    }
+  },
+ 
+  //获取背包参数范围
+  /*getDevParamRange(param) {
+    var res = [];
+    if (param == 'video_encode') {
+      res = OPTIONS_VIDEOENCODE;
+    }
+    else if (param == 'bitrate_mode') {
+      res = OPTIONS_BITRATEMODE;
+    }
+    else if (param == 'hdr') {
+      res = OPTIONS_HDR;
+    }
+    else if (param == 'latency') {
+      res = OPTIONS_LATENCY;
+    }
+    else if (param == 'video_input') {
+      res = OPTIONS_VIDEOINPUT;
+    }
+    else if (param == 'audio_encode'){
+      res = OPTIONS_AUDIO_ENCODE;
+    }
+    return res;
+  }*/
 }

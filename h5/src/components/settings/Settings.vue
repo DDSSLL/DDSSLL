@@ -2,16 +2,61 @@
     <div class="settings">
         <Device></Device>
         <div class="Group">
-            <div class="GroupTitle">传输控制</div>
-            <!--<div class="GroupItem">-->
-                <!--<div class="GroupItemField">-->
-                    <!--<div class="GroupItemTitle">传输IP</div>-->
-                    <!--<div class="GroupItemValue">-->
-                        <!--<button :class="[options.dev_push_ip == '1' ? 'btnSelect' : '']" class="lan" @click="setDeviceParam('dev_push_ip','1')">内网</button>-->
-                        <!--<button :class="[options.dev_push_ip == '0' ? 'btnSelect' : '']" class="wan" @click="setDeviceParam('dev_push_ip','0')">外网</button>-->
-                    <!--</div>-->
-                <!--</div>-->
-            <!--</div>-->
+            <div class="GroupTitle">
+                传输控制
+                <span style="float:right">
+                    序列号:
+                    <span id="sn_str"></span>
+                </span>
+            </div>
+            <div class="GroupItem">
+                <div class="GroupItemField">
+                    <div class="GroupItemTitle">传输IP</div>
+                    <div class="GroupItemValue">
+                        <mt-radio
+                          title=""
+                          v-model="options.dev_push_ip"
+                          :options="RADIO_TRANS_IP"
+                          @click="setDeviceParam('dev_push_ip',options.dev_push_ip?'1':'0')">
+                        </mt-radio>
+                    </div>
+                </div>
+            </div>
+            <div class="GroupItem" v-if="this.user.id=='001-admin'">
+                <div class="GroupItemField">
+                    <div class="GroupItemTitle">传输模式</div>
+                    <div class="GroupItemValue">
+                        <mt-radio
+                          title=""
+                          v-model="options.PushTsType"
+                          :options="RADIO_TRANS_MODE"
+                          @change="changeTransMode"
+                          
+                          :disabled="paramLockAck == '1'?false:true">
+                        </mt-radio>
+                        <!-- @click="setDeviceParam('dev_push_mode',options.PushTsType?'1':'0')" -->
+                    </div>
+                </div>
+            </div>
+            <div class="GroupItem" v-if="this.card_sel_show">
+                <div class="GroupItemField">
+                    <div class="GroupItemTitle">单卡选择</div>
+                    <div class="GroupItemValue">
+                        <select class="ItemSelect" v-model="options.card_sel_val" @change="setDeviceParam('video_input',options.video_input)"  :disabled="paramLockAck == '1'?false:true">
+                            <template v-for="item in card_sel">
+                                <option :value="item.value">{{ item.text }}</option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+            </div>
+             <div class="form-group flexCenter" style="display: none" id="cardSel_tr">
+                      <label class="col-xs-8 col-sm-8 col-md-8 col-lg-8 control-label">单卡选择</label>
+                      <div class="col-xs-16 col-sm-16 col-md-15 col-lg-15 ps1">
+                        <select class="selectpicker" id="card_sel" data-width="100%">
+                        </select>
+                      </div>
+                    </div>
             <div class="GroupItem">
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">录制开关</div>
@@ -21,7 +66,7 @@
                     </div>
                 </div>
             </div>
-            <div class="GroupItem">
+            <div class="GroupItem" v-if="this.user.id=='001-admin'">
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">重传开关</div>
                     <div class="GroupItemValue">
@@ -30,7 +75,7 @@
                     </div>
                 </div>
             </div>
-            <div class="GroupItem">
+            <div class="GroupItem" v-if="this.user.id=='1080linedtest'">
                 <div class="GroupItemField">
                     <div class="GroupItemTitle">纠错开关</div>
                     <div class="GroupItemValue">
@@ -201,214 +246,244 @@
 </template>
 
 <script>
-    import { mapState, mapMutations } from 'vuex';
-    import { SET_USER,SET_NAV_STATUS } from '../../store/mutation-types';
-    import Device from '../basic/Device';
-    export default {
-        name: "Settings",
-        data(){
-            return{
-                OPTIONS_AUDIOINPUT : [{
-                    value: "1",
-                    text: "2-CH"
-                }],
-                OPTIONS_VIDEOINPUT : [{
-                    value: "0",
-                    text: "3G-SDI"
-                }, {
-                    value: "1",
-                    text: "HDMI"
-                }],
-                OPTIONS_VIDEOENCODE : [{
-                    value: "0",
-                    text: "H.264"
-                }],
-                OPTIONS_BITRATEMODE : [{
-                    value: "0",
-                    text: "CBR"
-                }, {
-                    value: "1",
-                    text: "AVBR"
-                }],
-                OPTIONS_HDR : [{
-                    text: "SDR",
-                    value: "0"
-                }],
-                OPTIONS_LATENCY : [{
-                    text: "标准时延",
-                    value: "0"
-                }],
-                OPTIONS_HDMI_FORMAT : [{
-                    text: "1920x1080p29.97",
-                    value: "1"
-                }, {
-                    text: "1920x1080p59.94",
-                    value: "2"
-                }, {
-                    text: "1920x1080p50",
-                    value: "3"
-                }, {
-                    text: "1920x1080p25",
-                    value: "4"
-                }, {
-                    text: "1920x1080i59.94",
-                    value: "5"
-                }, {
-                    text: "1920x1080i50",
-                    value: "6"
-                }, {
-                    text: "1280x720p59.94",
-                    value: "7"
-                }, {
-                    text: "1280x720p50",
-                    value: "8"
-                }, {
-                    text: "1280x720p29.97",
-                    value: "9"
-                }, {
-                    text: "1280x720p25",
-                    value: "10"
-                }, {
-                    text: "720x576p50",
-                    value: "11"
-                }, {
-                    text: "720x480p59.94",
-                    value: "12"
-                }],
-                OPTIONS_AUDIO_ENCODE : [{
-                    text: "AAC",
-                    value: "0"
-                }],
-                OPTIONS_AUDIO_BR : [{
-                    text: "256kbps",
-                    value: "256"
-                }, {
-                    text: "128kbps",
-                    value: "128"
-                },{
-                    text: "64kbps",
-                    value: "64"
-                }],
-                options:{
-                    dev_push_ip:'1',
-                    record:'0',
-                    recordVal:false,
-                    ResendMode:'0',
-                    ResendModeVal:false,
-                    OpenfecMode:'0',
-                    OpenfecModeVal:false,
-                    video_input:'0',
-                    audio_input:'1',
-                    video_encode:'0',
-                    AudioEnc:'0',
-                    AudioBitrate:'256',
-                    bitrate_mode:'0',
-                    hdr:'0',
-                    latency:'0',
-                    HdmiTransFormat:'1',
-                    sdiresolutionRate:'1080i',
-                    sdiresolutionValue:'50',
-                    hdmipenetrate:true,
-                    hdmiresolutionRate:'1080',
-                    hdmiresolutionValue:'59.94'
-                }
-            }
-        },
-        components: {
-            Device
-        },
-        computed: {
-            ...mapState(['user','navHide','ActiveDeviceType','paramLockAck'])
-        },
-        watch:{   //监听当前设备值变化
-            '$store.state.ActiveDevice': {
-                immediate: true,
-                handler(val) {
-                    this.ActiveDevice = val;
-                    this.getDeviceParam();
-                }
-            }
-        },
-        activated(){  //生命周期-缓存页面激活
+  import { mapState, mapMutations } from 'vuex';
+  import { SET_USER,SET_NAV_STATUS } from '../../store/mutation-types';
+  import Device from '../basic/Device';
+  import $ from 'jquery';
+  export default {
+    name: "Settings",
+    data(){
+      return{
+        RADIO_TRANS_IP : [],
+        RADIO_TRANS_MODE : [],
+        card_sel_show : false,
+        card_sel:[],
+        OPTIONS_AUDIOINPUT : [{value: "1",text: "2-CH"}],
+        OPTIONS_VIDEOINPUT : [{value: "0",text: "3G-SDI"}, {value: "1",text: "HDMI"}],
+        OPTIONS_VIDEOENCODE : [{value: "0",text: "H.264"}],
+        OPTIONS_BITRATEMODE : [{value: "0",text: "CBR"}, {value: "1",text: "AVBR"}],
+        OPTIONS_HDR : [{text: "SDR",value: "0"}],
+        OPTIONS_LATENCY : [{text: "标准时延",value: "0"}],
+        OPTIONS_HDMI_FORMAT : [{text: "1920x1080p29.97",value: "1"}, 
+                              {text: "1920x1080p59.94",value: "2"}, 
+                              {text: "1920x1080p50",value: "3"}, 
+                              {text: "1920x1080p25",value: "4"}, 
+                              {text: "1920x1080i59.94",value: "5"}, 
+                              {text: "1920x1080i50",value: "6"}, 
+                              {text: "1280x720p59.94",value: "7"}, 
+                              {text: "1280x720p50",value: "8"}, 
+                              {text: "1280x720p29.97",value: "9"}, 
+                              {text: "1280x720p25",value: "10"}, 
+                              {text: "720x576p50",value: "11"}, 
+                              {text: "720x480p59.94",value: "12"}],
+        OPTIONS_AUDIO_ENCODE : [{text: "AAC",value: "0"}],
+        OPTIONS_AUDIO_BR : [{text: "256kbps",value: "256"}, 
+                            {text: "128kbps",value: "128"},
+                            {text: "64kbps",value: "64"}],
+        options:{
+          dev_push_ip:'0',//传输IP
+          PushTsType:'0',//传输模式
+          card_sel_val : "",
+          /*record:'0',
+          recordVal:false,
+          ResendMode:'0',
+          ResendModeVal:false,
+          OpenfecMode:'0',
+          OpenfecModeVal:false,
+          video_input:'0',
+          audio_input:'1',
+          video_encode:'0',
+          AudioEnc:'0',
+          AudioBitrate:'256',
+          bitrate_mode:'0',
+          hdr:'0',
+          latency:'0',
+          HdmiTransFormat:'1',
+          sdiresolutionRate:'1080i',
+          sdiresolutionValue:'50',
+          hdmipenetrate:true,
+          hdmiresolutionRate:'1080',
+          hdmiresolutionValue:'59.94'*/
+        }
+      }
+    },
+    components: {
+        Device
+    },
+    computed: {
+        ...mapState(['user','navHide','ActiveDeviceType','paramLockAck'])
+    },
+    watch:{   //监听当前设备值变化
+      '$store.state.ActiveDevice': {
+        immediate: true,
+        handler(val) {
+          this.ActiveDevice = val;
+          $("#sn_str").text(this.ActiveDevice.dev_sn)
+          if(this.paramLockAck != "1"){
             this.getDeviceParam();
-        },
-        deactivated(){   //生命周期-缓存页面失活
+          }
+        }
+      },
+      '$store.state.paramLockAck':{
+        immediate: true,
+        handler(val) {
+          this.RADIO_TRANS_IP = [{
+            label: '内网',
+            value: '1',
+            disabled: this.paramLockAck == '1'?false:true
+          },{
+            label: '公网',
+            value: '0',
+            disabled: this.paramLockAck == '1'?false:true
+          }],
+          this.RADIO_TRANS_MODE = [{
+            label: '单卡',
+            value: '1',
+            disabled: this.paramLockAck == '1'?false:true
+          },{
+            label: '汇聚',
+            value: '0',
+            disabled: this.paramLockAck == '1'?false:true
+          }]
+        }
+      }
+    },
+    activated(){  //生命周期-缓存页面激活
+      console.log("setting activated");
+      this.getDeviceParam();
+    },
+    deactivated(){   //生命周期-缓存页面失活
 
-        },
-        methods:{
-            ...mapMutations({
-                SET_USER,
-                SET_NAV_STATUS
-            }),
+    },
+    methods:{
+      ...mapMutations({
+        SET_USER,
+        SET_NAV_STATUS
+      }),
+      chooseIP(val){this.control.ip = val;},
+      getDeviceParam(){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevParam:true,
+            devSN: that.ActiveDevice.dev_sn
+          }),
+          Api:"getDevParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          console.log("getDeviceParam")
+          if(res.res.success){
+            console.log("success");
+            that.options = that.formatData(res.data[0]);
+            console.log("options")
+            console.log(that.options);
+          }else{
+            /*that.options = {
+              dev_push_ip:'1',
+              dev_push_mode:'0',
+              record:'0',
+              recordVal:false,
+              ResendMode:'0',
+              ResendModeVal:false,
+              OpenfecMode:'0',
+              OpenfecModeVal:false,
+              video_input:'0',
+              audio_input:'1',
+              video_encode:'0',
+              AudioEnc:'0',
+              AudioBitrate:'256',
+              bitrate_mode:'0',
+              hdr:'0',
+              latency:'0',
+              HdmiTransFormat:'1',
+              sdiresolutionRate:'1080i',
+              sdiresolutionValue:'50',
+              hdmipenetrate:true,
+              hdmiresolutionRate:'1080',
+              hdmiresolutionValue:'59.94'
+            };*/
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      formatData(data){
+        var that = this;
+        console.log("formatData")
+        console.log(data)
+        //传输IP
+        data['dev_push_ip'] = data['dev_push_ip']=="1"?"1":"0";
+        if(data['PushTsType'] == 1){
+          this.card_sel_show = true;
+        }else{
+          this.card_sel_show = false;
+        }
+        //that.getDevCardParam(that.formatCardSel());
 
-            chooseIP(val){this.control.ip = val;},
-
-            getDeviceParam(){
-                var that = this;
-                this.$axios({
-                    method: 'post',
-                    url:"/page/index/indexData.php",
-                    data:this.$qs.stringify({
-                        getDevParam:true,
-                        devSN: that.ActiveDevice.dev_sn
-                    }),
-                    Api:"getDevParam",
-                    AppId:"android",
-                    UserId:that.user.id
-                })
-                .then(function (response) {
-                    let res = response.data;
-                    if(res.res.success){
-                        that.options = formatData(res.data[0]);
-                    }else{
-                        that.options = {
-                            dev_push_ip:'1',
-                            record:'0',
-                            recordVal:false,
-                            ResendMode:'0',
-                            ResendModeVal:false,
-                            OpenfecMode:'0',
-                            OpenfecModeVal:false,
-                            video_input:'0',
-                            audio_input:'1',
-                            video_encode:'0',
-                            AudioEnc:'0',
-                            AudioBitrate:'256',
-                            bitrate_mode:'0',
-                            hdr:'0',
-                            latency:'0',
-                            HdmiTransFormat:'1',
-                            sdiresolutionRate:'1080i',
-                            sdiresolutionValue:'50',
-                            hdmipenetrate:true,
-                            hdmiresolutionRate:'1080',
-                            hdmiresolutionValue:'59.94'
-                        };
-                    }
-                })
-                .catch(function (error) {
-                    console.log(error)
-                })
-
-                function formatData(data){
-                    if(data.record == '0'){  //录制开关
-                        data.recordVal = false;
-                    }else if(data.record == '1'){
-                        data.recordVal = true;
-                    }
-                    if(data.ResendMode == '0'){  //重传开关
-                        data.ResendModeVal = false;
-                    }else if(data.ResendMode == '1'){
-                        data.ResendModeVal = true;
-                    }
-                    if(data.OpenfecMode == '0'){  //纠错开关
-                        data.OpenfecModeVal = false;
-                    }else if(data.OpenfecMode == '1'){
-                        data.OpenfecModeVal = true;
-                    }
-                    return data;
-                }
-            },
+        /*if(data.record == '0'){  //录制开关
+          data.recordVal = false;
+        }else if(data.record == '1'){
+          data.recordVal = true;
+        }
+        if(data.ResendMode == '0'){  //重传开关
+          data.ResendModeVal = false;
+        }else if(data.ResendMode == '1'){
+          data.ResendModeVal = true;
+        }
+        if(data.OpenfecMode == '0'){  //纠错开关
+          data.OpenfecModeVal = false;
+        }else if(data.OpenfecMode == '1'){
+          data.OpenfecModeVal = true;
+        }*/
+        return data;
+      },
+      getDevCardParam(cb){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevCardParam:true,
+            devSN: that.ActiveDevice.dev_sn
+          }),
+          Api:"getDevCardParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if(cb){
+              cb(res.data[0]);
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            }); 
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //改变传输模式
+      changeTransMode(){
+        console.log("changeTransMode")
+        if(this.options.PushTsType == "1"){
+          this.card_sel_show = true;
+        }else{
+           this.card_sel_show = false;
+        }
+        setDeviceParam('dev_push_mode',this.options.PushTsType?'1':'0')
+      },
 
             setDeviceParam(key,val){
                 var that = this;
@@ -567,5 +642,27 @@
     .mint-switch{
         transform: scale(.7);
         transform-origin:left;
+    }
+</style>
+<style>
+    .settings .mint-cell{
+        background-color: transparent;
+        background-image: none !important;
+        display: inline-block;
+        min-height: auto;
+    }
+    .settings .mint-cell-wrapper{
+        background-image: none;
+        color: #EEEEEE;
+        padding-left:0px;
+    }
+    .settings .mint-radiolist-title{
+        margin:0px;
+    }
+    .settings .mint-radio-label{
+        font-size:.12rem;
+    }
+    .settings .mint-radiolist-label{
+        padding-left:0px;
     }
 </style>
