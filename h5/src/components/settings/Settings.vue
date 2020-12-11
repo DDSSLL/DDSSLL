@@ -1,248 +1,205 @@
 <template>
-    <div class="settings">
-        <Device></Device>
-        <div class="Group">
-            <div class="GroupTitle">
-                传输控制
-                <span style="float:right">
-                    序列号:
-                    <span id="sn_str"></span>
-                </span>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">传输IP</div>
-                    <div class="GroupItemValue">
-                        <mt-radio
-                          title=""
-                          v-model="options.dev_push_ip"
-                          :options="RADIO_TRANS_IP"
-                          @click="setDeviceParam('dev_push_ip',options.dev_push_ip?'1':'0')">
-                        </mt-radio>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem" v-if="this.user.id=='001-admin'">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">传输模式</div>
-                    <div class="GroupItemValue">
-                        <mt-radio
-                          title=""
-                          v-model="options.PushTsType"
-                          :options="RADIO_TRANS_MODE"
-                          @change="changeTransMode"
-                          
-                          :disabled="paramLockAck == '1'?false:true">
-                        </mt-radio>
-                        <!-- @click="setDeviceParam('dev_push_mode',options.PushTsType?'1':'0')" -->
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem" v-if="this.card_sel_show">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">单卡选择</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.card_sel_val" @change="setDeviceParam('video_input',options.video_input)"  :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in card_sel">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-             <div class="form-group flexCenter" style="display: none" id="cardSel_tr">
-                      <label class="col-xs-8 col-sm-8 col-md-8 col-lg-8 control-label">单卡选择</label>
-                      <div class="col-xs-16 col-sm-16 col-md-15 col-lg-15 ps1">
-                        <select class="selectpicker" id="card_sel" data-width="100%">
-                        </select>
-                      </div>
-                    </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">录制开关</div>
-                    <div class="GroupItemValue">
-                        <mt-switch v-model="options.recordVal" @change="setDeviceParam('record',options.recordVal?'1':'0')" :disabled="paramLockAck == '1'?false:true">
-                        </mt-switch>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem" v-if="this.user.id=='001-admin'">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">重传开关</div>
-                    <div class="GroupItemValue">
-                        <mt-switch v-model="options.ResendModeVal" @change="setDeviceParam('ResendMode',options.ResendModeVal?'1':'0')" :disabled="paramLockAck == '1'?false:true">
-                        </mt-switch>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem" v-if="this.user.id=='1080linedtest'">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">纠错开关</div>
-                    <div class="GroupItemValue">
-                        <mt-switch v-model="options.OpenfecModeVal" @change="setDeviceParam('OpenfecMode',options.OpenfecModeVal?'1':'0')" :disabled="paramLockAck == '1'?false:true">
-                        </mt-switch>
-                    </div>
-                </div>
-            </div>
+  <div class="settings">
+    <Device></Device>
+    <div class="Group"><!-- 传输控制 -->
+      <div class="GroupTitle">
+        传输控制
+        <span style="float:right">
+          序列号:
+          <span id="sn_str"></span>
+        </span>
+      </div>
+      <div class="GroupItem"><!-- 传输IP -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">传输IP</div>
+          <div class="GroupItemValue">
+            <mt-radio
+              title=""
+              v-model="options.dev_push_ip"
+              :options="RADIO_TRANS_IP"
+              @change="setDeviceParam('dev_push_ip',options.dev_push_ip=='1'?'1':'')">
+            </mt-radio>
+          </div>
         </div>
-        <div class="Group">
-            <div class="GroupTitle">输入编码</div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">视频输入</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.video_input" @change="setDeviceParam('video_input',options.video_input)"  :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in OPTIONS_VIDEOINPUT">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">音频输入</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.audio_input" @change="setDeviceParam('audio_input',options.audio_input)"  :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in OPTIONS_AUDIOINPUT">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">视频编码</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.video_encode" @change="setDeviceParam('video_encode',options.video_encode)" :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in OPTIONS_VIDEOENCODE">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">音频编码</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.AudioEnc" @change="setDeviceParam('AudioEnc',options.AudioEnc)" :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in OPTIONS_AUDIO_ENCODE">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">音频比特率</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.AudioBitrate" @change="setDeviceParam('AudioBitrate',options.AudioBitrate)" :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in OPTIONS_AUDIO_BR">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">码率控制</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.bitrate_mode" @change="setDeviceParam('bitrate_mode',options.bitrate_mode)" :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in OPTIONS_BITRATEMODE">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">HDR设置</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.hdr" @change="setDeviceParam('hdr',options.hdr)" :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in OPTIONS_HDR">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">时延模式</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.latency" @change="setDeviceParam('latency',options.latency)" :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in OPTIONS_LATENCY">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">编码分辨率</div>
-                    <div class="GroupItemValue">
-                        <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="paramLockAck == '1'?false:true">
-                            <template v-for="item in OPTIONS_HDMI_FORMAT">
-                                <option :value="item.value">{{ item.text }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="GroupItem" v-if="this.user.id==this.SUPER"><!-- 传输模式 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">传输模式</div>
+          <div class="GroupItemValue">
+            <mt-radio
+              title=""
+              v-model="options.PushTsType"
+              :options="RADIO_TRANS_MODE"
+              @change="changeTransMode"
+              :disabled="paramLockAck == '1'?false:true">
+            </mt-radio>
+          </div>
         </div>
-        <div class="Group" v-if="ActiveDeviceType == 'DV4000'">
-            <div class="GroupTitle">SDI</div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">分辨率帧率</div>
-                    <div class="GroupItemValue">
-                        <input type="text" class="x2Ipt" v-model="options.sdiresolutionRate">
-                        <input type="text" class="x1Ipt" v-model="options.sdiresolutionValue">
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">解码器</div>
-                    <div class="GroupItemValue">
-                        <button class="x2Btn">复位</button>
-                        <button class="x1Btn">停止</button>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="GroupItem" v-if="this.user.id==this.SUPER && this.card_sel_show"><!-- 单卡选择 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">单卡选择</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.PushCard" @change="setDeviceParam('PushCard', options.PushCard)"  :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in card_sel">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
         </div>
-        <div class="Group" v-if="ActiveDeviceType == 'DV4000'">
-            <div class="GroupTitle">HDMI</div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">输出透传</div>
-                    <div class="GroupItemValue">
-                        <mt-switch v-model="options.hdmipenetrate">
-                        </mt-switch>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">分辨率帧率</div>
-                    <div class="GroupItemValue">
-                        <select class="x2Ipt" v-model="options.hdmiresolutionRate">
-                            <option value="1080">1080p</option>
-                        </select>
-                        <select class="x1Ipt" v-model="options.hdmiresolutionValue">
-                            <option value="59.94">59.94</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="GroupItem"><!-- 录制开关 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">录制开关</div>
+          <div class="GroupItemValue">
+            <mt-switch v-model="options.record" @change="setDeviceParam('record',options.record?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            </mt-switch>
+          </div>
         </div>
+      </div>
+      <div class="GroupItem" v-if="this.user.id==this.SUPER"><!-- 重传开关 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">重传开关</div>
+          <div class="GroupItemValue">
+            <mt-switch v-model="options.ResendMode" @change="setDeviceParam('ResendMode',options.ResendMode?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            </mt-switch>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem" v-if="this.user.id==this.SUPER"><!-- 纠错开关 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">纠错开关</div>
+          <div class="GroupItemValue">
+            <mt-switch v-model="options.OpenfecMode" @change="setDeviceParam('OpenfecMode',options.OpenfecMode?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            </mt-switch>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem" v-if="this.user.id==this.SUPER && this.feclevel_show"><!-- 纠错能力 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">纠错能力</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.OpenfecLevel" @change="setDeviceParam('OpenfecLevel', options.OpenfecLevel)"  :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_FEC_LEVEL">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
+    <div class="Group"><!-- 输入编码 -->
+      <div class="GroupTitle">输入编码</div>
+      <div class="GroupItem" v-if="this.user.id==this.SUPER"><!-- SEI -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">SEI</div>
+          <div class="GroupItemValue">
+            <mt-switch v-model="options.SEI" @change="setDeviceParam('SEI',options.SEI?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            </mt-switch>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- 视频输入 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">视频输入</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.video_input" @change="setDeviceParam('video_input',options.video_input)"  :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_VIDEOINPUT">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- 音频输入 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">音频输入</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.audio_input" @change="setDeviceParam('audio_input',options.audio_input)"  :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_AUDIOINPUT">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- 视频编码 只有H.264-->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">视频编码</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.video_encode" @change="setDeviceParam('video_encode',options.video_encode)" :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_VIDEOENCODE">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- 音频编码 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">音频编码</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.AudioEnc" @change="setDeviceParam('AudioEnc',options.AudioEnc)" :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_AUDIO_ENCODE">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- 音频比特率 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">音频比特率</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.AudioBitrate" @change="setDeviceParam('AudioBitrate',options.AudioBitrate)" :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_AUDIO_BR">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- 码率控制 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">码率控制</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.bitrate_mode" @change="setDeviceParam('bitrate_mode',options.bitrate_mode)" :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_BITRATEMODE">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- 编码分辨率 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">编码分辨率</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_HDMI_FORMAT">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="Group"  v-if="this.user.id==this.SUPER"><!-- 日志记录 -->
+      <div class="GroupTitle">日志记录</div>
+      <div class="GroupItem"><!-- 日志记录 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">日志记录</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.ArmSenderLogLevel" @change="setDeviceParam('ArmSenderLogLevel',options.ArmSenderLogLevel)"  :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_LOG_LEVEL">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -254,56 +211,54 @@
     name: "Settings",
     data(){
       return{
+        SUPER : SUPER,
         RADIO_TRANS_IP : [],
         RADIO_TRANS_MODE : [],
         card_sel_show : false,
+        feclevel_show : false,
         card_sel:[],
+        OPTIONS_FEC_LEVEL : [{text: "低",value: "0"}, 
+                              {text: "中",value: "1"}, 
+                              {text: "高",value: "2"}],
         OPTIONS_AUDIOINPUT : [{value: "1",text: "2-CH"}],
         OPTIONS_VIDEOINPUT : [{value: "0",text: "3G-SDI"}, {value: "1",text: "HDMI"}],
         OPTIONS_VIDEOENCODE : [{value: "0",text: "H.264"}],
         OPTIONS_BITRATEMODE : [{value: "0",text: "CBR"}, {value: "1",text: "AVBR"}],
-        OPTIONS_HDR : [{text: "SDR",value: "0"}],
-        OPTIONS_LATENCY : [{text: "标准时延",value: "0"}],
-        OPTIONS_HDMI_FORMAT : [{text: "1920x1080p29.97",value: "1"}, 
-                              {text: "1920x1080p59.94",value: "2"}, 
+        OPTIONS_HDMI_FORMAT :[{text: "1920x1080p30",value: "1"},
+                              {text: "1920x1080p60",value: "2"}, 
                               {text: "1920x1080p50",value: "3"}, 
                               {text: "1920x1080p25",value: "4"}, 
-                              {text: "1920x1080i59.94",value: "5"}, 
-                              {text: "1920x1080i50",value: "6"}, 
-                              {text: "1280x720p59.94",value: "7"}, 
+                              {text: "1280x720p60",value: "7"}, 
                               {text: "1280x720p50",value: "8"}, 
-                              {text: "1280x720p29.97",value: "9"}, 
+                              {text: "1280x720p30",value: "9"}, 
                               {text: "1280x720p25",value: "10"}, 
                               {text: "720x576p50",value: "11"}, 
-                              {text: "720x480p59.94",value: "12"}],
+                              {text: "720x480p60",value: "12"}],
         OPTIONS_AUDIO_ENCODE : [{text: "AAC",value: "0"}],
         OPTIONS_AUDIO_BR : [{text: "256kbps",value: "256"}, 
                             {text: "128kbps",value: "128"},
                             {text: "64kbps",value: "64"}],
+        OPTIONS_LOG_LEVEL : [{text: "OFF",value: "0"}, 
+                            {text: "ERROR",value: "1"}, 
+                            {text: "INFO",value: "2"},
+                            {text: "DEBUG",value: "3"}],
         options:{
           dev_push_ip:'0',//传输IP
           PushTsType:'0',//传输模式
-          card_sel_val : "",
-          /*record:'0',
-          recordVal:false,
-          ResendMode:'0',
-          ResendModeVal:false,
-          OpenfecMode:'0',
-          OpenfecModeVal:false,
-          video_input:'0',
-          audio_input:'1',
-          video_encode:'0',
-          AudioEnc:'0',
-          AudioBitrate:'256',
-          bitrate_mode:'0',
-          hdr:'0',
-          latency:'0',
-          HdmiTransFormat:'1',
-          sdiresolutionRate:'1080i',
-          sdiresolutionValue:'50',
-          hdmipenetrate:true,
-          hdmiresolutionRate:'1080',
-          hdmiresolutionValue:'59.94'*/
+          PushCard : "",//单卡选择
+          record:false,//录制开关
+          ResendMode:false,//重传开关
+          OpenfecMode:false,//纠错开关
+          OpenfecLevel:0,//纠错能力
+          SEI:false,//SEI
+          video_input:'0',//视频输入
+          audio_input:'1',//音频输入
+          video_encode:'0',//视频编码
+          AudioEnc:'0',//音频编码
+          AudioBitrate:'256',//音频比特率
+          bitrate_mode:'0',//码率控制
+          HdmiTransFormat:'1',//编码分辨率
+          ArmSenderLogLevel:'0',//日志记录
         }
       }
     },
@@ -379,7 +334,8 @@
           console.log("getDeviceParam")
           if(res.res.success){
             console.log("success");
-            that.options = that.formatData(res.data[0]);
+            //that.options = that.formatData(res.data[0]);
+            that.formatData(res.data[0]);
             console.log("options")
             console.log(that.options);
           }else{
@@ -387,7 +343,6 @@
               dev_push_ip:'1',
               dev_push_mode:'0',
               record:'0',
-              recordVal:false,
               ResendMode:'0',
               ResendModeVal:false,
               OpenfecMode:'0',
@@ -418,30 +373,70 @@
         console.log("formatData")
         console.log(data)
         //传输IP
-        data['dev_push_ip'] = data['dev_push_ip']=="1"?"1":"0";
+        that.options.dev_push_ip = data['dev_push_ip']=="1"?"1":"0";
+        //data['dev_push_ip'] = data['dev_push_ip']=="1"?"1":"0";
+        //传输模式
+        that.options.PushTsType = data['PushTsType'];
         if(data['PushTsType'] == 1){
-          this.card_sel_show = true;
+          that.card_sel_show = true;
         }else{
-          this.card_sel_show = false;
+          that.card_sel_show = false;
         }
-        //that.getDevCardParam(that.formatCardSel());
-
-        /*if(data.record == '0'){  //录制开关
-          data.recordVal = false;
-        }else if(data.record == '1'){
-          data.recordVal = true;
+        //单卡选择
+        that.getDevCardParam(that.formatCardSel);
+        //录制开关
+        that.options.record = (data['record'] == '1' ? true : false);
+        //重传开关
+        that.options.ResendMode = (data['ResendMode'] == '1' ? true : false);
+        //纠错开关
+        if(data['OpenfecMode'] == '1'){
+          that.options.OpenfecMode = true;
+          that.feclevel_show = true;
+        }else{
+          that.options.OpenfecMode = false;
+          that.feclevel_show = false;
         }
-        if(data.ResendMode == '0'){  //重传开关
-          data.ResendModeVal = false;
-        }else if(data.ResendMode == '1'){
-          data.ResendModeVal = true;
-        }
-        if(data.OpenfecMode == '0'){  //纠错开关
-          data.OpenfecModeVal = false;
-        }else if(data.OpenfecMode == '1'){
-          data.OpenfecModeVal = true;
-        }*/
+        //纠错能力
+        that.options.OpenfecLevel = data['OpenfecLevel'];
+        //SEI
+        var sei_state = "";
+        that.options.SEI = (data['SEI'] == '1' ? true : false);
+        //视频输入
+        that.options.video_input = data['video_input'];
+        //音频输入
+        that.options.audio_input = data['audio_input'];
+        //视频编码
+        that.options.video_encode = data['video_encode'];
+        //音频编码
+        that.options.AudioEnc = data['AudioEnc'];
+        //音频比特率
+        that.options.AudioBitrate = data['AudioBitrate'];
+        //码率控制
+        that.options.bitrate_mode = data['bitrate_mode'];
+        //编码分辨率
+        that.options.HdmiTransFormat = data['HdmiTransFormat'];
+        //日志等级
+        that.options.ArmSenderLogLevel = data['ArmSenderLogLevel'];
+        
         return data;
+      },
+
+      //格式化单卡选择
+      formatCardSel(data){
+        var cardSel = [];
+        var cardSelObj = {};
+        for(let i=0; i<data.length; i++){
+          cardSelObj = {};
+          if(data[i]["online"] == "1"){
+            cardSelObj.text = data[i]["card_name"];
+            cardSelObj.value = data[i]["card_id"];
+            cardSel.push(cardSelObj);
+          }
+        }
+        if(cardSel.length == 0){
+          cardSel = [{"text":"无可用网卡","value":""}]  
+        }
+        this.card_sel = cardSel;
       },
       getDevCardParam(cb){
         var that = this;
@@ -482,7 +477,7 @@
         }else{
            this.card_sel_show = false;
         }
-        setDeviceParam('dev_push_mode',this.options.PushTsType?'1':'0')
+        this.setDeviceParam('dev_push_mode',this.options.PushTsType?'1':'0')
       },
 
             setDeviceParam(key,val){

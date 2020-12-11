@@ -249,9 +249,9 @@ export default {
         }
       }, {
         text: "",
-        left: 'center',
-        //right: marginTitleRight,
-        top: 2,
+        /*left: 'center',*/
+        right: 10,
+        top: 0,
         textStyle: {
           color: '#BFBFBF',
           fontSize: '14',
@@ -1037,12 +1037,12 @@ export default {
       option.title[0].text = "概览";
       option.grid.top = '60';
       option.legend.top = 20;
-      option.title[1].top = 5;
+      //option.title[1].top = 5;
       var title = "";
       for(var n=0; n<legendName.length; n++){
-        if(n%2==0 && n!= 0){
+        /*if(n%2==0 && n!= 0){
           title += "\n";
-        }
+        }*/
         var name = "";
         if(legendName[n] == "Total↑"){
           name = "上传速率";
@@ -1056,13 +1056,18 @@ export default {
           name = legendName[n];
         }
         if(legendName[n].indexOf("丢包") == -1){
-          title += [name+" : ",
-                  '{'+colorObj[name]+'|' + dataAll[legendName[n]][0] + '}Mbps  '].join("");
+          /*title += [name+" : ",
+                  '{'+colorObj[name]+'|' + dataAll[legendName[n]][0] + '}Mbps  '].join("");*/
+          title += ['{'+colorObj[name]+'|' + dataAll[legendName[n]][0] + '}Mbps'].join("");
         }else{
           if(dataAll[legendName[n]]){
-            title += [name+" : ",
-                  '{'+colorObj[name]+'|' + dataAll[legendName[n]][0] + '}%  '].join("");
+            /*title += [name+" : ",
+                  '{'+colorObj[name]+'|' + dataAll[legendName[n]][0] + '}%  '].join("");*/
+            title += ['{'+colorObj[name]+'|' + dataAll[legendName[n]][0] + '}%'].join("");
           }
+        }
+        if(n==0 || n%legendName.length-1 != 0){
+          title += "/";
         }
       }
       option.title[1].text = title;
