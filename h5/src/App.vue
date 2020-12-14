@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <!--<Ad v-show="false" @hideTabbarFn="hideTabbarFn"></Ad>-->
-    <!--DV1080底部菜单-->
+    <Ad v-show="true" @hideTabbarFn="hideTabbarFn"></Ad>
+    <!--DV1080-->
     <mt-tabbar v-model="activeTab" v-if="ActiveDeviceType == 'DV1080'" v-show="!navHide">
       <mt-tab-item id="status">
         <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'status' }"></i>
@@ -24,7 +24,7 @@
         {{ $t('basic.me') }}
       </mt-tab-item>
     </mt-tabbar>
-    <!--DV4000底部菜单-->
+    <!--DV4000-->
     <mt-tabbar v-model="activeTab" v-if="ActiveDeviceType == 'DV4000'" v-show="!navHide">
       <mt-tab-item id="dv4000status">
         <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'dv4000status' }"></i>
@@ -51,14 +51,12 @@ export default {
   name: 'App',
   data(){
     return{
-        name: 'app',
-        activeTab: 'status',
-        isLoggedIn: false
+      name: 'app',
+      activeTab: 'status',
+      isLoggedIn: false
     }
   },
-  components: {
-    Ad
-  },
+  components: {Ad},
   mounted(){
 //      if(this.user.id){
 //          this.SET_NAV_STATUS(false);

@@ -1,8 +1,51 @@
 <template>
-    <div class="page">
+  <div class="page">
+    <div id="body">
+      <h1 class="title">{{ title }}</h1>
+      <div class="form-item">
+        <input type="text" autocomplete="false" class="loginIpt" v-model="user.login_name" placeholder="登录账号">
+      </div>
+      <div class="form-item">
+        <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" placeholder="登录密码">
+      </div>
+      <div class="form-item" style="text-align: right;padding-right: .2rem;margin-bottom:0;">
+        <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe">
+        <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
+      </div>
+      <div class="form-item" style="overflow: hidden;">
         <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
+      </div>
+      <div class="setBtn" @click="showConfig = !showConfig">
+        <i class="fa fa-cog fa-2x" aria-hidden="true"></i>
+      </div>
+      <div class="loginGroup" v-show="showConfig">
+        <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV4000' ? 'deviceLoginActive': '']" @click="GoDV4000Login('DV4000')">DV4000</mt-button>
+        <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV1080' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV1080')">DV1080</mt-button>
+        <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
+        <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'WIFI' ? 'deviceLoginActive': '']" @click="connectWifi()">本机WiFi</mt-button>
+      </div>
     </div>
+    <mt-popup v-model="wifiUrlsEditVisible" popup-transition="popup-fade">
+      <div class="pushEditModal">
+        <div class="modalTitle">
+          连接本机WiFi
+          <i class="closeBtn fa fa-close" @click="wifiUrlsEditVisible = false"></i>
+        </div>
+        <div class="formContainer">
+          <div class="formItem">
+            <div class="formItemTitle">http://</div>
+            <div class="formItemVal"><input type="text" v-model="wifiUrl"></div>
+          </div>
+          <div class="formItem" style="text-align: right;margin-bottom: 0;">
+            <button class="modalBtn" @click="wifiUrlsEditVisible = false">取消</button>
+            <button class="modalBtn" @click="setWifiUrl" style="background-color: #3d81f1;color:#fff;">确定</button>
+          </div>
+        </div>
+      </div>
+    </mt-popup>
+  </div>
 </template>
+
 
 <script>
     import { mapState, mapMutations } from 'vuex';

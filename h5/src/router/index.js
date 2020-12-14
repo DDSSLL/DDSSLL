@@ -1,14 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Ad from '@/components/common/Ad'
-//DV1080 VUE
-import Login from '@/components/common/Login'
 import Wifi from '@/components/common/Wifi'
-import Status from '@/components/status/Status'
-import Control from '@/components/control/Control'
-import Live from '@/components/live/Live'
-import Settings from '@/components/settings/Settings'
-import Me from '@/components/me/Me'
+//DV1080 VUE
+import Login from '@/components/DV1080/common/Login'
+import Status from '@/components/DV1080/status/Status'
+import Control from '@/components/DV1080/control/Control'
+import Live from '@/components/DV1080/live/Live'
+import Settings from '@/components/DV1080/settings/Settings'
+import Me from '@/components/DV1080/me/Me'
 //DV4000 VUE
 import DV4000Login from '@/components/DV4000/common/Login'
 import DV4000Status from '@/components/DV4000/status/Status'
@@ -28,6 +28,10 @@ export default new Router({
     routes: [
         {
             path: '/',
+            redirect: { name: 'Ad' }
+        },
+        /*{
+            path: '/',
             redirect: { name: 'Login' }
         },
         {
@@ -37,7 +41,7 @@ export default new Router({
             meta: {
                 keepAlive: false
             }
-        },
+        },*/
         {
             path: '/login',
             name: 'Login',

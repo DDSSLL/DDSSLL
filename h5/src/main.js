@@ -18,7 +18,7 @@ Vue.use(MintUI)
 Vue.use(VueI18n)
 Vue.use(VueCordova)
 
-switch (process.env.VUE_APP_ENV) {
+/*switch (process.env.VUE_APP_ENV) {
     case 'serve':
         axios.defaults.baseURL = "http://47.104.164.249"; //开发环境
         break
@@ -27,7 +27,7 @@ switch (process.env.VUE_APP_ENV) {
         break
     default:
         break
-}
+}*/
 
 Vue.prototype.$Config = Config
 Vue.prototype.$axios = axios
