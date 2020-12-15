@@ -24,7 +24,7 @@ export default {
   methods: {
     showAds() {
       const that = this;
-      let sec = -1;
+      let sec = 5000;
       that.countdown = function() {
         if(sec < 0){
           that.skipAd();

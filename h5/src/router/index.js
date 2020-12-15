@@ -26,11 +26,11 @@ Vue.use(Router)
 //keepAlive定义了页面是否缓存在内存，为true时页面缓存并遵循vue缓存页面的生命周期函数
 export default new Router({
     routes: [
-        {
+        /*{
             path: '/',
             redirect: { name: 'Ad' }
-        },
-        /*{
+        },*/
+        {
             path: '/',
             redirect: { name: 'Login' }
         },
@@ -41,7 +41,7 @@ export default new Router({
             meta: {
                 keepAlive: false
             }
-        },*/
+        },
         {
             path: '/login',
             name: 'Login',

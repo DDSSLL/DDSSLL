@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Ad v-show="true" @hideTabbarFn="hideTabbarFn"></Ad>
+    <!-- <Ad v-show="true" @hideTabbarFn="hideTabbarFn"></Ad> -->
     <!--DV1080-->
     <mt-tabbar v-model="activeTab" v-if="ActiveDeviceType == 'DV1080'" v-show="!navHide">
       <mt-tab-item id="status">
