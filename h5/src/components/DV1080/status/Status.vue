@@ -1039,7 +1039,7 @@ export default {
       option.legend.top = 20;
       //option.title[1].top = 5;
       var title = "";
-      console.log("legendName.length:"+legendName.length)
+      //console.log("legendName.length:"+legendName.length)
       for(var n=0; n<legendName.length; n++){
         /*if(n%2==0 && n!= 0){
           title += "\n";

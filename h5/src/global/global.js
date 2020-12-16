@@ -242,7 +242,36 @@ export default {
       return true;
     }
   },
- 
+  //获取推流地址相关信息
+  getPushUrls(content,cb){
+    var that = this;
+    content.$axios({
+      method: 'post',
+      url:"/page/index/indexData.php",
+      data:content.$qs.stringify({
+        getBoardUrl:true,
+        rcvSn: content.ActiveDevice.rcv_sn,
+        boardId: content.ActiveDevice.board_id
+      }),
+      Api:"getBoardUrl",
+      AppId:"android",
+      UserId:content.user.id
+    })
+    .then(function (response) {
+      let res = response.data
+      if(res.res.success){
+        if(cb){
+          console.log("getPushUrls success")
+          cb(res.data);
+        }
+      }else{
+        that.address = [];
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  }
   //获取背包参数范围
   /*getDevParamRange(param) {
     var res = [];

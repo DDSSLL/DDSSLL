@@ -179,7 +179,7 @@
             },
             //获取背包锁状态
             getDevLockStatus(){
-              console.log("getDevLockStatus")
+              //console.log("getDevLockStatus")
               var that = this;
               this.$axios({
                   method: 'post',
