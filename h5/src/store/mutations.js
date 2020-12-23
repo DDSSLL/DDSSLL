@@ -30,7 +30,9 @@ export default {
     },
     // 设置当前设备状态
     [types.SET_ACTIVE_DEVICE_TYPE]: (state, datas) => {
-        state.ActiveDeviceType = datas
+        console.log("SET_ACTIVE_DEVICE_TYPE")
+        //state.ActiveDeviceType = datas;
+        state.activedevicetype = datas;
     },
     // 设置网卡图颜色样式
     [types.SET_CHART_STYLE]: (state, datas) => {
@@ -40,10 +42,17 @@ export default {
     [types.SET_DEVICE_TYPE_SELECT]: (state, datas) => {
         state.deviceTypeSelect = datas
     },
+    // 设置设备列表显示用户组
+    [types.SET_DEVICE_PREFIX_SELECT]: (state, datas) => {
+        state.devicePrefixSelect = datas
+    },
     [types.SET_PARAM_LOCK_ACK]: (state, datas) => {
         state.paramLockAck = datas
     },
     [types.SET_PARAM_LOCK]: (state, datas) => {
         state.paramLock = datas
+    },
+    [types.SET_DOMAIN]: (state, datas) => {
+        state.domain = datas
     }
 }

@@ -15,14 +15,18 @@ export default {
     paramLock:null,
     //设备列表显示类型
     deviceTypeSelect:1,
+    devicePrefixSelect:"all",
     //设备定时器ID
     DeviceTimer:null,
     //图表定时器ID
     ChartTimer:null,
     //当前登录设备型号
-    ActiveDeviceType:null,
+    ActiveDeviceType:'DV1080',
+    activedevicetype:'DV1080',
     //图表样式
     cardLineStyle:'old',
+    //请求地址
+    domain:'http://www.hdxpress.cn',//1080一级域名
     chartCardView : {
         "eth0": "",
         "sim1": "",

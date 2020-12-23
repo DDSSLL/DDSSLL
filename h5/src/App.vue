@@ -2,37 +2,49 @@
   <div id="app">
     <!-- <Ad v-show="true" @hideTabbarFn="hideTabbarFn"></Ad> -->
     <!--DV1080-->
-    <mt-tabbar v-model="activeTab" v-if="ActiveDeviceType == 'DV1080'" v-show="!navHide">
+    <mt-tabbar v-model="activeTab" v-if="tabShow_1080" v-show="!navHide">
       <mt-tab-item id="status">
         <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'status' }"></i>
-        {{ $t('basic.status') }}
+        {{ $t('basic1080.status') }}
       </mt-tab-item>
       <mt-tab-item id="control">
         <i class="tab tab-control" v-bind:class="{ 'tab-control-active': activeTab == 'control' }"></i>
-        {{ $t('basic.control') }}
+        {{ $t('basic1080.control') }}
       </mt-tab-item>
       <mt-tab-item id="live">
         <i class="tab tab-live" v-bind:class="{ 'tab-live-active': activeTab == 'live' }"></i>
-        {{ $t('basic.live') }}
+        {{ $t('basic1080.live') }}
       </mt-tab-item>
       <mt-tab-item id="settings">
         <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab == 'settings' }"></i>
-        {{ $t('basic.settings') }}
+        {{ $t('basic1080.settings') }}
       </mt-tab-item>
       <mt-tab-item id="me">
         <i class="tab tab-me" v-bind:class="{ 'tab-me-active': activeTab == 'me' }"></i>
-        {{ $t('basic.me') }}
+        {{ $t('basic1080.me') }}
       </mt-tab-item>
     </mt-tabbar>
     <!--DV4000-->
-    <mt-tabbar v-model="activeTab" v-if="ActiveDeviceType == 'DV4000'" v-show="!navHide">
-      <mt-tab-item id="dv4000status">
+    <mt-tabbar v-model="activeTab" v-if="tabShow_4000" v-show="!navHide">
+      <mt-tab-item id="status">
         <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'dv4000status' }"></i>
-        {{ $t('basic.status') }}
+        {{ $t('basic4000.status') }}
       </mt-tab-item>
-      <mt-tab-item id="dv4000me">
+      <mt-tab-item id="control">
+        <i class="tab tab-control" v-bind:class="{ 'tab-control-active': activeTab == 'dv4000control' }"></i>
+        {{ $t('basic4000.control') }}
+      </mt-tab-item>
+      <mt-tab-item id="live">
+        <i class="tab tab-live" v-bind:class="{ 'tab-live-active': activeTab == 'dv4000live' }"></i>
+        {{ $t('basic4000.live') }}
+      </mt-tab-item>
+      <mt-tab-item id="settings">
+        <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab == 'dv4000settings' }"></i>
+        {{ $t('basic4000.settings') }}
+      </mt-tab-item>
+      <mt-tab-item id="me">
         <i class="tab tab-me" v-bind:class="{ 'tab-me-active': activeTab == 'dv4000me' }"></i>
-        {{ $t('basic.me') }}
+        {{ $t('basic4000.me') }}
       </mt-tab-item>
     </mt-tabbar>
     <keep-alive v-if="isLoggedIn">
@@ -53,21 +65,44 @@ export default {
     return{
       name: 'app',
       activeTab: 'status',
-      isLoggedIn: false
+      isLoggedIn: false,
+      tabShow_1080:false,
+      tabShow_4000:false
     }
   },
   components: {Ad},
+  computed: {
+      ...mapState(['user','navHide','activedevicetype'])
+  },
   mounted(){
 //      if(this.user.id){
 //          this.SET_NAV_STATUS(false);
 //      }else{
           this.SET_NAV_STATUS(true);
+          console.log("app mounted")
+          console.log("activedevicetype:"+this.activedevicetype)
 //      }
   },
-  computed: {
-      ...mapState(['user','navHide','ActiveDeviceType'])
-  },
+
   watch: {
+    '$store.state.activedevicetype': {
+        immediate: true,
+        handler(val) {
+          if(val){
+            var that = this;
+            switch(this.activedevicetype){
+              case "DV1080":
+                that.tabShow_1080 = true;
+                break;
+              case "DV4000":
+                that.tabShow_4000 = true;
+                break;
+              default:
+                break;
+            }
+          }
+        }
+      },
       activeTab(val){
           if(this.user.id){
               switch (val){
@@ -79,6 +114,9 @@ export default {
                   case 'me': this.$router.push("/me");break;
                   //DV4000
                   case 'dv4000status': this.$router.push("/dv4000status");break;
+                  case 'dv4000control': this.$router.push("/dv4000control");break;
+                  case 'dv4000live': this.$router.push("/dv4000live");break;
+                  case 'dv4000settings': this.$router.push("/dv4000settings");break;
                   case 'dv4000me': this.$router.push("/dv4000me");break;
                   default: return null;
               }

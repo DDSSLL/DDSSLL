@@ -1,197 +1,107 @@
 <template>
-    <div class="page">
-        <!--<mt-header fixed v-bind:title="title">-->
-            <!--<mt-button slot="left" @click.native="back"> < </mt-button>-->
-        <!--</mt-header>-->
-        <div id="body">
-            <h1 class="title">{{ title }}</h1>
-            <div class="form-item">
-                <input type="text" autocomplete="false" class="loginIpt" v-model="user.login_name" placeholder="登录账号">
-            </div>
-            <div class="form-item">
-                <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" placeholder="登录密码">
-            </div>
-            <div class="form-item" style="text-align: right;padding-right: .2rem;margin-bottom:0;">
-                <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe">
-                <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
-            </div>
-            <div class="form-item" style="overflow: hidden;">
-                <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
-            </div>
-            <div class="form-item">
-                <span class="forgetPwd">忘记密码了?</span>
-                <span style="float: left;width:4%;text-align: center;margin-top:0.05rem;">|</span>
-                <span class="registerBtn">注册一个新账号</span>
-            </div>
-            <div class="setBtn"  @click="loginSetting" v-if="showConfigBtn"><!-- @click="showConfig = !showConfig" -->
-                <i class="fa fa-cog fa-2x" aria-hidden="true"></i>
-            </div>
-            <div class="loginGroup" v-show="showConfig">
-                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV4000' ? 'deviceLoginActive': '']" @click="GoDV4000Login('DV4000')">DV4000</mt-button>
-                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV1080' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV1080')">DV1080</mt-button>
-                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
-                <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'WIFI' ? 'deviceLoginActive': '']" @click="connectWifi()">本机WiFi</mt-button>
-            </div>
-            <!--<div class="loginBottom">-->
-                <!--<div class="copyright">-->
-                    <!--<span>版权所有：</span>-->
-                    <!--<span>天津德力仪器设备有限公司 本网站所有下载资料仅供参考  </span>-->
-                <!--</div>-->
-                <!--<div class="address">-->
-                    <!--<span>地址：</span>-->
-                    <!--<span>天津市西青区高新技术产业园区 (外环) 海泰创新三路8号 </span>-->
-                    <!--<span><a style="color: #5AB1A7;" href="https://beian.miit.gov.cn" target="_blank">津ICP备16000820号</a></span>-->
-                <!--</div>-->
-                <!--<div class="tel">-->
-                    <!--<span>总机：022-27645003</span>-->
-                    <!--<span>传真：022-27645002</span>-->
-                    <!--<span>E-mail：market@deviser.com.cn</span>-->
-                <!--</div>-->
-            <!--</div>-->
-        </div>
-        <mt-popup v-model="wifiUrlsEditVisible" popup-transition="popup-fade">
-            <div class="pushEditModal">
-                <div class="modalTitle">
-                    连接本机WiFi
-                    <i class="closeBtn fa fa-close" @click="wifiUrlsEditVisible = false"></i>
-                </div>
-                <div class="formContainer">
-                    <div class="formItem">
-                        <div class="formItemTitle">http://</div>
-                        <div class="formItemVal"><input type="text" v-model="wifiUrl"></div>
-                    </div>
-                    <div class="formItem" style="text-align: right;margin-bottom: 0;">
-                        <button class="modalBtn" @click="wifiUrlsEditVisible = false">取消</button>
-                        <button class="modalBtn" @click="setWifiUrl" style="background-color: #3d81f1;color:#fff;">确定</button>
-                    </div>
-                </div>
-            </div>
-        </mt-popup>
-
-        <mt-popup v-model="debugSetting" position="right" class="debugSetting">
-          <h1 class="debugSettingTitle">请输入开发者密码</h1>
-          <div class="form-item debugSettingInput">
-            <input type="text" class="" v-model="debugSettingPwd">
-          </div>
-          <div class="form-item debugSettingBtn">
-            <mt-button type="default" size="small" @click="backToLogin">返回</mt-button>
-            <mt-button type="primary" size="small" style="margin-left:15px" @click="changeDebug">确定</mt-button>
-          </div>
-          <!-- <div class="GroupItemBtns">
-            <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfUnit">确定</button>
-            <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfUnit">恢复当前值</button>
-          </div> -->
-        </mt-popup>
+  <div class="page">
+    <div id="body">
+      <h1 class="title">{{ title }}</h1>
+      <div class="form-item">
+        <input type="text" autocomplete="false" class="loginIpt" v-model="user.login_name" placeholder="登录账号">
       </div>
-    </template>
+      <div class="form-item">
+        <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" placeholder="登录密码">
+      </div>
+      <div class="form-item" style="text-align: right;padding-right: .2rem;margin-bottom:0;">
+        <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe_1080">
+        <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
+      </div>
+      <div class="form-item" style="overflow: hidden;">
+        <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
+      </div>
+      <div class="form-item">
+        <span class="forgetPwd">忘记密码了?</span>
+        <span style="float: left;width:4%;text-align: center;margin-top:0.05rem;">|</span>
+        <span class="registerBtn">注册一个新账号</span>
+      </div>
+      <LoginSetBtn></LoginSetBtn>    
+    </div>
+  </div>
+</template>
 
 <script>
+  import LoginSetBtn from '../../common/LoginSetBtn';
   import { mapState, mapMutations } from 'vuex';
-  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE_TYPE } from '../../../store/mutation-types';
+  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE_TYPE,SET_DOMAIN } from '../../../store/mutation-types';
   export default {
     name: "Login",
     data(){
       return {
         title : "HDXpress",
+        HDXPRESS_BUILD : "http://www.hdxpress.cn",//1080一级域名
         user:{
           login_name:'',
           password:'',
           loginStatus:false,
-          saveMe:false
+          saveMe_1080:false
         },
-        ActiveDeviceType:'DV1080',
-        showConfigBtn:true,
-        showConfig:false,
         wifiUrlsEditVisible:false,
         wifiUrl:"",
-        DEBUGMODECOUNT : 5,//连续点击5次，没两次点击的间隔小于1s
-        lastClick : null,
-        clickTimes : 0,
-        debugSetting:false,
-        debugSettingPwd:"",
-        DEBUGMODEPWD : "mode=debug",
-        DOMAIN : "http://www.hdxpress.cn",//一级域名
-        HDXPRESS_BUILD : "http://www.hdxpress.cn",//1080一级域名
-        HDXPRESS_SERVE : "http://1080.hdxpress.cn:8088/",//1080二级域名
-        UHDXPRESS_BUILD : "http://www.uhdxpress.com",//4000一级域名
-        UHDXPRESS_SERVE : "http://www.uhdxpress.com",//4000二级域名
       }
     },
     computed: {
-    ...mapState(['navHide'])
+    ...mapState(['navHide','activedevicetype','domain'])
+    },
+    components: {
+      LoginSetBtn
+    },
+    watch:{   //监听当前设备类型变化
+      '$store.state.activedevicetype': {
+        immediate: true,
+        handler(val) {
+          if(val){
+            var that = this;
+            switch(this.activedevicetype){
+              case "DV1080":
+                that.title = 'HDXpress';
+                that.user.login_name = localStorage.getItem("USERNAME_1080");
+                that.user.password = localStorage.getItem("PASSWORD_1080");
+                break;
+              case "DV4000":
+                that.title = 'UHDXpress';
+                that.user.login_name = localStorage.getItem("USERNAME_4000");
+                that.user.password = localStorage.getItem("PASSWORD_4000");
+                break;
+              default:
+                that.title = 'OTHER';
+                break;
+            }
+          }
+        }
+      }
     },
     mounted(){
-      console.log("mounted")
-      
-      // if(localStorage.getItem("LOGIN")){
-      this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080一级域名
-      console.log("this.$axios.defaults.baseURL:"+this.$axios.defaults.baseURL)
-      //"http://1080.hdxpress.cn:8088/";//二级域名
-      //"http://127.0.0.1/dv1080/";//
-      this.user.saveMe = localStorage.getItem("SAVEME")?eval(localStorage.getItem("SAVEME")):false;
-      if(this.user.saveMe){
-        this.user.login_name = localStorage.getItem("USERNAME");
-        this.user.password = localStorage.getItem("PASSWORD");
-        this.ActiveDeviceType = localStorage.getItem("DEVICE");
-        // this.login();
+      console.log("1080 login mount")
+      this.SET_ACTIVE_DEVICE_TYPE("DV1080")
+      this.SET_DOMAIN(this.HDXPRESS_BUILD);
+      this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080的一级域名
+      //this.$axios.defaults.baseURL = this.HDXPRESS_SERVE;//调试代码不能上传
+      //this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080一级域名
+      this.user.saveMe_1080 = localStorage.getItem("SAVEME_1080")?eval(localStorage.getItem("SAVEME_1080")):false;
+      if(this.user.saveMe1080){
+        this.user.login_name = localStorage.getItem("USERNAME_1080");
+        this.user.password = localStorage.getItem("PASSWORD_1080");
       }
-      // }
     },
     methods:{
       ...mapMutations({
         SET_USER,
         SET_NAV_STATUS,
-        SET_ACTIVE_DEVICE_TYPE
+        SET_ACTIVE_DEVICE_TYPE,
+        SET_DOMAIN
       }),
-      loginSetting(){
-        console.log("loginSetting")
-        var that = this;
-        if(!that.lastClick){
-          that.lastClick = (new Date()).getTime();
-          that.clickTimes++;
-        }else{
-          var newClick = (new Date()).getTime();
-          if(newClick - that.lastClick > 1000){//两次点击间隔大于1s
-            that.clickTimes = 0;
-          }else{
-            ++that.clickTimes;
-          }
-          that.lastClick = newClick;
-          if(that.clickTimes == that.DEBUGMODECOUNT){//连续点击5次
-            this.debugSetting = true;
-            that.clickTimes = 0;
-            that.lastClick = "";
-          }
-        }
-      },
-      changeDebug(){
-        if(this.debugSettingPwd == this.DEBUGMODEPWD){//进入debug模式
-          if(this.ActiveDeviceType == "DV1080"){
-            this.DOMAIN = this.HDXPRESS_SERVE;    
-          }else if(this.ActiveDeviceType == "DV4000"){
-            this.DOMAIN = this.UHDXPRESS_SERVE;    
-          }
-          this.$axios.defaults.baseURL = this.DOMAIN;
-          this.debugSetting = false;
-        }else{
-          this.$toast({
-            message: "密码错误",
-            position: 'middle',
-            duration: 2000
-          });
-        }
-      },
-      backToLogin(){
-        this.debugSetting = false;
-      },
-      back(){
-        this.$router.go(-1)
-      },
       login(){
         console.log("login")
-        console.log(this.DOMAIN)
-        console.log(this.$axios.defaults.baseURL);
+        console.log("设备："+this.activedevicetype);
+        console.log("this.$axios.defaults.baseURL:"+this.$axios.defaults.baseURL)
         var that = this;
+        that.$axios.defaults.baseURL = that.domain;
         this.$axios({
           method: 'post',
           url:"/login/login.php",
@@ -207,21 +117,16 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            /*that.$toast({
-                message: "登录成功",
-                position: 'middle',
-                duration: 2000
-            });*/
             setTimeout(function(){
               that.$router.push("/status");
               that.SET_NAV_STATUS(false);
               that.SET_USER(res.res.data);
-              that.SET_ACTIVE_DEVICE_TYPE(that.ActiveDeviceType);
+              that.SET_ACTIVE_DEVICE_TYPE(that.curDeviceType);
               localStorage.setItem("LOGIN",true);
-              localStorage.setItem("USERNAME",that.user.login_name);
-              localStorage.setItem("PASSWORD",that.user.password);
-              localStorage.setItem("DEVICE",that.ActiveDeviceType);
-              localStorage.setItem("SAVEME",that.user.saveMe);
+              localStorage.setItem("USERNAME_1080",that.user.login_name);
+              localStorage.setItem("PASSWORD_1080",that.user.password);
+              localStorage.setItem("DEVICE",that.activedevicetype);
+              localStorage.setItem("SAVEME_1080",that.user.saveMe_1080);
               //每次重新登录echarts图都重新画
               localStorage.removeItem("cardData");
               localStorage.removeItem("chartKey");
@@ -234,6 +139,10 @@
               position: 'middle',
               duration: 3000
             })
+            localStorage.setItem("USERNAME_1080",that.user.login_name);
+            localStorage.setItem("PASSWORD_1080",that.user.password);
+            localStorage.setItem("DEVICE",that.activedevicetype);
+            localStorage.setItem("SAVEM_1080",that.user.saveMe_1080);
           }
         })
         .catch(function (error) {
@@ -259,20 +168,32 @@
         }
       },
       register(){},
-
-      ChoseDevice(val){
+      /*back(){
+        this.$router.go(-1)
+      },*/
+      /*ChoseDevice(val){
         this.ActiveDeviceType = val;
         this.SET_ACTIVE_DEVICE_TYPE(this.ActiveDeviceType);
         switch(this.ActiveDeviceType){
-          case "DV1080":this.title = "HDXpress";
-              //this.$axios.defaults.baseURL = "http://47.104.164.249";
-              this.$axios.defaults.baseURL = this.DOMAIN;//"http://1080.hdxpress.cn:8088/";//"http://127.0.0.1";
-              break;
-          case "DV4000":this.title = "UHDXpress";this.$axios.defaults.baseURL = "http://117.131.178.104:8088";break;
-          case "OTHER":this.title = "UHDXpress";this.$axios.defaults.baseURL = "http://47.104.164.249";break;
+          case "DV1080":
+            this.title = "HDXpress";
+            this.$axios.defaults.baseURL = this.DOMAIN;
+            //"http://127.0.0.1";
+            break;
+          case "DV4000":
+            this.title = "UHDXpress";
+            this.$axios.defaults.baseURL = this.DOMAIN;
+            //this.$axios.defaults.baseURL = "http://117.131.178.104:8088";
+            this.$router.push("/dv4000login");
+            
+            break;
+          case "OTHER":
+            this.title = "OTHER";
+            this.$axios.defaults.baseURL = "http://47.104.164.249";
+            break;
         }
         this.showConfig = false;
-      },
+      },*/
 
       connectWifi(){
         //this.wifiUrlsEditVisible = true;
@@ -281,39 +202,19 @@
 
       setWifiUrl(){
         this.$axios.defaults.baseURL = "http://" + this.wifiUrl;
-        this.ActiveDeviceType = "WIFI";
+        this.activedevicetype = "WIFI";
         this.wifiUrlsEditVisible = false;
         this.showConfig = false;
       },
 
-      GoDV4000Login(){
+      /*GoDV4000Login(){
         this.$router.push("/dv4000login");
-      }
+      }*/
     }
   }
 </script>
 
 <style scoped>
-  .debugSetting{
-    width:100%;
-    height:100%; 
-    background-color:#000 !important;
-    font-size: .16rem;
-  }
-  .debugSettingTitle{
-    padding-top:2rem;
-    color: #fff;
-    text-align: center;
-  }
-  .debugSettingInput{
-    text-align: center;
-    margin-top: 15px;
-    font-size:0.16rem;
-  }
-  .debugSettingBtn{
-    text-align: center;
-    margin-top: 15px;
-  }
     .page{
         height: 100%;
         overflow: hidden;
@@ -390,7 +291,7 @@
         display: block;
         line-height: .16rem;
     }
-    .loginGroup{
+/*    .loginGroup{
         position: fixed;
         right: .55rem;
         bottom: .55rem;
@@ -410,7 +311,7 @@
     .deviceLoginActive{
       background-color: #3d81f1;
     }
-    .setBtn{
+   .setBtn{
         position: fixed;
         z-index: 1;
         right: .2rem;
@@ -422,6 +323,27 @@
         text-align: center;
         line-height: .64rem;
     }
+  .debugSetting{
+    width:100%;
+    height:100%; 
+    background-color:#000 !important;
+    font-size: .16rem;
+  }
+  .debugSettingTitle{
+    padding-top:2rem;
+    color: #fff;
+    text-align: center;
+  }
+  .debugSettingInput{
+    text-align: center;
+    margin-top: 15px;
+    font-size:0.16rem;
+  }
+  .debugSettingBtn{
+    text-align: center;
+    margin-top: 15px;
+  }
+    */
 
     .pushEditModal{
         width: 3rem;

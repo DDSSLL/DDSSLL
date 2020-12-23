@@ -271,7 +271,7 @@ export default {
     .catch(function (error) {
       console.log(error)
     })
-  }
+  },
   //获取背包参数范围
   /*getDevParamRange(param) {
     var res = [];
@@ -295,4 +295,32 @@ export default {
     }
     return res;
   }*/
+  //获取所有的前缀
+  getUserPrefixArr(content, cb) {
+    var that = this;
+    content.$axios({
+      method: 'post',
+      url:"/page/userPrefix/userPrefix.php",
+      data:content.$qs.stringify({
+        allPrefixs:true
+      }),
+      Api:"getBoardUrl",
+      AppId:"android",
+      UserId:content.user.id
+    })
+    .then(function (response) {
+      let res = response.data
+      if(res.res.success){
+        if(cb){
+          //console.log("getUserPrefixArr success")
+          cb(res.data);
+        }
+      }else{
+        that.address = [];
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  }
 }

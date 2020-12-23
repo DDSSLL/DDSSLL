@@ -204,7 +204,7 @@
 
 <script>
   import { mapState, mapMutations } from 'vuex';
-  import { SET_USER,SET_NAV_STATUS } from '../../store/mutation-types';
+  import { SET_USER,SET_NAV_STATUS } from '../../../store/mutation-types';
   import Device from '../basic/Device';
   import $ from 'jquery';
   export default {

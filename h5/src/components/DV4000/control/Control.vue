@@ -39,6 +39,7 @@
                     <div class="GroupItemTitle">传输开关</div>
                     <div class="GroupItemValue">
                         <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch>
+                        <span id="url_dis" v-if="pushDisShow" style="color:red">推流地址不通</span>
                     </div>
                 </div>
             </div>
@@ -88,7 +89,8 @@
 
 <script>
   import Device from '../basic/Device';
-  import { mapState } from 'vuex';
+  import { mapState, mapMutations } from 'vuex';
+  /*import {  } from '../../../store/mutation-types';*/
   import $ from 'jquery';
   export default {
     name: "Control",
@@ -103,6 +105,7 @@
         speedMin : 0,
         speedMax : 0,
         ActiveDevice:null,
+        pushDisShow:false,
         common:{
           dev_push_enable:"0",
           dev_push_enableVal:false,
@@ -131,6 +134,7 @@
             this.getNetBoard();
             this.getDeviceParam();
           }
+          this.$global.getPushUrls(this, this.formatPushUrlState);
         }
       }
     },
@@ -142,6 +146,9 @@
 
     },
     methods:{
+      /*...mapMutations({
+          
+      }),*/
       getNetBoard(){
         var that = this;
         this.$axios({
@@ -273,8 +280,10 @@
         var that = this;
         if(data.dev_push_enable == '0' && data.dev_push_status == '0'){  //推流开关
           data.dev_push_enableVal = false;
+          that.pushDisShow = false;
         }else if(data.dev_push_enable == '1'){
           data.dev_push_enableVal = true;
+          that.$global.getPushUrls(that, that.formatPushUrlState);
         }
         data.dev_srVal = (data.dev_sr / 1000).toFixed(1); //(Mbps)
         data.dev_srVal_range = data.dev_srVal;
@@ -282,9 +291,25 @@
         data.dev_delayVal = (data.dev_delay / 1000).toFixed(3); //(s)
         data.dev_delayVal_range = data.dev_delayVal;
         data.dev_delayVal_input = data.dev_delayVal;
-        console.log(data);
         return data;
       },
+      //推流地址状态
+      formatPushUrlState(data){
+        var that = this;
+        var runningStatusCount = 0;
+        for (var i = 0; i < data.length; i++) {
+          if (data[i].push_sel == '1') {
+            if (data[i].push_status == 'running') {
+              runningStatusCount++;
+            }
+          }
+        }
+        that.pushDisShow = false;
+        if(runningStatusCount == 0 && that.common.dev_push_enableVal){
+          that.pushDisShow = true;
+        }
+      },
+      
       //传输开关
       setDevPushEnable(){
         var that = this;
@@ -305,10 +330,48 @@
             that.setDeviceParam('dev_push_enable');
           })
         }else{
+          that.stopDevPushUrl(function(){
+            that.setDeviceParam('dev_push_enable');
+          })
+          $("#url_dis").css('display','none');
+
           that.setDeviceParam('dev_push_enable');
         }
       },
-      //判断是否有推流地址，没有推流地址不能打开传输开关
+      //禁用所有推流地址
+      stopDevPushUrl(cb){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            stopDevPushUrl:true,
+            boardId: that.ActiveDevice.dev_sn
+          }),
+          Api:"stopDevPushUrl",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if(cb){
+              cb()
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+            that.common.dev_push_enableVal = true; 
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //判断是否有推流地址，没有推流地址不能打开传输开关,有推流地址，启用所有推流地址
       checkDevPushCondition(cb){
         var that = this;
         this.$axios({

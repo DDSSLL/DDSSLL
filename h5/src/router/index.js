@@ -12,6 +12,9 @@ import Me from '@/components/DV1080/me/Me'
 //DV4000 VUE
 import DV4000Login from '@/components/DV4000/common/Login'
 import DV4000Status from '@/components/DV4000/status/Status'
+import DV4000Control from '@/components/DV4000/control/Control'
+import DV4000Live from '@/components/DV4000/live/Live'
+import DV4000Settings from '@/components/DV4000/settings/Settings'
 import DV4000Me from '@/components/DV4000/me/Me'
 
 //解决(in promise) NavigationDuplicated: Avoided redundant navigation问题
@@ -122,6 +125,30 @@ export default new Router({
             component: DV4000Me,
             meta: {
                 keepAlive: false
+            }
+        },
+        {
+            path: '/dv4000control',
+            name: 'DV4000Control',
+            component: DV4000Control,
+            meta: {
+                keepAlive: true
+            }
+        },
+        {
+            path: '/dv4000live',
+            name: 'DV4000Live',
+            component: DV4000Live,
+            meta: {
+                keepAlive: true
+            }
+        },
+        {
+            path: '/dv4000settings',
+            name: "DV4000Settings",
+            component: DV4000Settings,
+            meta: {
+                keepAlive: true
             }
         }
     ]

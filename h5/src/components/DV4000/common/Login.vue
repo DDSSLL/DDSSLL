@@ -9,109 +9,210 @@
         <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" placeholder="登录密码">
       </div>
       <div class="form-item" style="text-align: right;padding-right: .2rem;margin-bottom:0;">
-        <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe">
+        <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe_1080">
         <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
       </div>
       <div class="form-item" style="overflow: hidden;">
         <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
       </div>
-      <div class="setBtn" @click="showConfig = !showConfig">
-        <i class="fa fa-cog fa-2x" aria-hidden="true"></i>
+      <div class="form-item">
+        <span class="forgetPwd">忘记密码了?</span>
+        <span style="float: left;width:4%;text-align: center;margin-top:0.05rem;">|</span>
+        <span class="registerBtn">注册一个新账号</span>
       </div>
-      <div class="loginGroup" v-show="showConfig">
-        <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV4000' ? 'deviceLoginActive': '']" @click="GoDV4000Login('DV4000')">DV4000</mt-button>
-        <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'DV1080' ? 'deviceLoginActive': '']" @click="ChoseDevice('DV1080')">DV1080</mt-button>
-        <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
-        <mt-button class="deviceLogin" :class="[ActiveDeviceType == 'WIFI' ? 'deviceLoginActive': '']" @click="connectWifi()">本机WiFi</mt-button>
-      </div>
+      <LoginSetBtn></LoginSetBtn>    
     </div>
-    <mt-popup v-model="wifiUrlsEditVisible" popup-transition="popup-fade">
-      <div class="pushEditModal">
-        <div class="modalTitle">
-          连接本机WiFi
-          <i class="closeBtn fa fa-close" @click="wifiUrlsEditVisible = false"></i>
-        </div>
-        <div class="formContainer">
-          <div class="formItem">
-            <div class="formItemTitle">http://</div>
-            <div class="formItemVal"><input type="text" v-model="wifiUrl"></div>
-          </div>
-          <div class="formItem" style="text-align: right;margin-bottom: 0;">
-            <button class="modalBtn" @click="wifiUrlsEditVisible = false">取消</button>
-            <button class="modalBtn" @click="setWifiUrl" style="background-color: #3d81f1;color:#fff;">确定</button>
-          </div>
-        </div>
-      </div>
-    </mt-popup>
   </div>
 </template>
 
-
 <script>
-    import { mapState, mapMutations } from 'vuex';
-    import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE_TYPE } from '../../../store/mutation-types';
-    export default {
-        name: "Login",
-        data(){
-            return {
-                title : "UHDXpress",
-                user:{
-                    login_name:'',
-                    password:'',
-                    loginStatus:false,
-                    saveMe:false
-                },
-                ActiveDeviceType:'DV4000',
-                showConfig:false,
-                wifiUrlsEditVisible:false,
-                wifiUrl:""
-            }
+  import LoginSetBtn from '../../common/LoginSetBtn';
+  import { mapState, mapMutations } from 'vuex';
+  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE_TYPE,SET_DOMAIN } from '../../../store/mutation-types';
+  export default {
+    name: "Login",
+    data(){
+      return {
+        title : "HDXpress",
+        UHDXPRESS_BUILD : "http://www.uhdxpress.com",//4000一级域名
+        //UHDXPRESS_BUILD : "http://127.0.0.1/new-trank",
+        user:{
+          login_name:'',
+          password:'',
+          loginStatus:false,
+          saveMe_1080:false
         },
-        computed: {
-            ...mapState(['navHide'])
-        },
-        mounted(){
-            this.SET_ACTIVE_DEVICE_TYPE(this.ActiveDeviceType);
-            this.$axios.defaults.baseURL = "http://47.104.164.249";
-            this.user.saveMe = localStorage.getItem("SAVEME")?eval(localStorage.getItem("SAVEME")):false;
-            if(this.user.saveMe){
-                this.user.login_name = localStorage.getItem("USERNAME");
-                this.user.password = localStorage.getItem("PASSWORD");
-                this.ActiveDeviceType = localStorage.getItem("DEVICE");
+        wifiUrlsEditVisible:false,
+        wifiUrl:"",
+      }
+    },
+    computed: {
+    ...mapState(['navHide','activedevicetype','domain'])
+    },
+    components: {
+      LoginSetBtn
+    },
+    watch:{   //监听当前设备类型变化
+      '$store.state.activedevicetype': {
+        immediate: true,
+        handler(val) {
+          if(val){
+            var that = this;
+            switch(this.activedevicetype){
+              case "DV1080":
+                that.title = 'HDXpress';
+                that.user.login_name = localStorage.getItem("USERNAME_1080");
+                that.user.password = localStorage.getItem("PASSWORD_1080");
+                break;
+              case "DV4000":
+                that.title = 'UHDXpress';
+                that.user.login_name = localStorage.getItem("USERNAME_4000");
+                that.user.password = localStorage.getItem("PASSWORD_4000");
+                break;
+              default:
+                that.title = 'OTHER';
+                break;
             }
-        },
-        methods:{
-            ...mapMutations({
-                SET_USER,
-                SET_NAV_STATUS,
-                SET_ACTIVE_DEVICE_TYPE
-            }),
-
-            login(){
-                var that = this;
-                this.$toast({
-                    message: "登录成功",
-                    position: 'middle',
-                    duration: 2000
-                });
-                setTimeout(function(){
-                    that.$router.push("/dv4000status");
-                    that.SET_NAV_STATUS(false);
-                    that.SET_USER({id:"1"});
-                    localStorage.setItem("LOGIN",true);
-                    localStorage.setItem("USERNAME",that.user.login_name);
-                    localStorage.setItem("PASSWORD",that.user.password);
-                    localStorage.setItem("DEVICE",that.ActiveDeviceType);
-                    localStorage.setItem("SAVEME",that.user.saveMe);
-                    //每次重新登录echarts图都重新画
-                    localStorage.removeItem("cardData");
-                    localStorage.removeItem("chartKey");
-                    localStorage.removeItem("curChart");
-                    localStorage.removeItem("allChartData");
-                },800)
-            }
+          }
         }
+      }
+    },
+    mounted(){
+      //console.log("1080 login mount")
+      this.SET_ACTIVE_DEVICE_TYPE("DV4000")
+      this.SET_DOMAIN(this.UHDXPRESS_BUILD);
+      this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080的一级域名
+      //this.$axios.defaults.baseURL = this.HDXPRESS_SERVE;//调试代码不能上传
+      //this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080一级域名
+      this.user.saveMe_1080 = localStorage.getItem("SAVEME_1080")?eval(localStorage.getItem("SAVEME_1080")):false;
+      if(this.user.saveMe1080){
+        this.user.login_name = localStorage.getItem("USERNAME_1080");
+        this.user.password = localStorage.getItem("PASSWORD_1080");
+      }
+    },
+    methods:{
+      ...mapMutations({
+        SET_USER,
+        SET_NAV_STATUS,
+        SET_ACTIVE_DEVICE_TYPE,
+        SET_DOMAIN
+      }),
+      login(){
+        /*console.log("login")
+        console.log("设备："+this.activedevicetype);
+        console.log("this.$axios.defaults.baseURL:"+this.$axios.defaults.baseURL)*/
+        var that = this;
+        that.$axios.defaults.baseURL = that.domain;
+        this.$axios({
+          method: 'post',
+          url:"/login/login.php",
+          data:{
+            loginId: that.user.login_name,
+            pwd: that.user.password,
+            curTime: that.$moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+          },
+          Api:"SetLogin",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            setTimeout(function(){
+              that.$router.push("/dv4000status");
+              that.SET_NAV_STATUS(false);
+              that.SET_USER(res.res.data);
+              that.SET_ACTIVE_DEVICE_TYPE(that.curDeviceType);
+              localStorage.setItem("LOGIN",true);
+              localStorage.setItem("USERNAME_1080",that.user.login_name);
+              localStorage.setItem("PASSWORD_1080",that.user.password);
+              localStorage.setItem("DEVICE",that.activedevicetype);
+              localStorage.setItem("SAVEME_1080",that.user.saveMe_1080);
+              //每次重新登录echarts图都重新画
+              localStorage.removeItem("cardData");
+              localStorage.removeItem("chartKey");
+              localStorage.removeItem("curChart");
+              localStorage.removeItem("allChartData");
+            },800)
+          }else{
+            that.$toast({
+              message: "登录失败",
+              position: 'middle',
+              duration: 3000
+            })
+            localStorage.setItem("USERNAME_1080",that.user.login_name);
+            localStorage.setItem("PASSWORD_1080",that.user.password);
+            localStorage.setItem("DEVICE",that.activedevicetype);
+            localStorage.setItem("SAVEM_1080",that.user.saveMe_1080);
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$toast({
+            message: "登录失败",
+            position: 'middle',
+            duration: 3000
+          })
+        })
+
+        /*生成随机数*/
+        function generateMixed(n) {
+          var chars = ["0","1","2","3","4","5","6","7","8","9",
+            "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+            "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+          var res = "";
+          for (var i = 0; i < n; i++) {
+            var id = Math.ceil(Math.random() * 61);
+            res += chars[id];
+          }
+          return res;
+        }
+      },
+      register(){},
+      /*back(){
+        this.$router.go(-1)
+      },*/
+      /*ChoseDevice(val){
+        this.ActiveDeviceType = val;
+        this.SET_ACTIVE_DEVICE_TYPE(this.ActiveDeviceType);
+        switch(this.ActiveDeviceType){
+          case "DV1080":
+            this.title = "HDXpress";
+            this.$axios.defaults.baseURL = this.DOMAIN;
+            //"http://127.0.0.1";
+            break;
+          case "DV4000":
+            this.title = "UHDXpress";
+            this.$axios.defaults.baseURL = this.DOMAIN;
+            //this.$axios.defaults.baseURL = "http://117.131.178.104:8088";
+            this.$router.push("/dv4000login");
+            
+            break;
+          case "OTHER":
+            this.title = "OTHER";
+            this.$axios.defaults.baseURL = "http://47.104.164.249";
+            break;
+        }
+        this.showConfig = false;
+      },*/
+
+      connectWifi(){
+        //this.wifiUrlsEditVisible = true;
+        this.$router.push("/wifi");
+      },
+
+      setWifiUrl(){
+        this.$axios.defaults.baseURL = "http://" + this.wifiUrl;
+        this.activedevicetype = "WIFI";
+        this.wifiUrlsEditVisible = false;
+        this.showConfig = false;
+      },
+
+      /*GoDV4000Login(){
+        this.$router.push("/dv4000login");
+      }*/
     }
+  }
 </script>
 
 <style scoped>
@@ -191,7 +292,7 @@
         display: block;
         line-height: .16rem;
     }
-    .loginGroup{
+/*    .loginGroup{
         position: fixed;
         right: .55rem;
         bottom: .55rem;
@@ -209,9 +310,9 @@
         border-radius: 0;
     }
     .deviceLoginActive{
-        background-color: #3d81f1;
+      background-color: #3d81f1;
     }
-    .setBtn{
+   .setBtn{
         position: fixed;
         z-index: 1;
         right: .2rem;
@@ -223,6 +324,27 @@
         text-align: center;
         line-height: .64rem;
     }
+  .debugSetting{
+    width:100%;
+    height:100%; 
+    background-color:#000 !important;
+    font-size: .16rem;
+  }
+  .debugSettingTitle{
+    padding-top:2rem;
+    color: #fff;
+    text-align: center;
+  }
+  .debugSettingInput{
+    text-align: center;
+    margin-top: 15px;
+    font-size:0.16rem;
+  }
+  .debugSettingBtn{
+    text-align: center;
+    margin-top: 15px;
+  }
+    */
 
     .pushEditModal{
         width: 3rem;

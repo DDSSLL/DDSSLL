@@ -204,59 +204,59 @@
               </div>
               <div class="GroupItem">
                 <div class="GroupItemBtns">
-                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfUnit">确定</button>
-                  <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfUnit">恢复当前值</button>
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;position: static;line-height:0px" @click="setChartConfUnit">确定</button>
+                  <button class="setBtn" style="background:#EEE;color:#000;position: static;line-height:0px;width:auto;" @click="getChartConfUnit">恢复当前值</button>
                 </div>
               </div>
             </mt-tab-container-item>
-    <!-- <mt-tab-container-item id="2">
-      <div class="GroupItem">
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">上传速率</div>
-          <div class="GroupItemValue">
-            <select class="ItemSelect">
-              <option v-for="item in ChartConf.total.up" :value="item">{{item}}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="GroupItem">
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">下载速率</div>
-          <div class="GroupItemValue">
-            <select class="ItemSelect">
-              <option v-for="item in ChartConf.total.down" :value="item">{{item}}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="GroupItem">
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">传输丢包</div>
-          <div class="GroupItemValue">
-            <select class="ItemSelect">
-              <option v-for="item in ChartConf.total.lossDev" :value="item">{{item}}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-        <div class="GroupItem">
-          <div class="GroupItemField">
-            <div class="GroupItemTitle">业务丢包</div>
-            <div class="GroupItemValue">
-              <select class="ItemSelect">
-                <option v-for="item in ChartConf.total.lossRcv" :value="item">{{item}}</option>
-              </select>
-          </div>
-        </div>
-      </div>
-      <div class="GroupItem">
-        <div class="GroupItemBtns">
-          <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
-          <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
-        </div>
-      </div>
-    </mt-tab-container-item> -->
+            <!-- <mt-tab-container-item id="2">
+              <div class="GroupItem">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">上传速率</div>
+                  <div class="GroupItemValue">
+                    <select class="ItemSelect">
+                      <option v-for="item in ChartConf.total.up" :value="item">{{item}}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">下载速率</div>
+                  <div class="GroupItemValue">
+                    <select class="ItemSelect">
+                      <option v-for="item in ChartConf.total.down" :value="item">{{item}}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">传输丢包</div>
+                  <div class="GroupItemValue">
+                    <select class="ItemSelect">
+                      <option v-for="item in ChartConf.total.lossDev" :value="item">{{item}}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+                <div class="GroupItem">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle">业务丢包</div>
+                    <div class="GroupItemValue">
+                      <select class="ItemSelect">
+                        <option v-for="item in ChartConf.total.lossRcv" :value="item">{{item}}</option>
+                      </select>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem">
+                <div class="GroupItemBtns">
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
+                  <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
+                </div>
+              </div>
+            </mt-tab-container-item> -->
             <mt-tab-container-item id="3">
               <div class="GroupItem GroupItem0">
                 <div class="GroupItemField">
@@ -278,7 +278,7 @@
                   </div>
                 </div>
               </template>
-              <div class="GroupItem GroupItem0">
+             <!--  <div class="GroupItem GroupItem0">
                 <div class="GroupItemField">
                   <div class="GroupItemTitle GroupItemTitle1">批量选择</div>
                   <div class="GroupItemValue GroupItemValue1">
@@ -286,11 +286,11 @@
                     </mt-checklist>
                   </div>
                 </div>
-              </div>
+              </div> -->
               <div class="GroupItem">
                 <div class="GroupItemBtns">
-                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfCard">确定</button>
-    		  <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfCard">恢复当前值</button>
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;position: static;line-height:0px" @click="setChartConfCard">确定</button>
+    		          <button class="setBtn" style="background:#EEE;color:#000;position: static;line-height:0px;width:auto;" @click="getChartConfCard">恢复当前值</button>
                 </div>
               </div>
             </mt-tab-container-item>
@@ -304,7 +304,8 @@
         <i class="titleIcon fa" :class="[SystemShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
       </div>
       <transition name="slide-fade">
-        <div class="GroupItem" v-show="SystemShow">
+        <div class="GroupItem" v-show="SystemShow" id="systemInfo">
+          <mt-cell title="软件版本" value="V1.00.01"></mt-cell>
           <mt-button size="large" class="logout" @click="logout">登出</mt-button>
         </div>
       </transition>
@@ -2045,5 +2046,8 @@
     }
     .devRightsTable table td,.devRightsTable table th{
       padding:5px;
+    }
+    #systemInfo .mint-cell-value{
+      flex:1
     }
 </style>
