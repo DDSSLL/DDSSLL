@@ -9,7 +9,7 @@
       <div class="mainChart" id="mainChart">
         <div id="totalChart" class="totalChart"></div>
       </div>
-      <div id="cardsChart" class="cardsChart">
+      <div id="cardsChart" class="cardsChart" @click="showBigChart">
         <div class="lteChart" v-if="eth0Show" :class="chartStyle">
           <div class="chartTitle"></div>
           <div id="chart_eth0" class="chart"></div>
@@ -60,6 +60,65 @@
         </div>
       </div>
     </div>
+    <mt-popup v-model="bigChartShow" position="bottom">
+      <div id="bigChartDiv">
+        <div class="bigChartTitle">
+          <div class="back" @click="closeBigChart">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+          </div>  
+        </div>
+        <div class="bigChartContent">
+          <div class="lteChart bigChartStyle" v-if="eth0Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_eth0" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="lte1Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_lte1" class="chart"></div>
+          </div>
+         <div class="lteChart bigChartStyle" v-if="lte2Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_lte2" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="lte3Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_lte3" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="lte4Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_lte4" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="lte5Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_lte5" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="lte6Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_lte6" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="usblanShow">
+            <div class="chartTitle"></div>
+            <div id="chart_big_usb-lan" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="usblan2Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_usb-lan2" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="usb5g1Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_usb-5g1" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="usb5g2Show">
+            <div class="chartTitle"></div>
+            <div id="chart_big_usb-5g2" class="chart"></div>
+          </div>
+          <div class="lteChart bigChartStyle" v-if="wifiShow">
+            <div class="chartTitle"></div>
+            <div id="chart_big_wifi" class="chart"></div>
+          </div>
+        </div>
+      </div>
+    </mt-popup> 
     <!--<mt-palette-button content="+" @expanded="main_log('expanded')" @collapse="main_log('collapse')"-->
                        <!--direction="lt" class="pb" :radius="80" ref="target_1" mainButtonStyle="color:#fff;background-color:#26a2ff;"-->
                        <!--style="position: fixed;right: 20px;bottom: 100px;">-->
@@ -84,16 +143,22 @@ export default {
     return{
       ActiveDevice:null,
       timer:null,
-      /*keyArr: [],
-      allChartData: [],
-      curChart: [],
-      cardData : [],*/
       myChartTotal:null,
       lteChart : null,
+      showCardNum:0,
       eth0Show:false,
       lte1Show:false,
       lte2Show:false,
       lte3Show:false,
+      lte4Show:false,
+      lte5Show:false,
+      lte6Show:false,
+      usblanShow:false,
+      usblan2Show:false,
+      usb5g1Show:false,
+      usb5g2Show:false,
+      wifiShow:false,
+      bigChartShow:false,
       chartStyle:"",
       myChartCards: {},
       marginTitleLeft:100,
@@ -324,97 +389,6 @@ export default {
           }
         }
       }],
-      /*commonOptionTitleCard : [{
-        text: "",
-        left: 10,
-        top: 0,
-        textStyle: {
-          color: '#fff',
-          fontSize: '14',
-          fontWeight: 'bold',
-          text: ""
-        }
-      }, {
-        text: "",
-        right: 10,
-        top: 0,
-        textStyle: {
-          color: '#333',
-          fontSize: '10',
-          fontWeight: 'normal',
-          rich: {
-            'SIM1Up':       {color: colorGV['SIM1↑'],fontWeight: 'bold',fontSize: '14'},
-            'SIM1Down':     {color: colorGV['SIM1↓'],fontWeight: 'bold',fontSize: '14'},
-            'SIM1LossDev':  {color: colorGV['SIM1传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'SIM1LossRcv':  {color: colorGV['SIM1业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'SIM2Up':       {color: colorGV['SIM2↑'],fontWeight: 'bold',fontSize: '14'},
-            'SIM2Down':     {color: colorGV['SIM2↓'],fontWeight: 'bold',fontSize: '14'},
-            'SIM2LossDev':  {color: colorGV['SIM2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'SIM2LossRcv':  {color: colorGV['SIM2业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'SIM3Up':       {color: colorGV['SIM3↑'],fontWeight: 'bold',fontSize: '14'},
-            'SIM3Down':     {color: colorGV['SIM3↓'],fontWeight: 'bold',fontSize: '14'},
-            'SIM3LossDev':  {color: colorGV['SIM3传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'SIM3LossRcv':  {color: colorGV['SIM3业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'SIM4Up':       {color: colorGV['SIM4↑'],fontWeight: 'bold',fontSize: '14'},
-            'SIM4Down':     {color: colorGV['SIM4↓'],fontWeight: 'bold',fontSize: '14'},
-            'SIM4LossDev':  {color: colorGV['SIM4传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'SIM4LossRcv':  {color: colorGV['SIM4业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'SIM5Up':       {color: colorGV['SIM5↑'],fontWeight: 'bold',fontSize: '14'},
-            'SIM5Down':     {color: colorGV['SIM5↓'],fontWeight: 'bold',fontSize: '14'},
-            'SIM5LossDev':  {color: colorGV['SIM5传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'SIM5LossRcv':  {color: colorGV['SIM5业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'SIM6Up':       {color: colorGV['SIM6↑'],fontWeight: 'bold',fontSize: '14'},
-            'SIM6Down':     {color: colorGV['SIM6↓'],fontWeight: 'bold',fontSize: '14'},
-            'SIM6LossDev':  {color: colorGV['SIM6传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'SIM6LossRcv':  {color: colorGV['SIM6业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'ETH0Up':       {color: colorGV['ETH0↑'],fontWeight: 'bold',fontSize: '14'},
-            'ETH0Down':     {color: colorGV['ETH0↓'],fontWeight: 'bold',fontSize: '14'},
-            'ETH0LossDev':  {color: colorGV['ETH0传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'ETH0LossRcv':  {color: colorGV['ETH0业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'USB-5G1Up':       {color: colorGV['USB-5G1↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G1Down':     {color: colorGV['USB-5G1↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G1LossDev':  {color: colorGV['USB-5G1传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G1LossRcv':  {color: colorGV['USB-5G1业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'USB-5G2Up':       {color: colorGV['USB-5G2↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G2Down':     {color: colorGV['USB-5G2↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G2LossDev':  {color: colorGV['USB-5G2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G2LossRcv':  {color: colorGV['USB-5G2业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'USB-LANUp':       {color: colorGV['USB-LAN↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LANDown':     {color: colorGV['USB-LAN↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LANLossDev':  {color: colorGV['USB-LAN传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LANLossRcv':  {color: colorGV['USB-LAN业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'USB-LAN2Up':       {color: colorGV['USB-LAN2↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LAN2Down':     {color: colorGV['USB-LAN2↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LAN2LossDev':  {color: colorGV['USB-LAN2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LAN2LossRcv':  {color: colorGV['USB-LAN2业务丢包'],fontWeight: 'bold',fontSize: '14'},
-
-            'WIFIUp':       {color: colorGV['WIFI↑'],fontWeight: 'bold',fontSize: '14'},
-            'WIFIDown':     {color: colorGV['WIFI↓'],fontWeight: 'bold',fontSize: '14'},
-            'WIFILossDev':  {color: colorGV['WIFI传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'WIFILossRcv':  {color: colorGV['WIFI业务丢包'],fontWeight: 'bold',fontSize: '14'}
-          }
-        }
-      }, {
-        text: "",
-        left: 'center',
-        top: 22,
-        textStyle: {
-          color: '#fff',
-          fontSize: '14',
-          fontWeight: 'normal',
-          text: ""
-        }
-      }],*/
       commonOptionGrid : {
         containLabel: true,
         borderWidth: 0,
@@ -460,50 +434,34 @@ export default {
     '$store.state.ActiveDevice': {
       immediate: true,
       handler(val) {
-        //console.warn(val)
         if(val){
           var that = this;
           that.ActiveDevice = val;
           that.myChartCards = {};
           var initData = that.initChartData();
-          //console.log("切换设备，重启定时器");
-          //clearInterval(that.timer);
           var devSns = initData.devSns;
           that.getChartData(devSns);
-          //clearInterval(that.ChartTimer);
-          /*that.timer = setInterval(function(){
-            that.getChartData(devSns);
-          },1000)*/
-          //that.SET_CHART_TIMER(that.timer);
         }
       }
     }
   },
   activated(){  //生命周期-缓存页面激活
-    //console.log("dd status activated："+this.cardLineStyle)
     this.initColorGV(this.cardLineStyle);
   },
   deactivated(){   //生命周期-缓存页面失活
-
   },
   created(){
-    console.log("created"); 
+    console.log("status created"); 
   },
   mounted() { //生命周期-页面初始化完成
-    console.log("mounted")
+    console.log("status mounted")
     var that = this;
     that.formatXData();
   },
   methods:{
     ...mapMutations({
-        SET_CHART_TIMER
+      SET_CHART_TIMER
     }),
-    testMint(){
-      this.$toast({
-        message: '操作成功',
-        iconClass: 'icon icon-success'
-      });
-    },
     showChannelList(){
       this.popupVisible = true;
     },
@@ -591,11 +549,6 @@ export default {
       devSns = devFilterArr.join("/");
       var resData = {};
       resData.devSns = devSns;
-      /*resData.logId = logId;
-      resData.allChartData = allChartData;
-      resData.keyArr = keyArr;
-      resData.curChart = curChart;
-      var logId = getLoginId();*/
       return resData;
     },
     getChartData(devSns){
@@ -813,7 +766,9 @@ export default {
       var upArr = Object.keys(dataUpShow); //有上传数据的网卡
       var downArr = Object.keys(dataDownShow); //有下载数据的网卡
       var showCard = that.MergeArray(upArr, downArr); //所有有数据的网卡名称
+      showCard = showCard.filter(str => {return  !!str});
       var cardNum = showCard.length;
+      that.showCardNum = cardNum;
       switch(cardNum){
         case 1:
           $("#mainChart").css("height","50%");
@@ -1107,6 +1062,7 @@ export default {
       var upArr = Object.keys(dataUpShow); //有上传数据的网卡
       var downArr = Object.keys(dataDownShow); //有下载数据的网卡
       var showCard = this.MergeArray(upArr, downArr); //所有有数据的网卡名称
+      showCard = showCard.filter(str => {return  !!str});
       var cardNum = showCard.length;
       for (var i = 0; i < cardNum; i++) {
         var key = showCard[i];
@@ -1123,9 +1079,16 @@ export default {
       if (!that.myChartCards[devSn]) {
         that.myChartCards[devSn] = {};
         that.myChartCards[devSn][chartName] = echarts.init(document.getElementById('chart_' + key));
+        if(that.bigChartShow){
+          that.myChartCards[devSn][chartName+"_big"] = echarts.init(document.getElementById('chart_big_' + key));  
+        }
+        
       }else{
         if(!that.myChartCards[devSn][chartName]){
           that.myChartCards[devSn][chartName] = echarts.init(document.getElementById('chart_' + key));
+          if(that.bigChartShow){
+            that.myChartCards[devSn][chartName+"_big"] = echarts.init(document.getElementById('chart_big_' + key));  
+          }
         }
       }
       that.myChartCards[devSn][chartName].resize();
@@ -1394,14 +1357,25 @@ export default {
             },
             formatter: '{value}'
           }
-        }, that.commonOptionYAxis2],
+        }, that.copy(that.commonOptionYAxis2)],
         series: series,
         animation: false
       };
       option.title[0].text = name;
+      option.grid.top = 55;
+      if(that.showCardNum >= 4 && !that.bigChartShow){//小图且网卡数》4 不显示部分title
+        title1Text = "";
+        operator = "";
+        option.title[0].textStyle.fontSize = '12';
+        option.grid.top='20';
+        option.yAxis[0].name = '';
+        option.yAxis[1].name = '';
+        option.yAxis[0].axisLabel.show = false;
+        option.yAxis[1].axisLabel.show = false;
+      }
       option.title[1].text = title1Text;
       option.title[2].text = operator;
-      option.grid.top = 55;
+      
       option.legend.show = false;
     
       option.xAxis[0]["axisLabel"]["textStyle"]["fontSize"] = 10;
@@ -1414,6 +1388,9 @@ export default {
 
       option.legend.data = legendName;
       that.myChartCards[devSn][chartName].setOption(option, true);
+      if(that.bigChartShow){
+        that.myChartCards[devSn][chartName+"_big"].setOption(option, true);
+      }
       //that.lteChart.setOption(option, true);
 
     },
@@ -1538,6 +1515,22 @@ export default {
         }
         that.chartStyle = "card"+showCard.length+"Style";
       }
+    },
+    showBigChart(){
+      var that = this;
+      if(that.showCardNum >= 4){
+        var initData = that.initChartData();
+        var devSns = initData.devSns;
+        that.getChartData(devSns);
+        that.bigChartShow = true;
+      }
+    },
+    closeBigChart(){
+      var that = this;
+      var initData = that.initChartData();
+      var devSns = initData.devSns;
+      that.getChartData(devSns);
+      that.bigChartShow=false;
     },
     //深拷贝对象
     copy(obj) {
@@ -1795,6 +1788,7 @@ export default {
     float: left;
   }
   .cardsChart >>> .chartTitle,
+  .bigChartStyle >>> .chartTitle,
   .mainChart .chartTitle{
     border-top: 1px solid #222;
     border-bottom: 1px solid #222;
@@ -1836,5 +1830,36 @@ export default {
   .card4Style{
     width:50%;
     height:50%;
+  }
+  .card5Style, .card6Style{
+    width:50%;
+    height:33%;
+  }
+  .bigChartStyle{
+    width:100%;
+    height:25%;
+  }
+  #bigChartDiv{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .bigChartContent{
+    width:100%;
+    height:calc( 100% - 40px);
+    overflow:scroll;
+  }
+  .bigChartTitle{
+    color: #fff;
+    border-top: 1px solid #222;
+    border-bottom: 1px solid #222;
+    text-align: left;
+    text-indent: .1rem;
+    background: linear-gradient(270deg,#111 0,#333 50%);
+    font-size: .14rem;
+    line-height: 120%;
+    font-weight: 500;
+    height: 20px;
+    padding: 10px .08rem;
   }
 </style>
