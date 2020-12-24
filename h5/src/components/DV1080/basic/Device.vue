@@ -15,15 +15,15 @@
           </div>
           <div v-else class="noSpeedInfo">--</div>
         </div>
-        <div class="info">
-          <div>
+        <div class="info nowrap" style="width:45%">
+          <div style="width:100%">
             <span class="T">
               <span class="TCircle" :class="[this.ActiveDevice.online== 1 ? (this.ActiveDevice.dev_push_status!=0 ? 'red' : 'green') : 'gray']"></span>
-              T: {{ this.ActiveDevice.dev_name }}
+              <span class="nowrapText">T: {{ this.ActiveDevice.dev_name }}</span>
             </span>
             <span class="R">
               <span class="RCircle" :class="[this.ActiveDevice.rcv_online == 1 ? (this.ActiveDevice.dev_push_status != '0' ? 'red' : 'green') : 'gray']"></span>
-              R: {{ this.ActiveDevice.rcv_name }}
+              <span class="nowrapText">R: {{ this.ActiveDevice.rcv_name }}</span>
             </span>
             <span class="B" v-if="ActiveDeviceType=='DV4000'">
               <span class="BCircle" :class="[!this.ActiveDevice.board_online||this.ActiveDevice.board_online=='0' ? 'gray': this.ActiveDevice.dev_push_status!='0'?'red':'green']"></span>
@@ -480,4 +480,20 @@
 </style>
 <style>
   .channelList .mint-loadmore-text{color: #FFF;}
+  .nowrap{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width:100%;
+    display:inline-block;
+  }
+  .nowrapText{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width:90%;
+    display:inline-block; 
+    vertical-align: middle;
+    padding-left:5px;
+  }
 </style>
