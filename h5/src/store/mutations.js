@@ -54,5 +54,13 @@ export default {
     },
     [types.SET_DOMAIN]: (state, datas) => {
         state.domain = datas
+    },
+    // 设置当前设备参数
+    [types.SET_DEV_PARAM]: (state, datas) => {
+        state.devParam = datas
+    },
+    // 设置当前接收机参数
+    [types.SET_RCV_PARAM]: (state, datas) => {
+        state.rcvParam = datas
     }
 }

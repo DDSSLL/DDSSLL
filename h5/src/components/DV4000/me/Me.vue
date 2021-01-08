@@ -1,66 +1,13 @@
 <template>
   <div class="me">
     <!-- 背包 -->
-    <div class="Group">
-      <div class="GroupTitle" @click="DeviceShow=!DeviceShow">
-        背包信息
-        <i class="titleIcon fa" :class="[DeviceShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
-        <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addDevice"></i>
-      </div>
-      <transition name="slide-fade">
-        <div class="GroupItem" v-if="DeviceShow" id="devList">
-          <template v-for="(item,i) in deviceList">
-            <mt-cell-swipe
-              :right="[ 
-              {content: '网卡',handler:() => showDeviceCard(item)},
-              {content: '编辑',handler:() => editDevice(item)},
-              {content: '删除',handler:() => deleteDevice(item)}
-              ]">
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">背包名称</span>
-                <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.dev_name }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">状态</span>
-                <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.online }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">序列号</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.dev_sn }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">上线时间</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.datetime }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">型号</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.dev_model }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">软件版本</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.softVer?item.softVer.split('-')[0]:"-" }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">硬件版本</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.hardVer }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">背包实时位置</span>
-                <span class="cellName cellValue" style="float: right;padding-left:20px">{{ item.addr }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">绑定板卡</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.match_board }}</span>
-              </div>
-            </mt-cell-swipe>
-          </template>
-        </div>
-      </transition>
-    </div>
-    <!-- 汇聚服务器 -->
-    <div class="Group">
+    <DevMan></DevMan>
+    
+    <!-- 接收机 -->
+    <RcvMan></RcvMan>
+    <!-- <div class="Group">
       <div class="GroupTitle" @click="ReceiverShow=!ReceiverShow">
-        汇聚服务器信息
+        接收机信息
         <i class="titleIcon fa" :class="[ReceiverShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
         <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addReceiver" v-if="user.id==SUPER"></i>
       </div>
@@ -113,7 +60,7 @@
           </template>
         </div>
       </transition>
-    </div>
+    </div> -->
     <!-- 用户 -->
     <div class="Group">
       <div class="GroupTitle" @click="AccountShow=!AccountShow">
@@ -309,150 +256,7 @@
         </div>
       </transition>
     </div>
-    <!-- 网卡信息 -->
-    <mt-popup v-model="deviceCardVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          网卡信息
-          <i class="popupCloseBtn fa fa-times" @click="deviceCardVisible = false"></i>
-        </div>
-        <template v-for="(item,i) in deviceCardList">
-          <div class="deviceCardItem">
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">网卡</span>
-              <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.card_name }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">状态</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.used=="0"?"禁用":"启用" }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">IP</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.card_ip }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">MAC</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.card_mac }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">信号强度</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.rssi }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">运营商</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.operator }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">网络制式</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.sim_mode }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">模块型号</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.module_type }}</span>
-            </div>
-          </div>
-        </template>
-      </div>
-    </mt-popup>
-    <!-- 背包信息 -->
-    <mt-popup v-model="deviceVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          背包
-          <i class="popupCloseBtn fa fa-times" @click="deviceVisible = false"></i>
-        </div>
-        <template v-for="(item,i) in devicePopupList">
-          <div class="deviceItem">
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">背包名</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.board_id }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">状态</span>
-              <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.online }}</span>
-            </div>
-          </div>
-        </template>
-      </div>
-    </mt-popup>
-    <!-- 背包配置 -->
-    <mt-popup v-model="deviceConfigVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          背包配置
-          <i class="popupCloseBtn fa fa-times" @click="deviceConfigVisible = false"></i>
-        </div>
-        <form action="" @submit.prevent="submitDeviceConfig">
-          <div class="fGrp">
-            <div class="tl">背包名称</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="deviceConfigForm.devName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格">
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">仪器名(长度1-15,仅支持中文,字母,数字,+,-,@,()和空格)</p>
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">序列号</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="deviceConfigForm.devSn" required pattern="[0-9]{10}" title="10位数字序列号" :disabled="deviceConfigType == 'edit'"> 
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">用户</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="deviceConfigForm.devUser" :disabled="deviceConfigType == 'edit'">
-                <template v-for="(item,i) in deviceConfigUserOptions">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-          <div class="fGrp" v-if="deviceConfigType == 'edit'">
-            <div class="tl">汇聚服务器</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="deviceConfigForm.server" style="margin-bottom: 5px;" @change="editMatchChange = true">
-                <template v-for="(item,i) in deviceConfigServerOptions">
-                  <option :value="item.value" :style="'color:'+item.color+''">{{ item.text }}</option>
-                </template>
-              </select>
-              <button @click.prevent="editMatchRow" style="border:1px solid #666;">保存绑定</button>
-              <button @click.prevent="deleteMatchRow" style="border:1px solid #666;">解除绑定</button>
-            </div>
-          </div>
-          <div class="fGrp" style="text-align: right">
-            <button class="modalBtn" @click="deviceConfigVisible = false" style="margin-right: .06rem;">取消</button>
-            <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
-          </div>
-        </form>
-      </div>
-    </mt-popup>
-    <!-- 汇聚服务器配置 -->
-    <mt-popup v-model="receiverConfigVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          汇聚服务器配置
-          <i class="popupCloseBtn fa fa-times" @click="receiverConfigVisible = false"></i>
-        </div>
-        <form action="" @submit.prevent="submitReceiverConfig">
-          <div class="fGrp">
-            <div class="tl">名称</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="receiverConfigForm.rcvName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="receiverConfigType=="edit" && user.id == SUPER">
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()和空格</p>
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">序列号</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="receiverConfigForm.rcvSn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="receiverConfigType == 'edit'"> 
-            </div>
-          </div>
-          <div class="fGrp" style="text-align: right">
-            <button @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
-            <button type="submit">确定</button>
-          </div>
-        </form>
-      </div>
-    </mt-popup>
+    
     <!-- 用户管理 -->
     <mt-popup v-model="userConfigVisible" popup-transition="popup-fade">
       <div class="popupContainer">
@@ -565,6 +369,8 @@
 </template>
 
 <script>
+  import DevMan from './dev';
+  import RcvMan from './rcv';
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER, SET_NAV_STATUS, SET_ACTIVE_DEVICE, SET_TIMER_CLEAR, SET_CHART_STYLE } from '../../../store/mutation-types';
   import $ from 'jquery';
@@ -618,22 +424,22 @@
         AccountShow:false,
         SystemShow:true,
         /*背包*/
-        deviceList:[],
-        deviceCardVisible:false,
-        deviceCardList:[],
-        deviceConfigVisible:false,
-        deviceConfigType:'add',
-        deviceConfigForm:{
+        /*deviceList:[],*/
+        /*deviceCardVisible:false,*/
+        /*deviceCardList:[],*/
+        /*deviceConfigVisible:false,*/
+        /*deviceConfigType:'add',*/
+        /*deviceConfigForm:{
           devName:"",
           editDev:"",
           devUser:"",
           server:""
-        },
-        deviceConfigUserOptions:[],
-        deviceConfigServerOptions:[],
+        },*/
+        /*deviceConfigUserOptions:[],*/
+        /*deviceConfigServerOptions:[],*/
         editMatchChange: false,
         /*接收机*/
-        receiverList:[],
+        /*receiverList:[],
         receiverConfigVisible:false,
         receiverConfigType:'add',
         receiverConfigForm:{
@@ -641,7 +447,7 @@
           rcvSn:""
         },
         deviceVisible:false,
-        devicePopupList:[],
+        devicePopupList:[],*/
         /*用户*/
         accountList:[],
         userConfigVisible:false,
@@ -662,19 +468,20 @@
     computed: {
       ...mapState(['user','navHide','DeviceTimer','ChartTimer','cardLineStyle','chartCardView'])
     },
+    components: {
+      DevMan,RcvMan
+    },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {
         immediate: true,
         handler(val) {
           this.ActiveDevice = val;
           this.getChartConfUnit();
-          console.log("watch")
           this.getChartConfTotal();
           //this.getChartConfCard();
           //this.initCardChartSelect();
-          this.getDeviceList();
-          this.getReceiverList();
-          this.getAccountList();
+          /*this.getReceiverList();
+          this.getAccountList();*/
         }
       }
     },
@@ -686,12 +493,11 @@
     },
     activated(){  //生命周期-缓存页面激活
       console.log("dd me activated")
-      this.getChartConfUnit();
+      /*this.getChartConfUnit();
       this.getChartConfTotal();
       //this.getChartConfCard();
-      this.getDeviceList();
       this.getReceiverList();
-      this.getAccountList();
+      this.getAccountList();*/
     },
     deactivated(){   //生命周期-缓存页面失活
 
@@ -981,58 +787,8 @@
         console.log("setLineContent")
         console.log(e)
       },
-      getDeviceList(){
-        var that = this;
-        this.$axios({
-          method: 'post',
-          url:"/page/dev/devData.php",
-          data:this.$qs.stringify({
-            getDevices:true,
-            userId: that.user.id
-          }),
-          Api:"getDevices",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.deviceList = res.data;
-            console.log("aaaaaaaaaaaaa")
-            console.log(that.deviceList)
-          }else{
-            that.deviceList = [];
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
-      getReceiverList(){
-        var that = this;
-        this.$axios({
-          method: 'post',
-          url:"/page/dev/devData.php",
-          data:this.$qs.stringify({
-            getRcv:true,
-            userId: that.user.id
-          }),
-          Api:"getRcv",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.receiverList = res.data;
-          }else{
-            that.receiverList = [];
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
+      
+      
       getAccountList(){
         var that = this;
         this.$axios({
@@ -1060,12 +816,7 @@
           console.log(error)
         })
       },
-      addDevice(){
-        this.getUserList();
-        this.deviceConfigVisible = true;
-        this.deviceConfigType = "add";
-        this.clearDevPopup();
-      },
+
       addReceiver(){
         this.receiverConfigVisible = true;
         this.receiverConfigType = "add";
@@ -1076,18 +827,7 @@
         this.userConfigType = "add";
         this.clearUserPopup();
       },
-      editDevice(item){
-        this.getUserList();
-        this.getRcvSelectAndVal(item);
-        this.deviceConfigVisible = true;
-        this.deviceConfigType = "edit";
-        this.deviceConfigForm = {
-            devName:item.dev_name,
-            devSn:item.dev_sn,
-            devUser:item.prefix,
-            server:item.rcv_sn
-        }
-      },
+
       editReceiver(item){
         this.receiverConfigVisible = true;
         this.receiverConfigType = "edit";
@@ -1148,13 +888,7 @@
           that.deviceConfigForm.devUser = option[0].value;
         }
       },
-      getRcvSelectAndVal(row){
-        console.log("getRcvSelectAndVal")
-        var that = this;
-        this.$global.getRcvList(this,row,that.formatRcvList);
-        
-        //deviceConfigServerOptions
-      },
+
       editMatchRow(){
         console.log("保存绑定");
         //未修改
@@ -1273,15 +1007,8 @@
           });
         });
       },
-      formatRcvList(list){
-        this.deviceConfigServerOptions = list;
-      },
-      clearDevPopup(){
-        this.deviceConfigForm.devName = "";
-        this.deviceConfigForm.editDev = "";
-        this.deviceConfigForm.devUser = "";
-        this.deviceConfigForm.server = "";
-      },
+
+
       clearRcvPopup(){
         this.receiverConfigForm.rcvName = "";
         this.receiverConfigForm.rcvSn = "";
@@ -1293,80 +1020,7 @@
         this.userConfigForm.emailAddress = "";
         this.userConfigForm.remark = "";
       },
-      submitDeviceConfig(){
-        if(this.deviceConfigType == "add"){
-          var that = this;
-          var devSn = this.deviceConfigForm.devSn;
-          var mode = this.$global.getDevMode(devSn.substr(-4));
-          if (!mode) {
-            that.$toast({
-              message: "背包型号不支持!",
-              position: 'middle',
-              duration: 2000
-            });
-            return;
-          }
-          this.$axios({
-            method: 'post',
-            url:"/page/dev/devData.php",
-            data:this.$qs.stringify({
-              addDev:true,
-              devName:that.deviceConfigForm.devName,
-              devSn:that.deviceConfigForm.devSn,
-              devModel:mode,
-              prefix: that.user.id,
-              logUser: that.user.id
-            }),
-            Api:"addDev",
-            AppId:"android",
-            UserId:that.user.id
-          })
-          .then(function (response) {
-            let res = response.data;
-            if(res.res.success){
-              that.getDeviceList();
-              that.deviceConfigVisible = false;
-            }else{
-              that.$toast({
-                message: res.res.reason,
-                position: 'middle',
-                duration: 2000
-              });
-            }
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
-        }else if(this.deviceConfigType == "edit"){
-          var that = this;
-          this.$axios({
-            method: 'post',
-            url:"/page/dev/devData.php",
-            data:this.$qs.stringify({
-              editDev:that.deviceConfigForm.devSn,
-              devName:that.deviceConfigForm.devName,
-              devUser:that.deviceConfigForm.devUser,
-              logUser:that.user.id,
-              prefix:that.user.id
-            }),
-            Api:"editDev",
-            AppId:"android",
-            UserId:that.user.id
-          })
-          .then(function (response) {
-            let res = response.data;
-            if(res.res.success){
-              that.getDeviceList();
-              that.deviceConfigVisible = false;
-            }else{
-              that.getDeviceList();
-            }
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
-        }
-      },
+
       submitReceiverConfig(){
         var that = this;
         var rcvSn = this.receiverConfigForm.rcvSn;
@@ -1540,33 +1194,6 @@
           })
         }
       },
-      showDeviceCard(item){
-        var that = this;
-        this.deviceCardList = [];
-        this.deviceCardVisible = true;
-        this.$axios({
-          method: 'post',
-          url:"/page/dev/devData.php",
-          data:this.$qs.stringify({
-            getCardByDevSn:true,
-            devSN: item.dev_sn
-          }),
-          Api:"getCardByDevSn",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.deviceCardList = res.data;
-          }else{
-            that.deviceCardList = [];
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
       showDevAuthority(item){
         console.log("showDevAuthority")
         console.log(item)
@@ -1600,39 +1227,7 @@
           console.log(error)
         })
       },
-      deleteDevice(item){
-        var that = this;
-        this.$messagebox.confirm("确定删除此背包?").then(
-          action => {
-            this.$axios({
-              method: 'post',
-              url:"/page/dev/devData.php",
-              data:this.$qs.stringify({
-                delDevSns:item.dev_sn,
-                userId:that.user.id
-              }),
-              Api:"delDev",
-              AppId:"android",
-              UserId:that.user.id
-            })
-            .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                that.$toast({
-                  message: '操作成功'
-                });
-              }else{
-                that.$toast({
-                  message: '操作失败'
-                });
-              }
-              that.getDeviceList();
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
-        });
-      },
+      
       deleteUser(item){
         var that = this;
         this.$messagebox.confirm("确定删除此用户?").then(

@@ -25,7 +25,7 @@
               <span class="RCircle" :class="[this.ActiveDevice.rcv_online == 1 ? (this.ActiveDevice.dev_push_status != '0' ? 'red' : 'green') : 'gray']"></span>
               <span class="nowrapText">R: {{ this.ActiveDevice.rcv_name }}</span>
             </span>
-            <span class="B" v-if="ActiveDeviceType=='DV4000'">
+            <span class="B" v-if="!(this.ActiveDevice.rcv_sn.substr(-4) == '2999')">
               <span class="BCircle" :class="[!this.ActiveDevice.board_online||this.ActiveDevice.board_online=='0' ? 'gray': this.ActiveDevice.dev_push_status!='0'?'red':'green']"></span>
               B: {{ this.ActiveDevice.board_id }}
             </span>
@@ -86,9 +86,9 @@
                       <span class="RCircle" :class="[item.rcv_online == 1 ? (item.dev_push_status != '0' ? 'red' : 'green') : 'gray']"></span>
                       <span class="nowrapText">R: {{ item.rcv_name }}</span>
                     </span>
-                    <span class="B" v-if="ActiveDeviceType=='DV4000'">
-                      <span class="BCircle" :class="[!ActiveDevice.board_online||ActiveDevice.board_online=='0' ? 'gray': ActiveDevice.dev_push_status!='0'?'red':'green']"></span>
-                      B: {{ ActiveDevice.board_id }}
+                    <span class="B" v-if="!(item.rcv_sn.substr(-4) == '2999')">
+                      <span class="BCircle" :class="[!item.board_online||item.board_online=='0' ? 'gray': item.dev_push_status!='0'?'red':'green']"></span>
+                      B: {{ item.board_id }}
                     </span>
                   </div>
                 </div>
@@ -179,14 +179,11 @@
           SET_PARAM_LOCK
       }),
       changeDeviceType(){
-        console.log("changeDeviceType")
         var that = this;
-        console.log("that.deviceType:"+that.deviceType)
         that.SET_DEVICE_TYPE_SELECT(that.deviceType);
         that.formatDeviceTypeName();
       },
       changeDevicePrefix(){
-        console.log("changeDevicePrefix")
         var that = this;
         var selectPrefix = that.devicePrefix;
         if(selectPrefix[selectPrefix.length-1] == "all"){//当前选中all
@@ -221,21 +218,17 @@
           }
         }*/
         that.formatDeviceTypeName();
-        that.$global.getUserPrefixArr(that, that.formatPrefix)
+        that.$global.getUserPrefixArr(that.formatPrefix)
         
       },
       formatPrefix(data){
-        console.log("formatPrefix")
         var that = this;
         var arr = [{"label":"全部","value":"all"},{"label":"无","value":"none"}];
         for(let i=0; i<data.length; i++){
           arr.push({"label":data[i]["prefix_name"],"value":data[i]["prefix"]})
         }
         that.allPrefix = arr;
-        console.log(that.devicePrefixSelect)
         that.devicePrefix = that.devicePrefixSelect.split(",");
-        console.log(that.devicePrefix)
-        //that.userGroup = "all";
       },
       refreshCurDevParam(datas){
         this.SET_ACTIVE_DEVICE(datas);
@@ -243,8 +236,6 @@
       },
       getDeviceList(){
         var that = this;
-        console.log("getDeviceList")
-        console.log(that.devicePrefix)
         this.$axios({
           method: 'post',
           url:"/page/index/indexData.php",
@@ -283,7 +274,6 @@
       },
       //获取背包锁状态
       getDevLockStatus(){
-        //console.log("getDevLockStatus")
         var that = this;
         this.$axios({
             method: 'post',
@@ -359,7 +349,6 @@
           this.popupVisible = false;
       },
       filterDevice(){
-        console.log("filterDevice")
         var that = this;
         var deviceList = this.deviceList;
         //设备在线类型
@@ -388,26 +377,6 @@
             break;
         }
         that.deviceListShow = deviceListShow  
-        /*console.log("deviceListShow")
-        console.log(deviceListShow)
-        
-        console.log("that.devicePrefix:")
-        console.log(that.devicePrefix)*/
-        /*if(that.devicePrefix.indexOf("all") != -1){
-          console.log("if")
-          that.deviceListShow = deviceListShow  
-        }else{
-          console.log("else")
-          that.deviceListShow = deviceListShow.filter(function(item){
-            console.log(item.prefix)
-            if(that.devicePrefix.indexOf(item.prefix) != -1){
-              return true;
-            }else{
-              return false;
-            }
-          })
-        }*/
-        
       }
     }
   }
@@ -614,11 +583,31 @@
 <style>
   .channelList .mint-loadmore-text{color: #FFF;}
   .deviceFilterPop .mint-cell-wrapper{
-    background-image:linear-gradient(180deg,#000,#000 50%,transparent 0);
+    background-image:linear-gradient(180deg,#000,#000 50%,transparent 0) !important;
+  }
+  .deviceFilterPop .mint-cell-wrapper{
+    padding:0 10px !important;
+    padding-left:10px !important;
   }
   .deviceFilterPop .mint-cell{
-    background-color:#3f4551;
-    color:#fff; 
+    background-color:#3f4551 !important;
+    color:#fff !important; 
+    min-height: 48px !important;
+    display: block !important;
+  }
+  .deviceFilterPop .mint-checkbox-label {
+    vertical-align: middle !important;
+    margin-left: 6px !important;
+    font-size:.14rem !important;
+  }
+  .deviceFilterPop .mint-radio-label {
+    vertical-align: middle !important;
+    margin-left: 6px !important;
+    font-size:.16rem !important;
+  }
+  .deviceFilterPop .mint-radiolist-label {
+    display: block !important;
+    padding: 0 10px !important;
   }
   .deviceFilterPop .mint-radiolist-title,
   .deviceFilterPop .mint-checklist-title{

@@ -122,7 +122,7 @@
               that.$router.push("/dv4000status");
               that.SET_NAV_STATUS(false);
               that.SET_USER(res.res.data);
-              that.SET_ACTIVE_DEVICE_TYPE(that.curDeviceType);
+              /*that.SET_ACTIVE_DEVICE_TYPE(that.curDeviceType);*/
               localStorage.setItem("LOGIN",true);
               localStorage.setItem("USERNAME_1080",that.user.login_name);
               localStorage.setItem("PASSWORD_1080",that.user.password);

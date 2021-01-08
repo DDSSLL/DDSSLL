@@ -1,90 +1,90 @@
 <template>
-    <div class="control">
-        <keep-alive>
-            <Device></Device>
-        </keep-alive>
-        <div class="Group">
-            <div class="GroupTitle">网卡设置</div>
-            <div class="GroupItem" style="padding: .1rem;border-bottom:0;">
-                <table class="netBoardTable">
-                    <thead>
-                    <tr>
-                        <th>网卡</th>
-                        <th>启用/禁用</th>
-                        <th>上传<br>Mbps</th>
-                        <th>RTT<br>ms</th>
-                        <th>强度<br>dBm</th>
-                        <th>运营商</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <template v-for="item in netBoard">
-                        <tr v-if="item.cardShow == '1'">
-                            <td class="td" :class="[item.online == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
-                            <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch></td>
-                            <td class="td">{{ item.send_br }}</td>
-                            <td class="td">{{ item.card_rtt }}</td>
-                            <td class="td">{{ item.rssi }}</td>
-                            <td class="td">{{ transOperator(item.operator) }}</td>
-                        </tr>
-                    </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="Group">
-            <div class="GroupTitle">常用设置</div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">传输开关</div>
-                    <div class="GroupItemValue">
-                        <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch>
-                        <span id="url_dis" v-if="pushDisShow" style="color:red">推流地址不通</span>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">视频比特率(Mbps)</div>
-                    <div class="GroupItemValue">
-                        <mt-range
-                                v-model="common.dev_srVal_range"
-                                class="ItemRange byteRange"
-                                :min="BITRATE_MIN"
-                                :max="BITRATE_MAX"
-                                :step="0.1"
-                                :bar-height="5"
-                                :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
-                                @change="setDeviceParam('dev_sr_range')">
-                            <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{BITRATE_MIN}}</div>
-                            <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{BITRATE_MAX}}</div>
-                        </mt-range>
-                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal_input" @blur="setDeviceParam('dev_sr_input')" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true">
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">延时(s)</div>
-                    <div class="GroupItemValue">
-                        <mt-range
-                                v-model="common.dev_delayVal_range"
-                                class="ItemRange byteRange"
-                                :min="DELAY_MIN"
-                                :max="DELAY_MAX"
-                                :step.number="0.1"
-                                :bar-height="5"
-                                :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
-                                @change="setDeviceParam('dev_delay_range')">
-                            <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{DELAY_MIN}}</div>
-                            <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{DELAY_MAX}}</div>
-                        </mt-range>
-                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="paramLockAck == '1'?false:true">
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="control">
+    <keep-alive>
+      <Device></Device>
+    </keep-alive>
+    <div class="Group">
+      <div class="GroupTitle">网卡设置</div>
+      <div class="GroupItem" style="padding: .1rem;border-bottom:0;">
+        <table class="netBoardTable">
+          <thead>
+            <tr>
+              <th>网卡</th>
+              <th>启用/禁用</th>
+              <th>上传<br>Mbps</th>
+              <th>RTT<br>ms</th>
+              <th>强度<br>dBm</th>
+              <th>运营商</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="item in netBoard">
+              <tr v-if="item.cardShow == '1'">
+                <td class="td" :class="[item.online == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
+                <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch></td>
+                <td class="td">{{ item.send_br }}</td>
+                <td class="td">{{ item.card_rtt }}</td>
+                <td class="td">{{ item.rssi }}</td>
+                <td class="td">{{ transOperator(item.operator) }}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
     </div>
+    <div class="Group">
+      <div class="GroupTitle">常用设置</div>
+      <div class="GroupItem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">传输开关</div>
+          <div class="GroupItemValue">
+            <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch>
+            <span id="url_dis" v-if="pushDisShow" style="color:red">推流地址不通</span>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">视频比特率(Mbps)</div>
+          <div class="GroupItemValue">
+            <mt-range
+              v-model="common.dev_srVal_range"
+              class="ItemRange byteRange"
+              :min="BITRATE_MIN"
+              :max="BITRATE_MAX"
+              :step="0.1"
+              :bar-height="5"
+              :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
+              @change="setDeviceParam('dev_sr_range')">
+              <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{BITRATE_MIN}}</div>
+              <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{BITRATE_MAX}}</div>
+            </mt-range>
+            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal_input" @blur="setDeviceParam('dev_sr_input')" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true">
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">延时(s)</div>
+          <div class="GroupItemValue">
+            <mt-range
+              v-model="common.dev_delayVal_range"
+              class="ItemRange byteRange"
+              :min="DELAY_MIN"
+              :max="DELAY_MAX"
+              :step.number="0.1"
+              :bar-height="5"
+              :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
+              @change="setDeviceParam('dev_delay_range')">
+              <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{DELAY_MIN}}</div>
+              <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{DELAY_MAX}}</div>
+            </mt-range>
+            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="paramLockAck == '1'?false:true">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -96,8 +96,8 @@
     name: "Control",
     data(){
       return{
-        BITRATE_MIN : 0.5, //Mbps   数据库里的dev_sr
-        BITRATE_MAX : 20,
+        BITRATE_MIN : 0, //Mbps   数据库里的dev_sr
+        BITRATE_MAX : 0,
         DELAY_MIN : 0.1, //s
         DELAY_MAX : 20,
         delayMin : 0,
@@ -132,7 +132,7 @@
           this.ActiveDevice = val;
           if(this.paramLockAck != "1"){
             this.getNetBoard();
-            this.getDeviceParam();
+            this.$global.getDeviceParam(this.formatData)
           }
           this.$global.getPushUrls(this, this.formatPushUrlState);
         }
@@ -140,7 +140,7 @@
     },
     activated(){  //生命周期-缓存页面激活
       this.getNetBoard();
-      this.getDeviceParam();
+      this.$global.getDeviceParam(this.formatData)
     },
     deactivated(){   //生命周期-缓存页面失活
 
@@ -177,10 +177,8 @@
       formatSwitch(arr){
         var that = this;
         arr.forEach(function(item){
-          if ( that.ActiveDeviceType == "DV1080" ){
-            if( item.card_id == "lte4" || item.card_id == "lte5" || item.card_id == "lte6"){
-              item.cardShow = '0';
-            } else if (item.card_id == "eth0" || item.card_id == "lte1" || item.card_id == "lte2" || item.card_id == "lte3"){
+          var defaultShowArr = ["eth0", "lte1", "lte2", "lte3", "lte4", "lte5", "lte6"]
+            if ($.inArray(item.card_id, defaultShowArr) != -1){
               item.cardShow = '1';
             } else if (item.card_id == "wifi" || item.card_id == "usb-lan" || item.card_id == "usb-5g1" || item.card_id == "usb-5g2") {
               if (item.online == "1") {
@@ -201,7 +199,6 @@
               item.rssi = '-';
               item.operator = '-';
             }
-          }
         })
         return arr;
       },
@@ -239,7 +236,7 @@
           console.log(error)
         })
       },
-      getDeviceParam(){
+      /*getDeviceParam(){
         var that = this;
         this.$axios({
           method: 'post',
@@ -274,24 +271,48 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
+      },*/
       formatData(data){
         console.log("formatData")
+        console.log(data);
         var that = this;
+        var prefix = that.user.prefix;
         if(data.dev_push_enable == '0' && data.dev_push_status == '0'){  //推流开关
-          data.dev_push_enableVal = false;
-          that.pushDisShow = false;
+          that.common.dev_push_enableVal = false;
+          that.common.pushDisShow = false;
         }else if(data.dev_push_enable == '1'){
-          data.dev_push_enableVal = true;
+          that.common.dev_push_enableVal = true;
           that.$global.getPushUrls(that, that.formatPushUrlState);
         }
-        data.dev_srVal = (data.dev_sr / 1000).toFixed(1); //(Mbps)
-        data.dev_srVal_range = data.dev_srVal;
-        data.dev_srVal_input = data.dev_srVal;
-        data.dev_delayVal = (data.dev_delay / 1000).toFixed(3); //(s)
-        data.dev_delayVal_range = data.dev_delayVal;
-        data.dev_delayVal_input = data.dev_delayVal;
-        return data;
+        //视频比特率最大值
+        if(data['video_input'] == '4'){//视频输入是HDMI(此情况下无超低延时)
+          that.BITRATE_MAX = 20;
+        }else{
+           if(prefix == "001" || prefix == "xs" || prefix == "hngd"){
+              that.BITRATE_MAX = 100;
+           }else{
+              that.BITRATE_MAX = 40;
+           }
+        }
+        //视频比特率最小值
+        if(this.user.prefix != "001" && data.latency == "1"){
+          that.BITRATE_MIN = 8;
+        }else{
+          that.BITRATE_MIN = 1;
+        }
+        
+        that.common.dev_srVal = (data.dev_sr / 1000).toFixed(1); //(Mbps)
+        that.common.dev_srVal_range = that.common.dev_srVal;
+        that.common.dev_srVal_input = that.common.dev_srVal;
+        //延时
+        if(that.common.dev_srVal <= 40){
+          that.DELAY_MAX = 20;
+        }else{
+          that.DELAY_MAX = 10;
+        }
+        that.common.dev_delayVal = (data.dev_delay / 1000).toFixed(3); //(s)
+        that.common.dev_delayVal_range = that.common.dev_delayVal;
+        that.common.dev_delayVal_input = that.common.dev_delayVal;
       },
       //推流地址状态
       formatPushUrlState(data){
@@ -326,15 +347,34 @@
             },1000)
             return;
           }
-          that.checkDevPushCondition(function(){
-            that.setDeviceParam('dev_push_enable');
-          })
+          //回传中要询问
+          var text = '';
+          if ($('#work_str').text() == '文件离线回传中') {
+            text = '是否停止背包文件回传？';
+            //询问
+            layer.confirm(text, {
+              btn: ['确定', '取消'], //按钮
+              shade: [0.8, '#393D49'] //显示遮罩
+            }, function(index, layero) {
+              //停止文件回传
+              clickBackStopBtn();
+              $('#back_enable').bootstrapSwitch('state', false, true);
+              //setDevParam('dev_push_enable', 1, switchId);
+              $("#dev_push_enable").bootstrapSwitch('state', false, true);
+              layer.load(1, {
+                shade: [0.1, '#fff'],
+                time: 2000
+              });
+              layer.close(index);
+            }, function() {
+              //取消
+            });
+          } else {
+            //打开传输
+            setDevParam('dev_push_enable', 1, switchId);
+            setDevPush = 1;
+          }
         }else{
-          that.stopDevPushUrl(function(){
-            that.setDeviceParam('dev_push_enable');
-          })
-          $("#url_dis").css('display','none');
-
           that.setDeviceParam('dev_push_enable');
         }
       },
@@ -444,9 +484,9 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.getDeviceParam();
+            that.$global.getDeviceParam(that.formatData)
           }else{
-            that.getDeviceParam();
+            that.$global.getDeviceParam(that.formatData)
           }
         })
         .catch(function (error) {

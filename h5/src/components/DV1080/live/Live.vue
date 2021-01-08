@@ -57,35 +57,34 @@
         </div>
       </template>
     </div>
-        <mt-popup
-                v-model="pushUrlsEditVisible"
-                popup-transition="popup-fade">
-            <div class="pushEditModal">
-                <div class="modalTitle">
-                    推流地址
-                    <i class="closeBtn fa fa-close" @click="hideEditUrls"></i>
-                </div>
-                <div class="formContainer">
-                    <div class="formItem">
-                        <div class="formItemTitle">备注名</div>
-                        <div class="formItemVal"><input type="text" v-model="activePushObj.remark" :disabled="this.dev_push_enable"></div>
-                    </div>
-                    <div class="formItem">
-                        <div class="formItemTitle">推流地址</div>
-                        <div class="formItemVal">
-                            <!-- <span class="rtmp">RTMP</span> -->
-                            <input type="text" v-model="activePushObj.push_url" :disabled="this.dev_push_enable">
-                            <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265</p>
-                        </div>
-                    </div>
-                    <div class="formItem" style="text-align: right;margin-bottom: 0;">
-                        <button class="modalBtn" @click="hideEditUrls">取消</button>
-                        <button class="modalBtn" @click="saveEditUrls" style="background-color: #3d81f1;color:#fff;">确定</button>
-                    </div>
-                </div>
+    <mt-popup v-model="pushUrlsEditVisible" popup-transition="popup-fade">
+      <div class="pushEditModal">
+        <div class="modalTitle">
+          推流地址
+          <i class="closeBtn fa fa-close" @click="hideEditUrls"></i>
+        </div>
+        <div class="formContainer">
+          <div class="formItem">
+            <div class="formItemTitle">备注名</div>
+            <div class="formItemVal">
+              <input type="text" v-model="activePushObj.remark" :disabled="this.dev_push_enable">
             </div>
-        </mt-popup>
-    </div>
+          </div>
+          <div class="formItem">
+            <div class="formItemTitle">推流地址</div>
+            <div class="formItemVal">
+              <input type="text" v-model="activePushObj.push_url" :disabled="this.dev_push_enable">
+              <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265</p>
+            </div>
+          </div>
+          <div class="formItem" style="text-align: right;margin-bottom: 0;">
+            <button class="modalBtn" @click="hideEditUrls">取消</button>
+            <button class="modalBtn" @click="saveEditUrls" style="background-color: #3d81f1;color:#fff;">确定</button>
+          </div>
+        </div>
+      </div>
+    </mt-popup>
+  </div>
 </template>
 
 <script>

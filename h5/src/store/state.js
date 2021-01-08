@@ -13,6 +13,10 @@ export default {
     //背包锁状态
     paramLockAck:null,
     paramLock:null,
+    //背包参数
+    devParam:{},
+    //接收机参数
+    rcvParam:{},
     //设备列表显示类型
     deviceTypeSelect:1,
     devicePrefixSelect:"all",
