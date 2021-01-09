@@ -5,113 +5,17 @@
     
     <!-- 接收机 -->
     <RcvMan></RcvMan>
-    <!-- <div class="Group">
-      <div class="GroupTitle" @click="ReceiverShow=!ReceiverShow">
-        接收机信息
-        <i class="titleIcon fa" :class="[ReceiverShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
-        <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addReceiver" v-if="user.id==SUPER"></i>
-      </div>
-      <transition name="slide-fade">
-        <div class="GroupItem" v-if="ReceiverShow" id="rcvList">
-          <template v-for="(item,i) in receiverList">
-            <mt-cell-swipe
-              :right="[ 
-              {content: '背包',handler:() => showDevice(item)},
-              {content: '编辑',handler:() => editReceiver(item)},
-              {content: '删除',style:{display:user.id!=SUPER?'none':''}, handler:() => deleteReceiver(item)}
-              ]">
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">服务器名称</span>
-                <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.rcv_name }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">状态</span>
-                <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.online }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">序列号</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.rcv_sn }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">上线时间</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.datetime }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">映射IP</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.rcv_ip }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">本地IP</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.rcv_ownIP }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">型号</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.rcv_model }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">软件版本</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.softVer }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">MAC</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.rcv_mac }}</span>
-              </div>
-            </mt-cell-swipe>
-          </template>
-        </div>
-      </transition>
-    </div> -->
+    
+    <!-- 录机管理 -->
+    <RecordMan></RecordMan>
+
     <!-- 用户 -->
-    <div class="Group">
-      <div class="GroupTitle" @click="AccountShow=!AccountShow">
-        用户信息
-        <i class="titleIcon fa" :class="[AccountShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
-        <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addUser" v-if="user.id==SUPER"></i>
-      </div>
-      <transition name="slide-fade">
-        <div class="GroupItem" v-if="AccountShow">
-          <template v-for="(item,i) in accountList">
-            <mt-cell-swipe
-              :right="[ 
-              {content: '设备权限',handler:() => showDevAuthority(item)},
-              {content: '编辑',handler:() => editUser(item)},
-              {content: '删除',style:{display:(user.id!=SUPER || item.id==SUPER)?'none':''}, handler:() => deleteUser(item)}
-              ]">
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">用户名称</span>
-                <span class="cellName cellValue" style="float: right;">
-                  <span v-show="[item.id==user.id]">
-                    <i class="fa fa-user" style="color: #23b7e5"></i>
-                  </span>
-                  {{ item.name }}
-                  </span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">登录账号</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.id }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">最近登录时间</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.loginTime }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">手机号</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.mobilePhone }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">邮箱</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.emailAddress }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">备注</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.remark }}</span>
-              </div>
-            </mt-cell-swipe>
-          </template>
-        </div>
-      </transition>
-    </div>
-    <div class="Group">
+    <UserMan></UserMan>
+    
+    <!-- 用户等级 -->
+    <UserLevelMan></UserLevelMan>
+    
+    <div class="Group" v-if="false">
       <div class="GroupTitle" @click="ChartConfShow=!ChartConfShow">
         图表配置
         <i class="titleIcon fa" :class="[ChartConfShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
@@ -156,54 +60,54 @@
                 </div>
               </div>
             </mt-tab-container-item>
-    <!-- <mt-tab-container-item id="2">
-      <div class="GroupItem">
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">上传速率</div>
-          <div class="GroupItemValue">
-            <select class="ItemSelect">
-              <option v-for="item in ChartConf.total.up" :value="item">{{item}}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="GroupItem">
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">下载速率</div>
-          <div class="GroupItemValue">
-            <select class="ItemSelect">
-              <option v-for="item in ChartConf.total.down" :value="item">{{item}}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="GroupItem">
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">传输丢包</div>
-          <div class="GroupItemValue">
-            <select class="ItemSelect">
-              <option v-for="item in ChartConf.total.lossDev" :value="item">{{item}}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-        <div class="GroupItem">
-          <div class="GroupItemField">
-            <div class="GroupItemTitle">业务丢包</div>
-            <div class="GroupItemValue">
-              <select class="ItemSelect">
-                <option v-for="item in ChartConf.total.lossRcv" :value="item">{{item}}</option>
-              </select>
-          </div>
-        </div>
-      </div>
-      <div class="GroupItem">
-        <div class="GroupItemBtns">
-          <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
-          <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
-        </div>
-      </div>
-    </mt-tab-container-item> -->
+            <!-- <mt-tab-container-item id="2">
+              <div class="GroupItem">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">上传速率</div>
+                  <div class="GroupItemValue">
+                    <select class="ItemSelect">
+                      <option v-for="item in ChartConf.total.up" :value="item">{{item}}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">下载速率</div>
+                  <div class="GroupItemValue">
+                    <select class="ItemSelect">
+                      <option v-for="item in ChartConf.total.down" :value="item">{{item}}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">传输丢包</div>
+                  <div class="GroupItemValue">
+                    <select class="ItemSelect">
+                      <option v-for="item in ChartConf.total.lossDev" :value="item">{{item}}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+                <div class="GroupItem">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle">业务丢包</div>
+                    <div class="GroupItemValue">
+                      <select class="ItemSelect">
+                        <option v-for="item in ChartConf.total.lossRcv" :value="item">{{item}}</option>
+                      </select>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem">
+                <div class="GroupItemBtns">
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
+                  <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
+                </div>
+              </div>
+            </mt-tab-container-item> -->
             <mt-tab-container-item id="3">
               <div class="GroupItem GroupItem0">
                 <div class="GroupItemField">
@@ -237,7 +141,7 @@
               <div class="GroupItem">
                 <div class="GroupItemBtns">
                   <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfCard">确定</button>
-    		  <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfCard">恢复当前值</button>
+                  <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfCard">恢复当前值</button>
                 </div>
               </div>
             </mt-tab-container-item>
@@ -256,121 +160,17 @@
         </div>
       </transition>
     </div>
-    
-    <!-- 用户管理 -->
-    <mt-popup v-model="userConfigVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          用户管理
-          <i class="popupCloseBtn fa fa-times" @click="userConfigVisible = false"></i>
-        </div>
-        <form action="" @submit.prevent="submitUserConfig">
-          <input type="password" style="display:none" id="loginPassword"/>
-          <input type="text" style="display:none" id="loginUserName"/>
-          <div class="fGrp">
-            <div class="tl">用户名</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="userConfigForm.name" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()">
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()</p>
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">登录密码</div>
-            <div class="vl">
-              <input type="password" class="ItemInput" v-model="userConfigForm.pwd" required pattern="^[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合"/> 
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
-                6~16位字母,数字,下划线和@组合
-              </p>
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">确认密码</div>
-            <div class="vl">
-              <input type="password" class="ItemInput" v-model="userConfigForm.pwd2" required pattern="^[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合" clearable autocomplete="off" />
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">手机号</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="userConfigForm.mobilePhone" pattern="^1[3|4|5|8][0-9]\d{8}$" title="请输入正确手机号" >
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">邮箱</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="userConfigForm.emailAddress">
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">备注</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="userConfigForm.remark">
-            </div>
-          </div>
-          <div class="fGrp" style="text-align: right">
-            <button @click="userConfigVisible = false" style="margin-right: .06rem;">取消</button>
-            <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
-          </div>
-        </form>
-      </div>
-    </mt-popup>
-    <!-- 设备权限 -->
-    <mt-popup v-model="devRightsVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          设备权限
-          <i class="popupCloseBtn fa fa-times" @click="devRightsVisible = false"></i>
-        </div>
-        <!-- <template v-for="(item,i) in devRightsList">
-          <div class="devRightsItem">
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">设备</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.dev_name }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">序列号</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.dev_sn}}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">状态</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.online }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">型号</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.dev_model }}</span>
-            </div>
-          </div>
-        </template> -->
-        <div class="devRightsTable">
-          <table>
-            <thead>
-              <tr>
-                <th>设备</th>
-                <th>序列号</th>
-                <th>状态</th>
-                <th>型号</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template v-for="(item,i) in devRightsList">
-                <tr>
-                  <td>{{ item.dev_name }}</td>
-                  <td>{{ item.dev_sn }}</td>
-                  <td>{{ item.online }}</td>
-                  <td>{{ item.dev_model }}</td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </mt-popup>
   </div>
 </template>
 
 <script>
   import DevMan from './dev';
   import RcvMan from './rcv';
+  import RecordMan from './record';
+  import UserMan from './user';
+  import UserLevelMan from './userLevel';
+  
+  
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER, SET_NAV_STATUS, SET_ACTIVE_DEVICE, SET_TIMER_CLEAR, SET_CHART_STYLE } from '../../../store/mutation-types';
   import $ from 'jquery';
@@ -423,53 +223,13 @@
         ReceiverShow:false,
         AccountShow:false,
         SystemShow:true,
-        /*背包*/
-        /*deviceList:[],*/
-        /*deviceCardVisible:false,*/
-        /*deviceCardList:[],*/
-        /*deviceConfigVisible:false,*/
-        /*deviceConfigType:'add',*/
-        /*deviceConfigForm:{
-          devName:"",
-          editDev:"",
-          devUser:"",
-          server:""
-        },*/
-        /*deviceConfigUserOptions:[],*/
-        /*deviceConfigServerOptions:[],*/
-        editMatchChange: false,
-        /*接收机*/
-        /*receiverList:[],
-        receiverConfigVisible:false,
-        receiverConfigType:'add',
-        receiverConfigForm:{
-          rcvName:"",
-          rcvSn:""
-        },
-        deviceVisible:false,
-        devicePopupList:[],*/
-        /*用户*/
-        accountList:[],
-        userConfigVisible:false,
-        userConfigType:"add",
-        userConfigForm:{
-          id:"",
-          name:"",
-          pwd:"",
-          pwd2:"",
-          mobilePhone:"",
-          emailAddress:"",
-          remark:""
-        },
-        devRightsVisible:false,
-        devRightsList:[]
       }
     },
     computed: {
       ...mapState(['user','navHide','DeviceTimer','ChartTimer','cardLineStyle','chartCardView'])
     },
     components: {
-      DevMan,RcvMan
+      DevMan,RcvMan,UserMan,RecordMan,UserLevelMan
     },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {

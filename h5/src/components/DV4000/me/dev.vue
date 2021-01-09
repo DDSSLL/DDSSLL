@@ -2,8 +2,9 @@
   <div class="DevMan">
     <div class="Group">
       <div class="GroupTitle" @click="DeviceShow=!DeviceShow">
-        背包信息
+        背包
         <i class="titleIcon fa" :class="[DeviceShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+        <i class="titleIcon addBtn fa fa-refresh" @click.stop="getDeviceList"></i>
         <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addDevice" v-if="devAddShow"></i>
       </div>
       <transition name="slide-fade">
@@ -473,7 +474,7 @@
         }
         that.getDevPrefixList(function(){//获取用户组下拉列表options
           that.options.prefix = item.prefix; //赋值当前设备所属用户组
-          that.$global..initUserListByPrefix(item.prefix, function(data) {//获取用户下拉列表options
+          that.$global.initUserListByPrefix(item.prefix, function(data) {//获取用户下拉列表options
             that.deviceConfigUserOptions = data.userArr.map(function(item){
               return {"label":item.text,"value":item.value}
             });

@@ -216,6 +216,9 @@ export default {
                   {text: "128kbps",value: "128kbps"},
                   {text: "64kbps",value: "64kbps"}],
   //接收机板卡相关参数--end
+  /*录机路径*/
+  OPTIONS_RECORD_PATH : [{text: "USB",value: "0"}, 
+                        {text: "NAS",value: "1"}],
   //DV4000 参数---end
   getCurrentTime() {
     var date = new Date();
@@ -974,5 +977,36 @@ export default {
     .catch(function (error) {
       console.log(error)
     })
+  },
+  //判断是否是有效手机号
+  isValidPhone(number) {
+    var res = false;
+    if (number.length != 11) {
+      return false;
+    } else {
+      if (/^[0-9]+$/.test(number)) {
+        res = true;
+      } else {
+        res = false;
+      }
+    }
+    return res;
+  },
+  //格式化用户组选中值
+  formatUserSelect(userPrefixShow,selectPrefix){
+    var that = this;
+    var select = "";
+    if(userPrefixShow){
+      if(selectPrefix){
+        select = selectPrefix.map(function(item){
+          return "'" + item + "'"
+        }).join(",");
+      }else{
+        select = "'/'";
+      }
+    }else{
+       select = "'"+store.state.user.prefix+"'";
+    }
+    return select;
   },
 }
