@@ -34,7 +34,7 @@
     data(){
       return {
         title : "HDXpress",
-        UHDXPRESS_BUILD : "http://www.uhdxpress.com",//4000一级域名
+        //UHDXPRESS_BUILD : "http://www.uhdxpress.com",//4000一级域名
         //UHDXPRESS_BUILD : "http://127.0.0.1/new-trank",
         user:{
           login_name:'',
@@ -78,16 +78,13 @@
       }
     },
     mounted(){
-      //console.log("1080 login mount")
       this.SET_ACTIVE_DEVICE_TYPE("DV4000")
       this.SET_DOMAIN(this.UHDXPRESS_BUILD);
-      this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080的一级域名
-      //this.$axios.defaults.baseURL = this.HDXPRESS_SERVE;//调试代码不能上传
-      //this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080一级域名
-      this.user.saveMe_1080 = localStorage.getItem("SAVEME_1080")?eval(localStorage.getItem("SAVEME_1080")):false;
+      this.$axios.defaults.baseURL = this.UHDXPRESS_BUILD;//默认1080的一级域名
+      this.user.saveMe_4000 = localStorage.getItem("SAVEME_4000")?eval(localStorage.getItem("SAVEME_4000")):false;
       if(this.user.saveMe1080){
-        this.user.login_name = localStorage.getItem("USERNAME_1080");
-        this.user.password = localStorage.getItem("PASSWORD_1080");
+        this.user.login_name = localStorage.getItem("USERNAME_4000");
+        this.user.password = localStorage.getItem("PASSWORD_4000");
       }
     },
     methods:{
@@ -98,9 +95,6 @@
         SET_DOMAIN
       }),
       login(){
-        /*console.log("login")
-        console.log("设备："+this.activedevicetype);
-        console.log("this.$axios.defaults.baseURL:"+this.$axios.defaults.baseURL)*/
         var that = this;
         that.$axios.defaults.baseURL = that.domain;
         this.$axios({
@@ -122,12 +116,11 @@
               that.$router.push("/dv4000status");
               that.SET_NAV_STATUS(false);
               that.SET_USER(res.res.data);
-              /*that.SET_ACTIVE_DEVICE_TYPE(that.curDeviceType);*/
               localStorage.setItem("LOGIN",true);
-              localStorage.setItem("USERNAME_1080",that.user.login_name);
-              localStorage.setItem("PASSWORD_1080",that.user.password);
+              localStorage.setItem("USERNAME_4000",that.user.login_name);
+              localStorage.setItem("PASSWORD_4000",that.user.password);
               localStorage.setItem("DEVICE",that.activedevicetype);
-              localStorage.setItem("SAVEME_1080",that.user.saveMe_1080);
+              localStorage.setItem("SAVEME_4000",that.user.saveMe_1080);
               //每次重新登录echarts图都重新画
               localStorage.removeItem("cardData");
               localStorage.removeItem("chartKey");
@@ -140,10 +133,10 @@
               position: 'middle',
               duration: 3000
             })
-            localStorage.setItem("USERNAME_1080",that.user.login_name);
-            localStorage.setItem("PASSWORD_1080",that.user.password);
+            localStorage.setItem("USERNAME_4000",that.user.login_name);
+            localStorage.setItem("PASSWORD_4000",that.user.password);
             localStorage.setItem("DEVICE",that.activedevicetype);
-            localStorage.setItem("SAVEM_1080",that.user.saveMe_1080);
+            localStorage.setItem("SAVEM_4000",that.user.saveMe_1080);
           }
         })
         .catch(function (error) {
@@ -169,35 +162,7 @@
         }
       },
       register(){},
-      /*back(){
-        this.$router.go(-1)
-      },*/
-      /*ChoseDevice(val){
-        this.ActiveDeviceType = val;
-        this.SET_ACTIVE_DEVICE_TYPE(this.ActiveDeviceType);
-        switch(this.ActiveDeviceType){
-          case "DV1080":
-            this.title = "HDXpress";
-            this.$axios.defaults.baseURL = this.DOMAIN;
-            //"http://127.0.0.1";
-            break;
-          case "DV4000":
-            this.title = "UHDXpress";
-            this.$axios.defaults.baseURL = this.DOMAIN;
-            //this.$axios.defaults.baseURL = "http://117.131.178.104:8088";
-            this.$router.push("/dv4000login");
-            
-            break;
-          case "OTHER":
-            this.title = "OTHER";
-            this.$axios.defaults.baseURL = "http://47.104.164.249";
-            break;
-        }
-        this.showConfig = false;
-      },*/
-
       connectWifi(){
-        //this.wifiUrlsEditVisible = true;
         this.$router.push("/wifi");
       },
 
@@ -207,10 +172,6 @@
         this.wifiUrlsEditVisible = false;
         this.showConfig = false;
       },
-
-      /*GoDV4000Login(){
-        this.$router.push("/dv4000login");
-      }*/
     }
   }
 </script>

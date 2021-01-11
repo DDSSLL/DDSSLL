@@ -5,7 +5,7 @@
         录机管理
         <i class="titleIcon fa" :class="[userShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
         <i class="titleIcon addBtn fa fa-refresh" @click.stop="getRecordList"></i>
-        <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addRecord" v-if="userAddShow"></i>
+        <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addRecord" v-if="recordAddShow"></i>
       </div>
       <transition name="slide-fade">
         <div class="GroupItem" v-if="userShow" id="userList">
@@ -18,7 +18,7 @@
             <mt-cell-swipe
               :right="[ 
               {content: '编辑',handler:() => editRecord(item)},
-              {content: '删除',style:{display:user.id!=SUPER?'none':''}, handler:() => deleteRecord(item)}
+              {content: '删除',style:{display:recordDelShow?'':'none'}, handler:() => deleteRecord(item)}
               ]">
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">录机名</span>
@@ -171,7 +171,8 @@
         },
         
         userShow:false,//用户tab
-        userAddShow:true,//添加用户按钮
+        recordAddShow:true,//添加录机按钮
+        recordAddShow:true,//删除录机按钮
         userGroups:[],//用户组
         
         /*设备权限信息*/
@@ -208,9 +209,15 @@
       initShowContent(){
         console.log("initShowContent")
         var that = this;
+        if(that.user.userGroup == that.ADMIN){
+          that.recordAddShow = true;
+          that.recordDelShow = true;
+        }else{
+          that.recordAddShow = false;
+          that.recordDelShow = false;
+        }
         if(this.user.id == this.SUPER){//"001-admin"
           that.userPrefixShow = true;
-          that.userAddShow = true;
           that.$global.getUserPrefixArr(function(data) {
             var options = [],prefixIdArr = [];
             options.push({label:"全部", value:"all"});
@@ -224,7 +231,7 @@
           })
         }else{
           that.userPrefixShow = false;
-          that.userAddShow = false;
+          that.getRecordList()
         }
       },
       getRecordList(){

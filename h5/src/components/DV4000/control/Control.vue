@@ -371,8 +371,8 @@
             });
           } else {
             //打开传输
-            setDevParam('dev_push_enable', 1, switchId);
-            setDevPush = 1;
+            that.setDeviceParam('dev_push_enable');
+            //setDevPush = 1;
           }
         }else{
           that.setDeviceParam('dev_push_enable');

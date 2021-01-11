@@ -19,7 +19,7 @@
               :right="[ 
               {content: '板卡',handler:() => showBoardInfo(item)},
               {content: '编辑',handler:() => editReceiver(item)},
-              {content: '删除',style:{display:user.id!=SUPER?'none':''}, handler:() => deleteReceiver(item)}
+              {content: '删除',style:{display:rcvDelShow?'':'none'}, handler:() => deleteReceiver(item)}
               ]">
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">接收机名称</span>
@@ -91,7 +91,7 @@
       <!-- navbar -->
       <mt-navbar class="page-part" v-model="selected">
         <mt-tab-item id="1">状态</mt-tab-item>
-        <mt-tab-item id="2" v-if="encodeTabShow">编码卡</mt-tab-item>
+        <mt-tab-item id="2" v-show="encodeTabShow">编码卡</mt-tab-item>
       </mt-navbar>
       <mt-tab-container v-model="selected">
         <mt-tab-container-item id="1"><!-- 状态 -->
@@ -417,7 +417,7 @@
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
-            <button class="modalBtn" @click="deviceConfigVisible = false" style="margin-right: .06rem;">取消</button>
+            <button class="modalBtn" @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
             <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
         </form>
@@ -452,6 +452,7 @@
         ADMIN : ADMIN,
         ReceiverShow:false,
         rcvAddShow:true,//添加按钮
+        rcvDelShow:true,//删除按钮
         /*用户组*/
         userPrefixShow:true,//用户组过滤
         selectPrefix:[],//选中的用户组
@@ -505,9 +506,7 @@
           rcvUser:"",
           rcvUserDisable:false,
           
-rcvUserId:"",
-          
-          
+          rcvUserId:"",
         },
         rcvUserListPop:false,
         boardShow:false,
@@ -559,9 +558,15 @@ rcvUserId:"",
       initShowContent(){
         console.log("initShowContent")
         var that = this;
+        if(that.user.userGroup == that.ADMIN){
+          that.rcvAddShow = true;
+          that.rcvDelShow = true;
+        }else{
+          that.rcvAddShow = false;
+          that.rcvDelShow = false;
+        }
         if(this.user.id == this.SUPER){//"001-admin"
           that.userPrefixShow = true;
-          that.rcvAddShow = true;
           that.$global.getUserPrefixArr(function(data) {
             var options = [],prefixIdArr = [];
             options.push({label:"全部", value:"all"});
@@ -576,7 +581,7 @@ rcvUserId:"",
           })
         }else{
           that.userPrefixShow = false;
-          that.rcvAddShow = false;
+          that.getReceiverList();
         }
       },
       getReceiverList(){
@@ -727,7 +732,7 @@ rcvUserId:"",
         that.$axios({
           method: 'post',
           url:"/page/dev/devData.php",
-          data:this.$qs.stringify({
+          data:that.$qs.stringify({
             getEncodeParam: true,
             rcvSn: rcv_sn
           }),

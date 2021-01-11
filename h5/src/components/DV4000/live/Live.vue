@@ -40,7 +40,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-show="show.sel_resolution"><!-- 推流地址 -->
+          <div class="GroupItem"><!-- 推流地址 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">推流地址</div>
               <div class="GroupItemValue">

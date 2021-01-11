@@ -19,7 +19,7 @@
               :right="[ 
               {content: '网卡',handler:() => showDeviceCard(item)},
               {content: '编辑',handler:() => editDevice(item)},
-              {content: '删除',handler:() => deleteDevice(item)}
+              {content: '删除',style:{display:devDelShow?'':'none'},handler:() => deleteDevice(item)}
               ]">
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">背包名称</span>
@@ -253,6 +253,7 @@
         },
         userPrefixShow:true,
         devAddShow:true,
+        devDelShow:true,
         selectPrefix:['all'],
         prefixArr:[],
         deviceCardList : [],
@@ -279,28 +280,29 @@
     },
     created(){  //生命周期-页面创建后
       this.initShowContent();
-      this.getDeviceList();
+      //this.getDeviceList();
     },
     activated(){
       console.log("devMan activated")
       this.initShowContent();
-      this.getDeviceList();
+      //this.getDeviceList();
     },
     methods:{
       ...mapMutations({
           
       }),
       initShowContent(){
-        console.log("initShowContent")
         var that = this;
-        console.log(this.user.id)
-        console.log(this.SUPER)
-        if(this.user.id == this.SUPER){//"001-admin"
-          that.userPrefixShow = true;
+        if(that.user.userGroup == that.ADMIN){
           that.devAddShow = true;
+          that.devDelShow = true;
+        }else{
+          that.devAddShow = false;
+          that.devDelShow = false;
+        }
+        if(this.user.userGroup == this.SUPER){//"001-admin"
+          that.userPrefixShow = true;
           that.$global.getUserPrefixArr(function(data) {
-            console.log("getUserPrefixArr")
-            console.log(data);
             var options = [],prefixIdArr = [];
             options.push({label:"全部", value:"all"});
             for(var i=0; i<data.length; i++){
@@ -310,19 +312,12 @@
             
             that.prefixArr = options;
             that.selectPrefix = ['all'];
-
-
-
-            /*$("#devPrefixSelect").on('changed.bs.select', function(e,clickedIndex,isSelected){
-              changePrefixSelect("#devPrefixSelect",clickedIndex,refreshDevTable);
-            });*/
-            
             //背包列表
             that.getDeviceList();
           })
         }else{
           that.userPrefixShow = false;
-          that.devAddShow = false;
+          that.getDeviceList();
         }
       },
       formatUserSelect(){
@@ -507,8 +502,8 @@
           })
         }else{
           var option = [{
-            text: store.state.user.id,
-            value: store.state.user.id
+            text: that.user.id,
+            value: that.user.id
           }];
           that.deviceConfigPrefixOptions = option;
           that.options.prefix = option[0].value;

@@ -19,7 +19,7 @@
               :right="[ 
               {content: '设备权限',handler:() => showDevAuthority(item)},
               {content: '编辑',handler:() => editUser(item)},
-              {content: '删除',style:{display:user.id!=SUPER?'none':''}, handler:() => deleteUser(item)}
+              {content: '删除',style:{display:userDelShow?'':'none'}, handler:() => deleteUser(item)}
               ]">
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">用户名称</span>
@@ -208,6 +208,7 @@
         ADMIN : ADMIN,
         userShow:false,//用户tab
         userAddShow:true,//添加用户按钮
+        userDelShow:true,//删除用户按钮
         userGroups:[],//用户组
         /*用户组*/
         userPrefixShow:true,//用户组过滤
@@ -270,9 +271,15 @@
       initShowContent(){
         console.log("initShowContent")
         var that = this;
+        if (that.user.userGroup == that.ADMIN) {
+          that.userAddShow = true;
+          that.userDelShow = true;
+        } else {
+          that.userAddShow = false;
+          that.userDelShow = false;
+        }
         if(this.user.id == this.SUPER){//"001-admin"
           that.userPrefixShow = true;
-          that.userAddShow = true;
           that.$global.getUserPrefixArr(function(data) {
             var options = [],prefixIdArr = [];
             options.push({label:"全部", value:"all"});
@@ -287,7 +294,7 @@
           })
         }else{
           that.userPrefixShow = false;
-          that.userAddShow = false;
+          that.getUserGroup(that.getUserList());
         }
       },
       getUserGroup(cb){
