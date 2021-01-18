@@ -15,18 +15,20 @@
       <div class="form-item" style="overflow: hidden;">
         <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
       </div>
-      <div class="form-item">
+      <!-- <div class="form-item">
         <span class="forgetPwd">忘记密码了?</span>
         <span style="float: left;width:4%;text-align: center;margin-top:0.05rem;">|</span>
         <span class="registerBtn">注册一个新账号</span>
-      </div>
-      <LoginSetBtn></LoginSetBtn>    
+      </div> -->
+      <appVersion></appVersion>
+      <LoginSetBtn></LoginSetBtn>     
     </div>
   </div>
 </template>
 
 <script>
   import LoginSetBtn from '../../common/LoginSetBtn';
+  import appVersion from '../../common/appVersion';
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE_TYPE,SET_DOMAIN } from '../../../store/mutation-types';
   export default {
@@ -49,7 +51,7 @@
     ...mapState(['navHide','activedevicetype','domain'])
     },
     components: {
-      LoginSetBtn
+      LoginSetBtn,appVersion
     },
     watch:{   //监听当前设备类型变化
       '$store.state.activedevicetype': {

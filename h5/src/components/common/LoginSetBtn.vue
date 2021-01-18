@@ -6,8 +6,8 @@
     <div class="loginGroup" v-show="showConfig">
       <mt-button class="deviceLogin" :class="[activedevicetype == 'DV4000' ? 'deviceLoginActive': '']" @click="GoDV4000Login('DV4000')">DV4000</mt-button>
       <mt-button class="deviceLogin" :class="[activedevicetype == 'DV1080' ? 'deviceLoginActive': '']" @click="GoDV1080Login('DV1080')">DV1080</mt-button>
-      <mt-button class="deviceLogin" :class="[activedevicetype == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
-      <mt-button class="deviceLogin" :class="[activedevicetype == 'WIFI' ? 'deviceLoginActive': '']" @click="connectWifi()">本机WiFi</mt-button>
+      <!-- <mt-button class="deviceLogin" :class="[activedevicetype == 'OTHER' ? 'deviceLoginActive': '']" @click="ChoseDevice('OTHER')">其他</mt-button>
+      <mt-button class="deviceLogin" :class="[activedevicetype == 'WIFI' ? 'deviceLoginActive': '']" @click="connectWifi()">本机WiFi</mt-button> -->
     </div> 
     <mt-popup v-model="debugSetting" position="right" class="debugSetting">
       <h1 class="debugSettingTitle">{{ this.title }}</h1>
@@ -63,7 +63,9 @@
         HDXPRESS_BUILD : "http://www.hdxpress.cn",//1080一级域名
         HDXPRESS_SERVE : "http://1080.hdxpress.cn:8088/",//1080二级域名
         UHDXPRESS_BUILD : "http://4000.uhdxpress.com",//4000一级域名
-        UHDXPRESS_SERVE : "http://192.168.100.110:8088/",//4000二级域名
+        //UHDXPRESS_SERVE : "http://192.168.100.110:8088/",//4000二级域名
+        UHDXPRESS_SERVE : "http://139.129.91.106:80/",//4000二级域名（测试部环境）
+        
         //UHDXPRESS_SERVE : "http://127.0.0.1/new-trank",//本地测试
       }
     },

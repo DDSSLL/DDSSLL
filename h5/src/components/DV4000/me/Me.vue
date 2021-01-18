@@ -155,7 +155,8 @@
         <i class="titleIcon fa" :class="[SystemShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
       </div>
       <transition name="slide-fade">
-        <div class="GroupItem" v-show="SystemShow">
+        <div class="GroupItem" v-show="SystemShow" id="systemInfo">
+          <mt-cell title="软件版本" value="V1.00.01" style="font-size:.14rem"></mt-cell>
           <mt-button size="large" class="logout" @click="logout">登出</mt-button>
         </div>
       </transition>
@@ -1400,5 +1401,11 @@
     }
     .devRightsTable table td,.devRightsTable table th{
       padding:5px;
+    }
+    #systemInfo .mint-cell-value{
+      flex:1
+    }
+    #systemInfo .mint-cell-wrapper{
+      font-size:.14rem !important;
     }
 </style>
