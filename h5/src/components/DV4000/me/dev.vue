@@ -1,7 +1,7 @@
 <template>
   <div class="DevMan">
     <div class="Group">
-      <div class="GroupTitle" @click="DeviceShow=!DeviceShow">
+      <div class="GroupTitle" @click="changeDeviceShow">
         背包
         <i class="titleIcon fa" :class="[DeviceShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
         <i class="titleIcon addBtn fa fa-refresh" @click.stop="getDeviceList"></i>
@@ -10,7 +10,7 @@
       <transition name="slide-fade">
         <div class="GroupItem" v-if="DeviceShow" id="devList">
           <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
-            <mt-cell :title="'用户组:'+selectPrefix.join(',')">
+            <mt-cell :title="'用户组:'+selectPrefixName.join(',')">
               <i class="fa fa-chevron-down" @click.stop="userPrefixPop = true" ></i>
             </mt-cell>
           </div>
@@ -77,7 +77,7 @@
       </span>
       <mt-checklist
         v-model="selectPrefix"
-        :options="prefixArr"
+        :options="selectPrefixOptions"
         @change="changePrefixSelect">
       </mt-checklist>
     </mt-popup>
@@ -92,7 +92,7 @@
           <div class="deviceCardItem">
             <div class="cellItem">
               <span class="cellName cellLabel" style="float: left;">网卡</span>
-              <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.card_name }}</span>
+              <span class="cellName cellValue" style="float: right;" :class="[(item.online=='1'&&(devOnline == '在线' || devOnline == '直播'))?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.card_name }}</span>
             </div>
             <div class="cellItem">
               <span class="cellName cellLabel" style="float: left;">状态</span>
@@ -160,7 +160,7 @@
           <div class="fGrp" v-if="deviceConfigType == 'edit' && show.devUser==true">
             <div class="tl">使用者</div>
             <div class="vl">
-              <input class="ItemInput" :disabled="disable.devUser" @click="userListPop = true" v-model="options.devUser.join(',')">
+              <input class="ItemInput" :disabled="disable.devUser" @click="userListPop = true" v-model="options.devUser.join(',')" readonly>
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
                 仅显示非管理员用户
               </p>
@@ -253,10 +253,14 @@
         },
         userPrefixShow:true,
         devAddShow:true,
-        devDelShow:true,
-        selectPrefix:['all'],
+        devDelShow:true,/*
+        selectPrefix:['all'],*/
+        selectPrefixOptions:[],//用户组options
+        selectPrefix:[],//选中的用户组
+        selectPrefixName:[],//显示过滤组的名称
         prefixArr:[],
         deviceCardList : [],
+        devOnline : "",
         deviceCardVisible :false,
         deviceConfigPrefixOptions:[],
         deviceConfigUserOptions:[],
@@ -264,6 +268,7 @@
         deviceConfigBoardOptions:[],
         deviceConfigType:'add',
         deviceConfigVisible:false,
+        getDeviceListInterval:"",
       }
     },
     computed: {
@@ -291,6 +296,18 @@
       ...mapMutations({
           
       }),
+      changeDeviceShow(){
+        var that = this;
+        that.DeviceShow = !that.DeviceShow
+        if(that.DeviceShow){
+          that.getDeviceList();
+          that.getDeviceListInterval = setInterval(function(){
+            that.getDeviceList();
+          },1000*15)
+        }else{
+          clearInterval(that.getDeviceListInterval)
+        }
+      },
       initShowContent(){
         var that = this;
         if(that.user.userGroup == that.ADMIN){
@@ -300,18 +317,13 @@
           that.devAddShow = false;
           that.devDelShow = false;
         }
-        if(this.user.userGroup == this.SUPER){//"001-admin"
+        if(this.user.id == this.SUPER){//"001-admin"
           that.userPrefixShow = true;
           that.$global.getUserPrefixArr(function(data) {
-            var options = [],prefixIdArr = [];
-            options.push({label:"全部", value:"all"});
-            for(var i=0; i<data.length; i++){
-              options.push({label:data[i].prefix_name, value:data[i].prefix});
-            }
-            options.push({label:"无", value:""})
-            
-            that.prefixArr = options;
-            that.selectPrefix = ['all'];
+            var data = that.$global.initPrefixData(data);
+            that.selectPrefixOptions = data.selectPrefixOptions;
+            that.selectPrefix = data.selectPrefix;
+            that.selectPrefixName = data.selectPrefixName;
             //背包列表
             that.getDeviceList();
           })
@@ -371,22 +383,16 @@
       changePrefixSelect(){
         var that = this;
         var selectPrefix = that.selectPrefix;
-        if(selectPrefix[selectPrefix.length-1] == "all"){//当前选中all
-          that.selectPrefix = ["all"];  
-        }else{
-          if(selectPrefix.length > 1){
-            if($.inArray("all",selectPrefix) != -1){
-              selectPrefix.splice(selectPrefix.indexOf("all"),1); 
-            }
-          }
-          that.selectPrefix = selectPrefix;  
-        } 
+        var data = that.$global.getPrefixShow(that.selectPrefix, that.selectPrefixOptions);
+        that.selectPrefix = data["selectPrefix"];  
+        that.selectPrefixName = data["selectPrefixName"];
         that.getDeviceList();
       },
       showDeviceCard(item){
         var that = this;
         this.deviceCardList = [];
         this.deviceCardVisible = true;
+        this.devOnline = item.online;
         this.$axios({
           method: 'post',
           url:"/page/dev/devData.php",
@@ -447,11 +453,11 @@
         this.getDevPrefixList();
         this.deviceConfigVisible = true;
         this.deviceConfigType = "add";
+        this.options.dev_name = "";
+        this.options.dev_sn = "";
         this.clearDevPopup();
       },
       editDevice(item){
-        console.log("编辑页面")
-        console.log(item)
         var that = this;
         that.deviceConfigType = "edit";
         that.options.user_id = item.user_id;
@@ -462,7 +468,13 @@
         that.options.matchBoard = item.board_id?item.board_id:"";
         that.options.matchBoard_old = item.board_id?item.board_id:"";
         that.options.board_id = item.board_id?item.board_id:"";
-
+        if(that.user.userGroup == 1){
+          that.show.devPrefix = true;  
+          that.show.devUser = true;  
+        }else{
+          that.show.devPrefix = false;  
+          that.show.devUser = false;  
+        }
         var hasRights = that.$global.judgeUserHasDevRights();
         if (!hasRights) {//没有权限不能编辑背包名称
           that.disable.devName = true;
@@ -502,11 +514,14 @@
           })
         }else{
           var option = [{
-            text: that.user.id,
-            value: that.user.id
+            text: that.user.prefix,
+            value: that.user.prefix
           }];
           that.deviceConfigPrefixOptions = option;
           that.options.prefix = option[0].value;
+          if(cb){
+            cb()
+          }
         }
       },
       getRcvSelectAndVal(row){
@@ -516,9 +531,7 @@
         });
       },
       formatRcvList(data){
-        console.log("formatRcvList")
         var that = this;
-        console.log(that.options)
         var result = [];
         //判断是否有当前配对的接收机的权限
         var bFind = false;
@@ -557,8 +570,6 @@
             });
           });
           that.deviceConfigServerOptions = result;
-          console.log("result:")
-          console.log(result)
           that.options.matchRcv = that.options.rcv_sn;
           that.options.matchRcv_old = that.options.rcv_sn;
         }
@@ -598,12 +609,8 @@
         }
       },
       formatBoardList(data){
-        console.log("formatBoardList")
-        console.log(data);
-
         var result = [];
         var that = this;
-        console.log(that.options);
         //无可用板卡
         if (data.length == 0) {
           if (that.options == undefined) {
@@ -655,14 +662,11 @@
       },
       //保存绑定
       saveMatch(){
-        console.log("dd saveMatch");
         var that = this;
         var dev_sn = that.options.dev_sn;
         var dev_name = that.options.dev_name;
         var rcv = that.options.matchRcv;
         var board = that.options.matchBoard;
-        console.log("dev_sn:"+dev_sn);
-        console.log("dev_name:"+dev_name);
         var sub = rcv.substr(-4);
         //未修改
         if(that.options.matchRcv_old == rcv
@@ -686,7 +690,6 @@
         var text = '是否切换配对关系？';
         that.$global.getDevPushStatus(dev_sn, function(data) {
           if (data == 'norcv') {
-            console.log("norcv")
             that.$global.editMatch(rcv,board,dev_sn,dev_name);
           } else {
             if (data == '1') {
@@ -774,9 +777,9 @@
         this.options.prefix = "";
       },
       submitDeviceConfig(){
+        var that = this;
         if(this.deviceConfigType == "add"){
-          var that = this;
-          var devSn = this.options.devSn;
+          var devSn = this.options.dev_sn;
           var mode = this.$global.getDevMode(devSn.substr(-4));
           if (!mode) {
             that.$toast({
@@ -786,8 +789,8 @@
             });
             return;
           }
-          for (var i = 0; i < deviceList.length; i++) {
-            if (deviceList[i].dev_sn == devSn) {
+          for (var i = 0; i < that.deviceList.length; i++) {
+            if (that.deviceList[i].dev_sn == devSn) {
               that.$toast({
                 message: "该背包已添加!",
                 position: 'middle',
@@ -801,8 +804,8 @@
             url:"/page/dev/devData.php",
             data:this.$qs.stringify({
               addDev:true,
-              devName:that.options.devName,
-              devSn:that.options.devSn,
+              devName:that.options.dev_name,
+              devSn:that.options.dev_sn,
               devModel:mode,
               prefix: that.options.prefix,
               logUser: that.user.id
@@ -877,7 +880,6 @@
     }
   }
 </script>
-
 <style scoped>
   .Group{
     margin-top: 0px;
@@ -984,16 +986,7 @@
     width: 100%;
     height: auto;
   }
-  .chevronDown{
-    width: 100%;
-    background-color: #3f4551!important;
-    color: #fff;
-    border: 1px;
-    display: block;
-    text-align: center;
-    padding: 5px;
-    font-size: .16rem;
-  }
+
   .cellItem{overflow:hidden}
   .cellItem .cellName{float: left;text-align: left;}
   .cellItem .cellNameR{float: right;text-align: right;}

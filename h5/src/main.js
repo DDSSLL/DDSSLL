@@ -13,6 +13,7 @@ import moment from 'moment'
 import md5 from 'md5'
 import 'font-awesome/css/font-awesome.min.css'
 import global from './global/global'
+import './assets/css/global.css'
 
 Vue.use(MintUI)
 Vue.use(VueI18n)

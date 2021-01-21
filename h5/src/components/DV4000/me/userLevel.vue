@@ -71,12 +71,12 @@
       return{
         SUPER : SUPER,
         ADVANCE : ADVANCE,
-       	NORMAL : NORMAL,
+         NORMAL : NORMAL,
         ADMIN : ADMIN,
         userLevelShow:false,//用户等级tab
         userLevelMemberPop:false,
         userLevelList:[],//用户权限列表
-       	curUserLevel:{
+         curUserLevel:{
           group_name:"",
           oldMember:"",
           groupId:"",
@@ -109,14 +109,14 @@
           
       }),
       getUserLevelList(){
-      	var that = this;
-      	that.$axios({
+        var that = this;
+        that.$axios({
           method: 'post',
           url:"/page/userGroups/userGroups.php",
           data:that.$qs.stringify({
-      			getUserGroup : true,
-			      prefix : that.user.prefix,
-			      userId : that.user.id
+            getUserGroup : true,
+            prefix : that.user.prefix,
+            userId : that.user.id
           }),
           Api:"getUserGroup",
           AppId:"android",
@@ -125,13 +125,11 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-          	console.log("getUserLevelList")
-          	var data = res.data;
-          	console.log(data)
+            var data = res.data;
             for(var i=0; i<data.length; i++){
               data[i]["memberName"] = that.formatMember(data[i]["member"]);
             }
-          	that.userLevelList = data
+            that.userLevelList = data
           }else{
             that.userList = [];
           }
@@ -163,8 +161,8 @@
         }
         return showMem;
       },
-			editUserLevel(item){
-				var that = this;
+      editUserLevel(item){
+        var that = this;
         that.userLevelConfigVisible = true;
         that.curUserLevel.group_name = item.group_name;
         that.curUserLevel.oldMember = item.member;
@@ -210,9 +208,9 @@
         .catch(function (error) {
           console.log(error)
         })
-			},
-			saveUserLevelConf() {
-				var that = this;
+      },
+      saveUserLevelConf() {
+        var that = this;
         var member = that.curUserLevel.userLevel;
         var strMember = "";
         if(member){
@@ -254,7 +252,7 @@
         .catch(function (error) {
           console.log(error)
         })
-			},
+      },
     }
   }
 </script>
@@ -406,44 +404,44 @@
     margin-top:3px;
   }
   .navTitle{
-  	text-align:center;
-  	display:inline-block;
-  	width:100%;
+    text-align:center;
+    display:inline-block;
+    width:100%;
   }
   .wholePagePop{
-  	background-color:#212227;
-  	font-size:.14rem;
-  	color:#fff;
-  	width: 100% !important;
+    background-color:#212227;
+    font-size:.14rem;
+    color:#fff;
+    width: 100% !important;
     height: 100%;
     max-height: 100% !important;
   }
   .wholePagePop .page-title{
-  	font-size:.16rem;
-  	color:#fff;
-  	padding:10px;
+    font-size:.16rem;
+    color:#fff;
+    padding:10px;
   }
   .mint-switch{
     transform: scale(.7);
     transform-origin: left;
-	}
-	.tableHead, .tableBody{
-		display: flex;
+  }
+  .tableHead, .tableBody{
+    display: flex;
     font-size: .14rem;
     padding: 5px 10px;
     text-align:center;
-	}
-	.tableHead>div, .tableBody>div{
-		flex:1
-	}
-	.tableHead>div:nth-child(1),
-	.tableBody>div:nth-child(1){
-		text-align:left;
-	}
-	.tableHead>div:nth-child(4),
-	.tableBody>div:nth-child(4){
-		text-align:right;
-	}
+  }
+  .tableHead>div, .tableBody>div{
+    flex:1
+  }
+  .tableHead>div:nth-child(1),
+  .tableBody>div:nth-child(1){
+    text-align:left;
+  }
+  .tableHead>div:nth-child(4),
+  .tableBody>div:nth-child(4){
+    text-align:right;
+  }
 </style>
 <style>
   .DevMan .mint-checkbox-label {

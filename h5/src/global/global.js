@@ -118,6 +118,7 @@ import { Toast } from 'mint-ui'
 import qs from 'qs';
 import store from '../store'
 import axios from '../api/axios.init'
+import $ from 'jquery';
 //import { mapState, mapMutations } from 'vuex';
 export default {
   //项目公共方法或常量
@@ -1008,5 +1009,43 @@ export default {
        select = "'"+store.state.user.prefix+"'";
     }
     return select;
+  },
+  //用户组过滤值改变时调用
+  getPrefixShow(selectPrefix,options){
+    var prefixShow = [], prefixNameShow = [];
+    if(selectPrefix[selectPrefix.length-1] == "all"){//当前选中all
+      prefixShow = ["all"];  
+      prefixNameShow = ["全部"];  
+    }else{
+      if(selectPrefix.length > 1){
+        if($.inArray("all",selectPrefix) != -1){
+          selectPrefix.splice(selectPrefix.indexOf("all"),1); 
+        }
+      }
+      prefixShow = selectPrefix;  
+      for(var i=0; i<options.length; i++){
+        if($.inArray(options[i]["value"], prefixShow) != -1){
+          prefixNameShow.push(options[i]["label"]);      
+        }
+      }
+    }
+    return {"selectPrefix":prefixShow,"selectPrefixName":prefixNameShow} ;
+  },
+  initPrefixData(data){
+    var selectPrefixOptions = [];
+    var selectPrefix = [];
+    var selectPrefixName = [];
+    selectPrefixOptions.push({label:"全部", value:"all"});
+    for(var i=0; i<data.length; i++){
+      selectPrefixOptions.push({label:data[i].prefix_name, value:data[i].prefix});
+    }
+    selectPrefixOptions.push({label:"无", value:" "})
+    selectPrefix.push(selectPrefixOptions[0]["value"])
+    selectPrefixName.push(selectPrefixOptions[0]["label"])              
+    return {
+      "selectPrefixOptions":selectPrefixOptions, 
+      "selectPrefix":selectPrefix,
+      "selectPrefixName":selectPrefixName
+    }
   },
 }

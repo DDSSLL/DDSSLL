@@ -10,7 +10,7 @@
       <transition name="slide-fade">
         <div class="GroupItem" v-if="userShow" id="userList">
           <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
-            <mt-cell :title="'用户组:'+selectPrefix.join(',')">
+            <mt-cell :title="'用户组:'+selectPrefixName.join(',')">
               <i class="fa fa-chevron-down" @click.stop="userPrefixPop = true" ></i>
             </mt-cell>
           </div>
@@ -54,7 +54,7 @@
       </span>
       <mt-checklist
         v-model="selectPrefix"
-        :options="prefixArr"
+        :options="selectPrefixOptions"
         @change="changePrefixSelect">
       </mt-checklist>
     </mt-popup>
@@ -141,11 +141,13 @@
       return{
         SUPER : SUPER,
         ADVANCE : ADVANCE,
-       	NORMAL : NORMAL,
+         NORMAL : NORMAL,
         ADMIN : ADMIN,
         /*用户组*/
         userPrefixShow:true,//用户组过滤
+        selectPrefixOptions:[],//用户组options
         selectPrefix:[],//选中的用户组
+        selectPrefixName:[],//显示过滤组的名称
         prefixArr:[],//用户组下拉框数据
         userPrefixPop:false,//用户组pop的show
         /*录机列表*/
@@ -178,10 +180,6 @@
         /*设备权限信息*/
         deviceAuthourityVisible:false,//设备权限界面显示
         deviceAuthourityTableData:[],//设备权限
-				
-        
-       	
-        
       }
     },
     computed: {
@@ -207,7 +205,6 @@
           
       }),
       initShowContent(){
-        console.log("initShowContent")
         var that = this;
         if(that.user.userGroup == that.ADMIN){
           that.recordAddShow = true;
@@ -219,14 +216,10 @@
         if(this.user.id == this.SUPER){//"001-admin"
           that.userPrefixShow = true;
           that.$global.getUserPrefixArr(function(data) {
-            var options = [],prefixIdArr = [];
-            options.push({label:"全部", value:"all"});
-            for(var i=0; i<data.length; i++){
-              options.push({label:data[i].prefix_name, value:data[i].prefix});
-            }
-            options.push({label:"无", value:""})
-            that.prefixArr = options;
-            that.selectPrefix = ['all'];            
+            var data = that.$global.initPrefixData(data);
+            that.selectPrefixOptions = data.selectPrefixOptions;
+            that.selectPrefix = data.selectPrefix;
+            that.selectPrefixName = data.selectPrefixName;
             that.getRecordList()
           })
         }else{
@@ -235,15 +228,14 @@
         }
       },
       getRecordList(){
-        console.log("getRecordList")
-      	var that = this;
-      	var selectPrefix = that.$global.formatUserSelect(that.userPrefixShow, that.selectPrefix);
+        var that = this;
+        var selectPrefix = that.$global.formatUserSelect(that.userPrefixShow, that.selectPrefix);
         this.$axios({
           method: 'post',
           url:"/page/dev/devData.php",
           data:this.$qs.stringify({
-      			getRecord : true,
-			      selectByPrefix : selectPrefix,
+            getRecord : true,
+            selectByPrefix : selectPrefix,
           }),
           Api:"getRecord",
           AppId:"android",
@@ -252,10 +244,8 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-          	console.log("getRecordList")
-          	var data = res.data;
-          	console.log(data)
-          	that.recordList = data
+            var data = res.data;
+            that.recordList = data
           }else{
             that.recordList = [];
           }
@@ -267,16 +257,9 @@
       changePrefixSelect(){
         var that = this;
         var selectPrefix = that.selectPrefix;
-        if(selectPrefix[selectPrefix.length-1] == "all"){//当前选中all
-          that.selectPrefix = ["all"];  
-        }else{
-          if(selectPrefix.length > 1){
-            if($.inArray("all",selectPrefix) != -1){
-              selectPrefix.splice(selectPrefix.indexOf("all"),1); 
-            }
-          }
-          that.selectPrefix = selectPrefix;  
-        } 
+        var data = that.$global.getPrefixShow(that.selectPrefix, that.selectPrefixOptions);
+        that.selectPrefix = data["selectPrefix"];  
+        that.selectPrefixName = data["selectPrefixName"];
         that.getRecordList();
       },
       changePath(){
@@ -293,7 +276,7 @@
         }
       },
       addRecord(){
-				var that = this;
+        var that = this;
         that.recordConfigVisible = true;
         that.curRecord.recordEditType = "add";
         that.curRecord.record_name = "";
@@ -320,10 +303,10 @@
         that.curRecord.nsaPathShow = false;
         that.curRecord.nsaUserShow = false;
         that.curRecord.nsaPwdShow = false;
-			},
-			//编辑接收机
-			editRecord(item){
-				var that = this;
+      },
+      //编辑接收机
+      editRecord(item){
+        var that = this;
         that.recordConfigVisible = true;
         that.curRecord.recordEditType = "edit";
         that.curRecord.record_name = item.record_name;
@@ -365,9 +348,9 @@
           that.curRecord.nsaUserShow = false;
           that.curRecord.nsaPwdShow = false;
         }
-			},
-			//保存接收机配置
-			saveRecordConf() {
+      },
+      //保存接收机配置
+      saveRecordConf() {
         var that = this;
         var type = that.curRecord.recordEditType;
         var name = that.curRecord.record_name;
@@ -453,15 +436,15 @@
         .catch(function (error) {
           console.log(error)
         })
-			},
+      },
       deleteRecord(item){
         var that = this;
         var SNs = item.record_sn;
         var text = '确认删除选中设备?';      
-				//询问
-				that.$messagebox.confirm(text).then(
+        //询问
+        that.$messagebox.confirm(text).then(
           action => {
-          	that.$axios({
+            that.$axios({
               method: 'post',
               url:"/page/dev/devData.php",
               data:this.$qs.stringify({
@@ -475,7 +458,7 @@
               let res = response.data;
               if(res.res.success){
                 that.getRecordList();
-			        }else{
+              }else{
                 that.$toast({
                   message: res.res.reason
                 });
@@ -484,7 +467,7 @@
             .catch(function (error) {
               console.log(error)
             })
-        	}
+          }
         )
       }, 
     }
@@ -598,16 +581,7 @@
     width: 100%;
     height: auto;
   }
-  .chevronDown{
-    width: 100%;
-    background-color: #3f4551!important;
-    color: #fff;
-    border: 1px;
-    display: block;
-    text-align: center;
-    padding: 5px;
-    font-size: .16rem;
-  }
+
   .cellItem{overflow:hidden}
   .cellItem .cellName{float: left;text-align: left;}
   .cellItem .cellNameR{float: right;text-align: right;}
@@ -638,44 +612,44 @@
     margin-top:3px;
   }
   .navTitle{
-  	text-align:center;
-  	display:inline-block;
-  	width:100%;
+    text-align:center;
+    display:inline-block;
+    width:100%;
   }
   .wholePagePop{
-  	background-color:#212227;
-  	font-size:.14rem;
-  	color:#fff;
-  	width: 100% !important;
+    background-color:#212227;
+    font-size:.14rem;
+    color:#fff;
+    width: 100% !important;
     height: 100%;
     max-height: 100% !important;
   }
   .wholePagePop .page-title{
-  	font-size:.16rem;
-  	color:#fff;
-  	padding:10px;
+    font-size:.16rem;
+    color:#fff;
+    padding:10px;
   }
   .mint-switch{
     transform: scale(.7);
     transform-origin: left;
-	}
-	.tableHead, .tableBody{
-		display: flex;
+  }
+  .tableHead, .tableBody{
+    display: flex;
     font-size: .14rem;
     padding: 5px 10px;
     text-align:center;
-	}
-	.tableHead>div, .tableBody>div{
-		flex:1
-	}
-	.tableHead>div:nth-child(1),
-	.tableBody>div:nth-child(1){
-		text-align:left;
-	}
-	.tableHead>div:nth-child(4),
-	.tableBody>div:nth-child(4){
-		text-align:right;
-	}
+  }
+  .tableHead>div, .tableBody>div{
+    flex:1
+  }
+  .tableHead>div:nth-child(1),
+  .tableBody>div:nth-child(1){
+    text-align:left;
+  }
+  .tableHead>div:nth-child(4),
+  .tableBody>div:nth-child(4){
+    text-align:right;
+  }
 </style>
 <style>
   .DevMan .mint-checkbox-label {

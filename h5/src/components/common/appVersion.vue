@@ -1,6 +1,6 @@
 <template>
   <div class="appVersion">
-    <span>版本号:V1.00.02</span>
+    <span>版本号:V1.00.03</span>
   </div>	
 </template>
 <style>

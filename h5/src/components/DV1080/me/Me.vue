@@ -1,7 +1,16 @@
 <template>
   <div class="me">
     <!-- 背包 -->
-    <div class="Group">
+    <DevMan></DevMan>
+    
+    <!-- 接收机 -->
+    <RcvMan></RcvMan>
+    
+    <!-- 用户 -->
+    <UserMan></UserMan>
+    
+    <!-- 背包 -->
+    <!-- <div class="Group">
       <div class="GroupTitle" @click="DeviceShow=!DeviceShow">
         背包信息
         <i class="titleIcon fa" :class="[DeviceShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
@@ -56,9 +65,9 @@
           </template>
         </div>
       </transition>
-    </div>
+    </div> -->
     <!-- 汇聚服务器 -->
-    <div class="Group">
+    <!-- <div class="Group">
       <div class="GroupTitle" @click="ReceiverShow=!ReceiverShow">
         汇聚服务器信息
         <i class="titleIcon fa" :class="[ReceiverShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
@@ -113,9 +122,9 @@
           </template>
         </div>
       </transition>
-    </div>
+    </div> -->
     <!-- 用户 -->
-    <div class="Group">
+    <!-- <div class="Group">
       <div class="GroupTitle" @click="AccountShow=!AccountShow">
         用户信息
         <i class="titleIcon fa" :class="[AccountShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
@@ -163,7 +172,7 @@
           </template>
         </div>
       </transition>
-    </div>
+    </div> -->
     <div class="Group">
       <div class="GroupTitle" @click="ChartConfShow=!ChartConfShow">
         图表配置
@@ -305,129 +314,14 @@
       </div>
       <transition name="slide-fade">
         <div class="GroupItem" v-show="SystemShow" id="systemInfo">
-          <mt-cell title="软件版本" value="V1.00.01"></mt-cell>
+          <mt-cell title="软件版本" value="V1.00.02"></mt-cell>
           <mt-button size="large" class="logout" @click="logout">登出</mt-button>
         </div>
       </transition>
     </div>
-    <!-- 网卡信息 -->
-    <mt-popup v-model="deviceCardVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          网卡信息
-          <i class="popupCloseBtn fa fa-times" @click="deviceCardVisible = false"></i>
-        </div>
-        <template v-for="(item,i) in deviceCardList">
-          <div class="deviceCardItem">
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">网卡</span>
-              <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.card_name }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">状态</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.used=="0"?"禁用":"启用" }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">IP</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.card_ip }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">MAC</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.card_mac }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">信号强度</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.rssi }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">运营商</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.operator }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">网络制式</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.sim_mode }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">模块型号</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.module_type }}</span>
-            </div>
-          </div>
-        </template>
-      </div>
-    </mt-popup>
-    <!-- 背包信息 -->
-    <mt-popup v-model="deviceVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          背包
-          <i class="popupCloseBtn fa fa-times" @click="deviceVisible = false"></i>
-        </div>
-        <template v-for="(item,i) in devicePopupList">
-          <div class="deviceItem">
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">背包名</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.board_id }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">状态</span>
-              <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.online }}</span>
-            </div>
-          </div>
-        </template>
-      </div>
-    </mt-popup>
-    <!-- 背包配置 -->
-    <mt-popup v-model="deviceConfigVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          背包配置
-          <i class="popupCloseBtn fa fa-times" @click="deviceConfigVisible = false"></i>
-        </div>
-        <form action="" @submit.prevent="submitDeviceConfig">
-          <div class="fGrp">
-            <div class="tl">背包名称</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="deviceConfigForm.devName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格">
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">仪器名(长度1-15,仅支持中文,字母,数字,+,-,@,()和空格)</p>
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">序列号</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="deviceConfigForm.devSn" required pattern="[0-9]{10}" title="10位数字序列号" :disabled="deviceConfigType == 'edit'"> 
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">用户</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="deviceConfigForm.devUser" :disabled="deviceConfigType == 'edit'">
-                <template v-for="(item,i) in deviceConfigUserOptions">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-          <div class="fGrp" v-if="deviceConfigType == 'edit'">
-            <div class="tl">汇聚服务器</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="deviceConfigForm.server" style="margin-bottom: 5px;" @change="editMatchChange = true">
-                <template v-for="(item,i) in deviceConfigServerOptions">
-                  <option :value="item.value" :style="'color:'+item.color+''">{{ item.text }}</option>
-                </template>
-              </select>
-              <button @click.prevent="editMatchRow" style="border:1px solid #666;">保存绑定</button>
-              <button @click.prevent="deleteMatchRow" style="border:1px solid #666;">解除绑定</button>
-            </div>
-          </div>
-          <div class="fGrp" style="text-align: right">
-            <button class="modalBtn" @click="deviceConfigVisible = false" style="margin-right: .06rem;">取消</button>
-            <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
-          </div>
-        </form>
-      </div>
-    </mt-popup>
+    
     <!-- 汇聚服务器配置 -->
-    <mt-popup v-model="receiverConfigVisible" popup-transition="popup-fade">
+    <!-- <mt-popup v-model="receiverConfigVisible" popup-transition="popup-fade">
       <div class="popupContainer">
         <div class="popupTitle">
           汇聚服务器配置
@@ -453,9 +347,9 @@
           </div>
         </form>
       </div>
-    </mt-popup>
+    </mt-popup> -->
     <!-- 用户管理 -->
-    <mt-popup v-model="userConfigVisible" popup-transition="popup-fade">
+    <!-- <mt-popup v-model="userConfigVisible" popup-transition="popup-fade">
       <div class="popupContainer">
         <div class="popupTitle">
           用户管理
@@ -510,34 +404,14 @@
           </div>
         </form>
       </div>
-    </mt-popup>
+    </mt-popup> -->
     <!-- 设备权限 -->
-    <mt-popup v-model="devRightsVisible" popup-transition="popup-fade">
+    <!-- <mt-popup v-model="devRightsVisible" popup-transition="popup-fade">
       <div class="popupContainer">
         <div class="popupTitle">
           设备权限
           <i class="popupCloseBtn fa fa-times" @click="devRightsVisible = false"></i>
         </div>
-        <!-- <template v-for="(item,i) in devRightsList">
-          <div class="devRightsItem">
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">设备</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.dev_name }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">序列号</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.dev_sn}}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">状态</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.online }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">型号</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.dev_model }}</span>
-            </div>
-          </div>
-        </template> -->
         <div class="devRightsTable">
           <table>
             <thead>
@@ -561,11 +435,14 @@
           </table>
         </div>
       </div>
-    </mt-popup>
+    </mt-popup> -->
   </div>
 </template>
 
 <script>
+  import DevMan from './dev';
+  import RcvMan from './rcv';
+  import UserMan from './user';
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER, SET_NAV_STATUS, SET_ACTIVE_DEVICE, SET_TIMER_CLEAR, SET_CHART_STYLE } from '../../../store/mutation-types';
   import $ from 'jquery';
@@ -614,14 +491,15 @@
           selectBat:[]
         },
         ChartConfShow:false,
-        DeviceShow:false,
-        ReceiverShow:false,
-        AccountShow:false,
+        /*DeviceShow:false,*/
+        /*ReceiverShow:false,*/
+        /*AccountShow:false,*/
         SystemShow:true,
         /*背包*/
-        deviceList:[],
+        /*deviceList:[],
         deviceCardVisible:false,
         deviceCardList:[],
+        devOnline:"",
         deviceConfigVisible:false,
         deviceConfigType:'add',
         deviceConfigForm:{
@@ -632,9 +510,9 @@
         },
         deviceConfigUserOptions:[],
         deviceConfigServerOptions:[],
-        editMatchChange: false,
+        editMatchChange: false,*/
         /*接收机*/
-        receiverList:[],
+        /*receiverList:[],
         receiverConfigVisible:false,
         receiverConfigType:'add',
         receiverConfigForm:{
@@ -642,9 +520,9 @@
           rcvSn:""
         },
         deviceVisible:false,
-        devicePopupList:[],
+        devicePopupList:[],*/
         /*用户*/
-        accountList:[],
+        /*accountList:[],
         userConfigVisible:false,
         userConfigType:"add",
         userConfigForm:{
@@ -657,11 +535,14 @@
           remark:""
         },
         devRightsVisible:false,
-        devRightsList:[]
+        devRightsList:[]*/
       }
     },
     computed: {
       ...mapState(['user','navHide','DeviceTimer','ChartTimer','cardLineStyle','chartCardView'])
+    },
+    components: {
+      DevMan,RcvMan,UserMan
     },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {
@@ -673,9 +554,9 @@
           this.getChartConfTotal();
           //this.getChartConfCard();
           //this.initCardChartSelect();
-          this.getDeviceList();
-          this.getReceiverList();
-          this.getAccountList();
+          /*this.getDeviceList();*/
+          /*this.getReceiverList();*/
+          /*this.getAccountList();*/
         }
       }
     },
@@ -690,9 +571,9 @@
       this.getChartConfUnit();
       this.getChartConfTotal();
       //this.getChartConfCard();
-      this.getDeviceList();
-      this.getReceiverList();
-      this.getAccountList();
+      /*this.getDeviceList();*/
+      /*this.getReceiverList();*/
+      /*this.getAccountList();*/
     },
     deactivated(){   //生命周期-缓存页面失活
 
@@ -982,7 +863,7 @@
         console.log("setLineContent")
         console.log(e)
       },
-      getDeviceList(){
+      /*getDeviceList(){
         var that = this;
         this.$axios({
           method: 'post',
@@ -998,9 +879,11 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.deviceList = res.data;
-            console.log("aaaaaaaaaaaaa")
-            console.log(that.deviceList)
+            var data = res.data;
+            var mapArr = {"直播":1,"在线":2,"离线":3}
+            that.deviceList = data.sort(function(a, b){
+              return (mapArr[a.online] - mapArr[b.online])
+            });
           }else{
             that.deviceList = [];
           }
@@ -1008,8 +891,8 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
-      getReceiverList(){
+      },*/
+      /*getReceiverList(){
         var that = this;
         this.$axios({
           method: 'post',
@@ -1025,7 +908,11 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.receiverList = res.data;
+            var data = res.data;
+            var mapArr = {"直播":1,"在线":2,"离线":3}
+            that.receiverList = data.sort(function(a, b){
+              return (mapArr[a.online] - mapArr[b.online])
+            });
           }else{
             that.receiverList = [];
           }
@@ -1033,8 +920,8 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
-      getAccountList(){
+      },*/
+      /*getAccountList(){
         var that = this;
         this.$axios({
           method: 'post',
@@ -1060,24 +947,24 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
-      addDevice(){
+      },*/
+      /*addDevice(){
         this.getUserList();
         this.deviceConfigVisible = true;
         this.deviceConfigType = "add";
         this.clearDevPopup();
-      },
-      addReceiver(){
+      },*/
+      /*addReceiver(){
         this.receiverConfigVisible = true;
         this.receiverConfigType = "add";
         this.clearRcvPopup();
-      },
-      addUser(){
+      },*/
+      /*addUser(){
         this.userConfigVisible = true;
         this.userConfigType = "add";
         this.clearUserPopup();
-      },
-      editDevice(item){
+      },*/
+      /*editDevice(item){
         this.getUserList();
         this.getRcvSelectAndVal(item);
         this.deviceConfigVisible = true;
@@ -1088,16 +975,16 @@
             devUser:item.prefix,
             server:item.rcv_sn
         }
-      },
-      editReceiver(item){
+      },*/
+      /*editReceiver(item){
         this.receiverConfigVisible = true;
         this.receiverConfigType = "edit";
         this.receiverConfigForm = {
             rcvName:item.rcv_name,
             rcvSn:item.rcv_sn
         }
-      },
-      editUser(item){
+      },*/
+      /*editUser(item){
         this.userConfigVisible = true;
         this.userConfigType = "edit";
         this.userConfigForm = {
@@ -1109,8 +996,8 @@
             emailAddress: item.emailAddress,
             remark: item.remark
         }
-      },
-      getUserList(){
+      },*/
+      /*getUserList(){
         console.log("getUserList")
         var that = this;
         if(this.user.id == SUPER){
@@ -1148,15 +1035,15 @@
           console.log(option[0].value);
           that.deviceConfigForm.devUser = option[0].value;
         }
-      },
-      getRcvSelectAndVal(row){
+      },*/
+      /*getRcvSelectAndVal(row){
         console.log("getRcvSelectAndVal")
         var that = this;
         this.$global.getRcvList(this,row,that.formatRcvList);
         
         //deviceConfigServerOptions
-      },
-      editMatchRow(){
+      },*/
+      /*editMatchRow(){
         console.log("保存绑定");
         //未修改
         var that = this;
@@ -1178,9 +1065,9 @@
             }).catch();
           }
         });
-      },
+      },*/
       //切换
-      editMatch() {
+      /*editMatch() {
         console.log("editMatch")
         var that = this;
         this.$axios({
@@ -1207,8 +1094,8 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
-      //获取背包的推流状态
+      },*/
+      /*//获取背包的推流状态
       getDevPushStatus(devSn, callback) {
         console.log("getDevPushStatus")
         console.log(devSn);
@@ -1233,8 +1120,8 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
-      deleteMatchRow(){
+      },*/
+      /*deleteMatchRow(){
         var that = this;
         var text = '是否解除配对关系？';
         this.getDevPushStatus(this.deviceConfigForm.devSn, function(data) {
@@ -1273,28 +1160,28 @@
              console.log("cancel");
           });
         });
-      },
-      formatRcvList(list){
+      },*/
+      /*formatRcvList(list){
         this.deviceConfigServerOptions = list;
-      },
-      clearDevPopup(){
+      },*/
+      /*clearDevPopup(){
         this.deviceConfigForm.devName = "";
         this.deviceConfigForm.editDev = "";
         this.deviceConfigForm.devUser = "";
         this.deviceConfigForm.server = "";
-      },
-      clearRcvPopup(){
+      },*/
+      /*clearRcvPopup(){
         this.receiverConfigForm.rcvName = "";
         this.receiverConfigForm.rcvSn = "";
-      },
-      clearUserPopup(){
+      },*/
+      /*clearUserPopup(){
         this.userConfigForm.name = "";
         this.userConfigForm.pwd = "";
         this.userConfigForm.mobilePhone = "";
         this.userConfigForm.emailAddress = "";
         this.userConfigForm.remark = "";
-      },
-      submitDeviceConfig(){
+      },*/
+      /*submitDeviceConfig(){
         if(this.deviceConfigType == "add"){
           var that = this;
           var devSn = this.deviceConfigForm.devSn;
@@ -1367,8 +1254,8 @@
             console.log(error)
           })
         }
-      },
-      submitReceiverConfig(){
+      },*/
+      /*submitReceiverConfig(){
         var that = this;
         var rcvSn = this.receiverConfigForm.rcvSn;
         var mode = this.$global.getRcvMode(rcvSn.substr(-4));
@@ -1398,7 +1285,6 @@
           method: 'post',
           url:"/page/dev/devData.php",
           data:this.$qs.stringify({
-            /*saveRcv:true,*/
             rcvName: that.receiverConfigForm.rcvName,
             rcvSn: that.receiverConfigForm.rcvSn,
             rcvModel: mode,
@@ -1427,8 +1313,8 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
-      submitUserConfig(){
+      },*/
+      /*submitUserConfig(){
         var that = this;
         var name = this.userConfigForm.name;
         var mobilePhone = this.userConfigForm.mobilePhone;
@@ -1540,11 +1426,14 @@
             console.log(error)
           })
         }
-      },
-      showDeviceCard(item){
+      },*/
+      /*showDeviceCard(item){
+        console.log("showDeviceCard")
+        console.log(item)
         var that = this;
         this.deviceCardList = [];
         this.deviceCardVisible = true;
+        this.devOnline = item.online;
         this.$axios({
           method: 'post',
           url:"/page/dev/devData.php",
@@ -1560,6 +1449,8 @@
           let res = response.data;
           if(res.res.success){
             that.deviceCardList = res.data;
+            console.log("deviceCardList:")
+            console.log(that.deviceCardList);
           }else{
             that.deviceCardList = [];
           }
@@ -1567,10 +1458,8 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
-      showDevAuthority(item){
-        console.log("showDevAuthority")
-        console.log(item)
+      },*/
+      /*showDevAuthority(item){
         var that = this;
         this.devRightsList = [];
         this.devRightsVisible = true;
@@ -1600,8 +1489,8 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
-      deleteDevice(item){
+      },*/
+      /*deleteDevice(item){
         var that = this;
         this.$messagebox.confirm("确定删除此背包?").then(
           action => {
@@ -1633,8 +1522,8 @@
               console.log(error)
             })
         });
-      },
-      deleteUser(item){
+      },*/
+      /*deleteUser(item){
         var that = this;
         this.$messagebox.confirm("确定删除此用户?").then(
           action => {
@@ -1665,8 +1554,8 @@
               console.log(error)
             })
         });
-      },
-      showDevice(item){
+      },*/
+      /*showDevice(item){
         console.log("showDevice")
         console.log(item);
         var that = this;
@@ -1698,8 +1587,8 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
-      deleteReceiver(item){
+      },*/
+      /*deleteReceiver(item){
         console.log("deleteReceiver");
         console.log(item);
         var that = this;
@@ -1721,7 +1610,6 @@
               method: 'post',
               url:"/page/dev/devData.php",
               data:this.$qs.stringify({
-                /*saveRcv:true,*/
                 delRcvSns: rcvSn,
                 userId: that.user.id
               }),
@@ -1748,7 +1636,7 @@
         }).catch(()=>{
           console.log("cancel");
         });
-      },
+      },*/
       logout(){
         clearInterval(this.DeviceTimer);
         clearInterval(this.ChartTimer);

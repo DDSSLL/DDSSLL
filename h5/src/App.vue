@@ -55,104 +55,102 @@
 </template>
 
 <script>
-import Ad from '@/components/common/Ad'
-import { mapState, mapMutations } from 'vuex';
-import { SET_NAV_STATUS } from './store/mutation-types';
+  import Ad from '@/components/common/Ad'
+  import { mapState, mapMutations } from 'vuex';
+  import { SET_NAV_STATUS } from './store/mutation-types';
 
-export default {
-  name: 'App',
-  data(){
-    return{
-      name: 'app',
-      activeTab: 'status',
-      isLoggedIn: false,
-      tabShow_1080:false,
-      tabShow_4000:false
+  export default {
+    name: 'App',
+    data(){
+      return{
+        name: 'app',
+        activeTab: 'status',
+        isLoggedIn: false,
+        tabShow_1080:false,
+        tabShow_4000:false
+      }
+    },
+    components: {Ad},
+    computed: {
+        ...mapState(['user','navHide','activedevicetype'])
+    },
+    mounted(){
+      this.SET_NAV_STATUS(true);
+    },
+
+    watch: {
+      '$store.state.activedevicetype': {
+        immediate: true,
+        handler(val) {
+          if(val){
+            var that = this;
+            switch(this.activedevicetype){
+              case "DV1080":
+                that.tabShow_1080 = true;
+                that.tabShow_4000 = false;
+                break;
+              case "DV4000":
+                that.tabShow_1080 = false;
+                that.tabShow_4000 = true;
+                break;
+              default:
+                break;
+            }
+          }
+        }
+      },
+      activeTab(val){
+        if(this.user.id){
+          switch (val){
+            //DV1080
+            case 'status': this.$router.push("/status");break;
+            case 'control': this.$router.push("/control");break;
+            case 'live': this.$router.push("/live");break;
+            case 'settings': this.$router.push("/settings");break;
+            case 'me': this.$router.push("/me");break;
+            //DV4000
+            case 'dv4000status': this.$router.push("/dv4000status");break;
+            case 'dv4000control': this.$router.push("/dv4000control");break;
+            case 'dv4000live': this.$router.push("/dv4000live");break;
+            case 'dv4000settings': this.$router.push("/dv4000settings");break;
+            case 'dv4000me': this.$router.push("/dv4000me");break;
+            default: return null;
+          }
+        }
+      },
+        user(val){
+            if(!Boolean(val.id)){
+                this.activeTab = 'status';
+            }
+        },
+        ActiveDeviceType(val){
+          if(val == "DV1080"){
+            this.activeTab = "status";
+          }else if(val == "DV4000"){
+            this.activeTab = "dv4000status";
+          }
+        },
+        $route() {
+            // if the route changes...
+            let token = localStorage.getItem("LOGIN")||''
+            if (token) {
+                // firebase returns null if user logged out
+                this.isLoggedIn = true;
+            } else {
+                this.isLoggedIn = false;
+            }
+        }
+    },
+    methods:{
+        ...mapMutations({
+            SET_NAV_STATUS
+        }),
+
+        hideTabbarFn:function (data) {
+            this.hideTabbar = data;
+        }
     }
-  },
-  components: {Ad},
-  computed: {
-      ...mapState(['user','navHide','activedevicetype'])
-  },
-  mounted(){
-    this.SET_NAV_STATUS(true);
-    //console.log("app mounted")
-    //console.log("activedevicetype:"+this.activedevicetype)
-  },
-
-  watch: {
-    '$store.state.activedevicetype': {
-      immediate: true,
-      handler(val) {
-        if(val){
-          var that = this;
-          switch(this.activedevicetype){
-            case "DV1080":
-              that.tabShow_1080 = true;
-              that.tabShow_4000 = false;
-              break;
-            case "DV4000":
-              that.tabShow_1080 = false;
-              that.tabShow_4000 = true;
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    },
-    activeTab(val){
-      if(this.user.id){
-        switch (val){
-          //DV1080
-          case 'status': this.$router.push("/status");break;
-          case 'control': this.$router.push("/control");break;
-          case 'live': this.$router.push("/live");break;
-          case 'settings': this.$router.push("/settings");break;
-          case 'me': this.$router.push("/me");break;
-          //DV4000
-          case 'dv4000status': this.$router.push("/dv4000status");break;
-          case 'dv4000control': this.$router.push("/dv4000control");break;
-          case 'dv4000live': this.$router.push("/dv4000live");break;
-          case 'dv4000settings': this.$router.push("/dv4000settings");break;
-          case 'dv4000me': this.$router.push("/dv4000me");break;
-          default: return null;
-        }
-      }
-    },
-      user(val){
-          if(!Boolean(val.id)){
-              this.activeTab = 'status';
-          }
-      },
-      ActiveDeviceType(val){
-        if(val == "DV1080"){
-          this.activeTab = "status";
-        }else if(val == "DV4000"){
-          this.activeTab = "dv4000status";
-        }
-      },
-      $route() {
-          // if the route changes...
-          let token = localStorage.getItem("LOGIN")||''
-          if (token) {
-              // firebase returns null if user logged out
-              this.isLoggedIn = true;
-          } else {
-              this.isLoggedIn = false;
-          }
-      }
-  },
-  methods:{
-      ...mapMutations({
-          SET_NAV_STATUS
-      }),
-
-      hideTabbarFn:function (data) {
-          this.hideTabbar = data;
-      }
   }
-}
 </script>
 
 <style>

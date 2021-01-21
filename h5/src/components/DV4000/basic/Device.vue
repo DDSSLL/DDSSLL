@@ -58,7 +58,7 @@
               </template>
             </select> -->
             <button @click="deviceTypePop = true" class="TypeSelect White">{{this.deviceTypeCurName}}</button>
-            <button @click="devicePrefixPop = true" class="TypeSelect White">{{this.devicePrefixCurName}}</button>
+            <button @click="devicePrefixPop = true" class="TypeSelect White" v-if="user.id==SUPER">{{this.devicePrefixCurName}}</button>
           </div>
           <mt-loadmore :top-method="getDeviceList" ref="loadmore">
             <template v-for="(item,i) in deviceListShow">

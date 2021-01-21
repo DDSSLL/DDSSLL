@@ -32,7 +32,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">分辨率</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.sel_resolution" @change="" :disabled="disable.sel_resolution">
+                <select class="ItemSelect" v-model="options.sel_resolution" @change="changeResolution" :disabled="disable.sel_resolution">
                   <template v-for="item in $global.OPTIONS_PUSH_RESULUTION">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -188,7 +188,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">录机端口</div>
               <div class="GroupItemValue">
-                <input type="text" class="ItemIpt byteIpt" v-model="options.record_port" :disabled="disable.record_port" @blur="changeBoardMbps">
+                <input type="text" class="ItemIpt byteIpt" v-model="options.record_port" :disabled="disable.record_port">
               </div>
             </div>
           </div>
@@ -230,15 +230,17 @@
         <div class="formContainer">
           <div class="formItem">
             <div class="formItemTitle">备注名</div>
-            <div class="formItemVal">
-              <input type="text" v-model="activePushObj.remark" :disabled="this.dev_push_enable">
+            <div class="formItemVal formItemTextArea">
+              <mt-field label="" placeholder="" type="textarea" rows="3" v-model="activePushObj.remark"  :disabled="this.dev_push_enable"></mt-field>
+              <!-- <input type="text" v-model="activePushObj.remark" :disabled="this.dev_push_enable"> -->
             </div>
           </div>
-          <div class="formItem">
+          <div class="formItem formItemTextArea">
             <div class="formItemTitle">推流地址</div>
             <div class="formItemVal">
-              <input type="text" v-model="activePushObj.push_url" :disabled="this.dev_push_enable">
-              <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265</p>
+              <!-- <input type="text" v-model="activePushObj.push_url" :disabled="this.dev_push_enable"> -->
+              <mt-field label="" placeholder="" type="textarea" rows="3" v-model="activePushObj.push_url"  :disabled="this.dev_push_enable"></mt-field>
+              <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265、RTSP+H.265、SRT</p>
             </div>
           </div>
           <div class="formItem" style="text-align: right;margin-bottom: 0;">
@@ -379,23 +381,28 @@
     methods:{
       changeBoardMbpsRange(){
         var that = this;
-        that.editBoardListParam('value15', that.options.board_mbps_range*1024*1024,function(){
-          that.options.board_mbps = that.options.board_mbps_range;
-        })
+        if(that.options.board_mbps == that.options.board_mbps_range){//修改input，联动range，下发命令，不需要再修改输入框
+          that.editBoardListParam('value15', that.options.board_mbps*1024*1024);
+        }else{//滑动滑块，下发命令，联动修改输入框
+          that.editBoardListParam('value15', that.options.board_mbps_range*1024*1024,function(){
+            that.options.board_mbps = that.options.board_mbps_range;
+          })
+        }
       },
       changeBoardMbps(){
         var that = this;
-        editBoardListParam('value15', that.options.board_mbps*1024*1024)
         that.options.board_mbps_range = that.options.board_mbps;
+        that.changeBoardMbpsRange();
+      },
+      changeResolution(){
+        //分辨率
+        var that = this;
+        this.editBoardListParam('push_resolution', that.options.sel_resolution);
       },
       initDevParam(data){
         var that = this;
-        console.log("initDevParam")
-        console.log(data)
         that.dev_options.video_encode = data["video_encode"];
         that.dev_options.latency = data["latency"];
-        console.log("video_encode:"+this.dev_options.video_encode);
-        console.log("latency:"+this.dev_options.latency);
       },
       //获取直播速率范围
       getMbps() {
@@ -409,7 +416,6 @@
       },
       //获取接收机相关数据
       getRcvParam() {
-        console.log("getRcvParam")
         var that = this;
         var rcv_sn = that.ActiveDevice.rcv_sn;
         var boardId = that.ActiveDevice.board_id;
@@ -439,9 +445,6 @@
           selBoardId = selBoardId - 1;
         }
         that.getRcvRights(selRcvSn, selBoardId, function(data) {
-          console.log("getRcvRights cb data：")
-          console.log(data)
-          //addSelOptions('rcv_board_sel', data);
           for (var i = 0; i < data.length; i++) {
             //接收机sn_板卡id_boardListId_操作权限_查看权限
             var value = data[i].value;
@@ -452,10 +455,8 @@
               break;
             }
           }
-          console.log("that.options.rcv_board_param:"+that.options.rcv_board_param)
           var rcvSn = that.getSelRcvBoard('rcvSn');
           var boardId = that.getSelRcvBoard('boardId');
-          console.log("rcvSn:"+rcvSn)
           if (rcvSn) {
             //获取板卡参数
             that.getBoardListParam(rcvSn, boardId);
@@ -471,7 +472,6 @@
       },
       //获取录机列表
       initRecordList(rcvSn, boardId) {
-        console.log("initRecordList")
         var that = this;
         this.$axios({
           method: 'post',
@@ -487,7 +487,6 @@
         })
         .then(function (response) {
           let res = response.data;
-          console.log(res.data)
           if (res.data.length == 0) {
             that.OPTIONS_RECORD_SEL = [{text: "无可用录机",value: "-1"}];
             that.options.record_sel = -1
@@ -519,7 +518,6 @@
       },
       //获取录机参数
       getRecordParam(recordSn) {
-        console.log("getRecordParam")
         var that = this;
         var rcvSn = that.getSelRcvBoard('rcvSn');
         var boardId = that.getSelRcvBoard('boardId');
@@ -538,7 +536,6 @@
         })
         .then(function (response) {
           var res = response.data;
-          console.log(res.data);
           if (res.data) {
             that.options.record_port = res.data.record_port==""?9188:res.data.record_port;
             if(res.data.value1 != "0"){
@@ -625,10 +622,8 @@
       },
       //获取当前所选的接收机板卡
       getSelRcvBoard(type) {
-        console.log("getSelRcvBoard")
         var that = this;
         var value = that.options.rcv_board_param;
-        console.log("value:"+value)
         if (value == null) {
           return '';
         }
@@ -644,7 +639,6 @@
           return value.split('_')[4];
         } else if (type == 'disabled') {
           var rights = value.split('_')[3];
-          console.log("rights:"+rights)
           if (rights == '1') {
             return false;
           } else {
@@ -712,9 +706,6 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            console.log("getBoardListParam success");
-            console.log(res)
-
             that.initBoardParam(res, rcvSn, boardId)
           }
         })
@@ -723,9 +714,6 @@
         })        
       },
       initBoardParam(res, rcvSn, boardId){
-        console.log("initBoardParam")
-        console.log(res)
-        console.log('rcvSn:'+rcvSn)
         var that = this;
         //虚拟接收机隐藏速率和分辨率
         if(that.$global.getRcvMode(rcvSn.substr(-4)) == 'DV4000RV'){
@@ -865,8 +853,6 @@
         var that = this;
         var timerAck = setInterval(function() {
           that.getEncodeResetAck(function(data) {
-            console.log("getEncodeResetAck cb")
-            console.log(data[0].value14)
             if(data.length == 0){
               clearInterval(timerAck);
               return;
@@ -1097,9 +1083,6 @@
       },
       //设置板卡参数
       editBoardListParam(col, value, cb) {
-        console.log("editBoardListParam")
-        console.log(col)
-        console.log(value)
         var that = this;
         var rcvSn = that.getSelRcvBoard('rcvSn');
         var boardId = that.getSelRcvBoard('boardId');
@@ -1273,7 +1256,6 @@
       },
       //获取推流开关参数
       getBoardUrl(){
-        console.log("getBoardUrl")
         var that = this;
         var rcvSn = that.getSelRcvBoard('rcvSn');
         var boardId = that.getSelRcvBoard('boardId');
@@ -1292,11 +1274,7 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            console.log("getBoardUrl")
-            console.log(res)
             that.options.address = res.data;
-            console.log("that.options.address")
-            console.log(that.options.address)
             var data = res.data;
             var sFlg = true;
             for(let i=0; i<data.length; i++){
@@ -1318,8 +1296,6 @@
       //点击添加URL
       addUrl() {
         var that = this;
-        console.log("addUrl")
-        console.log(that.options.address)
         if (that.options.address.length >= that.URL_MAX) {
           that.$toast({
             message: "已达添加上限!",
@@ -1332,7 +1308,6 @@
         var rcvSn = that.options.rcv_board_param.split("_")[0]
         var boardId = that.options.rcv_board_param.split("_")[1]
         var pushUrl = "";
-        console.log("boardListId/rcvSn/boardId:"+boardListId+"/"+rcvSn+"/"+boardId);
         that.$axios({
           method: 'post',
           url:"/page/index/indexData.php",
@@ -1461,7 +1436,7 @@
             address[i].push_status = '';
           } else {
             //一键停止
-            that.editUrl(tableData[i].id, 'push_sel', sel);
+            that.editUrl(address[i].id, 'push_sel', sel);
             address[i].push_sel = sel;
             address[i].push_status = '';
           }
@@ -1511,7 +1486,6 @@
         this.activePushObj = {};
       },
       saveEditUrls(){
-        console.log("saveEditUrls")
         var that = this;
         var urlId = that.activePushObj.id;
         var rcvSn = that.activePushObj.rcv_sn;
@@ -1554,7 +1528,6 @@
       },
       //数据库编辑url和备注
       editUrlRemark(id, rcvSn, boardId, pushUrl, remark, callback) {
-        console.log("editUrlRemark")
         var that = this;
         this.$axios({
           method: 'post',
@@ -1780,7 +1753,7 @@
     }
     .modalBtn{
         width: .6rem;
-        border: none;
+        border: 1px solid #ccc;
         outline: none;
         box-shadow: none;
         height: .26rem;
@@ -1830,4 +1803,13 @@
       font-size:0.14rem;
       line-height:.3rem;
     }
+</style>
+<style>
+  .formItemTextArea .mint-cell-wrapper{
+    border-radius:4px;
+    border:1px solid #ccc;
+  }
+  .formItemVal textarea{
+    font-size:.13rem;
+  }
 </style>

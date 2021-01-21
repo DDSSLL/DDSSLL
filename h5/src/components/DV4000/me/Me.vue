@@ -13,7 +13,7 @@
     <UserMan></UserMan>
     
     <!-- 用户等级 -->
-    <UserLevelMan></UserLevelMan>
+    <UserLevelMan v-if="user.userGroup == 1"></UserLevelMan>
     
     <div class="Group" v-if="false">
       <div class="GroupTitle" @click="ChartConfShow=!ChartConfShow">
@@ -156,7 +156,7 @@
       </div>
       <transition name="slide-fade">
         <div class="GroupItem" v-show="SystemShow" id="systemInfo">
-          <mt-cell title="软件版本" value="V1.00.01" style="font-size:.14rem"></mt-cell>
+          <mt-cell title="软件版本" value="V1.00.02" style="font-size:.14rem"></mt-cell>
           <mt-button size="large" class="logout" @click="logout">登出</mt-button>
         </div>
       </transition>

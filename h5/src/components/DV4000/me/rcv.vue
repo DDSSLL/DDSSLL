@@ -1,7 +1,7 @@
 <template>
   <div class="RcvMan">
     <div class="Group">
-      <div class="GroupTitle" @click="ReceiverShow=!ReceiverShow">
+      <div class="GroupTitle" @click="changeReceiverShow">
         接收机
         <i class="titleIcon fa" :class="[ReceiverShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
         <i class="titleIcon addBtn fa fa-refresh" @click.stop="getReceiverList"></i>
@@ -10,7 +10,7 @@
       <transition name="slide-fade">
         <div class="GroupItem" v-if="ReceiverShow" id="rcvList">
           <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
-            <mt-cell :title="'用户组:'+selectPrefix.join(',')">
+            <mt-cell :title="'用户组:'+selectPrefixName.join(',')">
               <i class="fa fa-chevron-down" @click.stop="userPrefixPop = true" ></i>
             </mt-cell>
           </div>
@@ -77,7 +77,7 @@
       </span>
       <mt-checklist
         v-model="selectPrefix"
-        :options="prefixArr"
+        :options="selectPrefixOptions"
         @change="changePrefixSelect">
       </mt-checklist>
     </mt-popup>
@@ -397,7 +397,7 @@
               <input type="text" class="ItemInput" v-model="curRcv.rcv_sn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="curRcv.rcvSnReadonly"> 
             </div>
           </div>
-          <div class="fGrp" v-if="show.devPrefix==true">
+          <div class="fGrp" v-if="curRcv.rcvGroupShow==true">
             <div class="tl">用户组</div>
             <div class="vl">
               <select class="ItemSelect" v-model="curRcv.prefix" :disabled="curRcv.prefixDisable">
@@ -410,7 +410,7 @@
           <div class="fGrp" v-if="curRcv.rcvUserShow==true">
             <div class="tl">使用者</div>
             <div class="vl">
-              <input class="ItemInput" :disabled="curRcv.rcvUserDisable" @click="rcvUserListPop = true" v-model="curRcv.rcvUser">
+              <input class="ItemInput" :disabled="curRcv.rcvUserDisable" @click="rcvUserListPop = true" v-model="curRcv.rcvUser" readonly>
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
                 仅显示非管理员用户
               </p>
@@ -455,7 +455,9 @@
         rcvDelShow:true,//删除按钮
         /*用户组*/
         userPrefixShow:true,//用户组过滤
+        selectPrefixOptions:[],//用户组options
         selectPrefix:[],//选中的用户组
+        selectPrefixName:[],//显示过滤组的名称
         prefixArr:[],//用户组下拉框数据
         userPrefixPop:false,//用户组pop的show
         /*板卡信息*/
@@ -500,7 +502,7 @@
           prefixOptions:[],//用户组
           prefix:"",
           prefixDisable:"",
-          
+          rcvGroupShow:true,//用户组
           rcvUserShow:false,//使用者
           userOptions:[],//用户
           rcvUser:"",
@@ -529,6 +531,7 @@
         },
         
         devicePopupList:[],
+        getReceiverListInterval:"",
       }
     },
     computed: {
@@ -555,8 +558,19 @@
       ...mapMutations({
           
       }),
+      changeReceiverShow(){
+        var that = this;
+        that.ReceiverShow = !that.ReceiverShow;
+        if(that.ReceiverShow){
+          that.getReceiverList();
+          that.getReceiverListInterval = setInterval(function(){
+            that.getReceiverList();
+          },1000*15)
+        }else{
+          clearInterval(that.getReceiverListInterval)
+        }
+      },
       initShowContent(){
-        console.log("initShowContent")
         var that = this;
         if(that.user.userGroup == that.ADMIN){
           that.rcvAddShow = true;
@@ -568,14 +582,10 @@
         if(this.user.id == this.SUPER){//"001-admin"
           that.userPrefixShow = true;
           that.$global.getUserPrefixArr(function(data) {
-            var options = [],prefixIdArr = [];
-            options.push({label:"全部", value:"all"});
-            for(var i=0; i<data.length; i++){
-              options.push({label:data[i].prefix_name, value:data[i].prefix});
-            }
-            options.push({label:"无", value:""})
-            that.prefixArr = options;
-            that.selectPrefix = ['all'];            
+            var data = that.$global.initPrefixData(data);
+            that.selectPrefixOptions = data.selectPrefixOptions;
+            that.selectPrefix = data.selectPrefix;
+            that.selectPrefixName = data.selectPrefixName;
             //背包列表
             that.getReceiverList();
           })
@@ -603,13 +613,11 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            console.log("getReceiverList")
             var data = res.data;
             var mapArr = {"直播":1,"在线":2,"离线":3}
             that.rcvList = data.sort(function(a, b){
               return (mapArr[a.online] - mapArr[b.online])
             });
-
           }else{
             that.rcvList = [];
           }
@@ -621,16 +629,9 @@
       changePrefixSelect(){
         var that = this;
         var selectPrefix = that.selectPrefix;
-        if(selectPrefix[selectPrefix.length-1] == "all"){//当前选中all
-          that.selectPrefix = ["all"];  
-        }else{
-          if(selectPrefix.length > 1){
-            if($.inArray("all",selectPrefix) != -1){
-              selectPrefix.splice(selectPrefix.indexOf("all"),1); 
-            }
-          }
-          that.selectPrefix = selectPrefix;  
-        } 
+        var data = that.$global.getPrefixShow(that.selectPrefix, that.selectPrefixOptions);
+        that.selectPrefix = data["selectPrefix"];  
+        that.selectPrefixName = data["selectPrefixName"];
         that.getReceiverList();
       },
       formatUserSelect(){
@@ -801,8 +802,6 @@
         var that = this;
         var selectBoard = that.curBoard.BoardNum;
         var param = that.boardEncodeParamList[selectBoard];
-        console.log("param")
-        console.log(param);
         that.curBoard.start = param['start'];//编码开关
         that.curBoard.transmode = param["transmode"];//工作模式
         that.changeTransMode();
@@ -816,19 +815,15 @@
         that.curBoard.transDelay = (param["transDelay"]/1000).toFixed(2)
       },
       changeTransMode(){
-        console.log("changeTransMode")
         var that = this;
         var param = that.boardEncodeParamList[that.curBoard.BoardNum];
-        console.log(param);
         if(that.curBoard.transmode == "SRT SEND"){
-          console.log("SRT SEND")
           that.sendSRT = true;
           that.serverSRT = false;
           that.srt_send_pushUrl = param['srt_send_pushUrl']
           that.srt_send_pullUrl = param['srt_send_pullUrl']
           clearInterval(that.srtInterval);
         }else if(that.curBoard.transmode == "SRT SERVER"){
-          console.log("SRT SERVER")
           that.sendSRT = false;
           that.serverSRT = true;
           //定时轮询取值
@@ -999,6 +994,7 @@
         that.curRcv.rcv_sn = "";
   
         that.receiverConfigVisible = true;
+        that.curRcv.rcvGroupShow = true;
         that.curRcv.rcvUserShow = false;
         that.curRcv.rcvNameReadonly = false;
         that.curRcv.rcvSnReadonly=false;
@@ -1042,8 +1038,15 @@
             });
           });
         })
-
-        that.curRcv.rcvUserShow = true;
+        //只有管理员可见
+        if(that.user.userGroup == 1){
+          that.curRcv.rcvUserShow = true;  
+          that.curRcv.rcvGroupShow = true;  
+        }else{
+          that.curRcv.rcvUserShow = false;
+          that.curRcv.rcvGroupShow = false;  
+        }
+        
 
         that.curRcv.rcvUserId = item.user_id;
         that.curRcv.rcv_ip = item.rcv_ip;
@@ -1086,7 +1089,7 @@
           })
         } else {
           var option = [{
-            label: that.user.prefix,
+            text: that.user.prefix,
             value: that.user.prefix
           }];
           that.curRcv.prefixOptions = option;
@@ -1361,16 +1364,7 @@
     width: 100%;
     height: auto;
   }
-  .chevronDown{
-    width: 100%;
-    background-color: #3f4551!important;
-    color: #fff;
-    border: 1px;
-    display: block;
-    text-align: center;
-    padding: 5px;
-    font-size: .16rem;
-  }
+
   .cellItem{overflow:hidden}
   .cellItem .cellName{float: left;text-align: left;}
   .cellItem .cellNameR{float: right;text-align: right;}

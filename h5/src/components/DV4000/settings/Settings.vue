@@ -214,7 +214,7 @@
         </div>
       </transition>
     </div>
-    <div class="Group"><!-- 配对设置 -->
+    <div class="Group matchConfig"><!-- 配对设置 -->
       <div class="GroupTitle" @click="matchConfigShow=!matchConfigShow">
         配对设置
         <i class="titleIcon fa" :class="[matchConfigShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
@@ -1319,5 +1319,14 @@
     }
     .settings .mint-radiolist-label{
         padding-left:0px;
+    }
+    .matchConfig .GroupItemTitle{
+      width:25%;
+    }
+    .matchConfig .GroupItemValue{
+      width:75%;
+    }
+    .matchConfig .GroupItemValue .ItemSelect{
+      width:100%;
     }
 </style>

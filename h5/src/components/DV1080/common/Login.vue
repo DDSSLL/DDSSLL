@@ -20,8 +20,8 @@
         <span style="float: left;width:4%;text-align: center;margin-top:0.05rem;">|</span>
         <span class="registerBtn">注册一个新账号</span>
       </div> -->
-      <appVersion></appVersion>
-      <LoginSetBtn></LoginSetBtn>     
+      <appVersion v-if="hidShow"></appVersion>
+      <LoginSetBtn v-if="hidShow"></LoginSetBtn>     
     </div>
   </div>
 </template>
@@ -45,6 +45,7 @@
         },
         wifiUrlsEditVisible:false,
         wifiUrl:"",
+        hidShow:true,
       }
     },
     computed: {
@@ -90,6 +91,14 @@
         this.user.login_name = localStorage.getItem("USERNAME_1080");
         this.user.password = localStorage.getItem("PASSWORD_1080");
       }
+      //移动端输入法弹起页面被顶上来解决方法
+      this.docmHeight = document.documentElement.clientHeight;//获取当前屏幕高度
+      window.onresize = () => {//屏幕高度变化时判断
+        return (() => {
+          let showHeight = document.body.clientHeight;
+          this.hidshow = this.docmHeight > showHeight ? false : true;
+        })();
+      };
     },
     methods:{
       ...mapMutations({
