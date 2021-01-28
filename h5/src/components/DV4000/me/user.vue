@@ -119,14 +119,14 @@
           <input type="password" style="display:none" id="loginPassword"/>
           <input type="text" style="display:none" id="loginUserName"/>
           <div class="fGrp">
-            <div class="tl">用户名</div>
+            <div class="tl">用户名<span class="redText">*</span></div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="curUser.name" required pattern="[A-Za-z0-9\u4e00-\u9fa5\@\+\_\(\)（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()" :readonly="curUser.nameReadonly">
+              <input type="text" class="ItemInput" v-model="curUser.name" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()" :readonly="curUser.nameReadonly">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()</p>
             </div>
           </div>
           <div class="fGrp">
-            <div class="tl">用户组名</div>
+            <div class="tl">用户组名<span class="redText">*</span></div>
             <div class="vl">
               <select class="ItemSelect" v-model="curUser.prefix" :disabled="curUser.prefixDisable">
                 <template v-for="(item,i) in curUser.prefixOptions">
@@ -136,18 +136,18 @@
             </div>
           </div>
           <div class="fGrp">
-            <div class="tl">登录密码</div>
+            <div class="tl">登录密码<span class="redText">*</span></div>
             <div class="vl">
-              <input type="password" class="ItemInput" v-model="curUser.pwd" required pattern="^[A-Za-z0-9\_\@]{6,16}$" title="6~16位字母,数字,下划线和@组合" :readonly="curUser.pwdReadonly" /> 
+              <input type="password" class="ItemInput" v-model="curUser.pwd" required pattern="^[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合" :readonly="curUser.pwdReadonly" /> 
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
                 6~16位字母,数字,下划线和@组合
               </p>
             </div>
           </div>
           <div class="fGrp">
-            <div class="tl">确认密码</div>
+            <div class="tl">确认密码<span class="redText">*</span></div>
             <div class="vl">
-              <input type="password" class="ItemInput" v-model="curUser.pwd2" required pattern="^[A-Za-z0-9\_\@]{6,16}$" title="6~16位字母,数字,下划线和@组合" clearable autocomplete="off" :readonly="curUser.pwd2Readonly"/>
+              <input type="password" class="ItemInput" v-model="curUser.pwd2" required pattern="[A-Za-z0-9_@]{6,16}" title="6~16位字母,数字,下划线和@组合" clearable autocomplete="off" :readonly="curUser.pwd2Readonly"/>
             </div>
           </div>
           <div class="fGrp">
@@ -349,7 +349,7 @@
                 }  
               }
             }
-            that.userList = data
+            that.userList = data;
           }else{
             that.userList = [];
           }
@@ -708,7 +708,9 @@
               that.userConfigVisible = false;
             }else{
               that.$toast({
-                message: res.res.reason
+                message: res.res.reason,
+                position: 'middle',
+                duration: 20000
               });
             }
           })
@@ -1063,7 +1065,7 @@
     vertical-align: middle;
     padding-left:5px;
   }
-  .mint-toast{
+  /*.mint-toast{
     z-index:2010 !important;
-  }
+  }*/
 </style>

@@ -1,9 +1,5 @@
 <template>
   <div class="main">
-    <!--<mt-header fixed>-->
-      <!--<mt-button slot="left">UHDXpress</mt-button>-->
-      <!--<mt-button slot="right">实时监测</mt-button>-->
-    <!--</mt-header>-->
     <Device></Device>
     <div class="chartArea">
       <div class="mainChart" id="mainChart">
@@ -119,13 +115,6 @@
         </div>
       </div>
     </mt-popup> 
-    <!--<mt-palette-button content="+" @expanded="main_log('expanded')" @collapse="main_log('collapse')"-->
-                       <!--direction="lt" class="pb" :radius="80" ref="target_1" mainButtonStyle="color:#fff;background-color:#26a2ff;"-->
-                       <!--style="position: fixed;right: 20px;bottom: 100px;">-->
-      <!--<div class="my-icon-button indexicon icon-popup" @touchstart="sub_log(1)"></div>-->
-      <!--<div class="my-icon-button indexicon icon-popup" @touchstart="sub_log(2)"></div>-->
-      <!--<div class="my-icon-button indexicon icon-popup" @touchstart="sub_log(3)"></div>-->
-    <!--</mt-palette-button>-->
   </div>
 </template>
 
@@ -133,7 +122,7 @@
 import Vue from 'vue'
 import Device from '../basic/Device';
 import { mapState,mapMutations } from 'vuex';
-import { SET_CHART_TIMER } from '../../../store/mutation-types';
+import { SET_CHART_TIMER,SET_CHART_CARD_VIEW } from '../../../store/mutation-types';
 import echarts from 'echarts';
 import $ from 'jquery';
 Vue.prototype.$echarts = echarts;
@@ -188,20 +177,6 @@ export default {
         "usb-5g1": "chart_usb-5g1",
         "usb-5g2": "chart_usb-5g2"
       },
-      /*chartCardView : {
-        "eth0": "",
-        "sim1": "",
-        "sim2": "",
-        "sim3": "",
-        "sim4": "",
-        "sim5": "",
-        "sim6": "",
-        "usb-5g1": "",
-        "usb-5g2": "",
-        "usb-lan": "",
-        "usb-lan2": "",
-        "wifi": ""
-      },*/
       lineStyle : {
         width: 1,
         type: 'solid' //'dotted'虚线 'solid'实线
@@ -447,6 +422,9 @@ export default {
   },
   activated(){  //生命周期-缓存页面激活
     this.initColorGV(this.cardLineStyle);
+    var initData = this.initChartData();
+    var devSns = initData.devSns;
+          this.getChartData(devSns);
   },
   deactivated(){   //生命周期-缓存页面失活
   },
@@ -456,11 +434,14 @@ export default {
   mounted() { //生命周期-页面初始化完成
     console.log("status mounted")
     var that = this;
+    that.initColorGV(that.cardLineStyle);
     that.formatXData();
+    that.SET_CHART_CARD_VIEW({});
   },
   methods:{
     ...mapMutations({
-      SET_CHART_TIMER
+      SET_CHART_TIMER,
+      SET_CHART_CARD_VIEW
     }),
     showChannelList(){
       this.popupVisible = true;
@@ -593,7 +574,7 @@ export default {
         var dataDev = data[key][1]["dev_push_br"]; //上行总速率
         var dataRcv = data[key][2] ? data[key][2]["rcv_br"] : 0; //下行速率
         var dataDownLoss = data[key][3] ? data[key][3]["TotalLossRate"] : 0; //下行总丢包
-        var dataUpLoss = data[key][data[key].length - 1]["dev_lost_br"]; //上行总丢包
+        var dataUpLoss = data[key][4]["dev_lost_br"]; //上行总丢包
         var curChartDevRcvBoard = "";//当前设备的 devsn/rcvsn/boardid
         for (var i = 0; i < keyArr.length; i++) {
           if (keyArr[i].split("/")[0] == key) {
@@ -1283,25 +1264,25 @@ export default {
               'ETH0LossDev':  {color: colorGV['ETH0传输丢包'],fontWeight: 'bold',fontSize: '14'},
               'ETH0LossRcv':  {color: colorGV['ETH0业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-              'USB-5G1Up':       {color: colorGV['USB-5G1↑'],fontWeight: 'bold',fontSize: '14'},
-              'USB-5G1Down':     {color: colorGV['USB-5G1↓'],fontWeight: 'bold',fontSize: '14'},
-              'USB-5G1LossDev':  {color: colorGV['USB-5G1传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'USB-5G1LossRcv':  {color: colorGV['USB-5G1业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G1Up':       {color: colorGV['USB-5G1↑'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G1Down':     {color: colorGV['USB-5G1↓'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G1LossDev':  {color: colorGV['USB-5G1传输丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G1LossRcv':  {color: colorGV['USB-5G1业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-              'USB-5G2Up':       {color: colorGV['USB-5G2↑'],fontWeight: 'bold',fontSize: '14'},
-              'USB-5G2Down':     {color: colorGV['USB-5G2↓'],fontWeight: 'bold',fontSize: '14'},
-              'USB-5G2LossDev':  {color: colorGV['USB-5G2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'USB-5G2LossRcv':  {color: colorGV['USB-5G2业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G2Up':       {color: colorGV['USB-5G2↑'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G2Down':     {color: colorGV['USB-5G2↓'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G2LossDev':  {color: colorGV['USB-5G2传输丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G2LossRcv':  {color: colorGV['USB-5G2业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-              'USB-LANUp':       {color: colorGV['USB-LAN↑'],fontWeight: 'bold',fontSize: '14'},
-              'USB-LANDown':     {color: colorGV['USB-LAN↓'],fontWeight: 'bold',fontSize: '14'},
-              'USB-LANLossDev':  {color: colorGV['USB-LAN传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'USB-LANLossRcv':  {color: colorGV['USB-LAN业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USBLANUp':       {color: colorGV['USB-LAN↑'],fontWeight: 'bold',fontSize: '14'},
+              'USBLANDown':     {color: colorGV['USB-LAN↓'],fontWeight: 'bold',fontSize: '14'},
+              'USBLANLossDev':  {color: colorGV['USB-LAN传输丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USBLANLossRcv':  {color: colorGV['USB-LAN业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-              'USB-LAN2Up':       {color: colorGV['USB-LAN2↑'],fontWeight: 'bold',fontSize: '14'},
-              'USB-LAN2Down':     {color: colorGV['USB-LAN2↓'],fontWeight: 'bold',fontSize: '14'},
-              'USB-LAN2LossDev':  {color: colorGV['USB-LAN2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'USB-LAN2LossRcv':  {color: colorGV['USB-LAN2业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USBLAN2Up':       {color: colorGV['USB-LAN2↑'],fontWeight: 'bold',fontSize: '14'},
+              'USBLAN2Down':     {color: colorGV['USB-LAN2↓'],fontWeight: 'bold',fontSize: '14'},
+              'USBLAN2LossDev':  {color: colorGV['USB-LAN2传输丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USBLAN2LossRcv':  {color: colorGV['USB-LAN2业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
               'WIFIUp':       {color: colorGV['WIFI↑'],fontWeight: 'bold',fontSize: '14'},
               'WIFIDown':     {color: colorGV['WIFI↓'],fontWeight: 'bold',fontSize: '14'},
@@ -1363,7 +1344,7 @@ export default {
       };
       option.title[0].text = name;
       option.grid.top = 55;
-      if(that.showCardNum >= 4 && !that.bigChartShow){//小图且网卡数》4 不显示部分title
+      if(that.showCardNum >= 4 && !that.bigChartShow){//小图且网卡数>4 不显示部分title
         title1Text = "";
         operator = "";
         option.title[0].textStyle.fontSize = '12';
@@ -1391,8 +1372,6 @@ export default {
       if(that.bigChartShow){
         that.myChartCards[devSn][chartName+"_big"].setOption(option, true);
       }
-      //that.lteChart.setOption(option, true);
-
     },
     getChartShowContent(cardData){
       var that = this;
@@ -1444,12 +1423,21 @@ export default {
         let res = response.data;
         if(res.res.success){
           var data = res.data[0];
+          var chartCardView = {};
           for(var key in data){
             if(key == "dev_sn" || key=="id"){
               continue;
             }
-            that.chartCardView[key] = data[key];
+            var newKey = "";
+            if(key.indexOf("_") != -1){
+              newKey = key.replace(/_/,'-');
+              chartCardView[newKey] = data[key];
+            }else{
+              chartCardView[key] = data[key];
+            }
+            //that.chartCardView[key.replace(/_/,"-")] = data[key];
           }
+          that.SET_CHART_CARD_VIEW(chartCardView);
           that.initChartTotal(cardData);
           that.initChartCards(cardData);
         }else{
@@ -1834,6 +1822,14 @@ export default {
   .card5Style, .card6Style{
     width:50%;
     height:33%;
+  }
+  .card7Style, .card8Style, .card9Style{
+    width:33%;
+    height:33%;
+  }
+  .card10Style, .card11Style, .card12Style{
+    width:33%;
+    height:25%;
   }
   .bigChartStyle{
     width:100%;

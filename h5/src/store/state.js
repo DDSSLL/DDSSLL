@@ -32,17 +32,5 @@ export default {
     //请求地址
     domain:'http://www.hdxpress.cn',//1080一级域名
     chartCardView : {
-        "eth0": "",
-        "sim1": "",
-        "sim2": "",
-        "sim3": "",
-        "sim4": "",
-        "sim5": "",
-        "sim6": "",
-        "usb-5g1": "",
-        "usb-5g2": "",
-        "usb-lan": "",
-        "usb-lan2": "",
-        "wifi": ""
       },
 }

@@ -13,4 +13,6 @@ export const SET_PARAM_LOCK = 'SET_PARAM_LOCK'
 export const SET_DOMAIN = 'SET_DOMAIN'
 export const SET_DEV_PARAM = 'SET_DEV_PARAM'
 export const SET_RCV_PARAM = 'SET_RCV_PARAM'
+export const SET_CHART_CARD_VIEW = 'SET_CHART_CARD_VIEW'
+
 

@@ -492,8 +492,10 @@
               hasRights = that.$global.judgeUserHasDevRights();
               if (hasRights) {
                 that.disable.devUser = false;
+                that.disable.dev_name = false;
               } else {
                 that.disable.devUser = true;
+                that.disable.dev_name = true;
               }
             });//获取当前设备的用户
           });
@@ -1109,7 +1111,7 @@
     vertical-align: middle;
     padding-left:5px;
   }
-  .mint-toast{
+  /*.mint-toast{
     z-index:2010 !important;
-  }
+  }*/
 </style>

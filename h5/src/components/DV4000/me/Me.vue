@@ -156,6 +156,7 @@
       </div>
       <transition name="slide-fade">
         <div class="GroupItem" v-show="SystemShow" id="systemInfo">
+          <mt-cell title="当前登录用户" :value="user.id" style="font-size:.14rem"></mt-cell>
           <mt-cell title="软件版本" value="V1.00.02" style="font-size:.14rem"></mt-cell>
           <mt-button size="large" class="logout" @click="logout">登出</mt-button>
         </div>
@@ -1110,13 +1111,15 @@
         this.SET_TIMER_CLEAR();
         var that = this;
         this.$toast({
-          message: '操作成功'
+          message: '操作成功',
+          position: 'middle',
+          duration: 2000
         });
         setTimeout(function(){
           that.SET_USER(null);
           that.SET_NAV_STATUS(true);
           that.SET_ACTIVE_DEVICE(null);
-          that.$router.replace("/login");
+          that.$router.replace("/dv4000login");
           localStorage.removeItem('LOGIN');
         }, 1000);
       }
@@ -1386,9 +1389,9 @@
       flex-shrink:1;
       text-align:right;
     }
-    .mint-toast{
+    /*.mint-toast{
       z-index:2002;
-    }
+    }*/
     .me .mint-navbar{background-color: #222;}
     .me .mint-cell{background-color: #35363a;}
     .me .mint-checklist .mint-cell-value{display: none;}

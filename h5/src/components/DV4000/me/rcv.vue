@@ -1509,7 +1509,7 @@
     vertical-align: middle;
     padding-left:5px;
   }
-  .mint-toast{
+  /*.mint-toast{
     z-index:2010 !important;
-  }
+  }*/
 </style>

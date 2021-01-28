@@ -9,11 +9,11 @@
         <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" placeholder="登录密码">
       </div>
       <div class="form-item" style="text-align: right;padding-right: .2rem;margin-bottom:0;">
-        <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe_1080">
+        <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe_4000">
         <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
       </div>
       <div class="form-item" style="overflow: hidden;">
-        <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
+        <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic4000.login' ) }}</mt-button>
       </div>
       <!-- <div class="form-item">
         <span class="forgetPwd">忘记密码了?</span>
@@ -29,8 +29,9 @@
 <script>
   import LoginSetBtn from '../../common/LoginSetBtn';
   import appVersion from '../../common/appVersion';
+  import md5 from 'md5'
   import { mapState, mapMutations } from 'vuex';
-  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE_TYPE,SET_DOMAIN } from '../../../store/mutation-types';
+  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE,SET_ACTIVE_DEVICE_TYPE,SET_DOMAIN } from '../../../store/mutation-types';
   export default {
     name: "Login",
     data(){
@@ -42,8 +43,9 @@
           login_name:'',
           password:'',
           loginStatus:false,
-          saveMe_1080:false
+          saveMe_4000:false,
         },
+        loginTimer : "",
         wifiUrlsEditVisible:false,
         wifiUrl:"",
         hidShow:true,
@@ -69,8 +71,13 @@
                 break;
               case "DV4000":
                 that.title = 'UHDXpress';
-                that.user.login_name = localStorage.getItem("USERNAME_4000");
-                that.user.password = localStorage.getItem("PASSWORD_4000");
+                if(that.user.saveMe_4000){
+                  that.user.login_name = localStorage.getItem("USERNAME_4000");
+                  that.user.password = localStorage.getItem("PASSWORD_4000");  
+                }else{
+                  that.user.login_name = "";
+                  that.user.password = "";
+                }
                 break;
               default:
                 that.title = 'OTHER';
@@ -85,9 +92,12 @@
       this.SET_DOMAIN(this.UHDXPRESS_BUILD);
       this.$axios.defaults.baseURL = this.UHDXPRESS_BUILD;//默认1080的一级域名
       this.user.saveMe_4000 = localStorage.getItem("SAVEME_4000")?eval(localStorage.getItem("SAVEME_4000")):false;
-      if(this.user.saveMe1080){
+      if(this.user.saveMe_4000){
         this.user.login_name = localStorage.getItem("USERNAME_4000");
         this.user.password = localStorage.getItem("PASSWORD_4000");
+      }else{
+        this.user.login_name = "";
+        this.user.password = "";
       }
       //移动端输入法弹起页面被顶上来解决方法
       this.docmHeight = document.documentElement.clientHeight;//获取当前屏幕高度
@@ -102,6 +112,7 @@
       ...mapMutations({
         SET_USER,
         SET_NAV_STATUS,
+        SET_ACTIVE_DEVICE,
         SET_ACTIVE_DEVICE_TYPE,
         SET_DOMAIN
       }),
@@ -126,28 +137,34 @@
             setTimeout(function(){
               that.$router.push("/dv4000status");
               that.SET_NAV_STATUS(false);
+              var data = res.res.data;
+              data.pwd = md5(data['pwd'])
               that.SET_USER(res.res.data);
               localStorage.setItem("LOGIN",true);
               localStorage.setItem("USERNAME_4000",that.user.login_name);
               localStorage.setItem("PASSWORD_4000",that.user.password);
               localStorage.setItem("DEVICE",that.activedevicetype);
-              localStorage.setItem("SAVEME_4000",that.user.saveMe_1080);
+              localStorage.setItem("SAVEME_4000",that.user.saveMe_4000);
               //每次重新登录echarts图都重新画
               localStorage.removeItem("cardData");
               localStorage.removeItem("chartKey");
               localStorage.removeItem("curChart");
               localStorage.removeItem("allChartData");
+
+              that.loginTimer = setInterval(function(){
+                that.CheckLogged(res.res.data)
+              },1000)
             },800)
           }else{
             that.$toast({
-              message: "登录失败",
+              message: res.res.reason,
               position: 'middle',
               duration: 3000
             })
             localStorage.setItem("USERNAME_4000",that.user.login_name);
             localStorage.setItem("PASSWORD_4000",that.user.password);
             localStorage.setItem("DEVICE",that.activedevicetype);
-            localStorage.setItem("SAVEM_4000",that.user.saveMe_1080);
+            localStorage.setItem("SAVEM_4000",that.user.saveMe_4000);
           }
         })
         .catch(function (error) {
@@ -158,7 +175,6 @@
             duration: 3000
           })
         })
-
         /*生成随机数*/
         function generateMixed(n) {
           var chars = ["0","1","2","3","4","5","6","7","8","9",
@@ -171,6 +187,39 @@
           }
           return res;
         }
+      },
+      //单用户登录校验
+      CheckLogged(data){
+        var that = this;
+        that.$axios({
+          method: 'post',
+          url:"/login/login.php",
+          data:{
+            isLogged: data.id.toString(),
+            loginRand: data.loginRand.toString(),
+            pwd: data.pwd.toString(),
+          },
+          Api:"CheckLogged",
+          AppId:"android",
+          UserId:data.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            
+          }else{
+            that.SET_USER(null);
+            that.SET_NAV_STATUS(true);
+            that.SET_ACTIVE_DEVICE(null);
+            that.$router.replace("/dv4000login");
+            localStorage.removeItem('LOGIN');
+            clearInterval(that.loginTimer);
+            that.loginTimer = undefined;  
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       register(){},
       connectWifi(){

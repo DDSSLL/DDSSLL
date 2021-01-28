@@ -109,10 +109,10 @@ window.colorObj = {
     "SIM6↑":'SIM6Up',"SIM6↓":'SIM6Down',"SIM6传输丢包":'SIM6LossDev',"SIM6业务丢包":'SIM6LossRcv',
     "ETH0↑":'ETH0Up',"ETH0↓":'ETH0Down',"ETH0传输丢包":'ETH0LossDev',"ETH0业务丢包":'ETH0LossRcv',
     "WIFI↑":'WIFIUp',"WIFI↓":'WIFIDown',"WIFI传输丢包":'WIFILossDev',"WIFI业务丢包":'WIFILossRcv',
-    "USB-5G1↑":'USB-5G1Up',  "USB-5G1↓":'USB-5G1Down',  "USB-5G1传输丢包":'USB-5G1LossDev',  "USB-5G1业务丢包":'USB-5G1LossRcv',
-    "USB-5G2↑":'USB-5G2Up',  "USB-5G2↓":'USB-5G2Down',  "USB-5G2传输丢包":'USB-5G2LossDev',  "USB-5G2业务丢包":'USB-5G2LossRcv',
-    "USB-LAN↑":'USB-LANUp',  "USB-LAN↓":'USB-LANDown',  "USB-LAN传输丢包":'USB-LANLossDev',  "USB-LAN业务丢包":'USB-LANLossRcv',
-    "USB-LAN2↑":'USB-LAN2Up',"USB-LAN2↓":'USB-LAN2Down',"USB-LAN2传输丢包":'USB-LAN2LossDev',"USB-LAN2业务丢包":'USB-LAN2LossRcv'
+    "USB-5G1↑":'USB5G1Up',  "USB-5G1↓":'USB5G1Down',  "USB-5G1传输丢包":'USB5G1LossDev',  "USB-5G1业务丢包":'USB5G1LossRcv',
+    "USB-5G2↑":'USB5G2Up',  "USB-5G2↓":'USB5G2Down',  "USB-5G2传输丢包":'USB5G2LossDev',  "USB-5G2业务丢包":'USB5G2LossRcv',
+    "USB-LAN↑":'USBLANUp',  "USB-LAN↓":'USBLANDown',  "USB-LAN传输丢包":'USBLANLossDev',  "USB-LAN业务丢包":'USBLANLossRcv',
+    "USB-LAN2↑":'USBLAN2Up',"USB-LAN2↓":'USBLAN2Down',"USB-LAN2传输丢包":'USBLAN2LossDev',"USB-LAN2业务丢包":'USBLAN2LossRcv'
 };
 import { Toast } from 'mint-ui'
 import qs from 'qs';
@@ -453,7 +453,7 @@ export default {
           cb(data);
         }
       }else{
-        that.$toast({
+        Toast({
           message: res.res.reason,
           position: 'middle',
           duration: 2000
@@ -631,7 +631,7 @@ export default {
           cb(data);
         }
       }else{
-        that.$toast({
+        Toast({
           message: res.res.reason,
           position: 'middle',
           duration: 2000
@@ -754,13 +754,13 @@ export default {
     .then(function (response) {
       let res = response.data;
       if(res.res.success){
-        that.$toast({
+        /*Toast({
           message: '设置成功',
           position: 'middle',
           duration: 2000
-        });
+        });*/
       }else{
-        that.$toast({
+        Toast({
           message: res.res.reason,
           position: 'middle',
           duration: 2000
@@ -793,13 +793,13 @@ export default {
     .then(function (response) {
       let res = response.data
       if(res.res.success){
-        that.$toast({
+        Toast({
           message: '设置成功',
           position: 'middle',
           duration: 2000
         });
       }else{
-        that.$toast({
+        Toast({
           message: res.res.reason,
           position: 'middle',
           duration: 2000
@@ -905,7 +905,7 @@ export default {
         /*var userList = res.data;
         that.deviceConfigUserOptions = userList;*/
       }else{
-        that.$toast({
+        Toast({
           message: res.res.reason,
           position: 'middle',
           duration: 2000

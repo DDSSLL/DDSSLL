@@ -25,25 +25,25 @@
       </mt-tab-item>
     </mt-tabbar>
     <!--DV4000-->
-    <mt-tabbar v-model="activeTab" v-if="tabShow_4000" v-show="!navHide">
+    <mt-tabbar v-model="activeTab4000" v-if="tabShow_4000" v-show="!navHide">
       <mt-tab-item id="dv4000status">
-        <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'dv4000status' }"></i>
+        <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab4000 == 'dv4000status' }"></i>
         {{ $t('basic4000.status') }}
       </mt-tab-item>
       <mt-tab-item id="dv4000control">
-        <i class="tab tab-control" v-bind:class="{ 'tab-control-active': activeTab == 'dv4000control' }"></i>
+        <i class="tab tab-control" v-bind:class="{ 'tab-control-active': activeTab4000 == 'dv4000control' }"></i>
         {{ $t('basic4000.control') }}
       </mt-tab-item>
       <mt-tab-item id="dv4000live">
-        <i class="tab tab-live" v-bind:class="{ 'tab-live-active': activeTab == 'dv4000live' }"></i>
+        <i class="tab tab-live" v-bind:class="{ 'tab-live-active': activeTab4000 == 'dv4000live' }"></i>
         {{ $t('basic4000.live') }}
       </mt-tab-item>
       <mt-tab-item id="dv4000settings">
-        <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab == 'dv4000settings' }"></i>
+        <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab4000 == 'dv4000settings' }"></i>
         {{ $t('basic4000.settings') }}
       </mt-tab-item>
       <mt-tab-item id="dv4000me">
-        <i class="tab tab-me" v-bind:class="{ 'tab-me-active': activeTab == 'dv4000me' }"></i>
+        <i class="tab tab-me" v-bind:class="{ 'tab-me-active': activeTab4000 == 'dv4000me' }"></i>
         {{ $t('basic4000.me') }}
       </mt-tab-item>
     </mt-tabbar>
@@ -65,6 +65,7 @@
       return{
         name: 'app',
         activeTab: 'status',
+        activeTab4000: 'dv4000status',
         isLoggedIn: false,
         tabShow_1080:false,
         tabShow_4000:false
@@ -100,6 +101,25 @@
         }
       },
       activeTab(val){
+        if(this.user.id){
+          switch (val){
+            //DV1080
+            case 'status': this.$router.push("/status");break;
+            case 'control': this.$router.push("/control");break;
+            case 'live': this.$router.push("/live");break;
+            case 'settings': this.$router.push("/settings");break;
+            case 'me': this.$router.push("/me");break;
+            //DV4000
+            case 'dv4000status': this.$router.push("/dv4000status");break;
+            case 'dv4000control': this.$router.push("/dv4000control");break;
+            case 'dv4000live': this.$router.push("/dv4000live");break;
+            case 'dv4000settings': this.$router.push("/dv4000settings");break;
+            case 'dv4000me': this.$router.push("/dv4000me");break;
+            default: return null;
+          }
+        }
+      },
+      activeTab4000(val){
         if(this.user.id){
           switch (val){
             //DV1080
@@ -234,5 +254,11 @@ input,select{
 .mint-switch-core{border:1px solid #333;}
 .mint-switch-core:before{
   background-color:#2B2E33;
+}
+.mint-toast{
+  z-index:3000 !important;
+}
+.redText{
+    color: #ff0000 !important;
 }
 </style>

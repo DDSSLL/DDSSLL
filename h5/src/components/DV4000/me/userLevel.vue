@@ -13,13 +13,22 @@
               :right="[ 
               {content: '编辑', style:{display:(user.userGroup == ADMIN && item.group_name != '管理员')?'':'none'}, handler:() => editUserLevel(item)},
               ]">
-              <div class="cellItem">
+              <!-- <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">用户等级</span>
                 <span class="cellName cellValue" style="float: right;">{{ item.group_name }}</span>
-              </div>
+              </div> -->
               <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">成员</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.member }}</span>
+                <div style="display:inline-block;width:25%;vertical-align:top">
+                  <span class="cellName cellLabel" style="float: left;">{{ item.group_name }}</span>
+                </div>
+                <div style="display:inline-block; width:75%">
+                  <template v-for="(value, key, j) in item.memberName">
+                    <span style="text-decoration:underline">{{"用户组"+key+": "}}</span>
+                    <br>
+                    <span class="cellName cellValue" style="float: none;">{{ value.join(", ") }}</span>
+                    <br>
+                  </template>  
+                </div>
               </div>
             </mt-cell-swipe>
           </template>
@@ -129,9 +138,9 @@
             for(var i=0; i<data.length; i++){
               data[i]["memberName"] = that.formatMember(data[i]["member"]);
             }
-            that.userLevelList = data
+            that.userLevelList = data;
           }else{
-            that.userList = [];
+            that.userLevelList = [];
           }
         })
         .catch(function (error) {
@@ -159,7 +168,7 @@
         }else{
           showMem = member.replace(/,/g, ", ");
         }
-        return showMem;
+        return groupObj;
       },
       editUserLevel(item){
         var that = this;
@@ -535,7 +544,7 @@
     vertical-align: middle;
     padding-left:5px;
   }
-  .mint-toast{
+  /*.mint-toast{
     z-index:2010 !important;
-  }
+  }*/
 </style>

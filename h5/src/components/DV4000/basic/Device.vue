@@ -131,9 +131,7 @@
         active:{},
         //当前选中设备的相关参数
         deviceListShow:[],
-        
-        
-        
+                       
         //用户组
         devicePrefixPop:false,
         allPrefix:[],
@@ -254,7 +252,7 @@
           if(res.res.success){
             that.deviceList = res.data;
             that.filterDevice();
-            that.$refs.loadmore.onTopLoaded();
+            //that.$refs.loadmore.onTopLoaded();
             if(!that.ActiveDevice){
               that.SET_ACTIVE_DEVICE(that.deviceList[0]);
             }
@@ -364,7 +362,7 @@
             break;
           case "3":
             deviceListShow = that.deviceList.filter(function(item){
-              return (item.online == 1)
+              return (item.online == 1 || item.rcv_online == 1)
             });
             break;
           case "4":

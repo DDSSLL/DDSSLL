@@ -58,7 +58,7 @@
                   <!-- <p :class="[item.push_url ? 'addressTitleLineH' : '', 
                   item.push_status == 'running' ? 'pushStyle' : (item.push_status == '' ? 'defaultStyle' : 'errStyle')]" class="addressUrl" v-if="item.push_url">{{ item.push_url }}</p> -->
                 </div>
-                <div class="buttons">
+                <div class="buttons" :style="{display:(disable.editDisable?'none':'')}">
                   <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item)"></i>
                   <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="delUrl(item)"></i>
                   <i class="iconBtn fa" :class="[item.push_sel=='1'?'fa-pause':'fa-play']" aria-hidden="true" @click="changePushStatus(item)"></i>
@@ -267,7 +267,7 @@
         MBPS_MAX : 0,
         URL_MAX:5,
         OPTIONS_RECORD_SEL:[],
-        OPTIONS_SDI_RESULUTION_SDI:this.$global.OPTIONS_SDI_RESULUTION,
+        OPTIONS_SDI_RESULUTION_SDI:"",
         OPTIONS_FRAMERATE_SDI: this.$global.OPTIONS_FRAMERATE_6,
         OPTIONS_FRAMERATE_HDMI: this.$global.OPTIONS_FRAMERATE_6,
         dev_options:{
@@ -313,6 +313,7 @@
           record_sel:false,//录机IP
           record_port:false,//录机端口
           rcv_record:false,//录制开关
+          editDisable:true,//推流地址
         },
         show:{
           showOutput:true,//输出tab
@@ -416,6 +417,7 @@
       },
       //获取接收机相关数据
       getRcvParam() {
+        console.log("getRcvParam");
         var that = this;
         var rcv_sn = that.ActiveDevice.rcv_sn;
         var boardId = that.ActiveDevice.board_id;
@@ -666,6 +668,7 @@
           that.disable.record_sel =true;//录机IP
           that.disable.record_port = true;//录机端口
           that.disable.rcv_record = true;//录制开关
+          that.disable.editDisable = true;//推流地址
         } else {
           that.disable.board_mbps = false;//视频速率
           that.disable.sel_resolution = false;//分辨率
@@ -681,6 +684,7 @@
           that.disable.record_sel =false;//录机IP
           that.disable.record_port = false;//录机端口
           that.disable.rcv_record = false;//录制开关
+          that.disable.editDisable = false;//推流地址
         }
         //推流地址
         /*$("#url_add").attr('disabled', disabled);
@@ -756,20 +760,20 @@
             that.disable.SDI_resolution = false;//SDI分辨率
             that.disable.SDI_framerate = true;//SDI帧率
           }
-          getDevParamM50('SDI', 'framerate');  //设置帧率 背包透传
+          that.getDevParamM50('SDI', 'framerate');  //设置帧率 背包透传
           //SDI分辨率
           var newOption = [];
           if (res.data[0].Support12G == '1') {
-            for (var i = 0; i < that.OPTIONS_SDI_RESULUTION_SDI.length; i++) {
+            for (var i = 0; i < that.$global.OPTIONS_SDI_RESULUTION.length; i++) {
               if (i != 3 && i != 4 && i != 5) {
-                newOption.push(that.OPTIONS_SDI_RESULUTION_SDI[i]);
+                newOption.push(that.$global.OPTIONS_SDI_RESULUTION[i]);
               }
             }
             that.OPTIONS_SDI_RESULUTION_SDI = newOption;
           } else {
-            for (var i = 0; i < that.OPTIONS_SDI_RESULUTION_SDI.length; i++) {
+            for (var i = 0; i < that.$global.OPTIONS_SDI_RESULUTION.length; i++) {
               if (i != 2 && i != 3 && i != 4 && i != 5) {
-                newOption.push(that.OPTIONS_SDI_RESULUTION_SDI[i]);
+                newOption.push(that.$global.OPTIONS_SDI_RESULUTION[i]);
               }
             }
             that.OPTIONS_SDI_RESULUTION_SDI = newOption;
@@ -779,9 +783,10 @@
           if(+res.data[0].value3 > 1 && +res.data[0].value3 < 5){
             newValue3 = 0;
           }
-          if(newValue3 != +res.data[0].value3){
+          /*if(newValue3 != +res.data[0].value3){
             that.options.SDI_resolution = newValue3;
-          }
+          }*/
+          that.options.SDI_resolution = newValue3;
         }
 
         //编码器复位

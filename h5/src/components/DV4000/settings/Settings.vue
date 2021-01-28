@@ -48,7 +48,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="this.user.prefix==this.PREFIX && this.feclevel_show"><!-- 纠错能力 -->
+          <div class="GroupItem" v-if="this.user.prefix==this.PREFIX && this.options.OpenfecMode"><!-- 纠错能力 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">纠错能力</div>
               <div class="GroupItemValue">
@@ -225,7 +225,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">背包</div>
               <div class="GroupItemValue">
-                <input type="text" class="" v-model="ActiveDevice.dev_name+'_'+ActiveDevice.dev_sn" style="width: 100%;border: none;background: transparent;margin-top: 0.06rem;">
+                <input type="text" class="" v-model="ActiveDevice.dev_name+'_'+ActiveDevice.dev_sn" style="width: 100%;border: none;background: transparent;margin-top: 0.06rem;" readonly>
               </div>
             </div>
           </div>
@@ -331,7 +331,6 @@
         RADIO_TRANS_IP : [],
         RADIO_TRANS_MODE : [],
         card_sel_show : false,
-        feclevel_show : false,
         hdrShow : true,
         latencyShow : true,
         audioEncodeShow : true,
@@ -364,7 +363,8 @@
           AudioBitrate : "",
           bitrate_mode : "",
           hdr : "",
-          HdmiTransFormat : ""
+          HdmiTransFormat : "",
+          latency:"",
         },
         options_old_265:{
           audio_input : "",
@@ -372,7 +372,8 @@
           AudioBitrate : "",
           bitrate_mode : "",
           hdr : "",
-          HdmiTransFormat : ""
+          HdmiTransFormat : "",
+          latency:"",
         },
         options:{
           dev_push_ip:'0',//传输IP
@@ -447,7 +448,6 @@
       }
     },
     activated(){  //生命周期-缓存页面激活
-      console.log("setting activated");
       this.getSelectOptions();
       //this.getDeviceParam();
       this.$global.getDeviceParam(this.formatData)
@@ -464,10 +464,8 @@
       }),
       chooseIP(val){this.control.ip = val;},
       getSelectOptions(){
-        console.log("getSelectOptions")
         var that = this;
         var dev_sn = that.ActiveDevice.dev_sn;
-        console.log("dev_sn:"+dev_sn)
         var userPrefix = that.user.prefix;
         //视频输入
         that.OPTIONS_VIDEOINPUT = that.$global.getDevParamRange(dev_sn,userPrefix,'video_input');
@@ -506,10 +504,10 @@
         //纠错开关
         if(data['OpenfecMode'] == '1'){
           that.options.OpenfecMode = true;
-          that.feclevel_show = true;
+          /*that.feclevel_show = true;*/
         }else{
           that.options.OpenfecMode = false;
-          that.feclevel_show = false;
+          /*that.feclevel_show = false;*/
         }
         //纠错能力
         that.options.OpenfecLevel = data['OpenfecLevel'];
@@ -524,11 +522,11 @@
         //视频输入
         that.options.video_input = data['video_input'];
         that.changeVideoInput(data);
-        if(that.options.video_encode == '4'){
+        /*if(that.options.video_encode == '4'){
           that.formatVideoEncode264();
         }else{
           that.formatVideoEncode265();
-        }
+        }*/
         //视频输入
         that.options.audio_input = data['audio_input'];
         //音频编码
@@ -539,8 +537,11 @@
         that.options.bitrate_mode = data['bitrate_mode'];
         //hdr设置
         that.options.hdr = data['hdr'];
+        //时延模式
+        that.options.latency = data['latency'];
         //编码分辨率
         that.options.HdmiTransFormat = data['HdmiTransFormat'];
+
         if(that.options.video_encode == '4'){
           //视频输入
           that.options_old_264.audio_input = data['audio_input'];
@@ -554,6 +555,22 @@
           that.options_old_264.hdr = data['hdr'];
           //编码分辨率
           that.options_old_264.HdmiTransFormat = data['HdmiTransFormat'];
+
+          //切换视频编码时做的初始化工作
+          //视频输入
+          that.options_old_265.audio_input = that.OPTIONS_AUDIOINPUT[0].value;
+          //音频编码
+          that.options_old_265.AudioEnc = that.OPTIONS_AUDIO_ENCODE[0].value;
+          //音频比特率
+          that.options_old_265.AudioBitrate = that.OPTIONS_AUDIO_BR[0].value;
+          //码率控制
+          that.options_old_265.bitrate_mode = that.OPTIONS_BITRATEMODE[0].value;
+          //hdr设置
+          that.options_old_265.hdr = that.OPTIONS_HDR[0].value;
+          //编码分辨率
+          that.options_old_265.HdmiTransFormat = that.OPTIONS_HDMI_FORMAT[0].value;
+          //时延
+          that.options_old_265.latency = that.OPTIONS_LATENCY[0].value;
         }else{
           //视频输入
           that.options_old_265.audio_input = data['audio_input'];
@@ -567,6 +584,23 @@
           that.options_old_265.hdr = data['hdr'];
           //编码分辨率
           that.options_old_265.HdmiTransFormat = data['HdmiTransFormat'];
+          //时延
+          that.options_old_265.latency = data['latency'];
+          //切换视频编码时做的初始化工作
+          //视频输入
+          that.options_old_264.audio_input = that.OPTIONS_AUDIOINPUT[1].value;
+          //音频编码
+          that.options_old_264.AudioEnc = that.OPTIONS_AUDIO_ENCODE[0].value;
+          //音频比特率
+          that.options_old_264.AudioBitrate = that.OPTIONS_AUDIO_BR[0].value;
+          //码率控制
+          that.options_old_264.bitrate_mode = that.OPTIONS_BITRATEMODE[0].value;
+          //hdr设置
+          that.options_old_264.hdr = that.OPTIONS_HDR[0].value;
+          //编码分辨率
+          that.options_old_264.HdmiTransFormat = that.OPTIONS_HDMI_FORMAT[0].value;
+          //时延
+          that.options_old_265.latency = that.OPTIONS_LATENCY[0].value;
         }
         /*------------------------配对设置------------------------*/
         //that.options.devNameSn = that.ActiveDevice.dev_name + "_" + that.ActiveDevice.dev_sn;
@@ -644,25 +678,26 @@
         that.options.hdr = that.options_old_265.hdr;
         //编码分辨率
         that.options.HdmiTransFormat = that.options_old_265.HdmiTransFormat;
+        //时延模式
+        that.options.latency = that.options_old_265.latency;
       },
       changeVideoInput(data){
-        //console.log("changeVideoInput 2");
         var that = this;
         var video_encode_option =  that.$global.getDevParamRange(that.ActiveDevice.dev_sn,that.user.prefix,'video_encode');
-        //console.log("that.options.video_input :"+that.options.video_input );
         if(that.options.video_input == '4'){//视频编码为HDMI 只支持H.264
           that.OPTIONS_VIDEOENCODE = video_encode_option.filter(function(item){
             return (item.value == '4');
           })
+          if(that.OPTIONS_VIDEOENCODE.length == 0){
+            that.OPTIONS_VIDEOENCODE = [{value: "4",text: "H.264"}];
+          }
           that.options.video_encode = '4';
         }else{
           that.OPTIONS_VIDEOENCODE = video_encode_option;
           if(data)
             that.options.video_encode = data["video_encode"];
         }
-        //console.log("that.options.video_encode:"+that.options.video_encode)
         that.$global.setDeviceParam('video_input', that.options.video_input);
-        //console.log("1111")
         that.changeVideoEncode();
       },
       changeVideoEncode(){
@@ -688,169 +723,7 @@
           that.options_old_265[paramType] = that.options[paramType];
         }
       },
-      //修改视频输入
-      changeVideoInput3(){
-        console.log("修改视频输入")
-        //视频输入是HDMI，视频编码只显示H.264, 视频接口不是HDMI，视频编码都显示
-        //视频输入为HDMI时，隐藏HDR和时延，音频输入只支持2声道
-        var that = this;
-        var devSN = this.ActiveDevice.dev_sn;
-        var prefix = this.user.prefix;
-        var video_encode_option = this.$global.getDevParamRange(devSN,prefix,'video_encode');
-        that.options.old_video_encode = this.options.video_encode;
-        //var old_speed_input = this.devParam.speed_input;
-        if(this.options.video_input == '4'){//视频输入是HDMI
-          console.log("视频输入是HDMI")
-          //音频输入，只支持2-CH
-          that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT_HDMI264;
-          that.old_audio_input = that.audio_input;
-          that.audio_input = 1;
-          //视频编码  只支持H.264
-          that.OPTIONS_VIDEOENCODE = video_encode_option.filter(function(item){
-            return (item.value == '4');
-          })
-          that.options.video_encode = 4;
-
-          //存视频输入变成HDMI之前的视频编码和时延模式
-          that.options.old_latency = that.options.latency;
-          that.options.old_video_input = 4;
-          
-          //HDR 时延 音频编码隐藏
-          that.hdrShow = false;
-          that.latencyShow = false;
-          that.audioEncodeShow = false;
-          //时延置成标准模式
-          that.options.latency = 0;
-          //编码分辨率 显示全部选项
-          that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT;
-        }else{
-          //音频输入  0 2 4
-          that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT;//音频输入
-          //视频编码  H.265 H.264
-          that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT;//音频输入
-          that.options.old_audio_input = that.options.audio_input;
-          /*if (that.options.old_video_encode == '4'){ //视频编码 H.264
-            that.OPTIONS_LATENCY = that.$global.OPTIONS_LATENCY2;//时延
-            that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT_HDMI264;//音频输入
-          }else{
-            that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT;//音频输入
-          }*/
-
-          
-          //从HDMI切换到其他选项,还原之前的视频编码和时延模式
-          if(that.options.old_video_input == 4){
-            that.options.latency = that.options.old_latency;
-            that.options.old_video_input = 0;
-            /*that.$global.setDevParamList(devSN, this, ['video_input','video_encode','latency'],
-              [$('#videoInput_sel').val(),oldVal,latencyOld],)*/
-            //超低时延，隐藏板卡HDMI输出
-            if(that.options.old_latency == 1){
-              /*$('#hdmiLi').hide();
-              outputTip('show','超低时延无HDMI输出');*/
-            }else{
-              /*$('#hdmiLi').show();
-              outputTip('hide','');*/
-            }
-          }
-          //that.$global.setDeviceParam('video_input', that.options.video_input);
-          //不是HDMI
-          //that.OPTIONS_VIDEOENCODE = video_encode_option;
-          //保持视频编码不变
-          that.options.video_encode = that.options.old_video_encode;
-          //HDR 时延 音频编码 显示
-          that.hdrShow = true;
-          that.latencyShow = true;
-          that.audioEncodeShow = true;
-          
-          //视频比特率
-          /*var range = getVideoBr(devSN);
-          setSpeedInputRange(range.min, range.max);
-          $("#speed_slider").slider('setValue', speed_inputVal);*/
-          
-          //SDI输出显示
-          /*if(isValidRcvSn(getSelRcvBoard('rcvSn'))){
-            //H.264, 隐藏板卡SDI输出
-            if(oldVal == '4'){
-              $('#sdiLi').hide();
-              outputTip('show','H.264无SDI输出');
-            } else{
-              $('#sdiLi').show();
-              outputTip('hide','');
-            }
-          }*/
-        }
-        that.$global.setDeviceParam('video_input', that.options.video_input);
-      },
-      //修改视频编码
-      changeVideoEncode2(){
-        /*var devSN = $('#edit_dev_name').val().split('_')[1];
-        var speed_inputVal = +$('#speed_input').val();*/
-        
-        var that = this;
-        if (that.options.video_encode == '4') {
-          //存视频编码不是H.264时的时延模式
-          that.options.old_latency = that.options.latency;
-          that.options.old_video_encode = 4;
-          //H.264 编码分辨率选项放开
-          that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT;
-          //音频输入 不支持 0-CH 4-CH
-          that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT_HDMI264;
-          that.options.audio_input = (that.options.audio_input!='1'?1:that.options.audio_input)
-          //时延模式 不支持 超低时延
-          that.OPTIONS_LATENCY = that.$global.OPTIONS_LATENCY2;
-          that.options.latency = 0;
-          //HDMI输出显示
-          /*if(isValidRcvSn(getSelRcvBoard('rcvSn'))){
-            $('#sdiLi').hide();
-            $('#hdmiLi').show();
-            outputTip('show','H.264无SDI输出');
-          }*/
-          //视频比特率
-          /*setSpeedInputRange(BITRATE_MIN, BITRATE_MAX3);
-          if (speed_inputVal > BITRATE_MAX3) {
-            paramArr.push('dev_sr');
-            valueArr.push(BITRATE_MAX3 * 1000);
-            $('#speed_input').val(BITRATE_MAX3);
-            $("#speed_slider").slider('setValue', BITRATE_MAX3);
-          } else {
-            $("#speed_slider").slider('setValue', speed_inputVal);
-          }*/
-        } else {
-          //H.265 编码分辨率选项只有自动
-          that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT.filter(function(item){
-            return (item.value == 0)
-          })
-          that.options.HdmiTransFormat = 0;
-          //音频输入 支持 0-CH
-          var audio_input = that.options.audio_input;
-          that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT;
-          that.options.audio_input = audio_input;
-          //时延模式 支持 超低时延
-          var latency = that.options.latency;
-          that.OPTIONS_LATENCY = that.$global.OPTIONS_LATENCY;
-          that.options.latency = latency;
-          //从H.264切换成其他的，时延模式恢复
-          if(that.options.old_video_encode == '4'){
-            that.options.latency = that.options.old_latency;
-            /*//SDI显示
-            $('#sdiLi').show();
-            //超低时延，隐藏板卡HDMI输出
-            if(latencyOld == 1){
-              $('#hdmiLi').hide();
-              outputTip('show','超低时延无HDMI输出');
-            }
-            else{
-              $('#hdmiLi').show();
-              outputTip('hide','');
-            }*/
-          }
-          //视频比特率
-          /*var range = getVideoBr(devSN);
-          setSpeedInputRange(range.min, range.max);
-          $("#speed_slider").slider('setValue', speed_inputVal);*/
-        }
-        that.$global.setDeviceParam('video_encode', that.options.video_encode);
-      },
+      
       //格式化单卡选择
       formatCardSel(data){
         var cardSel = [];

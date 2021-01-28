@@ -62,5 +62,8 @@ export default {
     // 设置当前接收机参数
     [types.SET_RCV_PARAM]: (state, datas) => {
         state.rcvParam = datas
+    },
+    [types.SET_CHART_CARD_VIEW]: (state, datas) => {
+        state.chartCardView = datas
     }
 }
