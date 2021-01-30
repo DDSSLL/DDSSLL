@@ -1,24 +1,24 @@
 module.exports = {
-    /*basic:{
+    basic:{
         "main":"Main",
         "settings":"Settings",
         "login":"Login"
-    },*/
+    },
     basic1080:{
-        "status":"状态",
-        "control":"控制",
-        "live":"直播",
-        "settings":"参数",
-        "me":"我的",
-        "login":"登录"
+        "status":"Status",
+        "control":"Control",
+        "live":"Streaming",
+        "settings":"Setting",
+        "me":"Me",
+        "login":"Login"
     },
     basic4000:{
-        "status":"状态",
-        "control":"控制",
-        "live":"接收机",
-        "settings":"参数",
-        "me":"我的",
-        "login":"登录"
+        "status":"Status",
+        "control":"Control",
+        "live":"Streaming",
+        "settings":"Setting",
+        "me":"Me",
+        "login":"Login"
     },
     tip:{
         "authSuccess":"Auth Success"
