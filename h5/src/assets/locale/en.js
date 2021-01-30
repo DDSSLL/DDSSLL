@@ -9,7 +9,7 @@ module.exports = {
         "control":"Control",
         "live":"Streaming",
         "settings":"Setting",
-        "me":"Me",
+        "me":"My",
         "login":"Login"
     },
     basic4000:{
@@ -17,7 +17,7 @@ module.exports = {
         "control":"Control",
         "live":"Streaming",
         "settings":"Setting",
-        "me":"Me",
+        "me":"My",
         "login":"Login"
     },
     tip:{
