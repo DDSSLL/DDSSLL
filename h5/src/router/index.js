@@ -124,7 +124,7 @@ export default new Router({
             name: "DV4000Me",
             component: DV4000Me,
             meta: {
-                keepAlive: false
+                keepAlive: true
             }
         },
         {
@@ -132,7 +132,7 @@ export default new Router({
             name: 'DV4000Control',
             component: DV4000Control,
             meta: {
-                keepAlive: false
+                keepAlive: true
             }
         },
         {
@@ -140,7 +140,7 @@ export default new Router({
             name: 'DV4000Live',
             component: DV4000Live,
             meta: {
-                keepAlive: false
+                keepAlive: true
             }
         },
         {
@@ -148,7 +148,7 @@ export default new Router({
             name: "DV4000Settings",
             component: DV4000Settings,
             meta: {
-                keepAlive: false
+                keepAlive: true
             }
         }
     ]

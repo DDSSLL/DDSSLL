@@ -418,10 +418,10 @@
         handler(val) {
           this.ActiveDevice = val;
           //$("#sn_str").text(this.ActiveDevice.dev_sn)
-          if(this.paramLockAck != "1"){
+          /*if(this.paramLockAck != "1"){
             //this.getDeviceParam();
             this.$global.getDeviceParam(this.formatData)
-          }
+          }*/
         }
       },
       '$store.state.ActiveDevice.dev_sn': {
@@ -449,11 +449,16 @@
     },
     activated(){  //生命周期-缓存页面激活
       this.getSelectOptions();
-      //this.getDeviceParam();
-      this.$global.getDeviceParam(this.formatData)
+      var that = this;
+      localStorage.getSettingParam = setInterval(function(){
+        if(that.paramLockAck != "1"){
+          that.$global.getDeviceParam(that.formatData)
+        }
+      },1000)
+
     },
     deactivated(){   //生命周期-缓存页面失活
-
+      clearInterval(localStorage.getSettingParam);
     },
     methods:{
       ...mapMutations({

@@ -31,9 +31,13 @@
             </span>
           </div>
         </div>
-        <div class="lock">
+        <div class="lock" v-if="pageType=='rcv'">
+          <i class="fa fa-2x fa-lock" id="rcvlockIcon" aria-hidden="true" @click.stop="changeRcvLockState"></i>
+        </div>
+        <div class="lock" v-else>
           <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState"></i>
         </div>
+        
       </div>
     </div>
     <div class="popup">
@@ -99,13 +103,19 @@
       </mt-popup>
 
       <mt-popup v-model="deviceTypePop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop">
+        <span class="chevronDown">
+          <i class="fa fa-chevron-down" @click.stop="deviceTypePop=false"></i>
+        </span>
         <mt-radio
           v-model="deviceType"
           :options="deviceTypeOptions"
           @change="changeDeviceType">
         </mt-radio>
       </mt-popup>
-      <mt-popup v-model="devicePrefixPop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop">
+      <mt-popup v-model="devicePrefixPop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop devicePrefixFilterPop">
+        <span class="chevronDown">
+          <i class="fa fa-chevron-down" @click.stop="devicePrefixPop=false"></i>
+        </span>
         <mt-checklist
           v-model="devicePrefix"
           :options="this.allPrefix"
@@ -122,6 +132,7 @@
   import $ from 'jquery';
   export default {
     name: "Device",
+    props:['page'],
     data(){
       return{
         SUPER : SUPER,
@@ -145,17 +156,16 @@
                             {label: '推流设备',value: '2'},
                             {label: '在线设备',value: '3'},
                             {label: '离线设备',value: '4'}],
+        pageType:this.page,
       }
     },
     computed: {
       ...mapState(['user','ActiveDevice','DeviceTimer','deviceTypeSelect','devicePrefixSelect','paramLockAck','paramLock'])
     },
     created(){  //生命周期-页面创建后
-      console.log("device created:")
       var that = this;
       that.initFilter();
       //that.getDeviceList();
-      
       clearInterval(this.DeviceTimer);
       this.timer = setInterval(function(){
         that.getDeviceList();
@@ -169,12 +179,12 @@
     },
     methods:{
       ...mapMutations({
-          SET_ACTIVE_DEVICE,
-          SET_DEVICE_TIMER,
-          SET_DEVICE_TYPE_SELECT,
-          SET_DEVICE_PREFIX_SELECT,
-          SET_PARAM_LOCK_ACK,
-          SET_PARAM_LOCK
+        SET_ACTIVE_DEVICE,
+        SET_DEVICE_TIMER,
+        SET_DEVICE_TYPE_SELECT,
+        SET_DEVICE_PREFIX_SELECT,
+        SET_PARAM_LOCK_ACK,
+        SET_PARAM_LOCK,
       }),
       changeDeviceType(){
         var that = this;
@@ -255,7 +265,7 @@
             //that.$refs.loadmore.onTopLoaded();
             if(!that.ActiveDevice){
               that.SET_ACTIVE_DEVICE(that.deviceList[0]);
-            }
+	    }
             for(var i=0; i<that.deviceList.length; i++){
               if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
                 that.refreshCurDevParam(that.deviceList[i]);
@@ -307,6 +317,16 @@
         } else {
           //已加锁，要解锁,背包锁定
           that.setDeviceParam('param_lock',1)
+        }
+      },
+      //修改接收机锁
+      changeRcvLockState(){
+        if($("#rcvlockIcon").hasClass("fa-lock")){
+          this.$emit('changeRcvLockState',"unlock")
+          $("#rcvlockIcon").removeClass("fa-lock").addClass("fa-unlock");
+        }else{
+          this.$emit('changeRcvLockState',"lock")
+          $("#rcvlockIcon").removeClass("fa-unlock").addClass("fa-lock");
         }
       },
       setDeviceParam(key,val){

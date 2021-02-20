@@ -1,90 +1,90 @@
 <template>
-    <div class="control">
-        <keep-alive>
-            <Device></Device>
-        </keep-alive>
-        <div class="Group">
-            <div class="GroupTitle">网卡设置</div>
-            <div class="GroupItem" style="padding: .1rem;border-bottom:0;">
-                <table class="netBoardTable">
-                    <thead>
-                    <tr>
-                        <th>网卡</th>
-                        <th>启用/禁用</th>
-                        <th>上传<br>Mbps</th>
-                        <th>RTT<br>ms</th>
-                        <th>强度<br>dBm</th>
-                        <th>运营商</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <template v-for="item in netBoard">
-                        <tr v-if="item.cardShow == '1'">
-                            <td class="td" :class="[item.online == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
-                            <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch></td>
-                            <td class="td">{{ item.send_br }}</td>
-                            <td class="td">{{ item.card_rtt }}</td>
-                            <td class="td">{{ item.rssi }}</td>
-                            <td class="td">{{ transOperator(item.operator) }}</td>
-                        </tr>
-                    </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="Group">
-            <div class="GroupTitle">常用设置</div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">传输开关</div>
-                    <div class="GroupItemValue">
-                        <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch>
-                        <span id="url_dis" v-if="pushDisShow" style="color:red">推流地址不通</span>
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">视频比特率(Mbps)</div>
-                    <div class="GroupItemValue">
-                        <mt-range
-                                v-model="common.dev_srVal_range"
-                                class="ItemRange byteRange"
-                                :min="BITRATE_MIN"
-                                :max="BITRATE_MAX"
-                                :step="0.1"
-                                :bar-height="5"
-                                :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
-                                @change="setDeviceParam('dev_sr_range')">
-                            <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{BITRATE_MIN}}</div>
-                            <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{BITRATE_MAX}}</div>
-                        </mt-range>
-                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal_input" @blur="setDeviceParam('dev_sr_input')" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true">
-                    </div>
-                </div>
-            </div>
-            <div class="GroupItem">
-                <div class="GroupItemField">
-                    <div class="GroupItemTitle">延时(s)</div>
-                    <div class="GroupItemValue">
-                        <mt-range
-                                v-model="common.dev_delayVal_range"
-                                class="ItemRange byteRange"
-                                :min="DELAY_MIN"
-                                :max="DELAY_MAX"
-                                :step.number="0.1"
-                                :bar-height="5"
-                                :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
-                                @change="setDeviceParam('dev_delay_range')">
-                            <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{DELAY_MIN}}</div>
-                            <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{DELAY_MAX}}</div>
-                        </mt-range>
-                        <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="paramLockAck == '1'?false:true">
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="control">
+    <keep-alive>
+      <Device></Device>
+    </keep-alive>
+    <div class="Group">
+      <div class="GroupTitle">网卡设置</div>
+      <div class="GroupItem" style="padding: .1rem;border-bottom:0;">
+        <table class="netBoardTable">
+          <thead>
+            <tr>
+              <th>网卡</th>
+              <th>启用/禁用</th>
+              <th>上传<br>Mbps</th>
+              <th>RTT<br>ms</th>
+              <th>强度<br>dBm</th>
+              <th>运营商</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="item in netBoard">
+              <tr v-if="item.cardShow == '1'">
+                <td class="td" :class="[item.online == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
+                <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch></td>
+                <td class="td">{{ item.send_br }}</td>
+                <td class="td">{{ item.card_rtt }}</td>
+                <td class="td">{{ item.rssi }}</td>
+                <td class="td">{{ transOperator(item.operator) }}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
     </div>
+    <div class="Group">
+      <div class="GroupTitle">常用设置</div>
+      <div class="GroupItem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">传输开关</div>
+          <div class="GroupItemValue">
+            <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch>
+            <span id="url_dis" v-if="pushDisShow" style="color:red">{{transErrReason}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">视频比特率(Mbps)</div>
+          <div class="GroupItemValue">
+            <mt-range
+              v-model="common.dev_srVal_range"
+              class="ItemRange byteRange"
+              :min="BITRATE_MIN*10"
+              :max="BITRATE_MAX*10"
+              :step="1"
+              :bar-height="5"
+              :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
+              @change="setDeviceParam('dev_sr_range')">
+              <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{BITRATE_MIN}}</div>
+              <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{BITRATE_MAX}}</div>
+            </mt-range>
+            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal_input" @blur="setDeviceParam('dev_sr_input')" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true">
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">延时(s)</div>
+          <div class="GroupItemValue">
+            <mt-range
+              v-model="common.dev_delayVal_range"
+              class="ItemRange byteRange"
+              :min="DELAY_MIN*10"
+              :max="DELAY_MAX*10"
+              :step.number="1"
+              :bar-height="5"
+              :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
+              @change="setDeviceParam('dev_delay_range')">
+              <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{DELAY_MIN}}</div>
+              <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{DELAY_MAX}}</div>
+            </mt-range>
+            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="paramLockAck == '1'?false:true">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -98,7 +98,7 @@
       return{
         BITRATE_MIN : 0.5, //Mbps   数据库里的dev_sr
         BITRATE_MAX : 20,
-        DELAY_MIN : 0.1, //s
+        DELAY_MIN : 0.5, //s
         DELAY_MAX : 20,
         delayMin : 0,
         delayMax : 0,
@@ -106,6 +106,7 @@
         speedMax : 0,
         ActiveDevice:null,
         pushDisShow:false,
+        transErrReason:"",
         common:{
           dev_push_enable:"0",
           dev_push_enableVal:false,
@@ -130,20 +131,29 @@
         immediate: true,
         handler(val) {
           this.ActiveDevice = val;
-          if(this.paramLockAck != "1"){
+          /*if(this.paramLockAck != "1"){
             this.getNetBoard();
             this.getDeviceParam();
           }
-          this.$global.getPushUrls(this, this.formatPushUrlState);
+          this.$global.getPushUrls(this, this.formatPushUrlState);*/
         }
       }
     },
     activated(){  //生命周期-缓存页面激活
-      this.getNetBoard();
-      this.getDeviceParam();
+      /*this.getNetBoard();
+      this.getDeviceParam();*/
+
+      var that = this;
+      localStorage.getControlParam1080 = setInterval(function(){
+        that.getNetBoard();
+        if(that.paramLockAck != "1"){
+          that.getDeviceControlParam()
+        }
+        that.$global.getPushUrls(that, that.formatPushUrlState);
+      },1000)
     },
     deactivated(){   //生命周期-缓存页面失活
-
+      clearInterval(localStorage.getControlParam1080);
     },
     methods:{
       /*...mapMutations({
@@ -239,7 +249,26 @@
           console.log(error)
         })
       },
-      getDeviceParam(){
+      getDeviceControlParam(){
+        var that = this;
+        /*that.common = {
+          dev_push_enable:"0",
+          dev_push_enableVal:false,
+          dev_sr:0,
+          dev_srVal:0,
+          dev_srVal_range : 0,
+          dev_srVal_input : 0,
+          dev_delay:0,
+          dev_delayVal_range : 0,
+          dev_delayVal_input : 0,
+          dev_delayVal:0
+        };*/
+        that.$global.getDeviceParam(function(data){
+          that.common = that.formatData(data);
+        })
+
+      },
+      /*getDeviceParam(){
         var that = this;
         this.$axios({
           method: 'post',
@@ -274,7 +303,7 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
+      },*/
       formatData(data){
         console.log("formatData")
         var that = this;
@@ -286,27 +315,33 @@
           that.$global.getPushUrls(that, that.formatPushUrlState);
         }
         data.dev_srVal = (data.dev_sr / 1000).toFixed(1); //(Mbps)
-        data.dev_srVal_range = data.dev_srVal;
+        data.dev_srVal_range = data.dev_srVal*10;
         data.dev_srVal_input = data.dev_srVal;
         data.dev_delayVal = (data.dev_delay / 1000).toFixed(3); //(s)
-        data.dev_delayVal_range = data.dev_delayVal;
+        data.dev_delayVal_range = data.dev_delayVal*10;
         data.dev_delayVal_input = data.dev_delayVal;
         return data;
       },
       //推流地址状态
       formatPushUrlState(data){
         var that = this;
-        var runningStatusCount = 0;
+        var closeStatusCount = 0;
         for (var i = 0; i < data.length; i++) {
           if (data[i].push_sel == '1') {
-            if (data[i].push_status == 'running') {
-              runningStatusCount++;
+            if (data[i].push_status == 'Closed') {
+              that.transErrReason = "视频流异常";
+              closeStatusCount++;
+            } else if (data[i].push_status == 'Open output file error!') {
+              that.transErrReason = "推流地址不通";
+              closeStatusCount++;
             }
           }
         }
         that.pushDisShow = false;
-        if(runningStatusCount == 0 && that.common.dev_push_enableVal){
-          that.pushDisShow = true;
+        if(closeStatusCount > 0){
+          if(that.common.dev_push_enableVal){
+            that.pushDisShow = true;
+          }
         }
       },
       
@@ -405,7 +440,6 @@
         })
       },
       setDeviceParam(key){
-        console.log("setDeviceParam:"+key)
         var that = this;
         var devParamCol = key;
         var value;
@@ -416,19 +450,18 @@
           that.common.dev_srVal_range = that.common.dev_srVal_input;
           devParamCol = "dev_sr";
         }else if(key == "dev_sr_range"){
-          value = parseFloat(that.common.dev_srVal_range) * 1000;
-          that.common.dev_srVal_input = that.common.dev_srVal_range;
+          value = parseFloat(that.common.dev_srVal_range/10) * 1000;
+          that.common.dev_srVal_input = that.common.dev_srVal_range/10;
           devParamCol = "dev_sr";
         }else if(key == "dev_delay_input"){
           value = parseFloat(that.common.dev_delayVal_input) * 1000;
           that.common.dev_delayVal_range = that.common.dev_delayVal_input;
           devParamCol = "dev_delay";
         }else if(key == "dev_delay_range"){
-          value = parseFloat(that.common.dev_delayVal_range) * 1000;
-          that.common.dev_delayVal_input = that.common.dev_delayVal_range;
+          value = parseFloat(that.common.dev_delayVal_range/10) * 1000;
+          that.common.dev_delayVal_input = that.common.dev_delayVal_range/10;
           devParamCol = "dev_delay";
         }
-        console.log("value:"+value);
         this.$axios({
           method: 'post',
           url:"/page/index/indexData.php",
@@ -443,11 +476,7 @@
         })
         .then(function (response) {
           let res = response.data;
-          if(res.res.success){
-            that.getDeviceParam();
-          }else{
-            that.getDeviceParam();
-          }
+          that.getDeviceControlParam();
         })
         .catch(function (error) {
           console.log(error)

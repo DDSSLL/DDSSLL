@@ -1,4 +1,12 @@
-.userPrefixPop .chevronDown{
+.devicePrefixFilterPop{
+  height:100% !important;
+}
+.devicePrefixFilterPop>div{
+  height:100%;
+  overflow:auto;
+}
+.userPrefixPop .chevronDown,
+.deviceFilterPop .chevronDown{
   width: 100%;
   background-color: #3f4551!important;
   color: #fff;
@@ -8,13 +16,27 @@
   padding: 5px;
   font-size: .16rem;
 }
-.userPrefixPop .mint-cell{
+.userPrefixPop .mint-cell,
+.deviceFilterPop .mint-cell{
 	background-color: #3f4551!important;
 }
-.userPrefixPop .mint-cell .mint-cell-wrapper {
+.userPrefixPop .mint-cell .mint-cell-wrapper,
+.deviceFilterPop .mint-cell .mint-cell-wrapper {
   background-image: linear-gradient(180deg,#000,#000 50%,transparent 0)!important;
 }
-.userPrefixPop .mint-cell .mint-checkbox-label{
+.userPrefixPop .mint-cell .mint-checkbox-label,
+.deviceFilterPop .mint-cell .mint-checkbox-label{
 	font-size: .14rem;
 	margin-left: 6px;
+}
+.mint-switch-input:checked:disabled +.mint-switch-core{
+  border-color: #2F518C;
+  background-color: #2F518C;
+}
+.mint-switch-input:disabled +.mint-switch-core::after{
+  border-color: #B7B7B7;
+  background-color: #B7B7B7;
+}
+.mt-range-runway{
+  width: calc(100% + 24px);
 }

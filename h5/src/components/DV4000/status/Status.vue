@@ -423,8 +423,10 @@ export default {
   activated(){  //生命周期-缓存页面激活
     this.initColorGV(this.cardLineStyle);
     var initData = this.initChartData();
-    var devSns = initData.devSns;
-          this.getChartData(devSns);
+    if(initData){
+      var devSns = initData.devSns;
+      this.getChartData(devSns);
+    }
   },
   deactivated(){   //生命周期-缓存页面失活
   },

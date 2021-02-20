@@ -29,8 +29,6 @@ export default {
     activedevicetype:'DV1080',
     //图表样式
     cardLineStyle:'old',
-    //请求地址
-    domain:'http://www.hdxpress.cn',//1080一级域名
     chartCardView : {
       },
 }

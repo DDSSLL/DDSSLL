@@ -13,7 +13,7 @@
         <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
       </div>
       <div class="form-item" style="overflow: hidden;">
-        <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
+        <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic1080.login' ) }}</mt-button>
       </div>
       <!-- <div class="form-item">
         <span class="forgetPwd">忘记密码了?</span>
@@ -29,14 +29,14 @@
 <script>
   import LoginSetBtn from '../../common/LoginSetBtn';
   import appVersion from '../../common/appVersion';
+  import md5 from 'md5'
   import { mapState, mapMutations } from 'vuex';
-  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE_TYPE,SET_DOMAIN } from '../../../store/mutation-types';
+  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE,SET_ACTIVE_DEVICE_TYPE } from '../../../store/mutation-types';
   export default {
     name: "Login",
     data(){
       return {
         title : "HDXpress",
-        HDXPRESS_BUILD : "http://www.hdxpress.cn",//1080一级域名
         user:{
           login_name:'',
           password:'',
@@ -46,10 +46,11 @@
         wifiUrlsEditVisible:false,
         wifiUrl:"",
         hidShow:true,
+        HDXPRESS_BUILD:HDXPRESS_BUILD,
       }
     },
     computed: {
-    ...mapState(['navHide','activedevicetype','domain'])
+    ...mapState(['navHide','activedevicetype'])
     },
     components: {
       LoginSetBtn,appVersion
@@ -63,8 +64,13 @@
             switch(this.activedevicetype){
               case "DV1080":
                 that.title = 'HDXpress';
-                that.user.login_name = localStorage.getItem("USERNAME_1080");
-                that.user.password = localStorage.getItem("PASSWORD_1080");
+                if(that.user.saveMe_1080){
+                  that.user.login_name = localStorage.getItem("USERNAME_1080");
+                  that.user.password = localStorage.getItem("PASSWORD_1080");
+		            }else{
+		              that.user.login_name = "";
+                  that.user.password = "";
+            		}
                 break;
               case "DV4000":
                 that.title = 'UHDXpress';
@@ -80,16 +86,16 @@
       }
     },
     mounted(){
-      console.log("1080 login mount")
       this.SET_ACTIVE_DEVICE_TYPE("DV1080")
-      this.SET_DOMAIN(this.HDXPRESS_BUILD);
+      //this.SET_DOMAIN(this.HDXPRESS_BUILD);
       this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080的一级域名
-      //this.$axios.defaults.baseURL = this.HDXPRESS_SERVE;//调试代码不能上传
-      //this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080一级域名
       this.user.saveMe_1080 = localStorage.getItem("SAVEME_1080")?eval(localStorage.getItem("SAVEME_1080")):false;
       if(this.user.saveMe1080){
         this.user.login_name = localStorage.getItem("USERNAME_1080");
         this.user.password = localStorage.getItem("PASSWORD_1080");
+      }else{
+        this.user.login_name = "";
+        this.user.password = "";
       }
       //移动端输入法弹起页面被顶上来解决方法
       this.docmHeight = document.documentElement.clientHeight;//获取当前屏幕高度
@@ -104,15 +110,12 @@
       ...mapMutations({
         SET_USER,
         SET_NAV_STATUS,
-        SET_ACTIVE_DEVICE_TYPE,
-        SET_DOMAIN
+        SET_ACTIVE_DEVICE,
+        SET_ACTIVE_DEVICE_TYPE
       }),
       login(){
-        console.log("login")
-        console.log("设备："+this.activedevicetype);
-        console.log("this.$axios.defaults.baseURL:"+this.$axios.defaults.baseURL)
         var that = this;
-        that.$axios.defaults.baseURL = that.domain;
+        //that.$axios.defaults.baseURL = that.domain;
         this.$axios({
           method: 'post',
           url:"/login/login.php",
@@ -131,8 +134,9 @@
             setTimeout(function(){
               that.$router.push("/status");
               that.SET_NAV_STATUS(false);
+              var data = res.res.data;
+              data.pwd = md5(data['pwd'])
               that.SET_USER(res.res.data);
-              that.SET_ACTIVE_DEVICE_TYPE(that.curDeviceType);
               localStorage.setItem("LOGIN",true);
               localStorage.setItem("USERNAME_1080",that.user.login_name);
               localStorage.setItem("PASSWORD_1080",that.user.password);
@@ -143,10 +147,14 @@
               localStorage.removeItem("chartKey");
               localStorage.removeItem("curChart");
               localStorage.removeItem("allChartData");
+
+              localStorage.loginTimer = setInterval(function(){
+                that.CheckLogged(res.res.data)
+              },1000)
             },800)
           }else{
             that.$toast({
-              message: "登录失败",
+              message: res.res.reason,
               position: 'middle',
               duration: 3000
             })
@@ -178,36 +186,41 @@
           return res;
         }
       },
-      register(){},
-      /*back(){
-        this.$router.go(-1)
-      },*/
-      /*ChoseDevice(val){
-        this.ActiveDeviceType = val;
-        this.SET_ACTIVE_DEVICE_TYPE(this.ActiveDeviceType);
-        switch(this.ActiveDeviceType){
-          case "DV1080":
-            this.title = "HDXpress";
-            this.$axios.defaults.baseURL = this.DOMAIN;
-            //"http://127.0.0.1";
-            break;
-          case "DV4000":
-            this.title = "UHDXpress";
-            this.$axios.defaults.baseURL = this.DOMAIN;
-            //this.$axios.defaults.baseURL = "http://117.131.178.104:8088";
-            this.$router.push("/dv4000login");
+      //单用户登录校验
+      CheckLogged(data){
+        var that = this;
+        that.$axios({
+          method: 'post',
+          url:"/login/login.php",
+          data:{
+            isLogged: data.id.toString(),
+            loginRand: data.loginRand.toString(),
+            pwd: data.pwd.toString(),
+          },
+          Api:"CheckLogged",
+          AppId:"android",
+          UserId:data.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
             
-            break;
-          case "OTHER":
-            this.title = "OTHER";
-            this.$axios.defaults.baseURL = "http://47.104.164.249";
-            break;
-        }
-        this.showConfig = false;
-      },*/
-
+          }else{
+            that.SET_USER(null);
+            that.SET_NAV_STATUS(true);
+            that.SET_ACTIVE_DEVICE(null);
+            that.$router.replace("/login");
+            localStorage.removeItem('LOGIN');
+            clearInterval(localStorage.loginTimer);
+            localStorage.loginTimer = undefined;  
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      register(){},
       connectWifi(){
-        //this.wifiUrlsEditVisible = true;
         this.$router.push("/wifi");
       },
 

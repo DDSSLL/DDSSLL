@@ -31,7 +31,13 @@
             </span>
           </div>
         </div>
-        <div class="lock">
+        <div class="refreshIcon" v-if="pageType=='status'">
+          <i class="fa fa-2x fa-refresh" id="" aria-hidden="true" @click.stop="refreshChart"></i>
+        </div>
+        <div class="lock" v-else-if="pageType=='rcv'" v-show="false">
+          <i class="fa fa-2x fa-lock" id="rcvlockIcon" aria-hidden="true" @click.stop="changeRcvLockState"></i>
+        </div>
+        <div class="lock" v-else>
           <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState"></i>
         </div>
       </div>
@@ -46,12 +52,14 @@
             <div class="back" @click="popupVisible=false">
               <i class="fa fa-arrow-left" aria-hidden="true"></i>
             </div>
-            <select v-model="deviceType" class="TypeSelect" :class="{'White':deviceTypeSelect == '1','Red':deviceTypeSelect == '2','Green':deviceTypeSelect == '3','Gray':deviceTypeSelect == '4'}" style="width:1.1rem" @change="filterDevice">
+            <!-- <select v-model="deviceType" class="TypeSelect" :class="{'White':deviceTypeSelect == '1','Red':deviceTypeSelect == '2','Green':deviceTypeSelect == '3','Gray':deviceTypeSelect == '4'}" style="width:1.1rem" @change="filterDevice">
               <option value="1" class="White"><span>全部设备</span></option>
               <option value="2" class="Red"><span>推流设备</span></option>
               <option value="3" class="Green"><span>在线设备</span></option>
               <option value="4" class="Gray"><span>离线设备</span></option>
-            </select>
+            </select> -->
+            <button @click="deviceTypePop = true" class="TypeSelect White">{{this.deviceTypeCurName}}</button>
+            <button @click="devicePrefixPop = true" class="TypeSelect White" v-if="user.id==SUPER">{{this.devicePrefixCurName}}</button>
           </div>
           <mt-loadmore :top-method="getDeviceList" ref="loadmore">
             <template v-for="(item,i) in deviceListShow">
@@ -90,200 +98,300 @@
           </mt-loadmore>
         </div>
       </mt-popup>
+      <mt-popup v-model="deviceTypePop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop">
+        <span class="chevronDown">
+          <i class="fa fa-chevron-down" @click.stop="deviceTypePop=false"></i>
+        </span>
+        <mt-radio
+          v-model="deviceType"
+          :options="deviceTypeOptions"
+          @change="changeDeviceType">
+        </mt-radio>
+      </mt-popup>
+      <mt-popup v-model="devicePrefixPop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop devicePrefixFilterPop">
+        <span class="chevronDown">
+          <i class="fa fa-chevron-down" @click.stop="devicePrefixPop=false"></i>
+        </span>
+        <mt-checklist
+          v-model="devicePrefix"
+          :options="this.allPrefix"
+          @change="changeDevicePrefix">
+        </mt-checklist>
+      </mt-popup>
     </div>
   </div>
 </template>
 
 <script>
-    import { mapState, mapMutations } from 'vuex';
-    import { SET_ACTIVE_DEVICE,SET_DEVICE_TIMER,SET_DEVICE_TYPE_SELECT,SET_PARAM_LOCK_ACK,SET_PARAM_LOCK } from '../../../store/mutation-types';
-    import $ from 'jquery';
-    export default {
-        name: "Device",
-        data(){
-            return{
-                timer:null,
-                popupVisible:false,
-                deviceList:[{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}],
-                active:{},
-                //当前选中设备的相关参数
-                deviceListShow:[],
-                deviceType:"1"
+  import { mapState, mapMutations } from 'vuex';
+  import { SET_ACTIVE_DEVICE,SET_DEVICE_TIMER,SET_DEVICE_TYPE_SELECT,SET_DEVICE_PREFIX_SELECT,SET_PARAM_LOCK_ACK,SET_PARAM_LOCK } from '../../../store/mutation-types';
+  import $ from 'jquery';
+  export default {
+    name: "Device",
+    props:['page'],
+    data(){
+      return{
+        SUPER:SUPER,
+        timer:null,
+        popupVisible:false,
+        deviceList:[{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}],
+        active:{},
+        //当前选中设备的相关参数
+        deviceListShow:[],
+        deviceType:"1",
+        pageType:this.page,
+        //用户组
+        devicePrefixPop:false,
+        allPrefix:[],
+        devicePrefix:"",
+        devicePrefixCurName:"用户组",
+        //设备在线类型
+        deviceTypePop: false,
+        deviceType:"",
+        deviceTypeCurName:"",
+        deviceTypeOptions: [{label: '全部设备',value: '1'},
+                            {label: '推流设备',value: '2'},
+                            {label: '在线设备',value: '3'},
+                            {label: '离线设备',value: '4'}],
+      }
+    },
+    computed: {
+      ...mapState(['user','ActiveDevice','DeviceTimer','deviceTypeSelect','devicePrefixSelect','paramLockAck','paramLock'])
+    },
+    created(){  //生命周期-页面创建后
+      var that = this;
+      that.initFilter();
+      //this.getDeviceList();
+
+      clearInterval(this.DeviceTimer);
+      this.timer = setInterval(function(){
+        that.getDeviceList();
+      },1000);
+      this.SET_DEVICE_TIMER(this.timer);
+      that.deviceType = that.deviceTypeSelect;
+    },
+    activated(){
+      this.deviceType = this.deviceTypeSelect;
+    },
+    methods:{
+      ...mapMutations({
+        SET_ACTIVE_DEVICE,
+        SET_DEVICE_TIMER,
+        SET_DEVICE_TYPE_SELECT,
+        SET_DEVICE_PREFIX_SELECT,
+        SET_PARAM_LOCK_ACK,
+        SET_PARAM_LOCK,
+      }),
+      changeDeviceType(){
+        var that = this;
+        that.SET_DEVICE_TYPE_SELECT(that.deviceType);
+        that.formatDeviceTypeName();
+      },
+      changeDevicePrefix(){
+        var that = this;
+        var selectPrefix = that.devicePrefix;
+        if(selectPrefix[selectPrefix.length-1] == "all"){//当前选中all
+          that.devicePrefix = ["all"];  
+        }else{
+          if(selectPrefix.length > 1){
+            if($.inArray("all",selectPrefix) != -1){
+              selectPrefix.splice(selectPrefix.indexOf("all"),1); 
             }
-        },
-        computed: {
-            ...mapState(['user','ActiveDevice','DeviceTimer','deviceTypeSelect','paramLockAck','paramLock'])
-        },
-        created(){  //生命周期-页面创建后
-            var that = this;
-            this.getDeviceList();
-            
-            clearInterval(this.DeviceTimer);
-            this.timer = setInterval(function(){
-              that.getDeviceList();
-            },1000);
-            this.SET_DEVICE_TIMER(this.timer);
-            that.deviceType = that.deviceTypeSelect;
-        },
-        activated(){
-          this.deviceType = this.deviceTypeSelect;
-        },
-        methods:{
-            ...mapMutations({
-                SET_ACTIVE_DEVICE,
-                SET_DEVICE_TIMER,
-                SET_DEVICE_TYPE_SELECT,
-                SET_PARAM_LOCK_ACK,
-                SET_PARAM_LOCK
-            }),
-            refreshCurDevParam(datas){
-              this.SET_ACTIVE_DEVICE(datas);
-              //更新当前设备参数
-            },
-            getDeviceList(){
-                var that = this;
-                this.$axios({
-                    method: 'post',
-                    url:"/page/index/indexData.php",
-                    data:this.$qs.stringify({
-                      getDevAndMatch:true,
-                      userId: that.user.id,
-                      userGroup: that.user.userGroup
-                    }),
-                    Api:"getDevAndMatch",
-                    AppId:"android",
-                    UserId:that.user.login_name
-                })
-                .then(function (response) {
-                    let res = response.data;
-                    if(res.res.success){
-                      that.deviceList = res.data;
-                      that.filterDevice(that.deviceTypeSelect);
-                      that.$refs.loadmore.onTopLoaded();
-                      if(!that.ActiveDevice){
-                        that.SET_ACTIVE_DEVICE(that.deviceList[0]);
-                      }
-                      for(var i=0; i<that.deviceList.length; i++){
-                        if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
-                          that.refreshCurDevParam(that.deviceList[i]);
-                        }
-                      }
-                      that.getDevLockStatus();
-                    }else{
-                      that.deviceList = [];
-                    }
-                })
-                .catch(function (error) {
-                    console.log(error)
-                })
-            },
-            //获取背包锁状态
-            getDevLockStatus(){
-              //console.log("getDevLockStatus")
-              var that = this;
-              this.$axios({
-                  method: 'post',
-                  url:"/page/index/indexData.php",
-                  data:this.$qs.stringify({
-                    getDevParam:true,
-                    devSN: that.ActiveDevice.dev_sn
-                  }),
-                  Api:"getDevParam",
-                  AppId:"android",
-                  UserId:that.user.login_name
-              })
-              .then(function (response) {
-                  let res = response.data;
-                  that.SET_PARAM_LOCK_ACK(res.data[0]['param_lock_ack'])
-                  that.SET_PARAM_LOCK(res.data[0]['param_lock'])
-                  if(res.data[0]['param_lock_ack'] == "1"){
-                    $("#lockIcon").removeClass("fa-lock").addClass("fa-unlock");
-                  }else{
-                    $("#lockIcon").removeClass("fa-unlock").addClass("fa-lock");
-                  }
-              })
-              .catch(function (error) {
-                  console.log(error)
-              })
-            },
-            //修改锁
-            changeLockState(){
-              var that = this;
-              if (this.paramLockAck == "1") {
-                //已解锁，要加锁,背包不锁定
-                that.setDeviceParam('param_lock',2)
-              } else {
-                //已加锁，要解锁,背包锁定
-                that.setDeviceParam('param_lock',1)
-              }
-            },
-            setDeviceParam(key,val){
-              var that = this;
-              var devParamCol = key;
-              var value = val;
-              this.$axios({
-                method: 'post',
-                url:"/page/index/indexData.php",
-                data:this.$qs.stringify({
-                    devSN: that.ActiveDevice.dev_sn,
-                    devParamCol: devParamCol,
-                    value: value
-                }),
-                Api:"SetDevParam",
-                AppId:"android",
-                UserId:that.user.id
-              })
-              .then(function (response) {
-                let res = response.data;
-                if(res.res.success){
-                    //that.getDeviceParam();
-                }else{
-                    //that.getDeviceParam();
-                }
-              })
-              .catch(function (error) {
-                  console.log(error)
-              })
-            },
-            showDeviceList(){
-                this.popupVisible = true;
-                this.getDeviceList();
-            },
-            changeActiveDevice(item){
-                this.SET_ACTIVE_DEVICE(item);
-                this.refreshCurDevParam(item);
-                this.popupVisible = false;
-            },
-            filterDevice(){
-              var that = this;
-              var deviceList = this.deviceList;
-              this.SET_DEVICE_TYPE_SELECT(that.deviceType);
-              switch (that.deviceType){
-                case "1":
-                  that.deviceListShow = that.deviceList;
-                  break;
-                case "2":
-                  that.deviceListShow = that.deviceList.filter(function(item){
-                    return (item.online == 1 && (item.dev_push_status == 1 || item.dev_push_status == 2))
-                  });
-                  break;
-                case "3":
-                  that.deviceListShow = that.deviceList.filter(function(item){
-                    return (item.online == 1)
-                  });
-                  break;
-                case "4":
-                  that.deviceListShow = that.deviceList.filter(function(item){
-                    return (item.online == 0)
-                  });
-                  break;
-                default:
-                  that.deviceListShow = that.deviceList;
-                  break;
-              }
-            }
+          }
+          that.devicePrefix = selectPrefix;  
+        } 
+        that.SET_DEVICE_PREFIX_SELECT(that.devicePrefix.join(","));
+      },
+      formatDeviceTypeName(){
+        var that = this;
+        that.deviceType = that.deviceTypeSelect;
+        for(let i=0; i<that.deviceTypeOptions.length; i++){
+          if(that.deviceTypeOptions[i].value == that.deviceType){
+            that.deviceTypeCurName = that.deviceTypeOptions[i].label;
+            break;
+          }
         }
+      },
+      initFilter(){
+        var that = this;
+        that.formatDeviceTypeName();
+        that.$global.getUserPrefixArr(that.formatPrefix)
+        
+      },
+      formatPrefix(data){
+        var that = this;
+        var arr = [{"label":"全部","value":"all"},{"label":"无","value":"none"}];
+        for(let i=0; i<data.length; i++){
+          arr.push({"label":data[i]["prefix_name"],"value":data[i]["prefix"]})
+        }
+        that.allPrefix = arr;
+        that.devicePrefix = that.devicePrefixSelect.split(",");
+      },
+      //更新当前设备参数
+      refreshCurDevParam(datas){
+        this.SET_ACTIVE_DEVICE(datas);
+        this.getDevLockStatus();
+      },
+      getDeviceList(){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevAndMatch:true,
+            userId: that.user.id,
+            userGroup: that.user.userGroup,
+            prefixType: that.devicePrefix.join(",")//that.user.prefix
+          }),
+          Api:"getDevAndMatch",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.deviceList = res.data;
+            that.filterDevice(that.deviceTypeSelect);
+            //that.$refs.loadmore.onTopLoaded();
+            if(!that.ActiveDevice){
+              that.SET_ACTIVE_DEVICE(that.deviceList[0]); 
+              //that.SET_ACTIVE_DEVICE_1080(true);
+            }
+            for(var i=0; i<that.deviceList.length; i++){
+              if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
+                that.refreshCurDevParam(that.deviceList[i]);
+              }
+            }
+            that.getDevLockStatus();
+          }else{
+            that.deviceList = [];
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //获取背包锁状态
+      getDevLockStatus(){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevParam:true,
+            devSN: that.ActiveDevice.dev_sn
+          }),
+          Api:"getDevParam",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          that.SET_PARAM_LOCK_ACK(res.data[0]['param_lock_ack'])
+          that.SET_PARAM_LOCK(res.data[0]['param_lock'])
+          if(res.data[0]['param_lock_ack'] == "1"){
+            $("#lockIcon").removeClass("fa-lock").addClass("fa-unlock");
+          }else{
+            $("#lockIcon").removeClass("fa-unlock").addClass("fa-lock");
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //修改锁
+      changeLockState(){
+        var that = this;
+        if (this.paramLockAck == "1") {
+          //已解锁，要加锁,背包不锁定
+          that.setDeviceParam('param_lock',2)
+        } else {
+          //已加锁，要解锁,背包锁定
+          that.setDeviceParam('param_lock',1)
+        }
+      },
+      //status页面刷新图表
+      refreshChart(){
+        this.$emit('refreshChart')
+      },
+      //修改接收机锁
+      changeRcvLockState(){
+        if($("#rcvlockIcon").hasClass("fa-lock")){
+          this.$emit('changeRcvLockState',"unlock")
+          $("#rcvlockIcon").removeClass("fa-lock").addClass("fa-unlock");
+        }else{
+          this.$emit('changeRcvLockState',"lock")
+          $("#rcvlockIcon").removeClass("fa-unlock").addClass("fa-lock");
+        }
+      },
+      setDeviceParam(key,val){
+        var that = this;
+        var devParamCol = key;
+        var value = val;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            devSN: that.ActiveDevice.dev_sn,
+            devParamCol: devParamCol,
+            value: value
+          }),
+          Api:"SetDevParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+              //that.getDeviceParam();
+          }else{
+              //that.getDeviceParam();
+          }
+        })
+        .catch(function (error) {
+            console.log(error)
+        })
+      },
+      showDeviceList(){
+        this.popupVisible = true;
+        this.getDeviceList();
+      },
+      changeActiveDevice(item){
+        // /this.SET_ACTIVE_DEVICE(item);
+        this.refreshCurDevParam(item);
+        this.popupVisible = false;
+      },
+      filterDevice(){
+        var that = this;
+        var deviceList = this.deviceList;
+        this.SET_DEVICE_TYPE_SELECT(that.deviceType);
+        switch (that.deviceType){
+          case "1":
+            that.deviceListShow = that.deviceList;
+            break;
+          case "2":
+            that.deviceListShow = that.deviceList.filter(function(item){
+              return (item.online == 1 && (item.dev_push_status == 1 || item.dev_push_status == 2))
+            });
+            break;
+          case "3":
+            that.deviceListShow = that.deviceList.filter(function(item){
+              return (item.online == 1)
+            });
+            break;
+          case "4":
+            that.deviceListShow = that.deviceList.filter(function(item){
+              return (item.online == 0)
+            });
+            break;
+          default:
+            that.deviceListShow = that.deviceList;
+            break;
+        }
+      }
     }
+  }
+  
 </script>
 
 <style scoped>
@@ -325,7 +433,7 @@
         height: 100%;
     }
     .status{
-        width: 20%;
+        width: 15%;
         line-height: .5rem;
         text-align: center;
     }
@@ -337,7 +445,7 @@
     }
     .rate{
         box-sizing: border-box;
-        width: 24%;
+        width: 15%;
         /*padding-top: .08rem;*/
         padding-right:0.15rem;
         display:flex;
@@ -368,7 +476,7 @@
         text-align: left;
     }
     .info{
-        width: 40%;
+        width: 60%;
         color: #FFFFFF;
         font-size: .15rem;
         box-sizing: border-box;
@@ -464,11 +572,11 @@
       margin: 10px;
       position: absolute;
     }
-    .lock{
+    .lock, .refreshIcon{
       height:100%;
       display:flex;
     }
-    .lock i{
+    .lock i, .refreshIcon i{
       margin:auto;
     }
     .lock .fa-lock{
@@ -476,6 +584,14 @@
     }
     .lock .fa-unlock{
       color: #75d1c7;
+    }
+    .refreshIcon .fa-refresh{
+      color:#fff;
+    }
+    .deviceFilterPop{
+      height:auto;
+      background-color:#3f4551;
+      color:#fff;
     }
 </style>
 <style>

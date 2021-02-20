@@ -1,7 +1,7 @@
 <template>
   <div class="live">
-    <Device></Device>
-    <div class="Group"><!-- 视频分发 -->
+    <Device page='rcv' @changeRcvLockState='changeRcvLockState'></Device>
+    <div class="Group" v-if="show.pushUrl"><!-- 视频分发 -->
       <div class="GroupTitle" @click="boardUrlShow=!boardUrlShow">
         视频分发
         <i class="titleIcon fa" :class="[boardUrlShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
@@ -165,7 +165,7 @@
         </div>
       </transition>
     </div>
-    <div class="Group"><!-- 录机 -->
+    <div class="Group" v-if="show.record"><!-- 录机 -->
       <div class="GroupTitle" @click="recordShow=!recordShow">
         录机
         <i class="titleIcon fa" :class="[recordShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
@@ -263,6 +263,7 @@
         boardUrlShow:true,
         outputShow:false,
         recordShow:false,
+        rcvParamLock: true,
         MBPS_MIN : 0,
         MBPS_MAX : 0,
         URL_MAX:5,
@@ -316,6 +317,8 @@
           editDisable:true,//推流地址
         },
         show:{
+          pushUrl:true,
+          record:true,
           showOutput:true,//输出tab
           SDIShow:true,//SDI输出
           HDMIShow:true,//HDMI输出
@@ -338,7 +341,7 @@
       '$store.state.ActiveDevice': {
         immediate: true,
         handler(val) {
-          console.warn(val)
+          //console.warn(val)
           if(val){
             var that = this;
             //that.getRcvParam();
@@ -353,7 +356,6 @@
           if(val){
             var that = this;
             that.getRcvParam();
-            //that.getPushParam();
           }
         }
       }
@@ -380,6 +382,23 @@
       Device
     },
     methods:{
+      //修改接收机锁定状态
+      changeRcvLockState(data){
+        if(data == "lock"){
+          this.rcvParamLock = true;
+          this.setRcvParamDisable(true);
+        }else{
+          this.rcvParamLock = false;
+          this.setRcvParamDisable(false);
+        }
+      },
+      setRcvParamDisable(disFlg){
+        if(disFlg){
+          this.setBoardSettingDisabled(disFlg);
+        }else{
+          this.setBoardSettingDisabled(this.getSelRcvBoard('disabled'))
+        }
+      },
       changeBoardMbpsRange(){
         var that = this;
         if(that.options.board_mbps == that.options.board_mbps_range){//修改input，联动range，下发命令，不需要再修改输入框
@@ -421,6 +440,16 @@
         var that = this;
         var rcv_sn = that.ActiveDevice.rcv_sn;
         var boardId = that.ActiveDevice.board_id;
+        if(rcv_sn == ""){
+          that.show.pushUrl = false;
+          that.show.record = false;
+          that.show.showOutput = false;
+          return;
+        }else{
+          that.show.pushUrl = true;
+          that.show.record = true;
+          that.show.showOutput = true;
+        }
         //接收机序列号合法判断
         if (!that.$global.isValidRcvSn(rcv_sn)) {
           //无配对接收机
@@ -453,7 +482,11 @@
             if (value.split('_')[0] == selRcvSn && value.split('_')[1] == selBoardId) {
               that.options.rcv_board_param = value;
               //根据权限设置控件是否禁用
-              that.setBoardSettingDisabled(that.getSelRcvBoard('disabled'));
+              if(that.rcvParamLock){
+                that.setRcvParamDisable(true);
+              }else{
+                that.setBoardSettingDisabled(that.getSelRcvBoard('disabled'));  
+              }
               break;
             }
           }
