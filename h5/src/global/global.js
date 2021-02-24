@@ -33,6 +33,10 @@ window.ADVANCE = '2'; //高级用户组
 window.NORMAL = '3'; //普通用户组
 window.PREFIX = '001'; //德力前缀
 window.SUPER = '001-admin'; //超级管理员
+window.HDXPRESS_BUILD = "http://www.hdxpress.cn";//1080一级域名
+window.HDXPRESS_SERVE = "http://1080.hdxpress.cn:8088/";//1080二级域名，对应地址：47.104.161.61
+window.UHDXPRESS_BUILD = "http://4000.uhdxpress.com";//4000一级域名
+window.UHDXPRESS_SERVE = "http://192.168.100.110:8088/";//4000二级域名
 window.colorGV = {
     '上传速率':'#FFFF00',
     '下载速率': '#22aadd',
@@ -1047,5 +1051,18 @@ export default {
       "selectPrefix":selectPrefix,
       "selectPrefixName":selectPrefixName
     }
+  },
+  //获取字符串长度，包括中文，中文也按一个字符处理
+  Substr(str, start){
+    var len = 0;
+    var tmpStr = '';
+    for (var i = start; i < str.length; i++) { // 遍历字符串
+      if (/[\u4e00-\u9fa5]/.test(str[i])) { // 中文 长度也默认是1字节
+        len += 1;
+      } else {
+        len += 1;
+      }
+    }
+    return len;
   },
 }

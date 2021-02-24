@@ -69,8 +69,8 @@
           <div class="fGrp">
             <div class="tl">登录密码</div>
             <div class="vl">
-              <input type="password" class="ItemInput" v-model="userConfigForm.pwd" required pattern="^[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合"/> 
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
+              <input type="password" class="ItemInput" v-model="userConfigForm.pwd" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母"/> 
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;"><!-- pattern="^[A-Za-z0-9_@]{6,16}$" -->
                 6~16位字母,数字,下划线和@组合
               </p>
             </div>
@@ -78,13 +78,13 @@
           <div class="fGrp">
             <div class="tl">确认密码</div>
             <div class="vl">
-              <input type="password" class="ItemInput" v-model="userConfigForm.pwd2" required pattern="^[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合" clearable autocomplete="off" />
+              <input type="password" class="ItemInput" v-model="userConfigForm.pwd2" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母" clearable autocomplete="off" />
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">手机号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="userConfigForm.mobilePhone" pattern="^1[3|4|5|8][0-9]\d{8}$" title="请输入正确手机号" >
+              <input type="text" class="ItemInput" v-model="userConfigForm.mobilePhone" pattern="^1(?:3\d|4[4-9]|5[0-35-9]|6[67]|7[013-8]|8\d|9\d)\d{8}$" title="请输入正确手机号" >
             </div>
           </div>
           <div class="fGrp">

@@ -113,8 +113,9 @@
           <div class="fGrp">
             <div class="tl">背包名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="deviceConfigForm.devName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格">
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">仪器名(长度1-15,仅支持中文,字母,数字,+,-,@,()和空格)</p>
+              <input type="text" class="ItemInput" v-model="deviceConfigForm.devName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="deviceConfigType == 'edit'">
+              <p v-if="deviceConfigType=='add'" style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">仪器名(长度1-15,仅支持中文,字母,数字,+,-,@,()和空格)</p>
+              <p v-else style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">修改名称请前往参数->别名</p>
             </div>
           </div>
           <div class="fGrp">
@@ -285,18 +286,23 @@
         })
       },
       editDevice(item){
-        this.getUserList();
-        this.getRcvSelectAndVal(item);
+        var that = this;
+        this.getUserList(function(){
+          that.deviceConfigForm.devUser = item.prefix;
+        });
+        this.getRcvSelectAndVal(item, function(){
+          that.deviceConfigForm.server = item.rcv_sn;
+        });
         this.deviceConfigVisible = true;
         this.deviceConfigType = "edit";
         this.deviceConfigForm = {
             devName:item.dev_name,
             devSn:item.dev_sn,
-            devUser:item.prefix,
-            server:item.rcv_sn
+            /*devUser:item.prefix,
+            server:item.rcv_sn*/
         }
       }, 
-      getUserList(){
+      getUserList(cb){
        var that = this;
         if(this.user.id == SUPER){
           this.$axios({
@@ -317,6 +323,9 @@
             }else{
               that.deviceConfigUserOptions = [];
             }
+            if(cb){
+              cb();
+            }
           })
           .catch(function (error) {
             console.log(error)
@@ -330,9 +339,14 @@
           that.deviceConfigForm.devUser = option[0].value;
         }
       },
-      getRcvSelectAndVal(row){
+      getRcvSelectAndVal(row, cb){
         var that = this;
-        this.$global.getRcvList(this,row,that.formatRcvList);
+        this.$global.getRcvList(this,row,function(){
+          that.formatRcvList();
+          if(cb) {
+            cb();
+          }
+        });
       },
       formatRcvList(list){
         this.deviceConfigServerOptions = list;
@@ -491,6 +505,7 @@
       },
       clearDevPopup(){
         this.deviceConfigForm.devName = "";
+        this.deviceConfigForm.devSn = "";
         this.deviceConfigForm.editDev = "";
         this.deviceConfigForm.devUser = "";
         this.deviceConfigForm.server = "";
@@ -516,7 +531,7 @@
               devName:that.deviceConfigForm.devName,
               devSn:that.deviceConfigForm.devSn,
               devModel:mode,
-              prefix: that.user.id,
+              prefix: that.deviceConfigForm.devUser,
               logUser: that.user.id
             }),
             Api:"addDev",
@@ -834,9 +849,9 @@
       flex-shrink:1;
       text-align:right;
     }
-    .mint-toast{
+    /*.mint-toast{
       z-index:2002;
-    }
+    }*/
     .me .mint-navbar{background-color: #222;}
     .me .mint-cell{background-color: #35363a;}
     .me .mint-checklist .mint-cell-value{display: none;}

@@ -99,6 +99,37 @@
               <input type="text" class="ItemInput" v-model="receiverConfigForm.rcvSn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="receiverConfigType == 'edit'"> 
             </div>
           </div>
+          <div class="fGrp">
+            <div class="tl">立即更新</div>
+            <div class="vl">
+                <!-- <div id="upgradeDiv" style="display: none">
+                  <div style="margin-bottom: 5px">
+                    <span style="color: #ff9945;">有新版本!</span>
+                  </div>
+                  <div >
+                    <button type="button" id="upgradeBtn" class="btn btnStyle1" style="height: 2em;padding: 0 0.5em">更新</button>
+                    <span> -> </span>
+                    <span id="newVerStr" style="color: #ff9945"></span>
+                  </div>
+                </div>
+                <div id="rollbackDiv" style="display: none">
+                  <div style="margin-bottom: 5px">
+                    <span style="color: #2de505;">已是最新版本!</span>
+                  </div>
+                  <div id="rollbackBtnDiv">
+                    <button type="button" id="rollbackBtn" class="btn btnStyle1" style="height: 2em;padding: 0 0.5em">回退</button>
+                    <span> -> </span>
+                    <span id="oldVerStr"></span>
+                  </div>
+                </div>
+                <div id="noNewVer">
+                  <div style="margin-bottom: 5px">
+                    <span>无可用升级包!</span>
+                  </div>
+                </div>
+              </div> -->
+            </div>
+          </div>
           <div class="fGrp" style="text-align: right">
             <button @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
             <button type="submit">确定</button>
@@ -129,6 +160,7 @@
         receiverConfigVisible:false,
         receiverConfigType:'add',
         receiverConfigForm:{
+          userId:"",
           rcvName:"",
           rcvSn:""
         },
@@ -228,8 +260,9 @@
         this.receiverConfigVisible = true;
         this.receiverConfigType = "edit";
         this.receiverConfigForm = {
-            rcvName:item.rcv_name,
-            rcvSn:item.rcv_sn
+          userId:item.user_id,
+          rcvName:item.rcv_name,
+          rcvSn:item.rcv_sn
         }
       },
       deleteReceiver(item){

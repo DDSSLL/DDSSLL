@@ -87,6 +87,47 @@
           </div>
         </div>
       </div>
+      <div class="GroupItem" v-if="this.show_5g"><!-- 5G模式 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">5G模式</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options.Mode5G" @change="setDeviceParam('5GMode', options.Mode5G)"  :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_NETMODE_PARAMS">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- ETH0 IP -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">ETH0 IP</div>
+          <div class="GroupItemValue">
+            <select class="ItemSelect" v-model="options['Eth0Type']" @change="setDeviceParam('Eth0Type', options['Eth0Type'])"  :disabled="paramLockAck == '1'?false:true">
+              <template v-for="item in OPTIONS_ETH0_TYPE">
+                <option :value="item.value">{{ item.text }}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- 显示别名 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">显示别名</div>
+          <div class="GroupItemValue">
+            <mt-switch v-model="options.DevAliasSwitch" @change="setDeviceParam('DevAliasSwitch',options.DevAliasSwitch?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            </mt-switch>
+          </div>
+        </div>
+      </div>
+      <div class="GroupItem"><!-- 别名 -->
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">别名</div>
+          <div class="GroupItemValue">
+            <input v-model="options.DevAlias" type="text" @change="changeAliasName" pattern="^[A-z0-9\u4e00-\u9fa5+-@()（） ]{1,10}$" :disabled="paramLockAck == '1'?false:true">
+          </div>
+        </div>
+      </div>      
     </div>
     <div class="Group"><!-- 输入编码 -->
       <div class="GroupTitle">输入编码</div>
@@ -216,6 +257,7 @@
         RADIO_TRANS_MODE : [],
         card_sel_show : false,
         feclevel_show : false,
+        show_5g:false,
         card_sel:[],
         OPTIONS_FEC_LEVEL : [{text: "低",value: "0"}, 
                               {text: "中",value: "1"}, 
@@ -242,6 +284,11 @@
                             {text: "ERROR",value: "1"}, 
                             {text: "INFO",value: "2"},
                             {text: "DEBUG",value: "3"}],
+        OPTIONS_NETMODE_PARAMS : [{text: "NSA",value: "0"}, 
+                                  {text: "SA",value: "1"}, 
+                                  {text: "LTE",value: "2"}],
+        OPTIONS_ETH0_TYPE : [{text: "固定IP地址",value: "0"}, 
+                            {text: "自动获取IP地址",value: "1"}],
         options:{
           dev_push_ip:'0',//传输IP
           PushTsType:'0',//传输模式
@@ -250,6 +297,10 @@
           ResendMode:false,//重传开关
           OpenfecMode:false,//纠错开关
           OpenfecLevel:0,//纠错能力
+          Mode5G:"",//5G模式
+          Eth0Type:"",//ETH0 IP
+          DevAliasSwitch:"",//显示别名
+          DevAlias:"",//别名
           SEI:false,//SEI
           video_input:'0',//视频输入
           audio_input:'1',//音频输入
@@ -273,10 +324,10 @@
         immediate: true,
         handler(val) {
           this.ActiveDevice = val;
-          $("#sn_str").text(this.ActiveDevice.dev_sn)
-          if(this.paramLockAck != "1"){
+          /*$("#sn_str").text(this.ActiveDevice.dev_sn)*/
+          /*if(this.paramLockAck != "1"){
             this.getDeviceParam();
-          }
+          }*/
         }
       },
       '$store.state.paramLockAck':{
@@ -306,9 +357,17 @@
     activated(){  //生命周期-缓存页面激活
       console.log("setting activated");
       this.getDeviceParam();
+      var that = this;
+      $("#sn_str").text(this.ActiveDevice.dev_sn)
+      localStorage.getSettingParam1080 = setInterval(function(){
+        if(that.paramLockAck != "1"){
+          that.$global.getDeviceParam()
+        }
+      },1000)
+
     },
     deactivated(){   //生命周期-缓存页面失活
-
+      clearInterval(localStorage.getSettingParam1080);
     },
     methods:{
       ...mapMutations({
@@ -398,6 +457,18 @@
         }
         //纠错能力
         that.options.OpenfecLevel = data['OpenfecLevel'];
+        //5G模式        
+        if(data['5gFlag']){//存在5G模式,传输控制显示5G模式
+          that.show_5g = true;
+        }else{//4G，传输控制不显示5G模式
+          that.show_5g = false;
+        }
+        //ETH0 IP
+        that.options.Eth0Type = data['Eth0Type'];
+        //显示别名开关
+        that.options.DevAliasSwitch = (data['DevAliasSwitch'] == '1')?true:false;
+        //别名
+        that.options.DevAlias = data['DevAlias'];
         //SEI
         var sei_state = "";
         that.options.SEI = (data['SEI'] == '1' ? true : false);
@@ -420,7 +491,67 @@
         
         return data;
       },
-
+      //修改别名
+      changeAliasName(){
+        var that = this;
+        /*var aliasNameId = '#dev_alias_name_switch';
+        var aliasValue = $('#dev_alias_name').val();*/
+        var len = that.$global.Substr(that.options.DevAlias, 0);
+        if(len > 10){
+          that.$toast({
+            message: '别名长度不超过10',
+            position: 'middle',
+            duration: 2000
+          }); 
+          return;
+        }
+        //别名名称校验
+        if (!that.nameDevAliasCheckType(that.options.DevAlias)) {
+          that.$toast({
+            message: '长度1~10，仅支持中文,字母,数字,+,-,@,(),和空格',
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        that.setDeviceParam('DevAlias',that.options.DevAlias)
+        that.setDevNameParam('dev_name', that.options.DevAlias);
+      },
+      //设置背包名称dev_name参数(跟别名保持一致)
+      setDevNameParam(param, value) {
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            devSN: that.ActiveDevice.dev_sn,
+            devNameCol: param,
+            value : value+"",
+          }),
+          Api:"SetDevNameParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            }); 
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      nameDevAliasCheckType(name) {
+        var pattern = /^[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\(\)（）]{1,10}$/gi;
+        return pattern.test(name);
+      },
       //格式化单卡选择
       formatCardSel(data){
         var cardSel = [];
@@ -471,45 +602,43 @@
       },
       //改变传输模式
       changeTransMode(){
-        console.log("changeTransMode")
         if(this.options.PushTsType == "1"){
           this.card_sel_show = true;
         }else{
            this.card_sel_show = false;
         }
-        this.setDeviceParam('dev_push_mode',this.options.PushTsType?'1':'0')
+        this.setDeviceParam('PushTsType',this.options.PushTsType=="1"?'1':'0')
       },
-
-            setDeviceParam(key,val){
-                var that = this;
-                var devParamCol = key;
-                var value = val;
-                this.$axios({
-                    method: 'post',
-                    url:"/page/index/indexData.php",
-                    data:this.$qs.stringify({
-                        devSN: that.ActiveDevice.dev_sn,
-                        devParamCol: devParamCol,
-                        value: value
-                    }),
-                    Api:"SetDevParam",
-                    AppId:"android",
-                    UserId:that.user.id
-                })
-                .then(function (response) {
-                    let res = response.data;
-                    if(res.res.success){
-                        that.getDeviceParam();
-                    }else{
-                        that.getDeviceParam();
-                    }
-                })
-                .catch(function (error) {
-                    console.log(error)
-                })
-            }
-        }
+      setDeviceParam(key,val){
+        var that = this;
+        var devParamCol = key;
+        var value = val;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            devSN: that.ActiveDevice.dev_sn,
+            devParamCol: devParamCol,
+            value: value
+          }),
+          Api:"SetDevParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.getDeviceParam();
+          }else{
+            that.getDeviceParam();
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      }
     }
+  }
 </script>
 
 <style scoped>

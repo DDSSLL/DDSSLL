@@ -1,9 +1,9 @@
 module.exports = {
-    basic:{
+    /*basic:{
         "main":"Main",
         "settings":"Settings",
         "login":"Login"
-    },
+    },*/
     basic1080:{
         "status":"Status",
         "control":"Control",

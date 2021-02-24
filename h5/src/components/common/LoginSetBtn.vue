@@ -42,7 +42,7 @@
 </template>
 <script>
 	import { mapState, mapMutations } from 'vuex';
-  import { SET_ACTIVE_DEVICE_TYPE, SET_DOMAIN } from '../../store/mutation-types';
+  import { SET_ACTIVE_DEVICE_TYPE } from '../../store/mutation-types';
 	import $ from 'jquery';
 	export default {
     name: "LoginSetBtn",
@@ -59,18 +59,14 @@
         debugSetting:false,
         debugSettingPwd:"",
         DEBUGMODEPWD : "mode=debug",
-        //DOMAIN : "http://www.hdxpress.cn",//一级域名
-        HDXPRESS_BUILD : "http://www.hdxpress.cn",//1080一级域名
-        HDXPRESS_SERVE : "http://1080.hdxpress.cn:8088/",//1080二级域名
-        UHDXPRESS_BUILD : "http://4000.uhdxpress.com",//4000一级域名
-        //UHDXPRESS_SERVE : "http://192.168.100.110:8088/",//4000二级域名
-        UHDXPRESS_SERVE : "http://139.129.91.106:80/",//4000二级域名（测试部环境）
-        
-        //UHDXPRESS_SERVE : "http://127.0.0.1/new-trank",//本地测试
+        HDXPRESS_BUILD : HDXPRESS_BUILD,//1080一级域名
+        HDXPRESS_SERVE : HDXPRESS_SERVE,//1080二级域名，对应地址：47.104.161.61
+        UHDXPRESS_BUILD : UHDXPRESS_BUILD,//4000一级域名
+        UHDXPRESS_SERVE : UHDXPRESS_SERVE,//4000二级域名
       }
     },
     computed: {
-      ...mapState(['DOMAIN','activedevicetype','domain'])
+      ...mapState(['DOMAIN','activedevicetype'])
     },
     watch:{   //监听当前设备类型变化
       '$store.state.activedevicetype': {
@@ -105,7 +101,7 @@
       //this.deviceType = this.deviceTypeSelect;
     },
     methods:{
-      ...mapMutations({SET_ACTIVE_DEVICE_TYPE,SET_DOMAIN}),
+      ...mapMutations({SET_ACTIVE_DEVICE_TYPE}),
       
       /*loginSetting(){
         console.log("loginSetting")
@@ -163,7 +159,8 @@
           }
           //that.singleClick = false;
         }
-        that.showConfig = !that.showConfig;//发版本暂时隐藏
+        //只发布1080不显示4000和1080的选项
+        //that.showConfig = !that.showConfig;//发版本暂时隐藏
         /*setTimeout(function(){//点设置按钮后过一秒如果singleClick==true,则显示选型
           if(that.singleClick){
             console.log("切换设备")
@@ -176,13 +173,13 @@
       },
       GoDV4000Login(val){
         this.$router.push("/dv4000login");
-        this.SET_DOMAIN(this.UHDXPRESS_BUILD);
+        //this.SET_DOMAIN(this.UHDXPRESS_BUILD);
         this.$axios.defaults.baseURL = this.domain;
         this.SET_ACTIVE_DEVICE_TYPE(val);
       },
       GoDV1080Login(val){
         this.$router.push("/login");
-        this.SET_DOMAIN(this.HDXPRESS_BUILD);
+        //this.SET_DOMAIN(this.HDXPRESS_BUILD);
         this.$axios.defaults.baseURL = this.domain;
         this.SET_ACTIVE_DEVICE_TYPE(val);
       },
@@ -212,11 +209,11 @@
           if(that.activedevicetype == "DV1080"){
             console.log("1080")
             //this.DOMAIN = this.HDXPRESS_SERVE;  
-            that.SET_DOMAIN(that.HDXPRESS_SERVE);  
+            //that.SET_DOMAIN(that.HDXPRESS_SERVE);  
             that.$axios.defaults.baseURL = that.HDXPRESS_SERVE;
           }else if(that.activedevicetype == "DV4000"){
             //this.DOMAIN = this.UHDXPRESS_SERVE;    
-            that.SET_DOMAIN(that.UHDXPRESS_SERVE);  
+            //that.SET_DOMAIN(that.UHDXPRESS_SERVE);  
             that.$axios.defaults.baseURL = that.UHDXPRESS_SERVE;
           }
           //that.$axios.defaults.baseURL = that.domain;

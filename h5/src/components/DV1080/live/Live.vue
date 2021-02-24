@@ -1,47 +1,6 @@
 <template>
   <div class="live">
-    <Device></Device>
-    <div class="Group">
-        <div class="GroupTitle">直播设置</div>
-        <div class="GroupItem" v-if="ActiveDeviceType == 'DV4000'">
-            <div class="GroupItemField">
-                <div class="GroupItemTitle">传输速率(Mbps)</div>
-                <div class="GroupItemValue">
-                    <mt-range
-                            v-model="live.rate"
-                            class="ItemRange byteRange"
-                            :min="0.5"
-                            :max="80"
-                            :step=".1"
-                            :bar-height="5">
-                        <div style="color: #333333;padding: .01rem;" slot="start">0.5</div>
-                        <div style="color: #333333;padding: .01rem;" slot="end">80</div>
-                    </mt-range>
-                    <input type="text" class="ItemIpt byteIpt" v-model.number="live.rate">
-                </div>
-            </div>
-        </div>
-        <div class="GroupItem" v-if="ActiveDeviceType == 'DV4000'">
-            <div class="GroupItemField">
-                <div class="GroupItemTitle">分辨率</div>
-                <div class="GroupItemValue">
-                    <select type="text" class="ItemSel" v-model="live.resolution">
-                        <option value="1080p">1080p</option>
-                        <option value="720p">720p</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <!--<div class="GroupItem">-->
-            <!--<div class="GroupItemField">-->
-                <!--<div class="GroupItemTitle">推流地址</div>-->
-                <!--<div class="GroupItemValue">-->
-                    <!--&lt;!&ndash;<mt-button type="default" class="ItemBtn">添加</mt-button>&ndash;&gt;-->
-                    <!--<mt-button type="default" class="ItemBtn">一键开启</mt-button>-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
-    </div>
+    <Device page='rcv' @changeRcvLockState='changeRcvLockState'></Device>
     <div class="addressGroup">
       <template v-for="(item,i) in address">
         <div class="address" :key="i">
@@ -51,6 +10,7 @@
             item.push_status == 'running' ? 'pushStyle' : (item.push_status == '' ? 'defaultStyle' : 'errStyle')]" class="addressUrl" v-if="item.push_url">{{ item.push_url }}</p>
           </div>
           <div class="buttons" v-if="!dev_push_enable">
+            <mt-switch v-model="item.nEnable=='1'?true:false" style="display: inline-block;vertical-align: middle;transform: scale(0.6);" @change="changeUrlEnable(item)"></mt-switch>  
             <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item)"></i>
             <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="delUrl(item)"></i>
           </div>
@@ -94,6 +54,7 @@
     name: "Live",
     data(){
       return{
+        rcvParamLock: true,
         pushUrlsEditVisible:false,
         activePushObj:{},
         dev_push_enable:false,
@@ -111,21 +72,31 @@
       '$store.state.ActiveDevice': {
         immediate: true,
         handler(val) {
-          console.warn(val)
-          if(val){
+          //console.warn(val)
+         /* if(val){
             var that = this;
-            that.$global.getPushUrls(that, that.formatPushUrls);
+            if(that.dev_push_enable){
+              console.log("111")
+              that.$global.getPushUrls(that, that.formatPushUrls);  
+            }
             that.getPushParam();
-          }
+          }*/
+        }
+      },
+      '$store.state.ActiveDevice.dev_sn': {
+        immediate: true,
+        handler(val) {
+          clearInterval(localStorage.getPushUrl1080);
+          this.getPushUrl();
         }
       }
     },
     activated(){  //生命周期-缓存页面激活
-      this.$global.getPushUrls(this, this.formatPushUrls);
-      this.getPushParam();
+      console.log("live activated")
+      this.getPushUrl();
     },
     deactivated(){   //生命周期-缓存页面失活
-
+      clearInterval(localStorage.getPushUrl1080);
     },
     /*mounted(){
     console.log("mounted")
@@ -135,6 +106,71 @@
       Device
     },
     methods:{
+
+      /*//修改接收机锁定状态
+      changeRcvLockState(data){
+        if(data == "lock"){
+          this.rcvParamLock = true;
+          this.setRcvParamDisable(true);
+        }else{
+          this.rcvParamLock = false;
+          this.setRcvParamDisable(false);
+        }
+      },
+      setRcvParamDisable(disFlg){
+        if(disFlg){
+          this.setBoardSettingDisabled(disFlg);
+        }else{
+          this.setBoardSettingDisabled(this.getSelRcvBoard('disabled'))
+        }
+      },*/
+      getPushUrl(){
+        console.log("getPushUrl")
+
+        var that = this;
+        console.log(that.ActiveDevice.rcv_sn)
+
+        console.log(that.ActiveDevice.board_id)
+        that.address = [];
+        if(!that.ActiveDevice.rcv_sn && !that.ActiveDevice.board_id){
+          return ;
+        }
+        that.$global.getPushUrls(that, that.formatPushUrls);
+        that.getPushParam();
+        localStorage.getPushUrl1080 = setInterval(function(){
+          if(that.dev_push_enable){
+            that.$global.getPushUrls(that, that.formatPushUrls);  
+          }
+          that.getPushParam();
+        },500)
+      },
+      //URL地址nEnable
+      changeUrlEnable(item){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            UrlcheckEnable: true,
+            id: item.id,
+            nEnable: item.nEnable?1:0,
+
+          }),
+          Api:"UrlcheckEnable",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          console.log("changeUrlEnable")
+          console.log(res)
+          if(res.res.success){
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
       formatPushUrls(data){
         var that = this;
         for(let i=0; i<data.length; i++){
@@ -235,10 +271,15 @@
         })
         .then(function (response) {
           let res = response.data;
-          that.pushUrlsEditVisible = false;
           if(res.res.success){
             that.$global.getPushUrls(that, that.formatPushUrls);
+            that.pushUrlsEditVisible = false;
           }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
             that.$global.getPushUrls(that, that.formatPushUrls);
           }
         })
@@ -246,7 +287,7 @@
           console.log(error)
         })
       },
-      switchPush(item){
+      /*switchPush(item){
         var value =  (item.push_status == 'running' ? 0 : 1);
         var that = this;
         this.$axios({
@@ -272,9 +313,9 @@
         .catch(function (error) {
           console.log(error)
         })
-        }
-      }
+      }*/
     }
+  }
 </script>
 
 <style scoped>
@@ -394,7 +435,7 @@
     }
     .address .buttons{
         float: left;
-        width: 18%;
+        width: 32%;
         padding-right: 2%;
         text-align: right;
     }
@@ -489,6 +530,6 @@
       width:100%;
     }
     .widthPart{
-      width:80%;
+      width:65%;
     }
 </style>

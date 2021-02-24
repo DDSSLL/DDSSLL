@@ -33,16 +33,19 @@
       </div>
     </div>
     <div class="Group">
-      <div class="GroupTitle">常用设置</div>
-      <div class="GroupItem">
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">传输开关</div>
-          <div class="GroupItemValue">
-            <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch>
-            <span id="url_dis" v-if="pushDisShow" style="color:red">推流地址不通</span>
+      <div class="GroupTitle pushEnableSwitch" style="padding:0px;border-bottom:0px;">
+        <div class="GroupItem">
+          <div class="GroupItemField">
+            <div class="GroupItemTitle" style="text-indent:0px">传输开关</div>
+            <div class="GroupItemValue">
+              <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch>
+              <span id="url_dis" v-if="pushDisShow" style="color:red">推流地址不通</span>
+            </div>
           </div>
         </div>
       </div>
+      <div class="GroupTitle">常用设置</div>
+      
       <div class="GroupItem">
         <div class="GroupItemField">
           <div class="GroupItemTitle">视频比特率(Mbps)</div>
@@ -130,20 +133,28 @@
         immediate: true,
         handler(val) {
           this.ActiveDevice = val;
-          if(this.paramLockAck != "1"){
+          /*if(this.paramLockAck != "1"){
             this.getNetBoard();
             this.$global.getDeviceParam(this.formatData)
           }
-          this.$global.getPushUrls(this, this.formatPushUrlState);
+          this.$global.getPushUrls(this, this.formatPushUrlState);*/
         }
       }
     },
     activated(){  //生命周期-缓存页面激活
-      this.getNetBoard();
-      this.$global.getDeviceParam(this.formatData)
+      //this.getNetBoard();
+      //this.$global.getDeviceParam(this.formatData)
+      var that = this;
+      localStorage.getControlParam = setInterval(function(){
+        that.getNetBoard();
+        if(that.paramLockAck != "1"){
+          that.$global.getDeviceParam(that.formatData)
+        }
+        that.$global.getPushUrls(that, that.formatPushUrlState);
+      },1000)
     },
     deactivated(){   //生命周期-缓存页面失活
-
+      clearInterval(localStorage.getControlParam)
     },
     methods:{
       /*...mapMutations({
@@ -619,5 +630,8 @@
         height: 14px;
         top:0.03rem;
         border: 5px solid #3d81f1;
+    }
+    .pushEnableSwitch .mint-switch{
+      transform: scale(0.9);
     }
 </style>

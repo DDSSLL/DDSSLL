@@ -31,28 +31,26 @@
   import appVersion from '../../common/appVersion';
   import md5 from 'md5'
   import { mapState, mapMutations } from 'vuex';
-  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE,SET_ACTIVE_DEVICE_TYPE,SET_DOMAIN } from '../../../store/mutation-types';
+  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE,SET_ACTIVE_DEVICE_TYPE } from '../../../store/mutation-types';
   export default {
     name: "Login",
     data(){
       return {
         title : "HDXpress",
-        //UHDXPRESS_BUILD : "http://www.uhdxpress.com",//4000一级域名
-        //UHDXPRESS_BUILD : "http://127.0.0.1/new-trank",
         user:{
           login_name:'',
           password:'',
           loginStatus:false,
           saveMe_4000:false,
         },
-        loginTimer : "",
         wifiUrlsEditVisible:false,
         wifiUrl:"",
         hidShow:true,
+        UHDXPRESS_BUILD:UHDXPRESS_BUILD,
       }
     },
     computed: {
-    ...mapState(['navHide','activedevicetype','domain'])
+    ...mapState(['navHide','activedevicetype'])
     },
     components: {
       LoginSetBtn,appVersion
@@ -89,7 +87,7 @@
     },
     mounted(){
       this.SET_ACTIVE_DEVICE_TYPE("DV4000")
-      this.SET_DOMAIN(this.UHDXPRESS_BUILD);
+      //this.SET_DOMAIN(this.UHDXPRESS_BUILD);
       this.$axios.defaults.baseURL = this.UHDXPRESS_BUILD;//默认1080的一级域名
       this.user.saveMe_4000 = localStorage.getItem("SAVEME_4000")?eval(localStorage.getItem("SAVEME_4000")):false;
       if(this.user.saveMe_4000){
@@ -113,12 +111,11 @@
         SET_USER,
         SET_NAV_STATUS,
         SET_ACTIVE_DEVICE,
-        SET_ACTIVE_DEVICE_TYPE,
-        SET_DOMAIN
+        SET_ACTIVE_DEVICE_TYPE
       }),
       login(){
         var that = this;
-        that.$axios.defaults.baseURL = that.domain;
+        //that.$axios.defaults.baseURL = that.domain;
         this.$axios({
           method: 'post',
           url:"/login/login.php",
@@ -150,8 +147,7 @@
               localStorage.removeItem("chartKey");
               localStorage.removeItem("curChart");
               localStorage.removeItem("allChartData");
-
-              that.loginTimer = setInterval(function(){
+              localStorage.loginTimer = setInterval(function(){
                 that.CheckLogged(res.res.data)
               },1000)
             },800)
@@ -213,8 +209,8 @@
             that.SET_ACTIVE_DEVICE(null);
             that.$router.replace("/dv4000login");
             localStorage.removeItem('LOGIN');
-            clearInterval(that.loginTimer);
-            that.loginTimer = undefined;  
+            clearInterval(localStorage.loginTimer);
+            localStorage.loginTimer = undefined;  
           }
         })
         .catch(function (error) {

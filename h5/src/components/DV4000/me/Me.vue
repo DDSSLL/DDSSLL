@@ -171,10 +171,8 @@
   import RecordMan from './record';
   import UserMan from './user';
   import UserLevelMan from './userLevel';
-  
-  
   import { mapState, mapMutations } from 'vuex';
-  import { SET_USER, SET_NAV_STATUS, SET_ACTIVE_DEVICE, SET_TIMER_CLEAR, SET_CHART_STYLE } from '../../../store/mutation-types';
+  import { SET_USER, SET_NAV_STATUS, SET_ACTIVE_DEVICE, SET_TIMER_CLEAR, SET_CHART_STYLE,SET_DEVICE_TYPE_SELECT,SET_DEVICE_PREFIX_SELECT } from '../../../store/mutation-types';
   import $ from 'jquery';
   export default {
     name: "Me",
@@ -228,7 +226,7 @@
       }
     },
     computed: {
-      ...mapState(['user','navHide','DeviceTimer','ChartTimer','cardLineStyle','chartCardView'])
+      ...mapState(['user','navHide','DeviceTimer','ChartTimer','cardLineStyle','chartCardView','deviceTypeSelect','devicePrefixSelect'])
     },
     components: {
       DevMan,RcvMan,UserMan,RecordMan,UserLevelMan
@@ -270,7 +268,9 @@
           SET_NAV_STATUS,
           SET_ACTIVE_DEVICE,
           SET_TIMER_CLEAR,
-          SET_CHART_STYLE
+          SET_CHART_STYLE,
+          SET_DEVICE_TYPE_SELECT,
+          SET_DEVICE_PREFIX_SELECT
       }),
       getChartConfUnit(){
           var that = this;
@@ -1119,8 +1119,11 @@
           that.SET_USER(null);
           that.SET_NAV_STATUS(true);
           that.SET_ACTIVE_DEVICE(null);
+          that.SET_DEVICE_TYPE_SELECT(1);
+          that.SET_DEVICE_PREFIX_SELECT("all");
           that.$router.replace("/dv4000login");
           localStorage.removeItem('LOGIN');
+          clearInterval(localStorage.loginTimer);
         }, 1000);
       }
     }

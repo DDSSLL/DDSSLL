@@ -30,8 +30,6 @@ export default {
     },
     // 设置当前设备状态
     [types.SET_ACTIVE_DEVICE_TYPE]: (state, datas) => {
-        console.log("SET_ACTIVE_DEVICE_TYPE")
-        //state.ActiveDeviceType = datas;
         state.activedevicetype = datas;
     },
     // 设置网卡图颜色样式
@@ -51,9 +49,6 @@ export default {
     },
     [types.SET_PARAM_LOCK]: (state, datas) => {
         state.paramLock = datas
-    },
-    [types.SET_DOMAIN]: (state, datas) => {
-        state.domain = datas
     },
     // 设置当前设备参数
     [types.SET_DEV_PARAM]: (state, datas) => {
