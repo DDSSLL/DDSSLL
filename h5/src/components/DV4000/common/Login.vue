@@ -20,7 +20,7 @@
         <span style="float: left;width:4%;text-align: center;margin-top:0.05rem;">|</span>
         <span class="registerBtn">注册一个新账号</span>
       </div> -->
-      <appVersion v-if="hidShow"></appVersion>
+      <!-- <appVersion v-if="hidShow"></appVersion> -->
       <LoginSetBtn v-if="hidShow"></LoginSetBtn>    
     </div>
   </div>
