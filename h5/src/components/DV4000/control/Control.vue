@@ -142,8 +142,8 @@
       }
     },
     activated(){  //生命周期-缓存页面激活
-      //this.getNetBoard();
-      //this.$global.getDeviceParam(this.formatData)
+      this.getNetBoard();
+      this.$global.getDeviceParam(this.formatData)
       var that = this;
       localStorage.getControlParam = setInterval(function(){
         that.getNetBoard();

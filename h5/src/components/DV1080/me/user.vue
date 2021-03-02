@@ -9,6 +9,11 @@
       </div>
       <transition name="slide-fade">
         <div class="GroupItem" v-if="AccountShow">
+          <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
+            <mt-cell :title="'用户组:'+selectPrefixName.join(',')">
+              <i class="fa fa-chevron-down" @click.stop="userPrefixPop = true" ></i>
+            </mt-cell>
+          </div>
           <template v-for="(item,i) in accountList">
             <mt-cell-swipe
               :right="[ 
@@ -50,6 +55,17 @@
         </div>
       </transition>
     </div>
+    <!-- 用户组过滤 -->
+    <mt-popup v-model="userPrefixPop" position="bottom" popup-transition="popup-slide" class="userPrefixPop">
+      <span class="chevronDown">
+        <i class="fa fa-chevron-down" @click.stop="userPrefixPop=false"></i>
+      </span>
+      <mt-checklist
+        v-model="selectPrefix"
+        :options="selectPrefixOptions"
+        @change="changePrefixSelect">
+      </mt-checklist>
+    </mt-popup>
     <mt-popup v-model="userConfigVisible" popup-transition="popup-fade">
       <div class="popupContainer">
         <div class="popupTitle">
@@ -60,43 +76,63 @@
           <input type="password" style="display:none" id="loginPassword"/>
           <input type="text" style="display:none" id="loginUserName"/>
           <div class="fGrp">
-            <div class="tl">用户名</div>
+            <div class="tl">用户名<span class="redText">*</span></div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="userConfigForm.name" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()">
+              <input type="text" class="ItemInput" v-model="curUser.name" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()</p>
             </div>
           </div>
           <div class="fGrp">
-            <div class="tl">登录密码</div>
+            <div class="tl">用户组名<span class="redText">*</span></div>
             <div class="vl">
-              <input type="password" class="ItemInput" v-model="userConfigForm.pwd" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母"/> 
+              <select class="ItemSelect" v-model="curUser.prefix" :disabled="curUser.prefixDisable">
+                <template v-for="(item,i) in curUser.prefixOptions">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">登录密码<span class="redText">*</span></div>
+            <div class="vl">
+              <input type="password" class="ItemInput" v-model="curUser.pwd" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母"/> 
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;"><!-- pattern="^[A-Za-z0-9_@]{6,16}$" -->
                 6~16位字母,数字,下划线和@组合
               </p>
             </div>
           </div>
           <div class="fGrp">
-            <div class="tl">确认密码</div>
+            <div class="tl">确认密码<span class="redText">*</span></div>
             <div class="vl">
-              <input type="password" class="ItemInput" v-model="userConfigForm.pwd2" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母" clearable autocomplete="off" />
+              <input type="password" class="ItemInput" v-model="curUser.pwd2" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母" clearable autocomplete="off" />
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">用户等级</div>
+            <div class="vl">
+              <select class="ItemSelect" v-model="curUser.userGroup" :disabled="curUser.userGroupDisable">
+                <template v-for="(item,i) in curUser.userGroupOptions">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">手机号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="userConfigForm.mobilePhone" pattern="^1(?:3\d|4[4-9]|5[0-35-9]|6[67]|7[013-8]|8\d|9\d)\d{8}$" title="请输入正确手机号" >
+              <input type="text" class="ItemInput" v-model="curUser.mobilePhone" pattern="^1(?:3\d|4[4-9]|5[0-35-9]|6[67]|7[013-8]|8\d|9\d)\d{8}$" title="请输入正确手机号" >
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">邮箱</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="userConfigForm.emailAddress">
+              <input type="text" class="ItemInput" v-model="curUser.emailAddress">
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">备注</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="userConfigForm.remark">
+              <input type="text" class="ItemInput" v-model="curUser.remark">
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
@@ -112,26 +148,6 @@
           设备权限
           <i class="popupCloseBtn fa fa-times" @click="devRightsVisible = false"></i>
         </div>
-        <!-- <template v-for="(item,i) in devRightsList">
-          <div class="devRightsItem">
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">设备</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.dev_name }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">序列号</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.dev_sn}}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">状态</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.online }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">型号</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.dev_model }}</span>
-            </div>
-          </div>
-        </template> -->
         <div class="devRightsTable">
           <table>
             <thead>
@@ -171,21 +187,42 @@
         ADVANCE : ADVANCE,
        	NORMAL : NORMAL,
         ADMIN : ADMIN,
+        userGroups:[],//用户组
         AccountShow:false,
         accountList:[],
         userConfigVisible:false,
-        userConfigType:"add",
-        userConfigForm:{
+        curUser:{//用户编辑页面
+          userEditType:"add",
+          nameReadonly:false,
           id:"",
-          name:"",
+          name:"",//用户名
+          oldName:"",
+          prefix:"",//用户组名
+          prefixOptions:[],//用户组下拉列表
+          prefixDisable:false,//用户组disabale
           pwd:"",
           pwd2:"",
+          pwdReadonly:false,
+          pwd2Readonly:false,
+          userGroup:"",//用户等级
+          userGroupDisable:false,
+          userGroupOptionsOri:[],
+          userGroupOptions:[],
+          nEnable:"",//启用
+          userEnableShow:"",//显示启用
           mobilePhone:"",
           emailAddress:"",
-          remark:""
+          remark:"",
         },
+
         devRightsVisible:false,
-        devRightsList:[]
+        devRightsList:[],
+        /*用户组*/
+        userPrefixShow:true,//用户组过滤
+        selectPrefixOptions:[],//用户组options
+        selectPrefix:[],//选中的用户组
+        selectPrefixName:[],//显示过滤组的名称
+        userPrefixPop:false,//用户组pop的show
       }
     },
     computed: {
@@ -200,24 +237,101 @@
       }
     },
     created(){  //生命周期-页面创建后
-      this.getAccountList();
+      //this.getAccountList();
+      this.initShowContent();
     },
     activated(){
       console.log("devMan activated")
-      this.getAccountList();
+      //this.getAccountList();
+      this.initShowContent();
     },
     methods:{
       ...mapMutations({
           
       }),
-      getAccountList(){
+      initShowContent(){
         var that = this;
+        if(this.user.id == this.SUPER){//"001-admin"
+          that.userPrefixShow = true;
+          that.$global.getUserPrefixArr(function(data) {
+            var data = that.$global.initPrefixData(data);
+            that.selectPrefixOptions = data.selectPrefixOptions;
+            that.selectPrefix = data.selectPrefix;
+            that.selectPrefixName = data.selectPrefixName;
+            //获取用户等级
+            that.getUserGroup(that.getAccountList);
+          })
+        }else{
+          that.userPrefixShow = false;
+          that.getUserGroup(that.getAccountList);
+        }
+      },
+      getUserGroup(cb){
+        var that = this;
+        that.$axios({
+          method: 'post',
+          url:"/page/users/users.php",
+          data:that.$qs.stringify({
+            getUserGroup : that.user.id,
+          }),
+          Api:"getUserGroup",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.curUser.userGroupOptionsOri = res.data;
+            that.curUser.userGroupOptions = res.data;
+            for (var i = 0; i < res.data.length; i++) {
+              if (res.data[i].value != that.ADMIN) {
+                that.userGroups.push(res.data[i])
+              }
+            }
+            if(cb){
+              cb();
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      changePrefixSelect(){
+        var that = this;
+        var selectPrefix = that.selectPrefix;
+        var data = that.$global.getPrefixShow(that.selectPrefix, that.selectPrefixOptions);
+        that.selectPrefix = data["selectPrefix"];  
+        that.selectPrefixName = data["selectPrefixName"];
+        that.getAccountList();
+      },
+      formatUserSelect(){
+        var that = this;
+        var select = "";
+        if(that.userPrefixShow){
+          if(that.selectPrefix){
+            select =  that.selectPrefix.map(function(item){
+              return "'" + item + "'"
+            }).join(",");
+          }else{
+            select = "'/'";
+          }
+        }else{
+           select = "'"+that.user.prefix+"'";
+        }
+        return select;
+      },
+      getAccountList(){
+        console.log("getAccountList")
+        var that = this;
+        var selectPrefix = that.formatUserSelect();
         this.$axios({
           method: 'post',
           url:"/page/users/users.php",
           data:this.$qs.stringify({
             getUsers:true,
-            userId: that.user.id
+            userId: that.user.id,
+            showPrefix : selectPrefix,
           }),
           Api:"getUsers",
           AppId:"android",
@@ -237,24 +351,24 @@
       },
       addUser(){
         this.userConfigVisible = true;
-        this.userConfigType = "add";
+        this.curUser.userEditType = "add";
         this.clearUserPopup();
       },
       clearUserPopup(){
-        this.userConfigForm.name = "";
-        this.userConfigForm.pwd = "";
-        this.userConfigForm.mobilePhone = "";
-        this.userConfigForm.emailAddress = "";
-        this.userConfigForm.remark = "";
+        this.curUser.name = "";
+        this.curUser.pwd = "";
+        this.curUser.mobilePhone = "";
+        this.curUser.emailAddress = "";
+        this.curUser.remark = "";
       },
       submitUserConfig(){
         var that = this;
-        var name = this.userConfigForm.name;
-        var mobilePhone = this.userConfigForm.mobilePhone;
-        var emailAddress = this.userConfigForm.emailAddress;
-        var remark = this.userConfigForm.remark;
-        var pwd = this.userConfigForm.pwd;
-        if (this.userConfigForm.pwd != this.userConfigForm.pwd2) {
+        var name = this.curUser.name;
+        var mobilePhone = this.curUser.mobilePhone;
+        var emailAddress = this.curUser.emailAddress;
+        var remark = this.curUser.remark;
+        var pwd = this.curUser.pwd;
+        if (this.curUser.pwd != this.curUser.pwd2) {
           that.$toast({
             message: "密码不一致!",
             position: 'middle',
@@ -262,7 +376,7 @@
           });
           return;
         }
-        if (this.userConfigType == "add") {
+        if (this.curUser.userEditType == "add") {
           for (var i = 0; i < this.accountList.length; i++) {
             if (this.accountList[i].id == name) {
               that.$toast({
@@ -283,7 +397,7 @@
           return;
         }
 
-        if (this.userConfigType == "add") {//只有001-admin可以添加
+        if (this.curUser.userEditType == "add") {//只有001-admin可以添加
           this.$axios({
             method: 'post',
             url:"/page/users/users.php",
@@ -321,8 +435,8 @@
             console.log(error)
           })
         } else {
-          console.log(this.userConfigForm)
-          var oldName = this.userConfigForm.id;
+          console.log(this.curUser)
+          var oldName = this.curUser.id;
           this.$axios({
             method: 'post',
             url:"/page/users/users.php",
@@ -393,8 +507,8 @@
       },
       editUser(item){
         this.userConfigVisible = true;
-        this.userConfigType = "edit";
-        this.userConfigForm = {
+        this.curUser.userEditType = "edit";
+        this.curUser = {
             id:item.id,
             name: item.name,
             pwd: item.pwd,

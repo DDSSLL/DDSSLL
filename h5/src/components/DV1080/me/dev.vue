@@ -9,6 +9,11 @@
       </div>
       <transition name="slide-fade">
         <div class="GroupItem" v-if="DeviceShow" id="devList">
+          <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
+            <mt-cell :title="'用户组:'+selectPrefixName.join(',')">
+              <i class="fa fa-chevron-down" @click.stop="userPrefixPop = true" ></i>
+            </mt-cell>
+          </div>
           <template v-for="(item,i) in deviceList">
             <mt-cell-swipe
               :right="[ 
@@ -33,8 +38,16 @@
                 <span class="cellName cellValue" style="float: right;">{{ item.datetime }}</span>
               </div>
               <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">用戶組</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.prefix }}</span>
+              </div>
+              <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">型号</span>
                 <span class="cellName cellValue" style="float: right;">{{ item.dev_model }}</span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">MAC</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.dev_mac }}</span>
               </div>
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">软件版本</span>
@@ -113,7 +126,7 @@
           <div class="fGrp">
             <div class="tl">背包名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="deviceConfigForm.devName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="deviceConfigType == 'edit'">
+              <input type="text" class="ItemInput" v-model="options.devName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="deviceConfigType == 'edit'">
               <p v-if="deviceConfigType=='add'" style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">仪器名(长度1-15,仅支持中文,字母,数字,+,-,@,()和空格)</p>
               <p v-else style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">修改名称请前往参数->别名</p>
             </div>
@@ -121,13 +134,23 @@
           <div class="fGrp">
             <div class="tl">序列号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="deviceConfigForm.devSn" required pattern="[0-9]{10}" title="10位数字序列号" :disabled="deviceConfigType == 'edit'"> 
+              <input type="text" class="ItemInput" v-model="options.devSn" required pattern="[0-9]{10}" title="10位数字序列号" :disabled="deviceConfigType == 'edit'"> 
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">用户组</div>
+            <div class="vl">
+              <select class="ItemSelect" v-model="options.prefix" :disabled="deviceConfigType == 'edit' && user.userGroup != ADMIN" @change="changePrefixFun">
+                <template v-for="(item,i) in deviceConfigPrefixOptions">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">用户</div>
             <div class="vl">
-              <select class="ItemSelect" v-model="deviceConfigForm.devUser" :disabled="deviceConfigType == 'edit'">
+              <select class="ItemSelect" v-model="options.devUser" :disabled="deviceConfigType == 'edit' && user.userGroup != ADMIN">
                 <template v-for="(item,i) in deviceConfigUserOptions">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
@@ -137,7 +160,7 @@
           <div class="fGrp" v-if="deviceConfigType == 'edit'">
             <div class="tl">汇聚服务器</div>
             <div class="vl">
-              <select class="ItemSelect" v-model="deviceConfigForm.server" style="margin-bottom: 5px;" @change="editMatchChange = true">
+              <select class="ItemSelect" v-model="options.server" style="margin-bottom: 5px;" @change="editMatchChange = true">
                 <template v-for="(item,i) in deviceConfigServerOptions">
                   <option :value="item.value" :style="'color:'+item.color+''">{{ item.text }}</option>
                 </template>
@@ -154,16 +177,17 @@
       </div>
     </mt-popup>
 
-    <!-- <mt-popup v-model="userListPop" position="bottom" popup-transition="popup-slide" class="userPrefixPop">
+    <!-- 用户组 -->
+    <mt-popup v-model="userPrefixPop" position="bottom" popup-transition="popup-slide" class="userPrefixPop">
       <span class="chevronDown">
-        <i class="fa fa-chevron-down" @click.stop="userListPop=false"></i>
+        <i class="fa fa-chevron-down" @click.stop="userPrefixPop=false"></i>
       </span>
       <mt-checklist
-        v-model="options.devUser"
-        :options="deviceConfigUserOptions"
-        @change="">
+        v-model="selectPrefix"
+        :options="selectPrefixOptions"
+        @change="changePrefixSelect">
       </mt-checklist>
-    </mt-popup> -->
+    </mt-popup>
   </div>
 </template>
 <script>
@@ -185,15 +209,21 @@
         devOnline:"",
         deviceConfigVisible:false,
         deviceConfigType:'add',
-        deviceConfigForm:{
+        options:{
           devName:"",
           editDev:"",
+          prefix:"",
           devUser:"",
           server:""
         },
+        deviceConfigPrefixOptions:[],
         deviceConfigUserOptions:[],
         deviceConfigServerOptions:[],
         editMatchChange: false,
+        userPrefixShow:true,//显示筛选表格的用户组下拉列表
+        selectPrefixOptions:[],//用户组options
+        selectPrefix:[],//选中的用户组
+        selectPrefixName:[],//显示过滤组的名称
       }
     },
     computed: {
@@ -210,32 +240,74 @@
     },
     created(){  //生命周期-页面创建后
     	var that = this;
-      if(that.user.id == that.SUPER){
+      /*if(that.user.id == that.SUPER){
         that.devAddShow = true;
         that.devDelShow = true;
       }else{
         that.devAddShow = false;
         that.devDelShow = false;
-      }
-      this.getDeviceList();
+      }*/
+      this.initShowContent();
+      //this.getDeviceList();
     },
     activated(){
       console.log("devMan activated")
-      this.getDeviceList();
+      this.initShowContent();
       //this.getDeviceList();
     },
     methods:{
       /*...mapMutations({
           
       }),*/
+      initShowContent(){
+        var that = this;
+        if(that.user.userGroup == that.ADMIN){
+          that.devAddShow = true;
+          that.devDelShow = true;
+          that.userPrefixShow = true;
+          that.$global.getUserPrefixArr(function(data) {
+            var data = that.$global.initPrefixData(data);
+            that.selectPrefixOptions = data.selectPrefixOptions;
+            that.selectPrefix = data.selectPrefix;
+            that.selectPrefixName = data.selectPrefixName;
+            //背包列表
+            that.getDeviceList();
+          })
+        }else{
+          that.devAddShow = false;
+          that.devDelShow = false;
+          that.userPrefixShow = false;
+          that.getDeviceList();
+        }
+      },
+      formatUserSelect(){
+        var that = this;
+        var select = "";
+        if(that.userPrefixShow){
+          if(that.selectPrefix){
+            select =  that.selectPrefix.map(function(item){
+              return "'" + item + "'"
+            }).join(",");
+          }else{
+            select = "'/'";
+          }
+        }else{
+           select = "'"+that.user.prefix+"'";
+        }
+        return select;
+      },
       getDeviceList(){
         var that = this;
+        var selectPrefix = that.formatUserSelect();
         this.$axios({
           method: 'post',
           url:"/page/dev/devData.php",
           data:this.$qs.stringify({
             getDevices:true,
-            userId: that.user.id
+            userId: that.user.id,
+            userGroup: that.user.userGroup,
+            selectByPrefix:selectPrefix,
+            logPrefix:that.user.prefix
           }),
           Api:"getDevices",
           AppId:"android",
@@ -256,6 +328,14 @@
         .catch(function (error) {
           console.log(error)
         })
+      },
+      changePrefixSelect(){
+        var that = this;
+        var selectPrefix = that.selectPrefix;
+        var data = that.$global.getPrefixShow(that.selectPrefix, that.selectPrefixOptions);
+        that.selectPrefix = data["selectPrefix"];  
+        that.selectPrefixName = data["selectPrefixName"];
+        that.getDeviceList();
       },
       showDeviceCard(item){
         var that = this;
@@ -285,24 +365,7 @@
           console.log(error)
         })
       },
-      editDevice(item){
-        var that = this;
-        this.getUserList(function(){
-          that.deviceConfigForm.devUser = item.prefix;
-        });
-        this.getRcvSelectAndVal(item, function(){
-          that.deviceConfigForm.server = item.rcv_sn;
-        });
-        this.deviceConfigVisible = true;
-        this.deviceConfigType = "edit";
-        this.deviceConfigForm = {
-            devName:item.dev_name,
-            devSn:item.dev_sn,
-            /*devUser:item.prefix,
-            server:item.rcv_sn*/
-        }
-      }, 
-      getUserList(cb){
+      /*getUserList(cb){
        var that = this;
         if(this.user.id == SUPER){
           this.$axios({
@@ -336,13 +399,13 @@
             value: this.user.id
           }];
           that.deviceConfigUserOptions = option;
-          that.deviceConfigForm.devUser = option[0].value;
+          that.options.devUser = option[0].value;
         }
-      },
+      },*/
       getRcvSelectAndVal(row, cb){
         var that = this;
-        this.$global.getRcvList(this,row,function(){
-          that.formatRcvList();
+        this.$global.getRcvList(row,function(data){
+          that.formatRcvList(data);
           if(cb) {
             cb();
           }
@@ -391,7 +454,7 @@
           return;
         }
         var text = '是否切换配对关系？';
-        this.getDevPushStatus(this.deviceConfigForm.devSn, function(data) {
+        this.getDevPushStatus(this.options.devSn, function(data) {
           if (data == 'norcv') {
             that.editMatch();
           } else {
@@ -401,7 +464,7 @@
             //询问
             that.$messagebox.confirm(text).then(
               action => {
-                that.editMatch(index, layero);
+                that.editMatch();
             }).catch();
           }
         });
@@ -437,10 +500,12 @@
           url:"/page/index/indexData.php",
           data:this.$qs.stringify({
             editMatchByDevSn:true,
-            dev_sn:that.deviceConfigForm.devSn,
-            devName:that.deviceConfigForm.devName,
-            new_rcv_sn:that.deviceConfigForm.server,
-            new_board_id:that.deviceConfigForm.devSn
+            dev_sn:that.options.devSn,
+            devName:that.options.devName,
+            new_rcv_sn:that.options.server,
+            new_board_id:that.options.devSn,
+            prefix:that.options.prefix,
+            user_id:that.options.devUser
           }),
           Api:"editMatchByDevSn",
           AppId:"android",
@@ -449,6 +514,11 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
+            that.$toast({
+              message: "綁定成功!",
+              position: 'middle',
+              duration: 2000
+            });
             that.getDeviceList();
           }else{
           }
@@ -460,7 +530,7 @@
       deleteMatchRow(){
         var that = this;
         var text = '是否解除配对关系？';
-        this.getDevPushStatus(this.deviceConfigForm.devSn, function(data) {
+        this.getDevPushStatus(this.options.devSn, function(data) {
           if (data == '1') {
             text = '是否需要先停止推流再解除配对关系？'
           }
@@ -471,7 +541,7 @@
                 url:"/page/index/indexData.php",
                 data:that.$qs.stringify({
                   delMatch:true,
-                  dev_sn:that.deviceConfigForm.devSn
+                  dev_sn:that.options.devSn
                 }),
                 Api:"delMatch",
                 AppId:"android",
@@ -498,22 +568,63 @@
         });
       },
       addDevice(){
-        this.getUserList();
         this.deviceConfigVisible = true;
         this.deviceConfigType = "add";
+        this.getDevPrefixList();
         this.clearDevPopup();
       },
+      editDevice(item){
+        var that = this;
+        this.deviceConfigVisible = true;
+        this.deviceConfigType = "edit";
+        this.getDevPrefixList(item);
+        this.getRcvSelectAndVal(item, function(){
+          that.options.server = item.rcv_sn;
+        });
+        this.options = {
+            devName:item.dev_name,
+            devSn:item.dev_sn,
+            /*devUser:item.prefix,
+            server:item.rcv_sn*/
+        }
+      }, 
+      changePrefixFun(){
+        var that = this;
+        that.$global.getNewUserListByPrefix(that.options.prefix, function(userList){
+          that.deviceConfigUserOptions = userList;
+          that.options.devUser = userList[0]["value"];
+        })
+      },
+      getDevPrefixList(item){
+        var that = this;
+        that.$global.getNewPrefixList(function(data){
+          that.deviceConfigPrefixOptions = data;
+          if(that.deviceConfigType == "add"){
+            that.options.prefix = data[0]["value"];
+          }else{
+            that.options.prefix = item.prefix;
+          }
+          that.$global.getNewUserListByPrefix(that.options.prefix, function(userList){
+            that.deviceConfigUserOptions = userList;
+            if(that.deviceConfigType == "add"){
+              that.options.devUser = userList[0]["value"];
+            }else{
+              that.options.devUser = item.user_id;
+            }
+          })
+        });
+      },
       clearDevPopup(){
-        this.deviceConfigForm.devName = "";
-        this.deviceConfigForm.devSn = "";
-        this.deviceConfigForm.editDev = "";
-        this.deviceConfigForm.devUser = "";
-        this.deviceConfigForm.server = "";
+        this.options.devName = "";
+        this.options.devSn = "";
+        this.options.editDev = "";
+        this.options.devUser = "";
+        this.options.server = "";
       },
       submitDeviceConfig(){
         if(this.deviceConfigType == "add"){
           var that = this;
-          var devSn = this.deviceConfigForm.devSn;
+          var devSn = this.options.devSn;
           var mode = this.$global.getDevMode(devSn.substr(-4));
           if (!mode) {
             that.$toast({
@@ -528,11 +639,12 @@
             url:"/page/dev/devData.php",
             data:this.$qs.stringify({
               addDev:true,
-              devName:that.deviceConfigForm.devName,
-              devSn:that.deviceConfigForm.devSn,
+              devName:that.options.devName,
+              devSn:that.options.devSn,
               devModel:mode,
-              prefix: that.deviceConfigForm.devUser,
-              logUser: that.user.id
+              prefix: that.options.prefix,
+              logUser: that.user.id,
+              user_id:that.options.devUser
             }),
             Api:"addDev",
             AppId:"android",
@@ -556,15 +668,33 @@
           })
         }else if(this.deviceConfigType == "edit"){
           var that = this;
+          //用户校验
+          /*var strValue = '';
+          var selectVal = that.options.devUser;
+          if (selectVal && selectVal.length != 0) {
+            for (var i = 0; i < selectVal.length; i++) {
+              var id = selectVal[i];
+              //前缀
+              if (that.user.id != SUPER) {
+                id = that.user.prefix + '-' + selectVal[i];
+              }
+              if (strValue == '') {
+                strValue = id;
+              } else {
+                strValue += ',' + id;
+              }
+            }
+          }*/
           this.$axios({
             method: 'post',
             url:"/page/dev/devData.php",
             data:this.$qs.stringify({
-              editDev:that.deviceConfigForm.devSn,
-              devName:that.deviceConfigForm.devName,
-              devUser:that.deviceConfigForm.devUser,
+              editDev:that.options.devSn,
+              devName:that.options.devName,
+              devUser:"",
               logUser:that.user.id,
-              prefix:that.user.id
+              prefix:that.options.prefix,
+              user_id:that.options.devUser
             }),
             Api:"editDev",
             AppId:"android",
@@ -781,6 +911,11 @@
     }
     .popupContainer .modalBtn{
       border: 1px solid rgb(61, 129, 241);
+    }
+    .userPrefixPop.mint-popup{
+      background-color: #212227;
+      width: 100%;
+      height: auto;
     }
     /*.deviceConfItem{overflow: hidden;padding: .1rem;}
     .deviceConfItemTitle{width: 40%;float: left;  text-align: left;padding-top:0.07rem;}

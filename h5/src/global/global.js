@@ -300,20 +300,20 @@ export default {
     return res;
   },
   //获取接收机列表
-  getRcvList(content, row, cb) {
+  getRcvList(row, cb) {
     var that = this;
-    content.$axios({
+    axios({
       method: 'post',
       url:"/page/index/indexData.php",
-      data:content.$qs.stringify({
+      data:qs.stringify({
         getAllRcvName:'rcv',
-        userId:content.user.id,
-        userGroup:1,
-        prefix:content.user.id
+        userId:store.state.user.id,
+        userGroup:store.state.user.userGroup,
+        prefix:store.state.user.prefix
       }),
       Api:"getAllRcvName",
       AppId:"android",
-      UserId:content.user.id
+      UserId:store.state.user.id
     })
     .then(function (response) {
       let res = response.data;
@@ -888,6 +888,66 @@ export default {
   isValidPort(port) {
     var re = /^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
     return re.test(port);
+  },
+  getNewPrefixList(cb){
+    axios({
+      method: 'post',
+      url:"/page/dev/devData.php",
+      data:qs.stringify({
+        getCurAndChildPrefixs:true,
+        prefix:store.state.user.prefix
+      }),
+      Api:"getCurAndChildPrefixs",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        if(cb){
+          cb(res.data)
+        }
+      }else{
+        Toast({
+          message: res.res.reason,
+          position: 'middle',
+          duration: 2000
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
+  getNewUserListByPrefix(prefix,cb){
+    axios({
+      method: 'post',
+      url:"/page/dev/devData.php",
+      data:qs.stringify({
+        getUserByPrefix:true,
+        prefix:prefix
+      }),
+      Api:"getUserByPrefix",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        if(cb){
+          cb(res.data)
+        }
+      }else{
+        Toast({
+          message: res.res.reason,
+          position: 'middle',
+          duration: 2000
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
   },
   getUserList(cb){
     axios({

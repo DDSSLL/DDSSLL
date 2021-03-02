@@ -140,8 +140,8 @@
       }
     },
     activated(){  //生命周期-缓存页面激活
-      /*this.getNetBoard();
-      this.getDeviceParam();*/
+      this.getNetBoard();
+      this.getDeviceControlParam();
 
       var that = this;
       localStorage.getControlParam1080 = setInterval(function(){
@@ -317,7 +317,7 @@
         data.dev_srVal = (data.dev_sr / 1000).toFixed(1); //(Mbps)
         data.dev_srVal_range = data.dev_srVal*10;
         data.dev_srVal_input = data.dev_srVal;
-        data.dev_delayVal = (data.dev_delay / 1000).toFixed(3); //(s)
+        data.dev_delayVal = (data.dev_delay / 1000).toFixed(1); //(s)
         data.dev_delayVal_range = data.dev_delayVal*10;
         data.dev_delayVal_input = data.dev_delayVal;
         return data;

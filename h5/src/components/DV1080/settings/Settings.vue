@@ -9,7 +9,7 @@
           <span id="sn_str"></span>
         </span>
       </div>
-      <div class="GroupItem"><!-- 传输IP -->
+      <div class="GroupItem" v-if="this.user.id==this.SUPER"><!-- 传输IP -->
         <div class="GroupItemField">
           <div class="GroupItemTitle">传输IP</div>
           <div class="GroupItemValue">
@@ -463,6 +463,7 @@
         }else{//4G，传输控制不显示5G模式
           that.show_5g = false;
         }
+        that.options.Mode5G = data["5GMode"];
         //ETH0 IP
         that.options.Eth0Type = data['Eth0Type'];
         //显示别名开关

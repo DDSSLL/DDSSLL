@@ -9,6 +9,11 @@
       </div>
       <transition name="slide-fade">
         <div class="GroupItem" v-if="ReceiverShow" id="rcvList">
+          <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
+            <mt-cell :title="'用户组:'+selectPrefixName.join(',')">
+              <i class="fa fa-chevron-down" @click.stop="userPrefixPop = true" ></i>
+            </mt-cell>
+          </div>
           <template v-for="(item,i) in receiverList">
             <mt-cell-swipe
               :right="[ 
@@ -52,11 +57,26 @@
                 <span class="cellName cellLabel" style="float: left;">MAC</span>
                 <span class="cellName cellValue" style="float: right;">{{ item.rcv_mac }}</span>
               </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">可用更新</span>
+                <span class="cellName cellValue" style="float: right;" :style="{color:upgradeColor}">{{ item.upgradeState }}</span>
+              </div>
             </mt-cell-swipe>
           </template>
         </div>
       </transition>
     </div>
+    <!-- 用户组过滤 -->
+    <mt-popup v-model="userPrefixPop" position="bottom" popup-transition="popup-slide" class="userPrefixPop">
+      <span class="chevronDown">
+        <i class="fa fa-chevron-down" @click.stop="userPrefixPop=false"></i>
+      </span>
+      <mt-checklist
+        v-model="selectPrefix"
+        :options="selectPrefixOptions"
+        @change="changePrefixSelect">
+      </mt-checklist>
+    </mt-popup>
     <!-- 背包信息 -->
     <mt-popup v-model="deviceVisible" popup-transition="popup-fade">
       <div class="popupContainer">
@@ -89,45 +109,56 @@
           <div class="fGrp">
             <div class="tl">名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="receiverConfigForm.rcvName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="receiverConfigType=='edit' && user.id == SUPER">
+              <input type="text" class="ItemInput" v-model="options.rcvName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="receiverConfigType=='edit' && user.id == SUPER">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()和空格</p>
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">序列号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="receiverConfigForm.rcvSn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="receiverConfigType == 'edit'"> 
+              <input type="text" class="ItemInput" v-model="options.rcvSn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="receiverConfigType == 'edit'"> 
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">用户组</div>
+            <div class="vl">
+              <select class="ItemSelect" v-model="options.prefix" @change="changePrefixFun">
+                <template v-for="(item,i) in receiverConfigPrefixOptions">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl">用户</div>
+            <div class="vl">
+              <select class="ItemSelect" v-model="options.rcvUser">
+                <template v-for="(item,i) in receiverConfigUserOptions">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">立即更新</div>
-            <div class="vl">
-                <!-- <div id="upgradeDiv" style="display: none">
-                  <div style="margin-bottom: 5px">
-                    <span style="color: #ff9945;">有新版本!</span>
-                  </div>
-                  <div >
-                    <button type="button" id="upgradeBtn" class="btn btnStyle1" style="height: 2em;padding: 0 0.5em">更新</button>
-                    <span> -> </span>
-                    <span id="newVerStr" style="color: #ff9945"></span>
-                  </div>
+            <div style="margin-top:5px;">
+              <div v-if="upgradeDiv">
+                <span style="color: #ff9945;">有新版本!</span>
+                <button type="button" id="upgradeBtn" @click="upgradeVirRcv('upgrade')">更新</button>
+                <span> -> </span>
+                <span style="color: #ff9945">{{ newVerStr }}</span>
+              </div>
+              <div v-if="rollbackDiv">
+                <span style="color: #2de505;">已是最新版本!</span>
+                <div id="rollbackBtnDiv">
+                  <button type="button" id="rollbackBtn" @click="upgradeVirRcv('rollback')">回退</button>
+                  <span> -> </span>
+                  <span>{{ oldVerStr }}</span>
                 </div>
-                <div id="rollbackDiv" style="display: none">
-                  <div style="margin-bottom: 5px">
-                    <span style="color: #2de505;">已是最新版本!</span>
-                  </div>
-                  <div id="rollbackBtnDiv">
-                    <button type="button" id="rollbackBtn" class="btn btnStyle1" style="height: 2em;padding: 0 0.5em">回退</button>
-                    <span> -> </span>
-                    <span id="oldVerStr"></span>
-                  </div>
-                </div>
-                <div id="noNewVer">
-                  <div style="margin-bottom: 5px">
-                    <span>无可用升级包!</span>
-                  </div>
-                </div>
-              </div> -->
+              </div>
+              <div v-if="noNewVer">
+                <span>无可用升级包!</span>
+              </div>
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
@@ -159,13 +190,31 @@
         receiverList:[],
         receiverConfigVisible:false,
         receiverConfigType:'add',
-        receiverConfigForm:{
+        options:{
           userId:"",
           rcvName:"",
-          rcvSn:""
+          rcvSn:"",
+          prefix:"",
+          rcvUser:"",
+          rcv_online:"",
+          rcv_autoUpgrade:"",
         },
+        noNewVer:false,
+        rollbackDiv:false,
+        upgradeDiv:false,
+        newVerStr:"",
+        oldVerStr:"",
         deviceVisible:false,
         devicePopupList:[],
+        receiverConfigPrefixOptions:[],
+        receiverConfigUserOptions:[],
+        /*用户组*/
+        userPrefixShow:true,//用户组过滤
+        selectPrefixOptions:[],//用户组options
+        selectPrefix:[],//选中的用户组
+        selectPrefixName:[],//显示过滤组的名称
+        prefixArr:[],//用户组下拉框数据
+        userPrefixPop:false,//用户组pop的show
       }
     },
     computed: {
@@ -182,31 +231,81 @@
     },
     created(){  //生命周期-页面创建后
       var that = this;
-      if(that.user.id == that.SUPER){
+      /*if(that.user.id == that.SUPER){
         that.rcvAddShow = true;
         that.rcvDelShow = true;
       }else{
         that.rcvAddShow = false;
         that.rcvDelShow = false;
-      }
-      this.getReceiverList();
+      }*/
+      //this.getReceiverList();
+      this.initShowContent();
     },
     activated(){
       console.log("devMan activated")
-      this.getReceiverList();
+      //this.getReceiverList();
+      this.initShowContent();
     },
     methods:{
       ...mapMutations({
           
       }),
+      initShowContent(){
+        var that = this;
+        if(that.user.userGroup == that.ADMIN){
+          that.rcvAddShow = true;
+          that.rcvDelShow = true;
+          that.userPrefixShow = true;
+          that.$global.getUserPrefixArr(function(data) {
+            var data = that.$global.initPrefixData(data);
+            that.selectPrefixOptions = data.selectPrefixOptions;
+            that.selectPrefix = data.selectPrefix;
+            that.selectPrefixName = data.selectPrefixName;
+            //背包列表
+            that.getReceiverList();
+          })
+        }else{
+          that.rcvAddShow = false;
+          that.rcvDelShow = false;
+          that.getReceiverList();
+        }
+      },
+      changePrefixSelect(){
+        var that = this;
+        var selectPrefix = that.selectPrefix;
+        var data = that.$global.getPrefixShow(that.selectPrefix, that.selectPrefixOptions);
+        that.selectPrefix = data["selectPrefix"];  
+        that.selectPrefixName = data["selectPrefixName"];
+        that.getReceiverList();
+      },
+      formatUserSelect(){
+        var that = this;
+        var select = "";
+        if(that.userPrefixShow){
+          if(that.selectPrefix){
+            select =  that.selectPrefix.map(function(item){
+              return "'" + item + "'"
+            }).join(",");
+          }else{
+            select = "'/'";
+          }
+        }else{
+           select = "'"+that.user.prefix+"'";
+        }
+        return select;
+      },
       getReceiverList(){
         var that = this;
+        var selectPrefix = that.formatUserSelect();
         this.$axios({
           method: 'post',
           url:"/page/dev/devData.php",
           data:this.$qs.stringify({
             getRcv:true,
-            userId: that.user.id
+            userId: that.user.id,
+            userGroup: that.user.userGroup,
+            selectByPrefix: selectPrefix,
+            logPrefix: that.user.prefix
           }),
           Api:"getRcv",
           AppId:"android",
@@ -216,10 +315,39 @@
           let res = response.data;
           if(res.res.success){
             var data = res.data;
-            var mapArr = {"直播":1,"在线":2,"离线":3}
+            var color = '#ffffff';
+            var str = '无';
+            for(var i=0; i<data.length; i++){
+              var row = data[i];
+              //不在更新中
+              if(row['autoUpgrade'] == 0){
+                if(row['newestVer'] != ''){
+                  var newVer = row['newestVer'].replace(/[^0-9]/ig,"");
+                  var softVer = row['softVer'].replace(/[^0-9]/ig,"");
+                  if(newVer == softVer){
+                    str = '已是最新';
+                    color = GREEN;
+                  }else if(newVer > softVer){
+                    str = '有更新('+row['newestVer']+')';
+                    color = ORANGE;
+                  }
+                }
+              }else{
+                if(row['autoUpgrade'] == 1){
+                  str = '更新中 '+row['upgradeProc'] +'%';
+                }else{
+                  str = '回退中';
+                }
+                color = BLUE;
+              }
+              data[i]["upgradeState"] = str;
+              data[i]["upgradeColor"] = color;
+            }
+            var mapArr = {"直播":1,"在线":2,"离线":3};
             that.receiverList = data.sort(function(a, b){
               return (mapArr[a.online] - mapArr[b.online])
             });
+            console.log(that.receiverList)
           }else{
             that.receiverList = [];
           }
@@ -259,10 +387,39 @@
       editReceiver(item){
         this.receiverConfigVisible = true;
         this.receiverConfigType = "edit";
-        this.receiverConfigForm = {
+        this.getDevPrefixList(item);
+        this.options = {
           userId:item.user_id,
           rcvName:item.rcv_name,
-          rcvSn:item.rcv_sn
+          rcvSn:item.rcv_sn,
+          rcv_online:item.online,
+          rcv_autoUpgrade:item.autoUpgrade,
+        }
+        //升级
+        if (item['newestVer'] != ''){
+          this.noNewVer = false;
+          //已是最新版本
+          if(item['newestVer'] == item['softVer']){
+            this.rollbackDiv = true;
+            this.upgradeDiv = false;
+            //回退按钮是否显示
+            if(item['oldVer'] != ''){
+              this.rollbackBtnDiv = true;
+              this.oldVerStr = item['oldVer'];
+            } else {
+              this.rollbackBtnDiv = false;
+            }
+          } else {
+            //有新版本
+            this.upgradeDiv = true;
+            this.rollbackDiv = false;
+            this.newVerStr = item['newestVer'];
+          }
+        } else {
+          //无可用升级包
+          this.upgradeDiv = false;
+          this.rollbackDiv = false;
+          this.noNewVer = true;
         }
       },
       deleteReceiver(item){
@@ -314,7 +471,7 @@
       },
       submitReceiverConfig(){
         var that = this;
-        var rcvSn = this.receiverConfigForm.rcvSn;
+        var rcvSn = this.options.rcvSn;
         var mode = this.$global.getRcvMode(rcvSn.substr(-4));
         var upgrade = 0;
         if (!mode) {
@@ -341,13 +498,16 @@
           method: 'post',
           url:"/page/dev/devData.php",
           data:this.$qs.stringify({
-            rcvName: that.receiverConfigForm.rcvName,
-            rcvSn: that.receiverConfigForm.rcvSn,
+            saveRcv:true,
+            rcvName: that.options.rcvName,
+            rcvSn: that.options.rcvSn,
             rcvModel: mode,
             userId: that.user.id,
-            prefix: that.user.id,
+            prefix: that.options.prefix,
             rcvUser: '',
-            type: that.receiverConfigType
+            upgrade:0,
+            type: that.receiverConfigType,
+            user_id:that.options.rcvUser
           }),
           Api:"saveRcv",
           AppId:"android",
@@ -373,12 +533,106 @@
       addReceiver(){
         this.receiverConfigVisible = true;
         this.receiverConfigType = "add";
+        this.options.rcv_online = "离线";
+        this.options.rcv_autoUpgrade = "0";
+        this.getDevPrefixList();
         this.clearRcvPopup();
       },
-      clearRcvPopup(){
-        this.receiverConfigForm.rcvName = "";
-        this.receiverConfigForm.rcvSn = "";
+      changePrefixFun(){
+        var that = this;
+        that.$global.getNewUserListByPrefix(that.options.prefix, function(userList){
+          that.receiverConfigUserOptions = userList;
+          that.options.rcvUser = userList[0]["value"];
+        })
       },
+      getDevPrefixList(item){
+        var that = this;
+        that.$global.getNewPrefixList(function(data){
+          that.receiverConfigPrefixOptions = data;
+          if(that.receiverConfigType == "add"){
+            that.options.prefix = data[0]["value"];
+          }else{
+            that.options.prefix = item.prefix;
+          }
+          that.$global.getNewUserListByPrefix(that.options.prefix, function(userList){
+            that.receiverConfigUserOptions = userList;
+            if(that.receiverConfigType == "add"){
+              that.options.rcvUser = userList[0]["value"];
+            }else{
+              that.options.rcvUser = item.user_id;
+            }
+          })
+        });
+      },
+      clearRcvPopup(){
+        this.options.rcvName = "";
+        this.options.rcvSn = "";
+        //升级
+        this.noNewVer = true;
+        this.rollbackDiv = false;
+        this.upgradeDiv = false;
+      },
+      upgradeVirRcv(type){
+        var that = this;
+        var rcvSn = this.options.rcvSn;
+        if(!that.$global.isValidRcvSn((rcvSn))){
+          return;
+        }
+        //获取汇聚的在线状态
+        var online = that.options.rcv_online;
+        if(online != '在线'){
+          that.$toast({
+            message: "离线或直播中不支持此操作!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        //正在更新中或回退中
+        var autoUpgrade = this.options.rcv_autoUpgrade;
+        if( autoUpgrade != 0){
+          that.$toast({
+            message: "请稍后再操作!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        var upgrade = 0;
+        if(type == 'upgrade') {
+          upgrade = 1;
+        } else if(type == 'rollback') {
+          upgrade = 2;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:this.$qs.stringify({
+            upgradeVirRcv: true,
+            rcvSn : rcvSn,
+            autoUpgrade : upgrade,
+          }),
+          Api:"upgradeVirRcv",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.getReceiverList();
+            that.receiverConfigVisible = false;
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      }
     }
   }
 </script>
@@ -549,6 +803,11 @@
   .mint-switch{
     transform: scale(.7);
     transform-origin: left;
+  }
+  .userPrefixPop.mint-popup{
+    background-color: #212227;
+    width: 100%;
+    height: auto;
   }
 </style>
 <style>
