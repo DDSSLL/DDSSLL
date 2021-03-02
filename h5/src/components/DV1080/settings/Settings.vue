@@ -124,7 +124,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">别名</div>
           <div class="GroupItemValue">
-            <input v-model="options.DevAlias" type="text" @change="changeAliasName" pattern="^[A-z0-9\u4e00-\u9fa5+-@()（） ]{1,10}$" :disabled="paramLockAck == '1'?false:true">
+            <input class="ItemInput" v-model="options.DevAlias" type="text" @change="changeAliasName" pattern="^[A-z0-9\u4e00-\u9fa5+-@()（） ]{1,10}$" :disabled="paramLockAck == '1'?false:true">
           </div>
         </div>
       </div>      
@@ -286,7 +286,7 @@
                             {text: "DEBUG",value: "3"}],
         OPTIONS_NETMODE_PARAMS : [{text: "NSA",value: "0"}, 
                                   {text: "SA",value: "1"}, 
-                                  {text: "LTE",value: "2"}],
+                                  {text: "LTE ONLY",value: "2"}],
         OPTIONS_ETH0_TYPE : [{text: "固定IP地址",value: "0"}, 
                             {text: "自动获取IP地址",value: "1"}],
         options:{
@@ -718,6 +718,15 @@
         box-shadow: none;
         border-radius: 5px;
         font-size: .12rem;
+    }
+    .ItemInput{
+      width: 1.8rem;
+      height: .26rem;
+      outline: none;
+      box-shadow: none;
+      border-radius: 5px;
+      font-size: .13rem;
+      padding: 0px;
     }
     .x2Ipt{
         width: 1.2rem;
