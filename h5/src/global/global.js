@@ -889,6 +889,37 @@ export default {
     var re = /^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
     return re.test(port);
   },
+  //获取登录用户所在组的所有子组
+  getChildGrpArr(cb) {
+    axios({
+      method: 'post',
+      url:"/page/userPrefix/userPrefix.php",
+      data:qs.stringify({
+        getChildGrpArr:true,
+        logPrefix:store.state.user.prefix
+      }),
+      Api:"getCurAndChildPrefixs",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        if(cb){
+          cb(res.data)
+        }
+      }else{
+        Toast({
+          message: res.res.reason,
+          position: 'middle',
+          duration: 2000
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
   getNewPrefixList(cb){
     axios({
       method: 'post',

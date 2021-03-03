@@ -31,6 +31,14 @@
                   </span>
               </div>
               <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">用户组</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.prefix }}</span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">用户等级</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.userGroupName }}</span>
+              </div>
+              <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">登录账号</span>
                 <span class="cellName cellValue" style="float: right;">{{ item.id }}</span>
               </div>
@@ -251,20 +259,33 @@
       }),
       initShowContent(){
         var that = this;
-        if(this.user.id == this.SUPER){//"001-admin"
-          that.userPrefixShow = true;
-          that.$global.getUserPrefixArr(function(data) {
-            var data = that.$global.initPrefixData(data);
-            that.selectPrefixOptions = data.selectPrefixOptions;
-            that.selectPrefix = data.selectPrefix;
-            that.selectPrefixName = data.selectPrefixName;
-            //获取用户等级
-            that.getUserGroup(that.getAccountList);
-          })
-        }else{
-          that.userPrefixShow = false;
-          that.getUserGroup(that.getAccountList);
-        }
+        that.getUserGroup(function(groupData){
+          that.formatUserGroup(groupData);
+          for (var i = 0; i < groupData.length; i++) {
+            if (groupData[i].value != that.ADMIN) {
+              that.userGroups.push(groupData[i])
+            }
+          }
+          //用户组列表
+          that.$global.getChildGrpArr(function(data) {
+            //添加编辑页面的用户组
+            /*for(var i=0; i<data.length; i++){
+              that.curUser.prefixOptions.push({text:data[i].prefix_name, value:data[i].prefix});
+            }*/
+            //列表页面的用户组过滤
+            if (that.user.userGroup == ADMIN) {
+              that.userPrefixShow = true;//显示用户组过滤
+              var data = that.$global.initPrefixData(data);
+              that.selectPrefixOptions = data.selectPrefixOptions;
+              that.selectPrefix = data.selectPrefix;
+              that.selectPrefixName = data.selectPrefixName;
+              that.getAccountList();
+            } else {
+              that.userPrefixShow = false;//隐藏用户组过滤
+              that.getAccountList();
+            }
+          });
+        })
       },
       getUserGroup(cb){
         var that = this;
@@ -281,15 +302,8 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.curUser.userGroupOptionsOri = res.data;
-            that.curUser.userGroupOptions = res.data;
-            for (var i = 0; i < res.data.length; i++) {
-              if (res.data[i].value != that.ADMIN) {
-                that.userGroups.push(res.data[i])
-              }
-            }
             if(cb){
-              cb();
+              cb(res.data);
             }
           }
         })
@@ -340,6 +354,18 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
+            var data = res.data;
+            for(var i=0; i<data.length; i++){
+              if (data[i].userGroup == that.ADMIN) {
+                data[i]['userGroupName'] = '管理员';
+              } else {
+                for (var j = 0; j < that.userGroups.length; j++) {
+                  if (that.userGroups[j].value == data[i].userGroup) {
+                    data[i]['userGroupName'] = that.userGroups[j].text;
+                  }
+                }  
+              }
+            }
             that.accountList = res.data;
           }else{
             that.receiverList = [];
@@ -350,9 +376,48 @@
         })
       },
       addUser(){
-        this.userConfigVisible = true;
-        this.curUser.userEditType = "add";
-        this.clearUserPopup();
+        var that = this;
+        that.userConfigVisible = true;
+        that.curUser.userEditType = "add";
+        that.initUserGroup(function(){
+          that.curUser.userGroup = that.curUser.userGroupOptions[0]["value"];
+        });
+        that.initPrefix(function(){
+          that.curUser.prefix = that.curUser.prefixOptions[0]["value"];
+        })
+        that.clearUserPopup();
+      },
+      initUserGroup(cb){
+        console.log("initUserGroup")
+        var that = this;
+        that.getUserGroup(function(groupData){
+          //that.formatUserGroup(groupData);
+          that.curUser.userGroupOptions = groupData;
+          console.log("that.curUser.userGroupOptions:")
+          console.log(that.curUser.userGroupOptions)
+          if(cb){
+            cb()
+          }
+        })
+      },
+      formatUserGroup(data){
+        console.log("formatUserGroup")
+        console.log(data)
+        var that = this;
+        //that.curUser.userGroupOptionsOri = data;
+        that.curUser.userGroupOptions = data;
+        
+      },
+      initPrefix(cb){
+        var that = this;
+        that.$global.getChildGrpArr(function(data) {
+          for(var i=0; i<data.length; i++){
+            that.curUser.prefixOptions.push({text:data[i].prefix_name, value:data[i].prefix});
+          }
+          if(cb){
+            cb()
+          }
+        })
       },
       clearUserPopup(){
         this.curUser.name = "";
@@ -404,12 +469,10 @@
             data:this.$qs.stringify({
               addUser: name,
               pwd: pwd,
-              group: 1,
-              prefix: name,
-              prefixName: name,
-              addPrefix: 1,
+              group: that.curUser.userGroup,
+              prefix: that.curUser.prefix,
               loginId: name,
-              enable: 1,
+              enable: that.user.id==SUPER?1:0,
               mobilePhone: mobilePhone,
               emailAddress: emailAddress,
               remark: remark
@@ -441,18 +504,18 @@
             method: 'post',
             url:"/page/users/users.php",
             data:this.$qs.stringify({
-              addUser: name,
+              editUser: name,
               oldUser: oldName,
               pwd: pwd,
-              group: 1,
-              prefix: name,
-              loginId: oldName,
-              enable: 1,
+              group: that.curUser.userGroup,
+              prefix: that.curUser.prefix,
+              loginId: name,
+              enable: that.user.id==SUPER?1:0,
               mobilePhone: mobilePhone,
               emailAddress: emailAddress,
               remark: remark
             }),
-            Api:"addUser",
+            Api:"editUser",
             AppId:"android",
             UserId:that.user.id
           })
@@ -506,17 +569,36 @@
         })
       },
       editUser(item){
-        this.userConfigVisible = true;
-        this.curUser.userEditType = "edit";
-        this.curUser = {
-            id:item.id,
-            name: item.name,
-            pwd: item.pwd,
-            pwd2: item.pwd,
-            mobilePhone: item.mobilePhone,
-            emailAddress: item.emailAddress,
-            remark: item.remark
-        }
+        var that = this;
+        that.userConfigVisible = true;
+        that.curUser.userEditType = "edit";
+        that.initUserGroup(function(){
+          console.log("initUserGroup cb")
+          that.curUser.userGroup = that.curUser.userGroupOptions[0]["value"];
+          var userGroup = that.user.userGroup;
+          that.curUser.userGroup = item.userGroup;
+          //用户等级
+          if(userGroup == ADMIN){//管理员
+            if(item.id != that.user.id){//非自己
+              that.curUser.userGroupDisable = false;
+            }else{
+              that.curUser.userGroupDisable = true;
+            }
+          }else if(userGroup == ADVANCE || userGroup == NORMAL){//高级用户或普通用户
+            that.curUser.userGroupDisable = true;
+          }
+        });
+        that.initPrefix(function(){
+          that.curUser.prefix = item.prefix;
+        })
+        that.curUser.id = item.id;
+        that.curUser.name = item.name;
+        that.curUser.pwd = item.pwd;
+        that.curUser.pwd2 = item.pwd;
+        that.curUser.mobilePhone = item.mobilePhone;
+        that.curUser.emailAddress = item.emailAddress;
+        that.curUser.remark = item.remark;
+    
       },
       deleteUser(item){
         var that = this;

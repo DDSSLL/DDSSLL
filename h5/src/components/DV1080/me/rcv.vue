@@ -347,7 +347,6 @@
             that.receiverList = data.sort(function(a, b){
               return (mapArr[a.online] - mapArr[b.online])
             });
-            console.log(that.receiverList)
           }else{
             that.receiverList = [];
           }
