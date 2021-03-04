@@ -89,8 +89,8 @@
       this.SET_ACTIVE_DEVICE_TYPE("DV1080")
       //this.SET_DOMAIN(this.HDXPRESS_BUILD);
       this.$axios.defaults.baseURL = this.HDXPRESS_BUILD;//默认1080的一级域名
-      this.user.saveMe_1080 = localStorage.getItem("SAVEME_1080")?eval(localStorage.getItem("SAVEME_1080")):false;
-      if(this.user.saveMe1080){
+      this.user.saveMe_1080 = localStorage.getItem("SAVEME_1080")=="true"?true:false;
+      if(this.user.saveMe_1080){
         this.user.login_name = localStorage.getItem("USERNAME_1080");
         this.user.password = localStorage.getItem("PASSWORD_1080");
       }else{

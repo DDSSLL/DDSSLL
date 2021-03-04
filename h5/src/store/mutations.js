@@ -50,6 +50,9 @@ export default {
     [types.SET_PARAM_LOCK]: (state, datas) => {
         state.paramLock = datas
     },
+    [types.SET_LOCK_USERID]: (state, datas) => {
+        state.lockUserId = datas
+    },
     // 设置当前设备参数
     [types.SET_DEV_PARAM]: (state, datas) => {
         state.devParam = datas

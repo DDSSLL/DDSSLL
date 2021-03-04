@@ -13,6 +13,7 @@ export default {
     //背包锁状态
     paramLockAck:null,
     paramLock:null,
+    lockUserId:null,
     //背包参数
     devParam:{},
     //接收机参数

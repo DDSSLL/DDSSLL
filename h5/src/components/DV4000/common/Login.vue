@@ -89,7 +89,7 @@
       this.SET_ACTIVE_DEVICE_TYPE("DV4000")
       //this.SET_DOMAIN(this.UHDXPRESS_BUILD);
       this.$axios.defaults.baseURL = this.UHDXPRESS_BUILD;//默认1080的一级域名
-      this.user.saveMe_4000 = localStorage.getItem("SAVEME_4000")?eval(localStorage.getItem("SAVEME_4000")):false;
+      this.user.saveMe_4000 = localStorage.getItem("SAVEME_4000")=="true"?true:false;
       if(this.user.saveMe_4000){
         this.user.login_name = localStorage.getItem("USERNAME_4000");
         this.user.password = localStorage.getItem("PASSWORD_4000");
