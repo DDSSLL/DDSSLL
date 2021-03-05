@@ -21,7 +21,7 @@
             <template v-for="item in netBoard">
               <tr v-if="item.cardShow == '1'">
                 <td class="td" :class="[item.online == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
-                <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch></td>
+                <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)" :disabled="(!pageLock && ActiveDevice.online=='1')?false:true"></mt-switch></td>
                 <td class="td">{{ item.send_br }}</td>
                 <td class="td">{{ item.card_rtt }}</td>
                 <td class="td">{{ item.rssi }}</td>
@@ -77,12 +77,12 @@
               :max="DELAY_MAX"
               :step.number="0.1"
               :bar-height="5"
-              :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
+              :disabled="(!pageLock && ActiveDevice.online=='1')?false:true"
               @change="setDeviceParam('dev_delay_range')">
               <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{DELAY_MIN}}</div>
               <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{DELAY_MAX}}</div>
             </mt-range>
-            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="paramLockAck == '1'?false:true">
+            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="!pageLock?false:true">
           </div>
         </div>
       </div>
@@ -99,6 +99,7 @@
     name: "Control",
     data(){
       return{
+        pageLock:false,
         BITRATE_MIN : 0, //Mbps   数据库里的dev_sr
         BITRATE_MAX : 0,
         DELAY_MIN : 0.1, //s
@@ -123,7 +124,7 @@
       }
     },
     computed: {
-      ...mapState(['user',"ActiveDeviceType",'paramLockAck'])
+      ...mapState(['user',"ActiveDeviceType",'paramLockAck','lockUserId'])
     },
     components: {
       Device
@@ -133,6 +134,7 @@
         immediate: true,
         handler(val) {
           this.ActiveDevice = val;
+          this.getLockStates();
           /*if(this.paramLockAck != "1"){
             this.getNetBoard();
             this.$global.getDeviceParam(this.formatData)
@@ -144,10 +146,12 @@
     activated(){  //生命周期-缓存页面激活
       this.getNetBoard();
       this.$global.getDeviceParam(this.formatData)
+      this.getLockStates();
       var that = this;
       localStorage.getControlParam = setInterval(function(){
         that.getNetBoard();
-        if(that.paramLockAck != "1"){
+        //if(that.paramLockAck != "1"){//页面锁定
+        if(!that.pageLock){//页面锁定
           that.$global.getDeviceParam(that.formatData)
         }
         that.$global.getPushUrls(that, that.formatPushUrlState);
@@ -160,6 +164,19 @@
       /*...mapMutations({
           
       }),*/
+      getLockStates(){
+        console.log("getLockStates");
+        var that = this;
+        if(that.paramLockAck == "1"){
+          if(that.lockUserId == that.user.id || that.lockUserId == ""){
+            that.pageLock = false;
+          }else{
+            that.pageLock = true;
+          }
+        }else{
+          that.pageLock = true;
+        }
+      },
       getNetBoard(){
         var that = this;
         this.$axios({

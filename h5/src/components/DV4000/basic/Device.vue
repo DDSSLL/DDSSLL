@@ -128,7 +128,7 @@
 
 <script>
   import { mapState, mapMutations } from 'vuex';
-  import { SET_ACTIVE_DEVICE,SET_DEVICE_TIMER,SET_DEVICE_TYPE_SELECT,SET_DEVICE_PREFIX_SELECT,SET_PARAM_LOCK_ACK,SET_PARAM_LOCK } from '../../../store/mutation-types';
+  import { SET_ACTIVE_DEVICE,SET_DEVICE_TIMER,SET_DEVICE_TYPE_SELECT,SET_DEVICE_PREFIX_SELECT,SET_PARAM_LOCK_ACK,SET_PARAM_LOCK,SET_LOCK_USERID } from '../../../store/mutation-types';
   import $ from 'jquery';
   export default {
     name: "Device",
@@ -160,7 +160,7 @@
       }
     },
     computed: {
-      ...mapState(['user','ActiveDevice','DeviceTimer','deviceTypeSelect','devicePrefixSelect','paramLockAck','paramLock'])
+      ...mapState(['user','ActiveDevice','DeviceTimer','deviceTypeSelect','devicePrefixSelect','paramLockAck','paramLock','lockUserId'])
     },
     created(){  //生命周期-页面创建后
       var that = this;
@@ -185,6 +185,7 @@
         SET_DEVICE_PREFIX_SELECT,
         SET_PARAM_LOCK_ACK,
         SET_PARAM_LOCK,
+        SET_LOCK_USERID
       }),
       changeDeviceType(){
         var that = this;
@@ -240,7 +241,7 @@
       },
       refreshCurDevParam(datas){
         this.SET_ACTIVE_DEVICE(datas);
-        //更新当前设备参数
+        this.getDevLockStatus();
       },
       getDeviceList(){
         var that = this;
@@ -295,14 +296,19 @@
             UserId:that.user.login_name
         })
         .then(function (response) {
-            let res = response.data;
-            that.SET_PARAM_LOCK_ACK(res.data[0]['param_lock_ack'])
-            that.SET_PARAM_LOCK(res.data[0]['param_lock'])
-            if(res.data[0]['param_lock_ack'] == "1"){
-              $("#lockIcon").removeClass("fa-lock").addClass("fa-unlock");
+          let res = response.data;
+          that.SET_PARAM_LOCK_ACK(res.data[0]['param_lock_ack'])
+          that.SET_PARAM_LOCK(res.data[0]['param_lock'])
+          that.SET_LOCK_USERID(res.data[0]['lock_userid'])
+          if(res.data[0]['param_lock_ack'] == "1"){
+            if(res.data[0]['lock_userid'] == that.user.id || res.data[0]['lock_userid'] == ""){
+              $("#lockIcon").removeClass("fa-lock").addClass("fa-unlock");  
             }else{
-              $("#lockIcon").removeClass("fa-unlock").addClass("fa-lock");
+              $("#lockIcon").removeClass("fa-unlock").addClass("fa-lock");  
             }
+          }else{
+            $("#lockIcon").removeClass("fa-unlock").addClass("fa-lock");
+          }
         })
         .catch(function (error) {
             console.log(error)
@@ -311,12 +317,19 @@
       //修改锁
       changeLockState(){
         var that = this;
-        if (this.paramLockAck == "1") {
-          //已解锁，要加锁,背包不锁定
-          that.setDeviceParam('param_lock',2)
+        //if (this.paramLockAck == "1") {
+        if (this.paramLockAck == "1") {//平台端已解锁
+          if(this.lockUserId != that.user.id){//当前设备为锁定标志
+            that.setDeviceParam('lock_userid',that.user.id);
+          }else{//当前设备为解锁标志
+            //已解锁，要加锁,背包不锁定
+            that.setDeviceParam('param_lock',2)
+            that.setDeviceParam('lock_userid',"");
+          }
         } else {
           //已加锁，要解锁,背包锁定
           that.setDeviceParam('param_lock',1)
+          that.setDeviceParam('lock_userid',that.user.id);
         }
       },
       //修改接收机锁

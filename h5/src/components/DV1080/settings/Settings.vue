@@ -31,7 +31,7 @@
               v-model="options.PushTsType"
               :options="RADIO_TRANS_MODE"
               @change="changeTransMode"
-              :disabled="paramLockAck == '1'?false:true">
+              :disabled="!pageLock?false:true">
             </mt-radio>
           </div>
         </div>
@@ -40,7 +40,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">单卡选择</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.PushCard" @change="setDeviceParam('PushCard', options.PushCard)"  :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.PushCard" @change="setDeviceParam('PushCard', options.PushCard)"  :disabled="!pageLock?false:true">
               <template v-for="item in card_sel">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -52,7 +52,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">录制开关</div>
           <div class="GroupItemValue">
-            <mt-switch v-model="options.record" @change="setDeviceParam('record',options.record?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            <mt-switch v-model="options.record" @change="setDeviceParam('record',options.record?'1':'0')" :disabled="!pageLock?false:true">
             </mt-switch>
           </div>
         </div>
@@ -61,7 +61,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">重传开关</div>
           <div class="GroupItemValue">
-            <mt-switch v-model="options.ResendMode" @change="setDeviceParam('ResendMode',options.ResendMode?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            <mt-switch v-model="options.ResendMode" @change="setDeviceParam('ResendMode',options.ResendMode?'1':'0')" :disabled="!pageLock?false:true">
             </mt-switch>
           </div>
         </div>
@@ -70,7 +70,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">纠错开关</div>
           <div class="GroupItemValue">
-            <mt-switch v-model="options.OpenfecMode" @change="setDeviceParam('OpenfecMode',options.OpenfecMode?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            <mt-switch v-model="options.OpenfecMode" @change="setDeviceParam('OpenfecMode',options.OpenfecMode?'1':'0')" :disabled="!pageLock?false:true">
             </mt-switch>
           </div>
         </div>
@@ -79,7 +79,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">纠错能力</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.OpenfecLevel" @change="setDeviceParam('OpenfecLevel', options.OpenfecLevel)"  :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.OpenfecLevel" @change="setDeviceParam('OpenfecLevel', options.OpenfecLevel)"  :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_FEC_LEVEL">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -91,7 +91,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">5G模式</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.Mode5G" @change="setDeviceParam('5GMode', options.Mode5G)"  :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.Mode5G" @change="setDeviceParam('5GMode', options.Mode5G)"  :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_NETMODE_PARAMS">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -103,7 +103,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">ETH0 IP</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options['Eth0Type']" @change="setDeviceParam('Eth0Type', options['Eth0Type'])"  :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options['Eth0Type']" @change="setDeviceParam('Eth0Type', options['Eth0Type'])"  :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_ETH0_TYPE">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -115,7 +115,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">显示别名</div>
           <div class="GroupItemValue">
-            <mt-switch v-model="options.DevAliasSwitch" @change="setDeviceParam('DevAliasSwitch',options.DevAliasSwitch?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            <mt-switch v-model="options.DevAliasSwitch" @change="setDeviceParam('DevAliasSwitch',options.DevAliasSwitch?'1':'0')" :disabled="!pageLock?false:true">
             </mt-switch>
           </div>
         </div>
@@ -124,7 +124,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">别名</div>
           <div class="GroupItemValue">
-            <input class="ItemInput" v-model="options.DevAlias" type="text" @change="changeAliasName" pattern="^[A-z0-9\u4e00-\u9fa5+-@()（） ]{1,10}$" :disabled="paramLockAck == '1'?false:true">
+            <input class="ItemInput" v-model="options.DevAlias" type="text" @change="changeAliasName" pattern="^[A-z0-9\u4e00-\u9fa5+-@()（） ]{1,10}$" :disabled="!pageLock?false:true">
           </div>
         </div>
       </div>      
@@ -135,7 +135,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">SEI</div>
           <div class="GroupItemValue">
-            <mt-switch v-model="options.SEI" @change="setDeviceParam('SEI',options.SEI?'1':'0')" :disabled="paramLockAck == '1'?false:true">
+            <mt-switch v-model="options.SEI" @change="setDeviceParam('SEI',options.SEI?'1':'0')" :disabled="!pageLock?false:true">
             </mt-switch>
           </div>
         </div>
@@ -144,7 +144,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">视频输入</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.video_input" @change="setDeviceParam('video_input',options.video_input)"  :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.video_input" @change="setDeviceParam('video_input',options.video_input)"  :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_VIDEOINPUT">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -156,7 +156,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">音频输入</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.audio_input" @change="setDeviceParam('audio_input',options.audio_input)"  :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.audio_input" @change="setDeviceParam('audio_input',options.audio_input)"  :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_AUDIOINPUT">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -168,7 +168,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">视频编码</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.video_encode" @change="setDeviceParam('video_encode',options.video_encode)" :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.video_encode" @change="setDeviceParam('video_encode',options.video_encode)" :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_VIDEOENCODE">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -180,7 +180,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">音频编码</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.AudioEnc" @change="setDeviceParam('AudioEnc',options.AudioEnc)" :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.AudioEnc" @change="setDeviceParam('AudioEnc',options.AudioEnc)" :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_AUDIO_ENCODE">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -192,7 +192,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">音频比特率</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.AudioBitrate" @change="setDeviceParam('AudioBitrate',options.AudioBitrate)" :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.AudioBitrate" @change="setDeviceParam('AudioBitrate',options.AudioBitrate)" :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_AUDIO_BR">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -204,7 +204,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">码率控制</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.bitrate_mode" @change="setDeviceParam('bitrate_mode',options.bitrate_mode)" :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.bitrate_mode" @change="setDeviceParam('bitrate_mode',options.bitrate_mode)" :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_BITRATEMODE">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -216,7 +216,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">编码分辨率</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_HDMI_FORMAT">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -231,7 +231,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">日志记录</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.ArmSenderLogLevel" @change="setDeviceParam('ArmSenderLogLevel',options.ArmSenderLogLevel)"  :disabled="paramLockAck == '1'?false:true">
+            <select class="ItemSelect" v-model="options.ArmSenderLogLevel" @change="setDeviceParam('ArmSenderLogLevel',options.ArmSenderLogLevel)"  :disabled="!pageLock?false:true">
               <template v-for="item in OPTIONS_LOG_LEVEL">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -252,6 +252,7 @@
     name: "Settings",
     data(){
       return{
+        pageLock:false,
         SUPER : SUPER,
         RADIO_TRANS_IP : [],
         RADIO_TRANS_MODE : [],
@@ -317,13 +318,14 @@
         Device
     },
     computed: {
-        ...mapState(['user','navHide','ActiveDeviceType','paramLockAck'])
+        ...mapState(['user','navHide','ActiveDeviceType','paramLockAck','lockUserId'])
     },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {
         immediate: true,
         handler(val) {
           this.ActiveDevice = val;
+          this.getLockStates();
           /*$("#sn_str").text(this.ActiveDevice.dev_sn)*/
           /*if(this.paramLockAck != "1"){
             this.getDeviceParam();
@@ -336,31 +338,32 @@
           this.RADIO_TRANS_IP = [{
             label: '内网',
             value: '1',
-            disabled: this.paramLockAck == '1'?false:true
+            disabled: !this.pageLock?false:true
           },{
             label: '公网',
             value: '0',
-            disabled: this.paramLockAck == '1'?false:true
+            disabled: !this.pageLock == '1'?false:true
           }],
           this.RADIO_TRANS_MODE = [{
             label: '单卡',
             value: '1',
-            disabled: this.paramLockAck == '1'?false:true
+            disabled: !this.pageLock == '1'?false:true
           },{
             label: '汇聚',
             value: '0',
-            disabled: this.paramLockAck == '1'?false:true
+            disabled: !this.pageLock == '1'?false:true
           }]
         }
       }
     },
     activated(){  //生命周期-缓存页面激活
       console.log("setting activated");
+      this.getLockStates();
       this.getDeviceParam();
       var that = this;
       $("#sn_str").text(this.ActiveDevice.dev_sn)
       localStorage.getSettingParam1080 = setInterval(function(){
-        if(that.paramLockAck != "1"){
+        if(!that.pageLock){
           that.$global.getDeviceParam()
         }
       },1000)
@@ -374,6 +377,19 @@
         SET_USER,
         SET_NAV_STATUS
       }),
+      getLockStates(){
+        console.log("getLockStates");
+        var that = this;
+        if(that.paramLockAck == "1"){
+          if(that.lockUserId == that.user.id || that.lockUserId == ""){
+            that.pageLock = false;
+          }else{
+            that.pageLock = true;
+          }
+        }else{
+          that.pageLock = true;
+        }
+      },
       chooseIP(val){this.control.ip = val;},
       getDeviceParam(){
         var that = this;

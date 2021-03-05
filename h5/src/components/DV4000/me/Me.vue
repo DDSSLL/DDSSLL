@@ -157,7 +157,7 @@
       <transition name="slide-fade">
         <div class="GroupItem" v-show="SystemShow" id="systemInfo">
           <mt-cell title="当前登录用户" :value="user.id" style="font-size:.14rem"></mt-cell>
-          <mt-cell title="设备版本" value="1.00.02" style="font-size:.14rem"></mt-cell>
+          <!-- <mt-cell title="设备版本" value="1.00.02" style="font-size:.14rem"></mt-cell> -->
           <mt-button size="large" class="logout" @click="logout">登出</mt-button>
         </div>
       </transition>

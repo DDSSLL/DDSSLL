@@ -308,10 +308,15 @@
       //修改锁
       changeLockState(){
         var that = this;
-        if (this.paramLockAck == "1") {
-          //已解锁，要加锁,背包不锁定
-          that.setDeviceParam('param_lock',2)
-          that.setDeviceParam('lock_userid',"");
+        //if (this.paramLockAck == "1") {
+        if (this.paramLockAck == "1") {//平台端已解锁
+          if(this.lockUserId != that.user.id){//当前设备为锁定标志
+            that.setDeviceParam('lock_userid',that.user.id);
+          }else{//当前设备为解锁标志
+            //已解锁，要加锁,背包不锁定
+            that.setDeviceParam('param_lock',2)
+            that.setDeviceParam('lock_userid',"");
+          }
         } else {
           //已加锁，要解锁,背包锁定
           that.setDeviceParam('param_lock',1)

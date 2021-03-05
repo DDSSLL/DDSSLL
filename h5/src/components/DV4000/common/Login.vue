@@ -121,7 +121,7 @@
           url:"/login/login.php",
           data:{
             loginId: that.user.login_name,
-            pwd: that.user.password,
+            pwd: md5(that.user.password),
             curTime: that.$moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
           },
           Api:"SetLogin",
