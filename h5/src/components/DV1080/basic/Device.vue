@@ -414,7 +414,8 @@
         width: 100%;
         height: 60px;
         z-index: 9;
-        background-color: #106fb1;
+        /*background-color: #106fb1;*/
+        background-color: #353535;
     }
     .popup{
         position: fixed;
@@ -428,7 +429,8 @@
     .activeDevice{
         overflow: hidden;
         height: .5rem;
-        background-color: #106fb1;
+        /*background-color: #106fb1;*/
+        background-color: #353535;
         padding: .05rem 0;
     }
     .listChannel{
