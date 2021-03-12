@@ -144,7 +144,7 @@
     activated(){  //生命周期-缓存页面激活
       this.getNetBoard();
       this.getDeviceControlParam();
-      this.getLockStates();  
+      this.getLockStates();      
       var that = this;
       localStorage.getControlParam1080 = setInterval(function(){
         that.getNetBoard();

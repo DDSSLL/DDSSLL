@@ -9,6 +9,9 @@
     <!-- 用户 -->
     <UserMan></UserMan>
 
+    <!-- 用户组 -->
+    <PrefixMan v-if="user.userGroup == ADMIN"></PrefixMan>
+
     <div class="Group">
       <div class="GroupTitle" @click="ChartConfShow=!ChartConfShow">
         图表配置
@@ -163,6 +166,7 @@
   import DevMan from './dev';
   import RcvMan from './rcv';
   import UserMan from './user';
+  import PrefixMan from './prefix';
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER, SET_NAV_STATUS, SET_ACTIVE_DEVICE, SET_TIMER_CLEAR, SET_CHART_STYLE, SET_DEVICE_TYPE_SELECT,SET_DEVICE_PREFIX_SELECT } from '../../../store/mutation-types';
   import $ from 'jquery';
@@ -170,6 +174,7 @@
     name: "Me",
     data(){
       return{
+        ADMIN:ADMIN,
         ChartConfTab:'1',
         //ChartConfTotalUp:[],
         ChartConf:{
@@ -222,7 +227,7 @@
       ...mapState(['user','navHide','DeviceTimer','ChartTimer','cardLineStyle','chartCardView','deviceTypeSelect','devicePrefixSelect'])
     },
     components: {
-      DevMan,RcvMan,UserMan
+      DevMan,RcvMan,UserMan,PrefixMan
     },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {

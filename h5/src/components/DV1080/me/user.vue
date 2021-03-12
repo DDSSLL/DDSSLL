@@ -22,13 +22,19 @@
               {content: '删除',style:{display:(user.id!=SUPER || item.id==SUPER)?'none':''}, handler:() => deleteUser(item)}
               ]">
               <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">用户名称</span>
+                <span class="cellName cellLabel" style="float: left;">用户ID</span>
                 <span class="cellName cellValue" style="float: right;">
                   <span v-show="[item.id==user.id]">
                     <i class="fa fa-user" style="color: #23b7e5"></i>
                   </span>
+                  {{ item.id }}
+                </span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">用户名</span>
+                <span class="cellName cellValue" style="float: right;">
                   {{ item.name }}
-                  </span>
+                </span>
               </div>
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">用户组</span>
@@ -37,10 +43,6 @@
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">用户等级</span>
                 <span class="cellName cellValue" style="float: right;">{{ item.userGroupName }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">登录账号</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.id }}</span>
               </div>
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">最近登录时间</span>
@@ -84,10 +86,16 @@
           <input type="password" style="display:none" id="loginPassword"/>
           <input type="text" style="display:none" id="loginUserName"/>
           <div class="fGrp">
+            <div class="tl">用户ID<span class="redText">*</span></div>
+            <div class="vl">
+              <input type="text" class="ItemInput" v-model="curUser.id" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()" :disabled="curUser.idDisable">
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()</p>
+            </div>
+          </div>
+          <div class="fGrp">
             <div class="tl">用户名<span class="redText">*</span></div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="curUser.name" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()">
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()</p>
+              <input type="text" class="ItemInput" v-model="curUser.name" required>
             </div>
           </div>
           <div class="fGrp">
@@ -100,7 +108,7 @@
               </select>
             </div>
           </div>
-          <div class="fGrp">
+          <div class="fGrp" v-if="curUser.userEditType == 'add'">
             <div class="tl">登录密码<span class="redText">*</span></div>
             <div class="vl">
               <input type="password" class="ItemInput" v-model="curUser.pwd" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母"/> 
@@ -109,10 +117,32 @@
               </p>
             </div>
           </div>
-          <div class="fGrp">
+          <div class="fGrp" v-if="curUser.userEditType == 'add'">
             <div class="tl">确认密码<span class="redText">*</span></div>
             <div class="vl">
               <input type="password" class="ItemInput" v-model="curUser.pwd2" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母" clearable autocomplete="off" />
+            </div>
+          </div>
+          <div class="fGrp" v-if="curUser.userEditType == 'edit'">
+            <div class="tl">重置密码</div>
+            <div class="vl">
+              <mt-checklist v-model="curUser.pwdReset" :options="[{label: ' ', value: '1'}]">
+              </mt-checklist>
+            </div>
+          </div>
+          <div class="fGrp" v-if="curUser.pwdReset == '1'">
+            <div class="tl">新密码<span class="redText">*</span></div>
+            <div class="vl">
+              <input type="password" class="ItemInput" v-model="curUser.newPwd" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母"/> 
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;"><!-- pattern="^[A-Za-z0-9_@]{6,16}$" -->
+                6~16位字母,数字,下划线和@组合
+              </p>
+            </div>
+          </div>
+          <div class="fGrp" v-if="curUser.pwdReset == '1'">
+            <div class="tl">确认密码<span class="redText">*</span></div>
+            <div class="vl">
+              <input type="password" class="ItemInput" v-model="curUser.newPwd2" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母" clearable autocomplete="off" />
             </div>
           </div>
           <div class="fGrp">
@@ -150,34 +180,64 @@
         </form>
       </div>
     </mt-popup>
-    <mt-popup v-model="devRightsVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          设备权限
-          <i class="popupCloseBtn fa fa-times" @click="devRightsVisible = false"></i>
+    <!-- 设备权限 -->
+    <mt-popup v-model="deviceAuthourityVisible" position="right" popup-transition="popup-slide" class="wholePagePop devAuthority">
+      <div class="page-navbar">
+        <div class="page-title">
+          <i class="fa fa-arrow-left" aria-hidden="true" @click="deviceAuthourityVisible = false" style="position:absolute"></i>
+          <span class='navTitle'>{{ "用户"+deviceAuthourityName+"设备权限" }}</span>
         </div>
-        <div class="devRightsTable">
-          <table>
-            <thead>
-              <tr>
-                <th>设备</th>
-                <th>序列号</th>
-                <th>状态</th>
-                <th>型号</th>
-              </tr>
-            </thead>
-            <tbody>
+        <mt-navbar v-model="active">
+          <mt-tab-item id="1">背包</mt-tab-item>
+          <mt-tab-item id="2">汇聚</mt-tab-item>
+        </mt-navbar>
+        <!-- tab-container -->
+        <mt-tab-container v-model="active" style="padding:2px 5px;">
+          <mt-tab-container-item id="1" style="overflow-x:auto">
+            <table>
               <template v-for="(item,i) in devRightsList">
                 <tr>
-                  <td>{{ item.dev_name }}</td>
+                  <td :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.dev_name }}</td>
                   <td>{{ item.dev_sn }}</td>
-                  <td>{{ item.online }}</td>
+                  <td>{{ item.user_id }}</td>
+                  <td>{{ item.prefix }}</td>
                   <td>{{ item.dev_model }}</td>
                 </tr>
               </template>
-            </tbody>
-          </table>
-        </div>
+            </table>
+          </mt-tab-container-item>
+          <mt-tab-container-item id="2" style="overflow-x:auto">
+            <table>
+              <template v-for="(item,i) in rcvRightsList">
+                <tr>
+                  <td :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.rcv_name }}</td>
+                  <td>{{ item.rcv_sn }}</td>
+                  <td>{{ item.user_id }}</td>
+                  <td>{{ item.prefix }}</td>
+                  <td>{{ item.rcv_model }}</td>
+                </tr>
+              </template>
+            </table>
+            <!-- <div class="GroupItem">
+              <div class="tableHead">
+                <div>汇聚</div>
+                <div>序列号</div>
+                <div>用户</div>
+                <div>组</div>
+                <div>型号</div>
+              </div>
+              <template v-for="(item,i) in devRightsList">
+                <div class="tableBody">
+                  <div :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.rcv_name }}</div>
+                  <div>{{ item.rcv_sn }}</div>
+                  <div>{{ item.user_id }}</div>
+                  <div>{{ item.prefix }}</div>
+                  <div>{{ item.rcv_model }}</div>
+                </div>
+              </template>
+            </div> -->
+          </mt-tab-container-item>
+        </mt-tab-container>
       </div>
     </mt-popup>
   </div>
@@ -191,6 +251,7 @@
     name: "DevMan",
     data(){
       return{
+        active:"1",
         SUPER : SUPER,
         ADVANCE : ADVANCE,
        	NORMAL : NORMAL,
@@ -199,10 +260,12 @@
         AccountShow:false,
         accountList:[],
         userConfigVisible:false,
+        deviceAuthourityName:"",
         curUser:{//用户编辑页面
           userEditType:"add",
           nameReadonly:false,
           id:"",
+          idDisable:false,
           name:"",//用户名
           oldName:"",
           prefix:"",//用户组名
@@ -210,6 +273,9 @@
           prefixDisable:false,//用户组disabale
           pwd:"",
           pwd2:"",
+          pwdReset:"0",
+          newPwd:"",
+          newPwd2:"",
           pwdReadonly:false,
           pwd2Readonly:false,
           userGroup:"",//用户等级
@@ -223,8 +289,9 @@
           remark:"",
         },
 
-        devRightsVisible:false,
+        deviceAuthourityVisible:false,
         devRightsList:[],
+        rcvRightsList:[],
         /*用户组*/
         userPrefixShow:true,//用户组过滤
         selectPrefixOptions:[],//用户组options
@@ -267,7 +334,7 @@
             }
           }
           //用户组列表
-          that.$global.getChildGrpArr(function(data) {
+          that.$global.getChildGrpArr(that.user.prefix,function(data) {
             //添加编辑页面的用户组
             /*for(var i=0; i<data.length; i++){
               that.curUser.prefixOptions.push({text:data[i].prefix_name, value:data[i].prefix});
@@ -391,26 +458,19 @@
         console.log("initUserGroup")
         var that = this;
         that.getUserGroup(function(groupData){
-          //that.formatUserGroup(groupData);
           that.curUser.userGroupOptions = groupData;
-          console.log("that.curUser.userGroupOptions:")
-          console.log(that.curUser.userGroupOptions)
           if(cb){
             cb()
           }
         })
       },
       formatUserGroup(data){
-        console.log("formatUserGroup")
-        console.log(data)
         var that = this;
-        //that.curUser.userGroupOptionsOri = data;
         that.curUser.userGroupOptions = data;
-        
       },
       initPrefix(cb){
         var that = this;
-        that.$global.getChildGrpArr(function(data) {
+        that.$global.getChildGrpArr(that.user.prefix,function(data) {
           for(var i=0; i<data.length; i++){
             that.curUser.prefixOptions.push({text:data[i].prefix_name, value:data[i].prefix});
           }
@@ -419,28 +479,37 @@
           }
         })
       },
-      clearUserPopup(){
-        this.curUser.name = "";
-        this.curUser.pwd = "";
-        this.curUser.mobilePhone = "";
-        this.curUser.emailAddress = "";
-        this.curUser.remark = "";
-      },
       submitUserConfig(){
         var that = this;
+        var id = this.curUser.id;
         var name = this.curUser.name;
         var mobilePhone = this.curUser.mobilePhone;
         var emailAddress = this.curUser.emailAddress;
         var remark = this.curUser.remark;
         var pwd = this.curUser.pwd;
-        if (this.curUser.pwd != this.curUser.pwd2) {
-          that.$toast({
-            message: "密码不一致!",
-            position: 'middle',
-            duration: 2000
-          });
-          return;
+        var newPwd = this.curUser.newPwd;
+        var type = this.curUser.userEditType;
+        if( type == "add"){
+          if (this.curUser.pwd != this.curUser.pwd2) {
+            that.$toast({
+              message: "密码不一致!",
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }  
+        }else{
+          pwd = this.curUser.newPwd;
+          if (this.curUser.newPwd != this.curUser.newPwd2) {
+            that.$toast({
+              message: "密码不一致!",
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
         }
+        
         if (this.curUser.userEditType == "add") {
           for (var i = 0; i < this.accountList.length; i++) {
             if (this.accountList[i].id == name) {
@@ -467,11 +536,12 @@
             method: 'post',
             url:"/page/users/users.php",
             data:this.$qs.stringify({
-              addUser: name,
+              addUser: id,
+              name:name,
               pwd: pwd,
               group: that.curUser.userGroup,
               prefix: that.curUser.prefix,
-              loginId: name,
+              loginId: id,
               enable: that.user.id==SUPER?1:0,
               mobilePhone: mobilePhone,
               emailAddress: emailAddress,
@@ -504,12 +574,12 @@
             method: 'post',
             url:"/page/users/users.php",
             data:this.$qs.stringify({
-              editUser: name,
-              oldUser: oldName,
+              editUser: id,
+              name:name,
               pwd: pwd,
               group: that.curUser.userGroup,
               prefix: that.curUser.prefix,
-              loginId: name,
+              loginId: id,
               enable: that.user.id==SUPER?1:0,
               mobilePhone: mobilePhone,
               emailAddress: emailAddress,
@@ -540,26 +610,35 @@
       showDevAuthority(item){
         var that = this;
         this.devRightsList = [];
-        this.devRightsVisible = true;
+        this.rcvRightsList = [];
+        this.active = "1";
+        this.deviceAuthourityVisible = true;
+        this.deviceAuthourityName = item.id;
+        this.getDevAuthourData(item.id);
+        this.getRcvAuthourData(item.id);
+      },
+      getDevAuthourData(userId){
+        var that = this;
         this.$axios({
           method: 'post',
           url:"/page/users/users.php",
           data:this.$qs.stringify({
-            getDevList: true,
-            userId: item.name,
-            userGroup: 1,
-            prefix: item.name,
-            logId: item.name,
-            logGroup: 1
+            getUserDevList: true,
+            userId: userId,
           }),
-          Api:"getDevList",
+          Api:"getUserDevList",
           AppId:"android",
           UserId:that.user.id
         })
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.devRightsList = res.data;
+            that.devRightsList.push({"dev_name": "背包",
+                                  "dev_sn": "序列号",
+                                  "user_id": "用户",
+                                  "prefix": "组",
+                                  "dev_model": "型号"}) 
+            that.devRightsList = that.devRightsList.concat(res.data);
           }else{
             that.devRightsList = [];
           }
@@ -568,12 +647,52 @@
           console.log(error)
         })
       },
+      getRcvAuthourData(userId){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/users/users.php",
+          data:this.$qs.stringify({
+            getUserRcvList: true,
+            userId: userId,
+          }),
+          Api:"getUserRcvList",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            //that.rcvRightsList = res.data;
+            that.rcvRightsList.push({"rcv_name": "汇聚",
+                                  "rcv_sn": "序列号",
+                                  "user_id": "用户",
+                                  "prefix": "组",
+                                  "rcv_model": "型号"}) 
+            that.rcvRightsList = that.rcvRightsList.concat(res.data);
+          }else{
+            that.rcvRightsList = [];
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      clearUserPopup(){
+        this.curUser.id = "";
+        this.curUser.idDisable = false;
+        this.curUser.name = "";
+        this.curUser.pwd = "";
+        this.curUser.pwd2 = "";
+        this.curUser.mobilePhone = "";
+        this.curUser.emailAddress = "";
+        this.curUser.remark = "";
+      },
       editUser(item){
         var that = this;
         that.userConfigVisible = true;
         that.curUser.userEditType = "edit";
         that.initUserGroup(function(){
-          console.log("initUserGroup cb")
           that.curUser.userGroup = that.curUser.userGroupOptions[0]["value"];
           var userGroup = that.user.userGroup;
           that.curUser.userGroup = item.userGroup;
@@ -592,44 +711,35 @@
           that.curUser.prefix = item.prefix;
         })
         that.curUser.id = item.id;
+        that.curUser.idDisable = true;
         that.curUser.name = item.name;
         that.curUser.pwd = item.pwd;
         that.curUser.pwd2 = item.pwd;
+        that.curUser.pwdReset = '';
+        that.curUser.newPwd = '';
+        that.curUser.newPwd2 = '';
         that.curUser.mobilePhone = item.mobilePhone;
         that.curUser.emailAddress = item.emailAddress;
-        that.curUser.remark = item.remark;
-    
+        that.curUser.remark = item.remark; 
       },
       deleteUser(item){
         var that = this;
-        this.$messagebox.confirm("确定删除此用户?").then(
-          action => {
-            this.$axios({
-              method: 'post',
-              url:"/page/users/users.php",
-              data:this.$qs.stringify({
-                delUserIds:"'"+item.id+"'"
-              }),
-              Api:"delUser",
-              AppId:"android",
-              UserId:that.user.id
-            })
-            .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                that.$toast({
-                  message: '操作成功'
-                });
-              }else{
-                that.$toast({
-                  message: '操作失败'
-                });
-              }
+        //询问
+        that.$messagebox.confirm('',{
+          title:'提示',
+          message:'是否删除用户及其名下设备?',
+          confirmButtonText:'全删',
+          cancelButtonText:'只删用户'
+        }).then(action => {
+          if (action == 'confirm') {
+            that.$global.deleteUserById(item.id,1,function(){
               that.getAccountList();
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
+            });
+          }
+        }).catch(error =>{
+          that.$global.deleteUserById(item.id,0,function(){
+              that.getAccountList();
+            });
         });
       },
     }
@@ -858,6 +968,9 @@
   .onlineStyle{
     color:#00ff00;
   }
+  .onBoardStyle{
+    color:#ff0000; 
+  }
   #devList .mint-cell-value>.cellItem{
     display:flex;
   }
@@ -912,6 +1025,17 @@
     display:inline-block; 
     vertical-align: middle;
     padding-left:5px;
+  }
+  .devAuthority td{
+    padding:4px 2px;
+    border:1px solid #333;
+    font-size:.14rem;
+  }
+  .mint-checklist a{
+    background-color:transparent !important;
+  }
+  .mint-checklist-title{
+    margin:0px;
   }
   /*.mint-toast{
     z-index:2010 !important;

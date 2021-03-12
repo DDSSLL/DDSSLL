@@ -38,6 +38,7 @@ window.RED = '#FF4D52';
 window.ORANGE = '#ff9945';
 window.BLUE = '#45ffe9';
 window.WHITE = '#ffffff';
+window.DEPTH_MAX = 4;
 window.HDXPRESS_BUILD = "http://www.hdxpress.cn";//1080一级域名
 window.HDXPRESS_SERVE = "http://1080.hdxpress.cn:8088/";//1080二级域名，对应地址：47.104.161.61
 window.UHDXPRESS_BUILD = "http://4000.uhdxpress.com";//4000一级域名
@@ -123,7 +124,8 @@ window.colorObj = {
     "USB-LAN↑":'USBLANUp',  "USB-LAN↓":'USBLANDown',  "USB-LAN传输丢包":'USBLANLossDev',  "USB-LAN业务丢包":'USBLANLossRcv',
     "USB-LAN2↑":'USBLAN2Up',"USB-LAN2↓":'USBLAN2Down',"USB-LAN2传输丢包":'USBLAN2LossDev',"USB-LAN2业务丢包":'USBLAN2LossRcv'
 };
-import { Toast } from 'mint-ui'
+import { Toast } from 'mint-ui';
+import { MessageBox } from 'mint-ui';
 import qs from 'qs';
 import store from '../store'
 import axios from '../api/axios.init'
@@ -894,37 +896,6 @@ export default {
     var re = /^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
     return re.test(port);
   },
-  //获取登录用户所在组的所有子组
-  getChildGrpArr(cb) {
-    axios({
-      method: 'post',
-      url:"/page/userPrefix/userPrefix.php",
-      data:qs.stringify({
-        getChildGrpArr:true,
-        logPrefix:store.state.user.prefix
-      }),
-      Api:"getCurAndChildPrefixs",
-      AppId:"android",
-      UserId:store.state.user.id
-    })
-    .then(function (response) {
-      let res = response.data;
-      if(res.res.success){
-        if(cb){
-          cb(res.data)
-        }
-      }else{
-        Toast({
-          message: res.res.reason,
-          position: 'middle',
-          duration: 2000
-        });
-      }
-    })
-    .catch(function (error) {
-      console.log(error)
-    })
-  },
   getNewPrefixList(cb){
     axios({
       method: 'post',
@@ -1160,5 +1131,69 @@ export default {
       }
     }
     return len;
+  },
+  //删除用户
+  deleteUserById(userIds,deldevflag,cb,group){
+    axios({
+      method: 'post',
+      url:"/page/users/users.php",
+      data:qs.stringify({
+        delUserIds: userIds,
+        delDevFlag: deldevflag,
+        logId: store.state.user.id,
+      }),
+      Api:"delUser",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+         if(cb){
+          cb("success",group);
+        }
+      }else{
+        that.$toast({
+          message: res.res.reason,
+          position: 'middle',
+          duration: 2000
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
+  //获取登录用户所在组的所有子组
+  getChildGrpArr(logPrefix,callback) {
+    axios({
+      method: 'post',
+      url:"/page/userPrefix/userPrefix.php",
+      data:qs.stringify({
+        getChildGrpArr: true,
+        logPrefix:logPrefix
+      }),
+      Api:"getChildGrpArr",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        var data = res.data;
+        if (callback) {
+          callback(data);
+        }
+      }else{
+        that.$toast({
+          message: res.res.reason,
+          position: 'middle',
+          duration: 2000
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
   },
 }
