@@ -25,7 +25,7 @@
                   <template v-for="(value, key, j) in item.memberName">
                     <span style="text-decoration:underline">{{"用户组"+key+": "}}</span>
                     <br>
-                    <span class="cellName cellValue" style="float: none;">{{ value.join(", ") }}</span>
+                    <span class="cellName cellValue" style="float: none;word-wrap: break-word;">{{ value.join(", ") }}</span>
                     <br>
                   </template>  
                 </div>
