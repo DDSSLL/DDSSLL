@@ -120,7 +120,7 @@
                   <div class="GroupItemField">
                     <div class="GroupItemTitle GroupItemTitle1">{{item.name}}</div>
                     <div class="GroupItemValue GroupItemValue1">
-                      <mt-checklist v-model="item.value" :options="ChartConf.simCheckList">
+                      <mt-checklist v-model="item.value" :options="ChartConf.simCheckList" @change="changeCardLineShow(item)">
                       </mt-checklist>
                     </div>
                   </div>
@@ -146,6 +146,10 @@
         </div>
       </transition>
     </div>
+
+    <!-- 路测 -->
+    <RoadTest></RoadTest>
+    
     <div class="Group">
       <div class="GroupTitle" @click="SystemShow=!SystemShow">
         系统
@@ -167,6 +171,7 @@
   import RcvMan from './rcv';
   import UserMan from './user';
   import PrefixMan from './prefix';
+  import RoadTest from './roadTest';
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER, SET_NAV_STATUS, SET_ACTIVE_DEVICE, SET_TIMER_CLEAR, SET_CHART_STYLE, SET_DEVICE_TYPE_SELECT,SET_DEVICE_PREFIX_SELECT } from '../../../store/mutation-types';
   import $ from 'jquery';
@@ -220,194 +225,183 @@
         /*ReceiverShow:false,*/
         /*AccountShow:false,*/
         SystemShow:true,
-       
+        RoadTestShow:false,
       }
     },
     computed: {
       ...mapState(['user','navHide','DeviceTimer','ChartTimer','cardLineStyle','chartCardView','deviceTypeSelect','devicePrefixSelect'])
     },
     components: {
-      DevMan,RcvMan,UserMan,PrefixMan
+      DevMan,RcvMan,UserMan,PrefixMan,RoadTest
     },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {
         immediate: true,
         handler(val) {
           this.ActiveDevice = val;
-          this.getChartConfUnit();
+          //this.getChartConfUnit();
           this.getChartConfTotal();
           //this.getChartConfCard();
           //this.initCardChartSelect();
-          /*this.getDeviceList();*/
-          /*this.getReceiverList();*/
-          /*this.getAccountList();*/
         }
       }
     },
     mounted(){
-      console.log("dd me mounted")
+      this.getChartConfUnit();
       this.getChartConfTotal();
       this.initCardChartSelect();
       this.getChartConfCard();
     },
     activated(){  //生命周期-缓存页面激活
-      console.log("dd me activated")
       this.getChartConfUnit();
       this.getChartConfTotal();
-      //this.getChartConfCard();
-      /*this.getDeviceList();*/
-      /*this.getReceiverList();*/
-      /*this.getAccountList();*/
+      this.getChartConfCard();
     },
     deactivated(){   //生命周期-缓存页面失活
 
     },
     methods:{
       ...mapMutations({
-          SET_USER,
-          SET_NAV_STATUS,
-          SET_ACTIVE_DEVICE,
-          SET_TIMER_CLEAR,
-          SET_CHART_STYLE,
-          SET_DEVICE_TYPE_SELECT,
-          SET_DEVICE_PREFIX_SELECT
+        SET_USER,
+        SET_NAV_STATUS,
+        SET_ACTIVE_DEVICE,
+        SET_TIMER_CLEAR,
+        SET_CHART_STYLE,
+        SET_DEVICE_TYPE_SELECT,
+        SET_DEVICE_PREFIX_SELECT
       }),
       getChartConfUnit(){
-          var that = this;
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  getChartParam:true,
-                  devSN: that.ActiveDevice?that.ActiveDevice.dev_sn:""
-              }),
-              Api:"getChartParam",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                  that.ChartConf.unit = formatUnit(res.data[0]);
-              }else{
-                  that.ChartConf.unit = {chartAutoVal:true};
-              }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
-          function formatUnit(item){
-              if(item.chartAuto == "1"){
-                  item.chartAutoVal = true;
-              }else{
-                  item.chartAutoVal = false;
-              }
-              return item;
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:this.$qs.stringify({
+            getChartParam:true,
+            devSN: that.ActiveDevice?that.ActiveDevice.dev_sn:""
+          }),
+          Api:"getChartParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.ChartConf.unit = formatUnit(res.data[0]);
+          }else{
+            that.ChartConf.unit = {chartAutoVal:true};
           }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+        function formatUnit(item){
+          if(item.chartAuto == "1"){
+            item.chartAutoVal = true;
+          }else{
+            item.chartAutoVal = false;
+          }
+          return item;
+        }
       },
       setChartConfUnit(){
-          var that = this;
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  setChartParam:true,
-                  devSN: that.ActiveDevice.dev_sn,
-                  chartAuto: that.ChartConf.unit.chartAutoVal? "1": "0",
-                  chartMax: that.ChartConf.unit.chartMax,
-                  chartInterval: that.ChartConf.unit.chartInterval
-              }),
-              Api:"setChartParam",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                that.$toast({
-                  message: "操作成功",
-                  position: 'middle',
-                  duration: 2000
-                });
-              }else{
-                  that.getChartConfUnit();
-              }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:this.$qs.stringify({
+            setChartParam:true,
+            devSN: that.ActiveDevice.dev_sn,
+            chartAuto: that.ChartConf.unit.chartAutoVal? "1": "0",
+            chartMax: that.ChartConf.unit.chartMax,
+            chartInterval: that.ChartConf.unit.chartInterval
+          }),
+          Api:"setChartParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.$toast({
+              message: "操作成功",
+              position: 'middle',
+              duration: 2000
+            });
+          }else{
+            that.getChartConfUnit();
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       getChartConfTotal(){
-          var that = this;
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  getChartShowContent:true,
-                  devSn: that.ActiveDevice?that.ActiveDevice.dev_sn:"",
-                  prefix: that.ActiveDevice?that.ActiveDevice.prefix:""
-              }),
-              Api:"getChartShowContent",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                var data = res.data[0];
-                for(var key in data){
-                  data[key] = data[key].split(",");
-                }
-                that.ChartConf.total = data;
-              }else{
-                that.$toast({
-                  message: res.res.reason,
-                  position: 'middle',
-                  duration: 5000
-                });
-              }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:this.$qs.stringify({
+            getChartShowContent:true,
+            devSn: that.ActiveDevice?that.ActiveDevice.dev_sn:"",
+            prefix: that.ActiveDevice?that.ActiveDevice.prefix:""
+          }),
+          Api:"getChartShowContent",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var data = res.data[0];
+            for(var key in data){
+              data[key] = data[key].split(",");
+            }
+            that.ChartConf.total = data;
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 5000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       setChartConfTotal(){
-          var that = this;
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  setChartShowContent:true,
-                  devSn: that.ActiveDevice.dev_sn,
-                  up: that.ChartConf.total.up,
-                  down: that.ChartConf.total.down,
-                  lossDev: that.ChartConf.total.lossDev,
-                  lossRcv: that.ChartConf.total.lossRcv
-              }),
-              Api:"setChartShowContent",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                  that.getChartConfTotal();
-              }else{
-                  that.getChartConfTotal();
-              }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:this.$qs.stringify({
+            setChartShowContent:true,
+            devSn: that.ActiveDevice.dev_sn,
+            up: that.ChartConf.total.up,
+            down: that.ChartConf.total.down,
+            lossDev: that.ChartConf.total.lossDev,
+            lossRcv: that.ChartConf.total.lossRcv
+          }),
+          Api:"setChartShowContent",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.getChartConfTotal();
+          }else{
+            that.getChartConfTotal();
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
-
       setCardChartStyle(type){
-        console.log("setCardChartStyle:"+type);
-          //this.ChartConf.card.id = type;
         this.SET_CHART_STYLE(type);
       },
       getChartConfCard(){
-        console.log("!!!!!!!!!!")
         var that = this;
         var showCard = that.ChartConf.showCard;
         for(var j=0; j<showCard.length; j++){
@@ -417,7 +411,7 @@
             that.ChartConf.showCard[j]["value"] = that.chartCardView[showCard[j]["name"].toLowerCase()].split(",");
           }
         }
-        console.log(that.ChartConf.showCard)
+        that.initChartConfCard();
           /*this.$axios({
               method: 'post',
               url:"/page/index/chartData.php",
@@ -453,21 +447,29 @@
           .catch(function (error) {
               console.log(error)
           })*/
-          function formatUnit(item){
-              item.eth0Val = item.eth0.split(",");
-              item.sim1Val = item.sim1.split(",");
-              item.sim2Val = item.sim2.split(",");
-              item.sim3Val = item.sim3.split(",");
-              item.sim4Val = item.sim4.split(",");
-              item.sim5Val = item.sim5.split(",");
-              item.sim6Val = item.sim6.split(",");
-              item.wifiVal = item.wifi.split(",");
-              item.usb_5g1Val = item.usb_5g1.split(",");
-              item.usb_5g2Val = item.usb_5g2.split(",");
-              item.usb_lanVal = item.usb_lan.split(",");
-              item.usb_lan2Val = item.usb_lan2.split(",");
-              return item;
-          }
+        function formatUnit(item){
+          item.eth0Val = item.eth0.split(",");
+          item.sim1Val = item.sim1.split(",");
+          item.sim2Val = item.sim2.split(",");
+          item.sim3Val = item.sim3.split(",");
+          item.sim4Val = item.sim4.split(",");
+          item.sim5Val = item.sim5.split(",");
+          item.sim6Val = item.sim6.split(",");
+          item.wifiVal = item.wifi.split(",");
+          item.usb_5g1Val = item.usb_5g1.split(",");
+          item.usb_5g2Val = item.usb_5g2.split(",");
+          item.usb_lanVal = item.usb_lan.split(",");
+          item.usb_lan2Val = item.usb_lan2.split(",");
+          return item;
+        }
+      },
+      initChartConfCard(){
+        var that = this;
+        var chartCardView = that.chartCardView;
+        for(var key in chartCardView){
+          that.ChartConf.card[key] = chartCardView[key];
+          that.ChartConf.card[key+"Val"] = chartCardView[key].split(",");
+        }
       },
       initCardChartSelect(devSN){
         var that = this;
@@ -503,47 +505,62 @@
           }
         }*/
       },
-
+      changeCardLineShow(e){
+        var that = this;
+        var order = ["up", "down", "lossDev"];
+        that.ChartConf.card[e["name"].toLowerCase()+"Val"] = e.value.filter(function(item){
+          return !!item;
+        }).sort(function(a,b){
+          return order.indexOf(a) - order.indexOf(b);
+        });
+        that.ChartConf.card[e["name"].toLowerCase()] = e.value.filter(function(item){
+          return !!item;
+        }).sort(function(a,b){
+          return order.indexOf(a) - order.indexOf(b);
+        }).join(",");
+      },
       setChartConfCard(){
-          var that = this;
-          var paramData = {
-              "eth0":that.ChartConf.card.eth0Val.join(","),
-              "wifi":that.ChartConf.card.eth0Val.join(","),
-              "sim1":that.ChartConf.card.eth0Val.join(","),
-              "sim2":that.ChartConf.card.eth0Val.join(","),
-              "sim3":that.ChartConf.card.eth0Val.join(","),
-              "sim4":that.ChartConf.card.eth0Val.join(","),
-              "sim5":that.ChartConf.card.eth0Val.join(","),
-              "sim6":that.ChartConf.card.eth0Val.join(","),
-              "usb-5g1":that.ChartConf.card.eth0Val.join(","),
-              "usb-5g2":that.ChartConf.card.eth0Val.join(","),
-              "usb-lan":that.ChartConf.card.eth0Val.join(","),
-              "usb-lan2":that.ChartConf.card.eth0Val.join(","),
-              "id":that.ChartConf.card.id
-          };
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  setCardChartShowContent:true,
-                  devSn: that.ActiveDevice.dev_sn,
-                  data: paramData
-              }),
-              Api:"setCardChartShowContent",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                  that.getChartConfCard();
-              }else{
-                  that.getChartConfCard();
-              }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
+        var that = this;
+        var paramData = {
+          "eth0":that.ChartConf.card.eth0Val,
+          "wifi":that.ChartConf.card.wifiVal,
+          "sim1":that.ChartConf.card.sim1Val,
+          "sim2":that.ChartConf.card.sim2Val,
+          "sim3":that.ChartConf.card.sim3Val,
+          "sim4":that.ChartConf.card.sim4Val,
+          "sim5":that.ChartConf.card.sim5Val,
+          "sim6":that.ChartConf.card.sim6Val,
+          "usb-5g1":that.ChartConf.card["usb-5g1Val"],
+          "usb-5g2":that.ChartConf.card["usb_5g2Val"],
+          "usb-lan":that.ChartConf.card["usb_lan"],
+          "usb-lan2":that.ChartConf.card["usb_lan2"],
+        };
+        that.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:that.$qs.stringify({
+            setCardChartShowContent:true,
+            devSn: that.ActiveDevice.dev_sn,
+            data: JSON.stringify(paramData)
+          }),
+          Api:"setCardChartShowContent",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.$toast({
+              message: '操作成功'
+            });
+            that.getChartConfCard();
+          }else{
+            that.getChartConfCard();
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       setLineContent(e){
         console.log("setLineContent")
@@ -575,7 +592,7 @@
 <style scoped>
     .me{
         background-color: #212227;
-        height: calc(100% - 54px);
+        height: calc(100% - 0.5rem);
         overflow:auto;
     }
     .Group{
@@ -813,7 +830,7 @@
       border-bottom-right-radius:4px;
     }
     .mint-popup{border-radius: 6px;background-color: #EEE;}
-    .me .mint-popup{width: 90%;max-height: 90%;overflow-y: auto;border-radius: 4px;}
+    .me .mint-popup{width: 90%;overflow-y: auto;border-radius: 4px;}
     .me .popupContainer .mint-cell-title{width:40%;text-align: left;}
     .me .popupContainer .mint-cell-value{width:60%;text-align: right;padding:0;}
     .me .popupContainer .mint-cell{min-height:24px;}
@@ -852,5 +869,14 @@
     }
     #systemInfo .mint-cell-value{
       flex:1
+    }
+    .userPrefixPop.mint-popup{
+      background-color: #212227;
+      width: 100%;
+      height: 100%;
+    }
+    .userPrefixPop.mint-popup>div{
+      height:calc(100% - 30px);
+      overflow:auto;
     }
 </style>

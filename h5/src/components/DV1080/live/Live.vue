@@ -1,5 +1,5 @@
 <template>
-  <div class="live">
+  <div class="live mainPage">
     <Device page='rcv' @changeRcvLockState='changeRcvLockState'></Device>
     <div class="addressGroup">
       <template v-for="(item,i) in address">
@@ -125,16 +125,8 @@
         }
       },*/
       getPushUrl(){
-        console.log("getPushUrl")
-
         var that = this;
-        console.log(that.ActiveDevice.rcv_sn)
-
-        console.log(that.ActiveDevice.board_id)
         that.address = [];
-        if(!that.ActiveDevice.rcv_sn && !that.ActiveDevice.board_id){
-          return ;
-        }
         that.$global.getPushUrls(that, that.formatPushUrls);
         that.getPushParam();
         localStorage.getPushUrl1080 = setInterval(function(){

@@ -315,60 +315,6 @@
         display: block;
         line-height: .16rem;
     }
-/*    .loginGroup{
-        position: fixed;
-        right: .55rem;
-        bottom: .55rem;
-        display: flex;
-        justify-content: space-between;
-        flex-direction: column;
-    }
-    .deviceLogin{
-        background-color: #484D57;
-        color: #FFFFFF;
-        box-shadow: none;
-        font-size: .14rem;
-        width: 1rem;
-        height: .36rem;
-        border-radius: 0;
-    }
-    .deviceLoginActive{
-      background-color: #3d81f1;
-    }
-   .setBtn{
-        position: fixed;
-        z-index: 1;
-        right: .2rem;
-        bottom: .2rem;
-        width: .5rem;
-        height: .5rem;
-        border-radius: 50%;
-        color: #FFF;
-        text-align: center;
-        line-height: .64rem;
-    }
-  .debugSetting{
-    width:100%;
-    height:100%; 
-    background-color:#000 !important;
-    font-size: .16rem;
-  }
-  .debugSettingTitle{
-    padding-top:2rem;
-    color: #fff;
-    text-align: center;
-  }
-  .debugSettingInput{
-    text-align: center;
-    margin-top: 15px;
-    font-size:0.16rem;
-  }
-  .debugSettingBtn{
-    text-align: center;
-    margin-top: 15px;
-  }
-    */
-
     .pushEditModal{
         width: 3rem;
     }

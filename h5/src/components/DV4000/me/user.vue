@@ -902,7 +902,7 @@
   .userPrefixPop.mint-popup{
     background-color: #212227;
     width: 100%;
-    height: auto;
+    height: 100%;
   }
   .cellItem{overflow:hidden}
   .cellItem .cellName{float: left;text-align: left;}

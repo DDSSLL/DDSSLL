@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="main mainPage">
     <Device page='status' @refreshChart='refreshChart'></Device>
     <div class="chartArea">
       <div class="mainChart" id="mainChart">
@@ -337,25 +337,25 @@ export default {
             'ETH0LossDev':  {color: colorGV['ETH0传输丢包'],fontWeight: 'bold',fontSize: '14'},
             'ETH0LossRcv':  {color: colorGV['ETH0业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-            'USB-5G1Up':       {color: colorGV['USB-5G1↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G1Down':     {color: colorGV['USB-5G1↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G1LossDev':  {color: colorGV['USB-5G1传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G1LossRcv':  {color: colorGV['USB-5G1业务丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G1Up':       {color: colorGV['USB-5G1↑'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G1Down':     {color: colorGV['USB-5G1↓'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G1LossDev':  {color: colorGV['USB-5G1传输丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G1LossRcv':  {color: colorGV['USB-5G1业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-            'USB-5G2Up':       {color: colorGV['USB-5G2↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G2Down':     {color: colorGV['USB-5G2↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G2LossDev':  {color: colorGV['USB-5G2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G2LossRcv':  {color: colorGV['USB-5G2业务丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G2Up':       {color: colorGV['USB-5G2↑'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G2Down':     {color: colorGV['USB-5G2↓'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G2LossDev':  {color: colorGV['USB-5G2传输丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G2LossRcv':  {color: colorGV['USB-5G2业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-            'USB-LANUp':       {color: colorGV['USB-LAN↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LANDown':     {color: colorGV['USB-LAN↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LANLossDev':  {color: colorGV['USB-LAN传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LANLossRcv':  {color: colorGV['USB-LAN业务丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USBLANUp':       {color: colorGV['USB-LAN↑'],fontWeight: 'bold',fontSize: '14'},
+            'USBLANDown':     {color: colorGV['USB-LAN↓'],fontWeight: 'bold',fontSize: '14'},
+            'USBLANLossDev':  {color: colorGV['USB-LAN传输丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USBLANLossRcv':  {color: colorGV['USB-LAN业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-            'USB-LAN2Up':       {color: colorGV['USB-LAN2↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LAN2Down':     {color: colorGV['USB-LAN2↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LAN2LossDev':  {color: colorGV['USB-LAN2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LAN2LossRcv':  {color: colorGV['USB-LAN2业务丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USBLAN2Up':       {color: colorGV['USB-LAN2↑'],fontWeight: 'bold',fontSize: '14'},
+            'USBLAN2Down':     {color: colorGV['USB-LAN2↓'],fontWeight: 'bold',fontSize: '14'},
+            'USBLAN2LossDev':  {color: colorGV['USB-LAN2传输丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USBLAN2LossRcv':  {color: colorGV['USB-LAN2业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
             'WIFIUp':       {color: colorGV['WIFI↑'],fontWeight: 'bold',fontSize: '14'},
             'WIFIDown':     {color: colorGV['WIFI↓'],fontWeight: 'bold',fontSize: '14'},
@@ -622,7 +622,7 @@ export default {
       var allChartData = localStorage.allChartData ? JSON.parse(localStorage.allChartData) : {};
       var curChart = localStorage.curChart ? JSON.parse(localStorage.curChart) : {};
       for (var key in data) {
-        if(!data[key]){
+        if(!data[key] || data[key] == ""){
           continue;
         }
         var dataAll = data[key][0]; //上行速率，下行速率，上行丢包率

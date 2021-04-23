@@ -1,6 +1,6 @@
 <template>
-  <div class="main">
-    <Device></Device>
+  <div class="main mainPage">
+    <Device page='status' @refreshChart='refreshChart'></Device>
     <div class="chartArea">
       <div class="mainChart" id="mainChart">
         <div id="totalChart" class="totalChart"></div>
@@ -156,6 +156,7 @@ export default {
       legendTop:20,
       xData : [],
       colorGV: {},
+      avbrFlag:false,
       chartLegendArr : ["Total"],
       chartGeneralView : {
         "up":["Total"],
@@ -180,6 +181,14 @@ export default {
       lineStyle : {
         width: 1,
         type: 'solid' //'dotted'虚线 'solid'实线
+      },
+      ChartConf:{
+        unit:{
+          chartAuto:"1",
+          chartInterval:"",
+          chartMax:"",
+          speedInput:"",
+        }
       },
       commonOptionXAxis : [{
         type: "category",
@@ -299,6 +308,7 @@ export default {
           rich: {
             'totalUp':      {color: colorGV['上传速率'],fontWeight: 'bold',fontSize: '14'},
             'totalDown':    {color: colorGV['下载速率'],fontWeight: 'bold',fontSize: '14'},
+            'totalAVBR':    {color: colorGV['可变码率'],fontWeight: 'bold',fontSize: '14'},
             'TotalLossDev': {color: colorGV['传输丢包'],fontWeight: 'bold',fontSize: '14'},
             'TotalLossRcv': {color: colorGV['业务丢包'],  fontWeight: 'bold',fontSize: '14'},
 
@@ -337,25 +347,25 @@ export default {
             'ETH0LossDev':  {color: colorGV['ETH0传输丢包'],fontWeight: 'bold',fontSize: '14'},
             'ETH0LossRcv':  {color: colorGV['ETH0业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-            'USB-5G1Up':       {color: colorGV['USB-5G1↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G1Down':     {color: colorGV['USB-5G1↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G1LossDev':  {color: colorGV['USB-5G1传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G1LossRcv':  {color: colorGV['USB-5G1业务丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G1Up':       {color: colorGV['USB-5G1↑'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G1Down':     {color: colorGV['USB-5G1↓'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G1LossDev':  {color: colorGV['USB-5G1传输丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G1LossRcv':  {color: colorGV['USB-5G1业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-            'USB-5G2Up':       {color: colorGV['USB-5G2↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G2Down':     {color: colorGV['USB-5G2↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G2LossDev':  {color: colorGV['USB-5G2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-5G2LossRcv':  {color: colorGV['USB-5G2业务丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G2Up':       {color: colorGV['USB-5G2↑'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G2Down':     {color: colorGV['USB-5G2↓'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G2LossDev':  {color: colorGV['USB-5G2传输丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USB5G2LossRcv':  {color: colorGV['USB-5G2业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-            'USB-LANUp':       {color: colorGV['USB-LAN↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LANDown':     {color: colorGV['USB-LAN↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LANLossDev':  {color: colorGV['USB-LAN传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LANLossRcv':  {color: colorGV['USB-LAN业务丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USBLANUp':       {color: colorGV['USB-LAN↑'],fontWeight: 'bold',fontSize: '14'},
+            'USBLANDown':     {color: colorGV['USB-LAN↓'],fontWeight: 'bold',fontSize: '14'},
+            'USBLANLossDev':  {color: colorGV['USB-LAN传输丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USBLANLossRcv':  {color: colorGV['USB-LAN业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
-            'USB-LAN2Up':       {color: colorGV['USB-LAN2↑'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LAN2Down':     {color: colorGV['USB-LAN2↓'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LAN2LossDev':  {color: colorGV['USB-LAN2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'USB-LAN2LossRcv':  {color: colorGV['USB-LAN2业务丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USBLAN2Up':       {color: colorGV['USB-LAN2↑'],fontWeight: 'bold',fontSize: '14'},
+            'USBLAN2Down':     {color: colorGV['USB-LAN2↓'],fontWeight: 'bold',fontSize: '14'},
+            'USBLAN2LossDev':  {color: colorGV['USB-LAN2传输丢包'],fontWeight: 'bold',fontSize: '14'},
+            'USBLAN2LossRcv':  {color: colorGV['USB-LAN2业务丢包'],fontWeight: 'bold',fontSize: '14'},
 
             'WIFIUp':       {color: colorGV['WIFI↑'],fontWeight: 'bold',fontSize: '14'},
             'WIFIDown':     {color: colorGV['WIFI↓'],fontWeight: 'bold',fontSize: '14'},
@@ -421,7 +431,14 @@ export default {
     }
   },
   activated(){  //生命周期-缓存页面激活
+    var that = this;
     this.initColorGV(this.cardLineStyle);
+    this.getChartConfUnit();
+    this.$global.getDeviceParam(function(data){
+      that.ChartConf.unit.speedInput = data.dev_sr/1000;
+      that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
+
+    });
     var initData = this.initChartData();
     if(initData){
       var devSns = initData.devSns;
@@ -445,6 +462,97 @@ export default {
       SET_CHART_TIMER,
       SET_CHART_CARD_VIEW
     }),
+    getChartConfUnit(){
+      var that = this;
+      this.$axios({
+        method: 'post',
+        url:"/page/index/chartData.php",
+        data:this.$qs.stringify({
+          getChartParam:true,
+          devSN: that.ActiveDevice?that.ActiveDevice.dev_sn:""
+        }),
+        Api:"getChartParam",
+        AppId:"android",
+        UserId:that.user.id
+      })
+      .then(function (response) {
+        let res = response.data;
+        if(res.res.success){
+          var data = res.data[0];
+          that.ChartConf.unit.chartAuto = data.chartAuto;
+          that.ChartConf.unit.chartInterval = data.chartInterval;
+          that.ChartConf.unit.chartMax = data.chartMax;
+        }
+      })
+      .catch(function (error) {
+          console.log(error)
+      })
+    },
+    refreshChart(){
+      console.log("refreshChart")
+      var cardData = JSON.parse(localStorage.cardData);
+      var allChartData = JSON.parse(localStorage.allChartData);
+      var curChart = localStorage.curChart.replace(/\"/g, "");
+
+      var dataUpLoss = cardData.seriesCardLost;
+      var dataDev = cardData.seriesDataDev;
+      var dataRcv = cardData.seriesDataRcv;
+      var dataUpShow = cardData.seriesDataUp;
+      var dataDownShow = cardData.seriesDataDown;
+      var dataDevLoss = cardData.seriesDevLost;
+      var dataRcvLoss = cardData.seriesTotalLoss;
+      var dataAVBR = cardData.seriesAVBR;
+
+      for (var key in dataUpLoss) {
+        dataUpLoss[key]["data"] = dataUpLoss[key]["data"].map(function(item) {
+          return 0;
+        })
+      }
+      dataDev = dataDev.map(function(item) {
+        return 0;
+      });
+      dataRcv = dataRcv.map(function(item) {
+        return 0;
+      });
+      for (var key1 in dataUpShow) {
+        dataUpShow[key1]["data"] = dataUpShow[key1]["data"].map(function(item) {
+          return 0;
+        })
+      }
+      for (var key2 in dataDownShow) {
+        dataDownShow[key2]["data"] = dataDownShow[key2]["data"].map(function(item) {
+          return 0;
+        })
+      }
+      dataDevLoss = dataDevLoss.map(function(item) {
+        return 0;
+      });
+      dataRcvLoss = dataRcvLoss.map(function(item) {
+        return 0;
+      });
+      dataRcvLoss = dataAVBR.map(function(item) {
+        return 0;
+      });
+
+      cardData.seriesCardLost = dataUpLoss;
+      cardData.seriesDataDev = dataDev;
+      cardData.seriesDataRcv = dataRcv;
+      cardData.seriesDataUp = dataUpShow;
+      cardData.seriesDataDown = dataDownShow;
+      cardData.seriesDevLost = dataDevLoss;
+      cardData.seriesTotalLoss = dataRcvLoss;
+      cardData.seriesAVBR = dataAVBR;
+      localStorage.cardData = JSON.stringify(cardData);
+      allChartData[curChart] = null;
+      allChartData[curChart] = cardData;
+      localStorage.allChartData = JSON.stringify(allChartData);
+    },
+    /*testMint(){
+      this.$toast({
+        message: '操作成功',
+        iconClass: 'icon icon-success'
+      });
+    },*/
     showChannelList(){
       this.popupVisible = true;
     },
@@ -496,7 +604,8 @@ export default {
           "seriesDevLost": [], //总的上传丢包率
           "seriesTotalLoss": [], //总的下载丢包率
           "seriesDataDev": [], //上传总速率
-          "seriesDataRcv": [] //下载总速率
+          "seriesDataRcv": [], //下载总速率
+          "seriesAVBR": [],   //AVBR
         };
         //11个网卡上先都填充0
         for (var i = 0; i < cardIdArr.length; i++) {
@@ -517,6 +626,7 @@ export default {
         }
         allChartData[curChart].seriesDataDev = new Array(xSplit).fill(0); //上行总速率
         allChartData[curChart].seriesDataRcv = new Array(xSplit).fill(0); //下行总速率
+        allChartData[curChart].seriesAVBR = new Array(xSplit).fill(0); //AVBR
         allChartData[curChart].seriesDevLost = new Array(xSplit).fill(0); //上行总丢包率
         allChartData[curChart].seriesTotalLoss = new Array(xSplit).fill(0); //下行总丢包率
         localStorage.allChartData = JSON.stringify(allChartData);
@@ -569,10 +679,11 @@ export default {
       var allChartData = localStorage.allChartData ? JSON.parse(localStorage.allChartData) : {};
       var curChart = localStorage.curChart ? JSON.parse(localStorage.curChart) : {};
       for (var key in data) {
-        if(!data[key]){
+        if(!data[key] || data[key] == ""){
           continue;
         }
         var dataAll = data[key][0]; //上行速率，下行速率，上行丢包率
+        var dataAVBR = data[key][1] ? data[key][1]["AvbrKbps"] : 0; //AVBR
         var dataDev = data[key][1]["dev_push_br"]; //上行总速率
         var dataRcv = data[key][2] ? data[key][2]["rcv_br"] : 0; //下行速率
         var dataDownLoss = data[key][3] ? data[key][3]["TotalLossRate"] : 0; //下行总丢包
@@ -604,6 +715,7 @@ export default {
         var seriesDataRcv = allChartData[curChartDevRcvBoard].seriesDataRcv;
         var seriesDevLost = allChartData[curChartDevRcvBoard].seriesDevLost;
         var seriesTotalLoss = allChartData[curChartDevRcvBoard].seriesTotalLoss;
+        var seriesAVBR = allChartData[curChartDevRcvBoard].seriesAVBR;
         for (var i = 0; i < dataAll.length; i++) {
           if (cardIdArr.indexOf(dataAll[i]['card_id']) == -1) {
             continue;
@@ -715,6 +827,8 @@ export default {
         seriesDataDev.pop();
         seriesDataRcv.unshift(dataRcv);
         seriesDataRcv.pop();
+        seriesAVBR.unshift(dataAVBR);
+        seriesAVBR.pop();   
         seriesTotalLoss.unshift(dataDownLoss);
         seriesTotalLoss.pop();
         seriesDevLost.unshift(dataUpLoss);
@@ -735,8 +849,12 @@ export default {
         allChartData[curChartDevRcvBoard].seriesDataRcv = seriesDataRcv;
         allChartData[curChartDevRcvBoard].seriesDevLost = seriesDevLost;
         allChartData[curChartDevRcvBoard].seriesTotalLoss = seriesTotalLoss;
+        allChartData[curChartDevRcvBoard].seriesAVBR = seriesAVBR;
         localStorage.allChartData = JSON.stringify(allChartData);
         if (curChart.split("/")[0] == key) { //当前要显示的放在sessionStorage.cardData中
+          if(that.avbrFlag == "false"){
+            allChartData[curChart]["seriesAVBR"] = new Array(xSplit).fill(0);
+          }
           localStorage.cardData = JSON.stringify(allChartData[curChart]);
         }
       }
@@ -783,26 +901,30 @@ export default {
       var maxYaxis = 0;
       var minYaxis = 0;
       var interval = 0;
-      //if (localStorage.chartAuto == "true") {
-        maxYaxis = Math.ceil(sessionStorage.speedInput * rateMax);
+      var chartAuto = that.ChartConf.unit.chartAuto;
+      var chartInterval = that.ChartConf.unit.chartInterval;
+      var chartMax = that.ChartConf.unit.chartMax;
+      var speedInput = that.ChartConf.unit.speedInput;
+      if (chartAuto == "1") {
+        maxYaxis = Math.ceil(speedInput * rateMax);
         maxYaxis = maxYaxis + 5 - maxYaxis % 5;
-        minYaxis = Math.floor(sessionStorage.speedInput * rateMin);
+        minYaxis = Math.floor(speedInput * rateMin);
         minYaxis = minYaxis - minYaxis % 5;
-      /*} else {
-        interval = sessionStorage.chartInterval;
-        maxYaxis = sessionStorage.chartMax;
-        minYaxis = (sessionStorage.chartMax - sessionStorage.chartInterval * 5) > 0 ? (sessionStorage.chartMax - sessionStorage.chartInterval * 5) : 0;
-      }*/
+      } else {
+        interval = chartInterval;
+        maxYaxis = chartMax;
+        minYaxis = (chartMax - chartInterval * 5) > 0 ? (chartMax - chartInterval * 5) : 0;
+      }
       if (!that.myChartTotal) {
         that.myChartTotal = echarts.init(document.getElementById('totalChart'));
       }
       that.myChartTotal.resize();
       var upShow = that.chartGeneralView.up.map(function(item){if(item==""){return ""};return item+"↑";});
       var downShow = that.chartGeneralView.down.map(function(item){if(item==""){return ""};return item+"↓";});
+      var avbrShow = that.chartGeneralView.avbr.map(function(item){if(item==""){return ""};return item+"可变码率";});
       var transShow = that.chartGeneralView.trans.map(function(item){if(item==""){return ""};return item+"传输丢包";});
       var bussShow = that.chartGeneralView.buss.map(function(item){if(item==""){return ""};return item+"业务丢包";});
-      var legendName = upShow.concat(downShow).concat(transShow).concat(bussShow).filter(function (el) {return el !== '';});
-      
+      var legendName = upShow.concat(downShow).concat(avbrShow).concat(transShow).concat(bussShow).filter(function (el) {return el !== '';});
       var dataAll = {};
       var maxDevLoss = 0;
       var maxRcvLoss = 0;
@@ -858,6 +980,8 @@ export default {
           }
         }else if(legendName[k].indexOf("业务丢包") != -1){//业务丢包
           dataAll[legendName[k]] = cardData.seriesTotalLoss.map(function(x){return (x/10).toFixed(1)*1});  
+        }else if(legendName[k].indexOf("可变码率") != -1){//可变码率
+          dataAll[legendName[k]] = cardData.seriesAVBR.map(function(x){return (x/1000).toFixed(3)*1});  
         }
       }
       var maxDevLoss = 0;
@@ -887,13 +1011,14 @@ export default {
       else{
         maxLoss = 30;
       }
-
       for(var m=0; m<legendName.length; m++){
         var name = "";
         if(legendName[m] == "Total↑"){
           name = "上传速率";
         }else if(legendName[m] == "Total↓"){
           name = "下载速率";
+        }else if(legendName[m] == "Total可变码率"){
+          name = "可变码率";
         }else if(legendName[m] == "Total传输丢包"){
           name = "传输丢包";
         }else if(legendName[m] == "Total业务丢包"){
@@ -939,7 +1064,6 @@ export default {
           data: dataAll[legendName[m]]
         })
       }
-      
       var xAxisOption = {};
       var yAxisOption1 = that.copy(that.commonOptionYAxis1);
       var yAxisOption2 = that.copy(that.commonOptionYAxis2);
@@ -987,6 +1111,8 @@ export default {
           name = "上传速率";
         }else if(legendName[n] == "Total↓"){
           name = "下载速率";
+        }else if(legendName[n] == "Total可变码率"){
+          name = "可变码率";
         }else if(legendName[n] == "Total传输丢包"){
           name = "传输丢包";
         }else if(legendName[n] == "Total业务丢包"){
@@ -1013,7 +1139,7 @@ export default {
 
 
       //文件回传且Y轴选自适应,图像的Y轴不设置yAxis，其他情况设置yAxis
-      /*if(!(sessionStorage.chartAuto == "true" && $('#back_enable').bootstrapSwitch('state') == true)){
+      if(!(chartAuto == "1" && false)){
         option.yAxis[0].min = minYaxis;
         option.yAxis[0].max = maxYaxis;
       }
@@ -1021,12 +1147,14 @@ export default {
       option.yAxis[1].max = maxLoss;
       if (interval) {
         option.yAxis[0].interval = interval * 1;
-      }*/
+      }
       option.legend.data = legendName.map(function(x){
                               if(x == "Total↑"){
                                 return "上传速率";
                               }else if(x == "Total↓"){
                                 return "下载速率";
+                              }else if(x == "Total可变码率"){
+                                return "可变码率";
                               }else if(x == "Total传输丢包"){
                                 return "传输丢包";
                               }else if(x == "Total业务丢包"){
@@ -1168,21 +1296,26 @@ export default {
               keyName = "WIFI";
               break;         
           }
+          var dw1 = "", dw2 = "";
+          if(cardNum<=3){
+            dw1 = "Mbps";
+            dw2 = "%";
+          }
           if(cardLineArr[j] == "up"){
             seriesName = "上传速率";
             data = dataUps;
             legendName.push("上传速率");
-            title1Text += "{"+colorObj[keyName+'↑']+"|"+ dataUps[0] + "}Mbps/";
+            title1Text += "{"+colorObj[keyName+'↑']+"|"+ dataUps[0] + "}"+dw1+"/";
           }else if(cardLineArr[j] == "down"){
             seriesName = "下载速率";
             data = dataDowns;
             legendName.push("下载速率");
-            title1Text += "{"+colorObj[keyName+'↓']+"|" + dataDowns[0] + "}Mbps/";
+            title1Text += "{"+colorObj[keyName+'↓']+"|" + dataDowns[0] + "}"+dw1+"/";
           }else{
             seriesName = "传输丢包";
             data = dataUpLoss;
             legendName.push("传输丢包");
-            title1Text += "{"+colorObj[keyName+'传输丢包']+"|" + dataUpLoss[0] + "}%";
+            title1Text += "{"+colorObj[keyName+'传输丢包']+"|" + dataUpLoss[0] + "}"+dw2+"";
           }
           colorName = keyName + typeFormat(seriesName);
           series.push({
@@ -1211,6 +1344,8 @@ export default {
         }
       }
       var xAxisOption = {};
+      var cardFontSize = '12';
+      var cardFontWeight = 'normal';
       var option = {
         title: [{
           text: "",
@@ -1231,65 +1366,65 @@ export default {
             fontSize: '10',
             fontWeight: 'normal',
             rich: {
-              'SIM1Up':       {color: colorGV['SIM1↑'],fontWeight: 'bold',fontSize: '14'},
-              'SIM1Down':     {color: colorGV['SIM1↓'],fontWeight: 'bold',fontSize: '14'},
-              'SIM1LossDev':  {color: colorGV['SIM1传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'SIM1LossRcv':  {color: colorGV['SIM1业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'SIM1Up':       {color: colorGV['SIM1↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM1Down':     {color: colorGV['SIM1↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM1LossDev':  {color: colorGV['SIM1传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM1LossRcv':  {color: colorGV['SIM1业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'SIM2Up':       {color: colorGV['SIM2↑'],fontWeight: 'bold',fontSize: '14'},
-              'SIM2Down':     {color: colorGV['SIM2↓'],fontWeight: 'bold',fontSize: '14'},
-              'SIM2LossDev':  {color: colorGV['SIM2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'SIM2LossRcv':  {color: colorGV['SIM2业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'SIM2Up':       {color: colorGV['SIM2↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM2Down':     {color: colorGV['SIM2↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM2LossDev':  {color: colorGV['SIM2传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM2LossRcv':  {color: colorGV['SIM2业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'SIM3Up':       {color: colorGV['SIM3↑'],fontWeight: 'bold',fontSize: '14'},
-              'SIM3Down':     {color: colorGV['SIM3↓'],fontWeight: 'bold',fontSize: '14'},
-              'SIM3LossDev':  {color: colorGV['SIM3传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'SIM3LossRcv':  {color: colorGV['SIM3业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'SIM3Up':       {color: colorGV['SIM3↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM3Down':     {color: colorGV['SIM3↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM3LossDev':  {color: colorGV['SIM3传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM3LossRcv':  {color: colorGV['SIM3业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'SIM4Up':       {color: colorGV['SIM4↑'],fontWeight: 'bold',fontSize: '14'},
-              'SIM4Down':     {color: colorGV['SIM4↓'],fontWeight: 'bold',fontSize: '14'},
-              'SIM4LossDev':  {color: colorGV['SIM4传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'SIM4LossRcv':  {color: colorGV['SIM4业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'SIM4Up':       {color: colorGV['SIM4↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM4Down':     {color: colorGV['SIM4↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM4LossDev':  {color: colorGV['SIM4传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM4LossRcv':  {color: colorGV['SIM4业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'SIM5Up':       {color: colorGV['SIM5↑'],fontWeight: 'bold',fontSize: '14'},
-              'SIM5Down':     {color: colorGV['SIM5↓'],fontWeight: 'bold',fontSize: '14'},
-              'SIM5LossDev':  {color: colorGV['SIM5传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'SIM5LossRcv':  {color: colorGV['SIM5业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'SIM5Up':       {color: colorGV['SIM5↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM5Down':     {color: colorGV['SIM5↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM5LossDev':  {color: colorGV['SIM5传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM5LossRcv':  {color: colorGV['SIM5业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'SIM6Up':       {color: colorGV['SIM6↑'],fontWeight: 'bold',fontSize: '14'},
-              'SIM6Down':     {color: colorGV['SIM6↓'],fontWeight: 'bold',fontSize: '14'},
-              'SIM6LossDev':  {color: colorGV['SIM6传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'SIM6LossRcv':  {color: colorGV['SIM6业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'SIM6Up':       {color: colorGV['SIM6↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM6Down':     {color: colorGV['SIM6↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM6LossDev':  {color: colorGV['SIM6传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'SIM6LossRcv':  {color: colorGV['SIM6业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'ETH0Up':       {color: colorGV['ETH0↑'],fontWeight: 'bold',fontSize: '14'},
-              'ETH0Down':     {color: colorGV['ETH0↓'],fontWeight: 'bold',fontSize: '14'},
-              'ETH0LossDev':  {color: colorGV['ETH0传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'ETH0LossRcv':  {color: colorGV['ETH0业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'ETH0Up':       {color: colorGV['ETH0↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'ETH0Down':     {color: colorGV['ETH0↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'ETH0LossDev':  {color: colorGV['ETH0传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'ETH0LossRcv':  {color: colorGV['ETH0业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'USB5G1Up':       {color: colorGV['USB-5G1↑'],fontWeight: 'bold',fontSize: '14'},
-              'USB5G1Down':     {color: colorGV['USB-5G1↓'],fontWeight: 'bold',fontSize: '14'},
-              'USB5G1LossDev':  {color: colorGV['USB-5G1传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'USB5G1LossRcv':  {color: colorGV['USB-5G1业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G1Up':       {color: colorGV['USB-5G1↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USB5G1Down':     {color: colorGV['USB-5G1↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USB5G1LossDev':  {color: colorGV['USB-5G1传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USB5G1LossRcv':  {color: colorGV['USB-5G1业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'USB5G2Up':       {color: colorGV['USB-5G2↑'],fontWeight: 'bold',fontSize: '14'},
-              'USB5G2Down':     {color: colorGV['USB-5G2↓'],fontWeight: 'bold',fontSize: '14'},
-              'USB5G2LossDev':  {color: colorGV['USB-5G2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'USB5G2LossRcv':  {color: colorGV['USB-5G2业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USB5G2Up':       {color: colorGV['USB-5G2↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USB5G2Down':     {color: colorGV['USB-5G2↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USB5G2LossDev':  {color: colorGV['USB-5G2传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USB5G2LossRcv':  {color: colorGV['USB-5G2业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'USBLANUp':       {color: colorGV['USB-LAN↑'],fontWeight: 'bold',fontSize: '14'},
-              'USBLANDown':     {color: colorGV['USB-LAN↓'],fontWeight: 'bold',fontSize: '14'},
-              'USBLANLossDev':  {color: colorGV['USB-LAN传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'USBLANLossRcv':  {color: colorGV['USB-LAN业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USBLANUp':       {color: colorGV['USB-LAN↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USBLANDown':     {color: colorGV['USB-LAN↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USBLANLossDev':  {color: colorGV['USB-LAN传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USBLANLossRcv':  {color: colorGV['USB-LAN业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'USBLAN2Up':       {color: colorGV['USB-LAN2↑'],fontWeight: 'bold',fontSize: '14'},
-              'USBLAN2Down':     {color: colorGV['USB-LAN2↓'],fontWeight: 'bold',fontSize: '14'},
-              'USBLAN2LossDev':  {color: colorGV['USB-LAN2传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'USBLAN2LossRcv':  {color: colorGV['USB-LAN2业务丢包'],fontWeight: 'bold',fontSize: '14'},
+              'USBLAN2Up':       {color: colorGV['USB-LAN2↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USBLAN2Down':     {color: colorGV['USB-LAN2↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USBLAN2LossDev':  {color: colorGV['USB-LAN2传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'USBLAN2LossRcv':  {color: colorGV['USB-LAN2业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
 
-              'WIFIUp':       {color: colorGV['WIFI↑'],fontWeight: 'bold',fontSize: '14'},
-              'WIFIDown':     {color: colorGV['WIFI↓'],fontWeight: 'bold',fontSize: '14'},
-              'WIFILossDev':  {color: colorGV['WIFI传输丢包'],fontWeight: 'bold',fontSize: '14'},
-              'WIFILossRcv':  {color: colorGV['WIFI业务丢包'],fontWeight: 'bold',fontSize: '14'}
+              'WIFIUp':       {color: colorGV['WIFI↑'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'WIFIDown':     {color: colorGV['WIFI↓'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'WIFILossDev':  {color: colorGV['WIFI传输丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize},
+              'WIFILossRcv':  {color: colorGV['WIFI业务丢包'],fontWeight: cardFontWeight,fontSize: cardFontSize}
             }
           }
         }, {
@@ -1398,6 +1533,11 @@ export default {
           that.chartGeneralView["down"] = data["down"].split(",").map(function(x){return that.formatCardShow(x)});
           that.chartGeneralView["trans"] = data["lossDev"].split(",").map(function(x){return that.formatCardShow(x)});//传输丢包
           that.chartGeneralView["buss"] = data["lossRcv"].split(",").map(function(x){return that.formatCardShow(x)});//业务丢包
+          if(that.avbrFlag){
+            that.chartGeneralView["avbr"] = data["avbr"].split(",").map(function(x){return that.formatCardShow(x)});  
+          }else{
+            that.chartGeneralView["avbr"] = [];
+          }
           that.getCardChartShowContent(devSn,cardData)
         }else{
           console.log(res)

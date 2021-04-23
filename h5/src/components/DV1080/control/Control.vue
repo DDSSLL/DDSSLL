@@ -1,5 +1,5 @@
 <template>
-  <div class="control">
+  <div class="control mainPage">
     <keep-alive>
       <Device></Device>
     </keep-alive>
@@ -518,7 +518,7 @@
 <style scoped>
     .control{
         margin-top: 60px;
-        height: 84%;
+        height: clac(100% - 115px);
         padding-bottom: 62px;
         overflow-y: auto;
         background-color: #212227;

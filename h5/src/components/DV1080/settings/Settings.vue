@@ -1,12 +1,12 @@
 <template>
-  <div class="settings">
+  <div class="settings mainPage">
     <Device></Device>
     <div class="Group"><!-- 传输控制 -->
       <div class="GroupTitle">
         传输控制
         <span style="float:right">
           序列号:
-          <span id="sn_str"></span>
+          <span>{{ options.curDevSn }}</span>
         </span>
       </div>
       <div class="GroupItem" v-if="this.user.id==this.SUPER"><!-- 传输IP -->
@@ -22,7 +22,7 @@
           </div>
         </div>
       </div>
-      <div class="GroupItem" v-if="this.user.id==this.SUPER"><!-- 传输模式 -->
+      <!-- <div class="GroupItem" v-if="this.user.id==this.SUPER">
         <div class="GroupItemField">
           <div class="GroupItemTitle">传输模式</div>
           <div class="GroupItemValue">
@@ -35,8 +35,8 @@
             </mt-radio>
           </div>
         </div>
-      </div>
-      <div class="GroupItem" v-if="this.user.id==this.SUPER && this.card_sel_show"><!-- 单卡选择 -->
+      </div> -->
+      <!-- <div class="GroupItem" v-if="this.user.id==this.SUPER && this.card_sel_show">
         <div class="GroupItemField">
           <div class="GroupItemTitle">单卡选择</div>
           <div class="GroupItemValue">
@@ -47,7 +47,7 @@
             </select>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="GroupItem"><!-- 录制开关 -->
         <div class="GroupItemField">
           <div class="GroupItemTitle">录制开关</div>
@@ -255,11 +255,11 @@
         pageLock:false,
         SUPER : SUPER,
         RADIO_TRANS_IP : [],
-        RADIO_TRANS_MODE : [],
-        card_sel_show : false,
+        //RADIO_TRANS_MODE : [],
+        //card_sel_show : false,
         feclevel_show : false,
         show_5g:false,
-        card_sel:[],
+        //card_sel:[],
         OPTIONS_FEC_LEVEL : [{text: "低",value: "0"}, 
                               {text: "中",value: "1"}, 
                               {text: "高",value: "2"}],
@@ -291,9 +291,10 @@
         OPTIONS_ETH0_TYPE : [{text: "固定IP地址",value: "0"}, 
                             {text: "自动获取IP地址",value: "1"}],
         options:{
+          curDevSn:"",//序列号
           dev_push_ip:'0',//传输IP
-          PushTsType:'0',//传输模式
-          PushCard : "",//单卡选择
+          //PushTsType:'0',//传输模式
+          //PushCard : "",//单卡选择
           record:false,//录制开关
           ResendMode:false,//重传开关
           OpenfecMode:false,//纠错开关
@@ -326,48 +327,26 @@
         handler(val) {
           this.ActiveDevice = val;
           this.getLockStates();
-          /*$("#sn_str").text(this.ActiveDevice.dev_sn)*/
-          /*if(this.paramLockAck != "1"){
-            this.getDeviceParam();
-          }*/
         }
       },
       '$store.state.paramLockAck':{
         immediate: true,
         handler(val) {
-          this.RADIO_TRANS_IP = [{
-            label: '内网',
-            value: '1',
-            disabled: !this.pageLock?false:true
-          },{
-            label: '公网',
-            value: '0',
-            disabled: !this.pageLock == '1'?false:true
-          }],
-          this.RADIO_TRANS_MODE = [{
-            label: '单卡',
-            value: '1',
-            disabled: !this.pageLock == '1'?false:true
-          },{
-            label: '汇聚',
-            value: '0',
-            disabled: !this.pageLock == '1'?false:true
-          }]
+          this.getLockStates();
         }
       }
     },
     activated(){  //生命周期-缓存页面激活
       console.log("setting activated");
-      this.getLockStates();
-      this.getDeviceParam();
       var that = this;
-      $("#sn_str").text(this.ActiveDevice.dev_sn)
+      that.getLockStates();
+      that.$global.getDeviceParam(that.formatData);
+      that.options.curDevSn = this.ActiveDevice.dev_sn;
       localStorage.getSettingParam1080 = setInterval(function(){
-        if(!that.pageLock){
-          that.$global.getDeviceParam()
+        if(that.pageLock){//加锁
+          that.$global.getDeviceParam(that.formatData)
         }
       },1000)
-
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(localStorage.getSettingParam1080);
@@ -378,7 +357,6 @@
         SET_NAV_STATUS
       }),
       getLockStates(){
-        console.log("getLockStates");
         var that = this;
         if(that.paramLockAck == "1"){
           if(that.lockUserId == that.user.id || that.lockUserId == ""){
@@ -389,76 +367,33 @@
         }else{
           that.pageLock = true;
         }
-      },
-      chooseIP(val){this.control.ip = val;},
-      getDeviceParam(){
-        var that = this;
-        this.$axios({
-          method: 'post',
-          url:"/page/index/indexData.php",
-          data:this.$qs.stringify({
-            getDevParam:true,
-            devSN: that.ActiveDevice.dev_sn
-          }),
-          Api:"getDevParam",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          console.log("getDeviceParam")
-          if(res.res.success){
-            console.log("success");
-            //that.options = that.formatData(res.data[0]);
-            that.formatData(res.data[0]);
-            console.log("options")
-            console.log(that.options);
-          }else{
-            /*that.options = {
-              dev_push_ip:'1',
-              dev_push_mode:'0',
-              record:'0',
-              ResendMode:'0',
-              ResendModeVal:false,
-              OpenfecMode:'0',
-              OpenfecModeVal:false,
-              video_input:'0',
-              audio_input:'1',
-              video_encode:'0',
-              AudioEnc:'0',
-              AudioBitrate:'256',
-              bitrate_mode:'0',
-              hdr:'0',
-              latency:'0',
-              HdmiTransFormat:'1',
-              sdiresolutionRate:'1080i',
-              sdiresolutionValue:'50',
-              hdmipenetrate:true,
-              hdmiresolutionRate:'1080',
-              hdmiresolutionValue:'59.94'
-            };*/
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
+        that.RADIO_TRANS_IP = [{
+          label: '内网',
+          value: '1',
+          disabled: this.pageLock?true:false
+        },{
+          label: '公网',
+          value: '0',
+          disabled: this.pageLock?true:false
+        }]
       },
       formatData(data){
         var that = this;
         console.log("formatData")
         console.log(data)
+        that.options.curDevSn = this.ActiveDevice.dev_sn;
         //传输IP
         that.options.dev_push_ip = data['dev_push_ip']=="1"?"1":"0";
         //data['dev_push_ip'] = data['dev_push_ip']=="1"?"1":"0";
         //传输模式
-        that.options.PushTsType = data['PushTsType'];
-        if(data['PushTsType'] == 1){
+        //that.options.PushTsType = data['PushTsType'];
+        /*if(data['PushTsType'] == 1){
           that.card_sel_show = true;
         }else{
           that.card_sel_show = false;
-        }
+        }*/
         //单卡选择
-        that.getDevCardParam(that.formatCardSel);
+        //that.getDevCardParam(that.formatCardSel);
         //录制开关
         that.options.record = (data['record'] == '1' ? true : false);
         //重传开关
@@ -570,7 +505,7 @@
         return pattern.test(name);
       },
       //格式化单卡选择
-      formatCardSel(data){
+      /*formatCardSel(data){
         var cardSel = [];
         var cardSelObj = {};
         for(let i=0; i<data.length; i++){
@@ -585,7 +520,7 @@
           cardSel = [{"text":"无可用网卡","value":""}]  
         }
         this.card_sel = cardSel;
-      },
+      },*/
       getDevCardParam(cb){
         var that = this;
         this.$axios({
@@ -618,14 +553,14 @@
         })
       },
       //改变传输模式
-      changeTransMode(){
+      /*changeTransMode(){
         if(this.options.PushTsType == "1"){
           this.card_sel_show = true;
         }else{
            this.card_sel_show = false;
         }
         this.setDeviceParam('PushTsType',this.options.PushTsType=="1"?'1':'0')
-      },
+      },*/
       setDeviceParam(key,val){
         var that = this;
         var devParamCol = key;
@@ -645,9 +580,9 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.getDeviceParam();
+            that.$global.getDeviceParam(that.formatData);
           }else{
-            that.getDeviceParam();
+            console.log(res.reason)
           }
         })
         .catch(function (error) {

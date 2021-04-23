@@ -214,7 +214,8 @@
           editDev:"",
           prefix:"",
           devUser:"",
-          server:""
+          server:"",
+          board:"",
         },
         deviceConfigPrefixOptions:[],
         deviceConfigUserOptions:[],
@@ -224,6 +225,7 @@
         selectPrefixOptions:[],//用户组options
         selectPrefix:[],//选中的用户组
         selectPrefixName:[],//显示过滤组的名称
+        DV4000RV:false,
       }
     },
     computed: {
@@ -240,20 +242,10 @@
     },
     created(){  //生命周期-页面创建后
     	var that = this;
-      /*if(that.user.id == that.SUPER){
-        that.devAddShow = true;
-        that.devDelShow = true;
-      }else{
-        that.devAddShow = false;
-        that.devDelShow = false;
-      }*/
       this.initShowContent();
-      //this.getDeviceList();
     },
     activated(){
-      console.log("devMan activated")
       this.initShowContent();
-      //this.getDeviceList();
     },
     methods:{
       /*...mapMutations({
@@ -437,10 +429,24 @@
                 });
               }else{
                 that.$toast({
-                  message: '操作失败'
+                  message: res.res.reason,
+                  position: 'middle',
+                  duration: 2000
                 });
               }
               that.getDeviceList();
+              var chartKey = JSON.parse(localStorage.chartKey);
+              var allChartData = JSON.parse(localStorage.allChartData);
+              var newChartKey = [];
+              var newAllChartData = [];
+              for(var i=0; i<chartKey.length; i++){
+                if(chartKey[i].split("/")[0] != item.dev_sn){
+                  newChartKey.push(chartKey[i]);
+                  newAllChartData[chartKey[i]] = allChartData[chartKey[i]];
+                }
+              }
+              localStorage.chartKey = JSON.stringify(newChartKey);
+              localStorage.allChartData = JSON.stringify(newAllChartData);
             })
             .catch(function (error) {
               console.log(error)
@@ -452,6 +458,19 @@
         //未修改
         if (!this.editMatchChange) {
           return;
+        }
+        //是否是虚拟接收机
+        var rcv = that.options.server;
+        var sub = rcv.substr(-4);
+        if (sub == '2999') {
+          that.DV4000RV = true;
+          that.options.board = that.options.devSn;
+        } else {
+          //无可用板卡
+          if (that.options.board == '' || that.options.board == '-1' && !that.DV4000RV) {
+            return;
+          }
+          that.options.board = (+that.options.board) - 1;
         }
         var text = '是否切换配对关系？';
         this.getDevPushStatus(this.options.devSn, function(data) {
@@ -514,6 +533,10 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
+            //虚拟
+            if (that.DV4000RV) {
+              that.addBoard();
+            }
             that.$toast({
               message: "綁定成功!",
               position: 'middle',
@@ -521,6 +544,35 @@
             });
             that.getDeviceList();
           }else{
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      addBoard(){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            addBoard:true,
+            dev_sn:that.options.devSn,
+            rcvSn:that.options.server,
+          }),
+          Api:"addBoard",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
           }
         })
         .catch(function (error) {
@@ -551,6 +603,8 @@
                 let res = response.data;
                 if(res.res.success){
                   that.getDeviceList();
+                  that.deviceConfigServerOptions.unshift({"value":"","text":""});
+                  that.options.server = "";
                 }else{
                   that.$toast({
                     message: res.res.reason,
@@ -915,7 +969,7 @@
     .userPrefixPop.mint-popup{
       background-color: #212227;
       width: 100%;
-      height: auto;
+      height: 100%;
     }
     /*.deviceConfItem{overflow: hidden;padding: .1rem;}
     .deviceConfItemTitle{width: 40%;float: left;  text-align: left;padding-top:0.07rem;}
@@ -963,7 +1017,7 @@
       border-bottom-right-radius:4px;
     }
     .mint-popup{border-radius: 6px;background-color: #EEE;}
-    .me .mint-popup{width: 90%;max-height: 90%;overflow-y: auto;border-radius: 4px;}
+    .me .mint-popup{width: 90%;overflow-y: auto;border-radius: 4px;}
     .me .popupContainer .mint-cell-title{width:40%;text-align: left;}
     .me .popupContainer .mint-cell-value{width:60%;text-align: right;padding:0;}
     .me .popupContainer .mint-cell{min-height:24px;}

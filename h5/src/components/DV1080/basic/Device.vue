@@ -59,7 +59,7 @@
               <option value="4" class="Gray"><span>离线设备</span></option>
             </select> -->
             <button @click="deviceTypePop = true" class="TypeSelect White">{{this.deviceTypeCurName}}</button>
-            <button @click="devicePrefixPop = true" class="TypeSelect White" v-if="user.id==SUPER">{{this.devicePrefixCurName}}</button>
+            <button @click="devicePrefixPop = true" class="TypeSelect White" v-if="user.userGroup==ADMIN">{{this.devicePrefixCurName}}</button>
           </div>
           <mt-loadmore :top-method="getDeviceList" ref="loadmore">
             <template v-for="(item,i) in deviceListShow">
@@ -132,13 +132,14 @@
     data(){
       return{
         SUPER:SUPER,
+        ADMIN:ADMIN,
         timer:null,
         popupVisible:false,
         deviceList:[{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}],
         active:{},
         //当前选中设备的相关参数
         deviceListShow:[],
-        deviceType:"1",
+        //deviceType:"1",
         pageType:this.page,
         //用户组
         devicePrefixPop:false,
@@ -255,8 +256,18 @@
             that.filterDevice(that.deviceTypeSelect);
             //that.$refs.loadmore.onTopLoaded();
             if(!that.ActiveDevice){
-              that.SET_ACTIVE_DEVICE(that.deviceList[0]); 
+              that.SET_ACTIVE_DEVICE(that.deviceListShow[0]); 
               //that.SET_ACTIVE_DEVICE_1080(true);
+            }else{//存了ActiveDevice
+              var devExist = false;
+              for(var i=0; i<that.deviceList.length; i++){
+                if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
+                  devExist = true;
+                }
+              }
+              if(!devExist){//ActiveDevice不在设备列表中
+                that.SET_ACTIVE_DEVICE(that.deviceListShow[0]); 
+              }
             }
             for(var i=0; i<that.deviceList.length; i++){
               if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
@@ -308,7 +319,6 @@
       //修改锁
       changeLockState(){
         var that = this;
-        //if (this.paramLockAck == "1") {
         if (this.paramLockAck == "1") {//平台端已解锁
           if(this.lockUserId != that.user.id){//当前设备为锁定标志
             that.setDeviceParam('lock_userid',that.user.id);
@@ -374,11 +384,12 @@
         this.refreshCurDevParam(item);
         this.popupVisible = false;
       },
-      filterDevice(){
+      filterDevice(deviceTypeSelect){
         var that = this;
         var deviceList = this.deviceList;
-        this.SET_DEVICE_TYPE_SELECT(that.deviceType);
-        switch (that.deviceType){
+        //this.SET_DEVICE_TYPE_SELECT(that.deviceType);
+        //switch (that.deviceType){
+        switch (deviceTypeSelect){
           case "1":
             that.deviceListShow = that.deviceList;
             break;

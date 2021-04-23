@@ -26,7 +26,7 @@ export default {
     //图表定时器ID
     ChartTimer:null,
     //当前登录设备型号
-    ActiveDeviceType:'DV1080',
+    /*ActiveDeviceType:'DV1080',*/
     activedevicetype:'DV1080',
     //图表样式
     cardLineStyle:'old',

@@ -385,7 +385,7 @@
           <div class="fGrp">
             <div class="tl">接收机名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="curRcv.rcv_name" required pattern="[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\(\)（）]{1,15}" title="长度1~15，仅支持中文,字母,数字,+,-,@,(),和空格" :readonly="curRcv.rcvNameReadonly">
+              <input type="text" class="ItemInput" v-model="curRcv.rcv_name" required pattern="[A-Za-z0-9\u4e00-\u9fa5 @+\-()（）]{1,15}" title="长度1~15，仅支持中文,字母,数字,+,-,@,(),和空格" :readonly="curRcv.rcvNameReadonly">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
                 仪器名(长度1~15，仅支持中文,字母,数字,+,-,@,(),和空格)
               </p>
@@ -1173,7 +1173,7 @@
               var id = selectVal[i];
               //前缀
               if (that.user.id != that.SUPER) {
-                id = logPrefix + '-' + selectVal[i];
+                id = that.user.prefix + '-' + selectVal[i];
               }
               if (strValue == '') {
                 strValue = id;

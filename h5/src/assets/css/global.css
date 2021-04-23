@@ -1,8 +1,11 @@
+.mainPage{
+  height: calc(100% - 1.05rem) !important;
+}
 .devicePrefixFilterPop{
   height:100% !important;
 }
 .devicePrefixFilterPop>div{
-  height:100%;
+  height:calc(100% - 30px);
   overflow:auto;
 }
 .userPrefixPop .chevronDown,

@@ -39,13 +39,16 @@ window.ORANGE = '#ff9945';
 window.BLUE = '#45ffe9';
 window.WHITE = '#ffffff';
 window.DEPTH_MAX = 4;
-window.HDXPRESS_BUILD = "http://www.hdxpress.cn";//1080一级域名
+window.MBPS_MAX2 = 80;
+window.MBPS_MIN = 0.5;
+window.HDXPRESS_BUILD = "http://www.hdxpress.cn";//1080一级域名  47.104.164.249
 window.HDXPRESS_SERVE = "http://1080.hdxpress.cn:8088/";//1080二级域名，对应地址：47.104.161.61
 window.UHDXPRESS_BUILD = "http://4000.uhdxpress.com";//4000一级域名
 window.UHDXPRESS_SERVE = "http://192.168.100.110:8088/";//4000二级域名
 window.colorGV = {
     '上传速率':'#FFFF00',
     '下载速率': '#22aadd',
+    '可变码率': '#73d13d',
     '传输丢包': '#f1a1ff',
     '业务丢包': '#f5222d',
 
@@ -110,7 +113,8 @@ window.colorGV = {
     'WIFI业务丢包':'#597ef7'
 };
 window.colorObj = {
-    "上传速率":'totalUp', "下载速率":'totalDown', "传输丢包":'TotalLossDev', "业务丢包":'TotalLossRcv',
+    "上传速率":'totalUp', "下载速率":'totalDown',"可变码率":'totalAVBR',
+    "传输丢包":'TotalLossDev', "业务丢包":'TotalLossRcv',
     "SIM1↑":'SIM1Up',"SIM1↓":'SIM1Down',"SIM1传输丢包":'SIM1LossDev',"SIM1业务丢包":'SIM1LossRcv',
     "SIM2↑":'SIM2Up',"SIM2↓":'SIM2Down',"SIM2传输丢包":'SIM2LossDev',"SIM2业务丢包":'SIM2LossRcv',
     "SIM3↑":'SIM3Up',"SIM3↓":'SIM3Down',"SIM3传输丢包":'SIM3LossDev',"SIM3业务丢包":'SIM3LossRcv',
@@ -187,9 +191,13 @@ export default {
                       {text: "128kbps",value: "128"},
                       {text: "64kbps",value: "64"}],
   //接收机
-  OPTIONS_PUSH_RESULUTION : [{text: "1080p",value: "1080"}, 
-                            {text: "720p",value: "720"}, 
-                            {text: "576i",value: "576"}],
+  OPTIONS_PUSH_RESULUTION : [{text: "1080p50",value: "1080"}, 
+                            {text: "720p50",value: "720"}, 
+                            {text: "576p50",value: "576"}, 
+                            {text: "1080p60",value: "0"}, 
+                            {text: "1080p30",value: "1"}, 
+                            {text: "1080p25",value: "2"}, 
+                            {text: "720p60", value: "3"}],
   OPTIONS_SDI_RESULUTION : [{text: "2160p-2SI",value: "0"}, 
                             {text: "2160p-SQ",value: "1"}, 
                             {text: "12G",value: "5"}, 
@@ -227,11 +235,19 @@ export default {
   OPTION_ENCABR : [{text: "256kbps",value: "256kbps"},
                   {text: "128kbps",value: "128kbps"},
                   {text: "64kbps",value: "64kbps"}],
+  OPTIONS_URL_V_ENC : [{text: "H.264",value: "0"}],
+  OPTIONS_URL_A_ENC : [{text: "AAC",value: "0"}],
   //接收机板卡相关参数--end
   /*录机路径*/
   OPTIONS_RECORD_PATH : [{text: "USB",value: "0"}, 
                         {text: "NAS",value: "1"}],
   //DV4000 参数---end
+
+  //网卡id转枚举类型
+  SRT_TRANS_IF : {"eth0":0, "wifi":1, "lte1":2, "lte2":3, "lte3":4, "lte4":5, 
+                  "lte5":6, "lte6":7, "usb-lan":8, "usb-5g1":9, "usb-5g2":10},
+  SRT_TRANS_IF2 : ["eth0","wifi","lte1","lte2","lte3","lte4",
+                    "lte5","lte6","usb-lan","usb-5g1","usb-5g2"],
   getCurrentTime() {
     var date = new Date();
     var year = '' + date.getFullYear();
@@ -476,7 +492,7 @@ export default {
     })  
   },
   //切换绑定
-  editMatch(rcv, board, dev_sn, dev_name) {
+  editMatch(rcv, board, dev_sn, dev_name, cb) {
     var that = this;
     axios({
       method: 'post',
@@ -543,6 +559,9 @@ export default {
           bindChart = dev_sn + "/" + rcv + "/" + board;
         }
         that.initChartSessionData(bindChart, "save");
+        if(cb){
+          cb();
+        }
         //chars数据删除--end
       }else{
         Toast({
@@ -592,30 +611,31 @@ export default {
     }
   },
   //获取推流地址相关信息
-  getPushUrls(content,cb){
-    var that = this;
-    content.$axios({
+  getPushUrls(cb){
+    //var that = this;
+    var board = store.state.ActiveDevice.board_id+"";
+    var boardId = board.indexOf("2999") != -1 ? board: board - 1;
+    axios({
       method: 'post',
       url:"/page/index/indexData.php",
-      data:content.$qs.stringify({
+      data:qs.stringify({
         getBoardUrl:true,
-        rcvSn: content.ActiveDevice.rcv_sn,
-        boardId: content.ActiveDevice.board_id
+        rcvSn: store.state.ActiveDevice.rcv_sn,
+        boardId: boardId
       }),
       Api:"getBoardUrl",
       AppId:"android",
-      UserId:content.user.id
+      UserId:store.state.user.id
     })
     .then(function (response) {
       let res = response.data
       if(res.res.success){
         if(cb){
-          console.log("getPushUrls success")
           cb(res.data);
         }
-      }else{
+      }/*else{
         that.address = [];
-      }
+      }*/
     })
     .catch(function (error) {
       console.log(error)
@@ -1196,4 +1216,39 @@ export default {
       console.log(error)
     })
   },
+  //深拷贝对象
+  copy(obj) {
+    var newobj = obj.constructor === Array ? [] : {};
+    if (typeof obj !== 'object') {
+      return;
+    }
+    for (var i in obj) {
+      newobj[i] = typeof obj[i] === 'object' ? this.copy(obj[i]) : obj[i];
+    }
+    return newobj
+  },
+  cardId2Enum(cardid){
+    var res = 0;
+    res = this.SRT_TRANS_IF[cardid];
+    return res;
+  },
+  cardEnum2Id(cardenum) {
+    return this.SRT_TRANS_IF2[cardenum];
+  },
+  //获取直播速率范围
+  getMbps() {
+    var prefix = store.state.user.prefix;
+    var res = {
+      min: MBPS_MIN,
+      max: MBPS_MAX2
+    };
+    if (prefix != PREFIX) {
+      if (prefix == 'xs') {
+        res.max = MBPS_MAX2; //80M
+      } else {
+        res.max = MBPS_MAX; //12M
+      }
+    }
+    return res;
+  }
 }

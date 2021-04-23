@@ -160,7 +160,7 @@
           //that.singleClick = false;
         }
         //只发布1080不显示4000和1080的选项
-        //that.showConfig = !that.showConfig;//发版本暂时隐藏
+        that.showConfig = !that.showConfig;//发版本暂时隐藏
         /*setTimeout(function(){//点设置按钮后过一秒如果singleClick==true,则显示选型
           if(that.singleClick){
             console.log("切换设备")
@@ -250,7 +250,7 @@
   position: fixed;
   z-index: 1;
   right: .2rem;
-  bottom: .2rem;
+  top: .2rem;
   width: .5rem;
   height: .5rem;
   border-radius: 50%;
@@ -260,8 +260,8 @@
 }
 .loginGroup{
   position: fixed;
-  right: .55rem;
-  bottom: .55rem;
+  right: .7rem;
+  top: .7rem;
   display: flex;
   justify-content: space-between;
   flex-direction: column;

@@ -1,5 +1,5 @@
 <template>
-  <div class="control">
+  <div class="control mainPage">
     <keep-alive>
       <Device></Device>
     </keep-alive>
@@ -10,7 +10,7 @@
           <thead>
             <tr>
               <th>网卡</th>
-              <th>启用/禁用</th>
+              <th>模式</th>
               <th>上传<br>Mbps</th>
               <th>RTT<br>ms</th>
               <th>强度<br>dBm</th>
@@ -20,8 +20,18 @@
           <tbody>
             <template v-for="item in netBoard">
               <tr v-if="item.cardShow == '1'">
-                <td class="td" :class="[item.online == '1' ? 'green': 'gray']">{{ item.card_name }}</td>
-                <td class="td"><mt-switch v-model="item.used" @change="switchCard(item)" :disabled="(!pageLock && ActiveDevice.online=='1')?false:true"></mt-switch></td>
+                <td class="td" :class="[item.online == '1' ? 'green': 'gray']">
+                  {{ item.card_name }}
+                  <mt-switch v-model="item.used" @change="switchCard(item)" :disabled="(!pageLock && ActiveDevice.online=='1')?false:true"></mt-switch>
+                </td>
+                <td class="td" v-if="showMode[item.card_id]">
+                  <select class="ItemSelect selectMode" v-model="mode[item.card_id]" @change="changeSimMode(item.card_id)"  :disabled="(!pageLock && ActiveDevice.online=='1')?false:true">
+                    <template v-for="item in modeOption[item.card_id]">
+                      <option :value="item.value">{{ item.text }}</option>
+                    </template>
+                  </select>
+                </td>
+                <td class="td" v-else>-</td>
                 <td class="td">{{ item.send_br }}</td>
                 <td class="td">{{ item.card_rtt }}</td>
                 <td class="td">{{ item.rssi }}</td>
@@ -39,7 +49,7 @@
             <div class="GroupItemTitle" style="text-indent:0px">传输开关</div>
             <div class="GroupItemValue">
               <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"></mt-switch>
-              <span id="url_dis" v-if="pushDisShow" style="color:red">推流地址不通</span>
+              <!-- <span id="url_dis" v-if="pushDisShow" style="color:red">推流地址不通</span> -->
             </div>
           </div>
         </div>
@@ -53,16 +63,16 @@
             <mt-range
               v-model="common.dev_srVal_range"
               class="ItemRange byteRange"
-              :min="BITRATE_MIN"
-              :max="BITRATE_MAX"
-              :step="0.1"
+              :min="BITRATE_MIN*10"
+              :max="BITRATE_MAX*10"
+              :step="1"
               :bar-height="5"
               :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true"
-              @change="setDeviceParam('dev_sr_range')">
+              @change="changeDevSr">
               <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{BITRATE_MIN}}</div>
               <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{BITRATE_MAX}}</div>
             </mt-range>
-            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal_input" @blur="setDeviceParam('dev_sr_input')" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true">
+            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_srVal_input" @blur="setDevSr" :disabled="(paramLockAck=='1' && ActiveDevice.online=='1')?false:true">
           </div>
         </div>
       </div>
@@ -73,16 +83,16 @@
             <mt-range
               v-model="common.dev_delayVal_range"
               class="ItemRange byteRange"
-              :min="DELAY_MIN"
-              :max="DELAY_MAX"
-              :step.number="0.1"
+              :min="DELAY_MIN*10"
+              :max="DELAY_MAX*10"
+              :step.number="1"
               :bar-height="5"
               :disabled="(!pageLock && ActiveDevice.online=='1')?false:true"
               @change="setDeviceParam('dev_delay_range')">
               <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{DELAY_MIN}}</div>
               <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{DELAY_MAX}}</div>
             </mt-range>
-            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="!pageLock?false:true">
+            <input type="text" class="ItemIpt byteIpt" v-model.number="common.dev_delayVal_input" @blur="setDelayParam" :disabled="!pageLock?false:true">
           </div>
         </div>
       </div>
@@ -103,13 +113,16 @@
         BITRATE_MIN : 0, //Mbps   数据库里的dev_sr
         BITRATE_MAX : 0,
         DELAY_MIN : 0.1, //s
-        DELAY_MAX : 20,
-        delayMin : 0,
-        delayMax : 0,
+        DELAY_MAX : 20, //视频比特率<=40M
         speedMin : 0,
         speedMax : 0,
         ActiveDevice:null,
-        pushDisShow:false,
+        OPTIONS_5G_MODE: [{text: "AUTO",value: "0"},
+                          {text: "NSA",value: "1"}, 
+                          {text: "SA",value: "2"}, 
+                          {text: "LTE",value: "3"}],
+        OPTIONS_LTE_MODE: [{text: "LTE",value: "3"}],
+        /*pushDisShow:false,*/
         common:{
           dev_push_enable:"0",
           dev_push_enableVal:false,
@@ -120,11 +133,40 @@
           dev_delay:0,
           dev_delayVal:0
         },
-        netBoard:[]
+        netBoard:[],
+        mode:{
+          lte1:"",
+          lte2:"",
+          lte3:"",
+          lte4:"",
+          lte5:"",
+          lte6:"",
+        },
+        modeOption:{
+          lte1:"",
+          lte2:"",
+          lte3:"",
+          lte4:"",
+          lte5:"",
+          lte6:"",
+        },
+        showMode:{
+          lte1:true,
+          lte2:true,
+          lte3:true,
+          lte4:true,
+          lte5:true,
+          lte6:true,
+          eth0:false,
+          wifi:false,
+          "usb-lan":false,
+          "usb-5g1":false,
+          "usb-5g2":false,
+        }
       }
     },
     computed: {
-      ...mapState(['user',"ActiveDeviceType",'paramLockAck','lockUserId'])
+      ...mapState(['user','paramLockAck','lockUserId'])//"ActiveDeviceType",
     },
     components: {
       Device
@@ -144,17 +186,18 @@
       }
     },
     activated(){  //生命周期-缓存页面激活
+      var that = this;
       this.getNetBoard();
       this.$global.getDeviceParam(this.formatData)
       this.getLockStates();
-      var that = this;
+
       localStorage.getControlParam = setInterval(function(){
         that.getNetBoard();
         //if(that.paramLockAck != "1"){//页面锁定
-        if(!that.pageLock){//页面锁定
+        if(that.pageLock){//页面锁定
           that.$global.getDeviceParam(that.formatData)
         }
-        that.$global.getPushUrls(that, that.formatPushUrlState);
+        that.$global.getPushUrls(that.formatPushUrlState);
       },1000)
     },
     deactivated(){   //生命周期-缓存页面失活
@@ -164,6 +207,88 @@
       /*...mapMutations({
           
       }),*/
+      changeSimMode(cardId){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            setSimMode : that.mode[cardId],
+            cardId : cardId,
+            devSN : that.ActiveDevice.dev_sn,
+          }),
+          Api:"setSimMode",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      changeDevSr(){
+        var that = this;
+        this.setDeviceParam('dev_sr_range');
+        if(that.common.dev_srVal_range > 40){
+          if(parseInt(that.common.dev_delayVal_range)>100){
+            that.common.dev_delayVal_range=100;
+            that.common.dev_delayVal_input=10;
+            this.setDeviceParam('dev_delay_range');
+          }
+          that.DELAY_MAX = 10;
+        }else{
+          that.DELAY_MAX = 20;
+        }
+      },
+      setDevSr(){
+        this.checkSpeed();
+        this.setDeviceParam('dev_sr_input');
+        localStorage.speedInput = this.common.dev_srVal_input;
+      },
+      setDelayParam(){
+        this.checkDelay();
+        this.setDeviceParam('dev_delay_input')
+      },
+      //校验比特率
+      checkSpeed() {
+        var value = this.common.dev_srVal_input;
+        var min = this.BITRATE_MIN;
+        var max = this.BITRATE_MAX;
+        if (value != '' || value == 0) {
+          if (value < min) {
+            this.common.dev_srVal_input = min;
+            this.common.dev_srVal_range = min;
+          } else if (value > max) {
+            this.common.dev_srVal_input = max;
+            this.common.dev_srVal_range = min;
+          }
+        }
+      },
+      //校验延时
+      checkDelay() {
+        var value = this.common.dev_delayVal_input;
+        var min = this.DELAY_MIN;
+        var max = this.DELAY_MAX;
+        if (value != '' || value == 0) {
+          if (value < min) {
+            this.common.dev_delayVal_input = min;
+            this.common.dev_delayVal_range = min;
+          } else if (value > max) {
+            this.common.dev_delayVal_input = max;
+            this.common.dev_delayVal_range = max;
+          }
+        }
+      },
       getLockStates(){
         console.log("getLockStates");
         var that = this;
@@ -177,7 +302,7 @@
           that.pageLock = true;
         }
       },
-      getNetBoard(){
+      getNetBoard(cb){
         var that = this;
         this.$axios({
           method: 'post',
@@ -194,6 +319,9 @@
           let res = response.data;
           if(res.res.success){
             that.netBoard = that.formatSwitch(res.data[0]);
+            if(cb){
+              cb();
+            }
           }else{
             that.netBoard = [];
           }
@@ -205,28 +333,36 @@
       formatSwitch(arr){
         var that = this;
         arr.forEach(function(item){
-          var defaultShowArr = ["eth0", "lte1", "lte2", "lte3", "lte4", "lte5", "lte6"]
-            if ($.inArray(item.card_id, defaultShowArr) != -1){
-              item.cardShow = '1';
-            } else if (item.card_id == "wifi" || item.card_id == "usb-lan" || item.card_id == "usb-5g1" || item.card_id == "usb-5g2") {
-              if (item.online == "1") {
-                item.cardShow = 1;
-              } else {
-                item.cardShow = 0;
-              }
+          var defaultShowArr = ["eth0", "lte1", "lte2", "lte3", "lte4", "lte5", "lte6"];
+          if ($.inArray(item.card_id, defaultShowArr) != -1){
+            item.cardShow = '1';
+            var cardId = item.card_id;
+            if(item["SimModule"] == "1"){
+              that.modeOption[cardId] = that.OPTIONS_5G_MODE;
+              that.mode[cardId] = item["SetSimMode"];
+            } else {
+              that.modeOption[cardId] = that.OPTIONS_LTE_MODE;
+              that.mode[cardId] = 3;
             }
-            item.used = item.used=="1"?true:false;
-            if(item.online == "1"){
-              item.send_br = (item.send_br/1000.0).toFixed(1)
-              item.card_rtt = item.card_rtt>999 ? ">999" : item.card_rtt;
-              item.rssi = item.rssi.split('dBm')[0];
-              item.operator = that.transOperator(item.operator);
-            }else{
-              item.send_br = '-';
-              item.card_rtt = '-';
-              item.rssi = '-';
-              item.operator = '-';
+          } else if (item.card_id == "wifi" || item.card_id == "usb-lan" || item.card_id == "usb-5g1" || item.card_id == "usb-5g2") {
+            if (item.online == "1") {
+              item.cardShow = 1;
+            } else {
+              item.cardShow = 0;
             }
+          }
+          item.used = item.used=="1"?true:false;
+          if(item.online == "1"){
+            item.send_br = (item.send_br/1000.0).toFixed(1)
+            item.card_rtt = item.card_rtt>999 ? ">999" : item.card_rtt;
+            item.rssi = item.rssi.split('dBm')[0];
+            item.operator = that.transOperator(item.operator);
+          }else{
+            item.send_br = '-';
+            item.card_rtt = '-';
+            item.rssi = '-';
+            item.operator = '-';
+          }
         })
         return arr;
       },
@@ -259,6 +395,13 @@
         })
         .then(function (response) {
           //页面随activeDevice实时刷新，无需调用getNetBoard
+          that.getNetBoard(function(){
+            var cardUsed = that.getUsedCardCount();  
+            if (cardUsed == 0) {
+              that.common.dev_push_enableVal = false;
+              that.setDevPushEnable();
+            }
+          })
         })
         .catch(function (error) {
           console.log(error)
@@ -307,10 +450,10 @@
         var prefix = that.user.prefix;
         if(data.dev_push_enable == '0' && data.dev_push_status == '0'){  //推流开关
           that.common.dev_push_enableVal = false;
-          that.common.pushDisShow = false;
+          /*that.common.pushDisShow = false;*/
         }else if(data.dev_push_enable == '1'){
           that.common.dev_push_enableVal = true;
-          that.$global.getPushUrls(that, that.formatPushUrlState);
+          that.$global.getPushUrls(that.formatPushUrlState);
         }
         //视频比特率最大值
         if(data['video_input'] == '4'){//视频输入是HDMI(此情况下无超低延时)
@@ -330,7 +473,7 @@
         }
         
         that.common.dev_srVal = (data.dev_sr / 1000).toFixed(1); //(Mbps)
-        that.common.dev_srVal_range = that.common.dev_srVal;
+        that.common.dev_srVal_range = that.common.dev_srVal*10;
         that.common.dev_srVal_input = that.common.dev_srVal;
         //延时
         if(that.common.dev_srVal <= 40){
@@ -338,8 +481,8 @@
         }else{
           that.DELAY_MAX = 10;
         }
-        that.common.dev_delayVal = (data.dev_delay / 1000).toFixed(3); //(s)
-        that.common.dev_delayVal_range = that.common.dev_delayVal;
+        that.common.dev_delayVal = (data.dev_delay / 1000).toFixed(1); //(s)
+        that.common.dev_delayVal_range = that.common.dev_delayVal*10;
         that.common.dev_delayVal_input = that.common.dev_delayVal;
       },
       //推流地址状态
@@ -353,10 +496,10 @@
             }
           }
         }
-        that.pushDisShow = false;
+        /*that.pushDisShow = false;
         if(runningStatusCount == 0 && that.common.dev_push_enableVal){
           that.pushDisShow = true;
-        }
+        }*/
       },
       
       //传输开关
@@ -484,16 +627,16 @@
           that.common.dev_srVal_range = that.common.dev_srVal_input;
           devParamCol = "dev_sr";
         }else if(key == "dev_sr_range"){
-          value = parseFloat(that.common.dev_srVal_range) * 1000;
-          that.common.dev_srVal_input = that.common.dev_srVal_range;
+          value = parseFloat(that.common.dev_srVal_range/10) * 1000;
+          that.common.dev_srVal_input = that.common.dev_srVal_range/10;
           devParamCol = "dev_sr";
         }else if(key == "dev_delay_input"){
           value = parseFloat(that.common.dev_delayVal_input) * 1000;
           that.common.dev_delayVal_range = that.common.dev_delayVal_input;
           devParamCol = "dev_delay";
         }else if(key == "dev_delay_range"){
-          value = parseFloat(that.common.dev_delayVal_range) * 1000;
-          that.common.dev_delayVal_input = that.common.dev_delayVal_range;
+          value = parseFloat(that.common.dev_delayVal_range/10) * 1000;
+          that.common.dev_delayVal_input = that.common.dev_delayVal_range/10;
           devParamCol = "dev_delay";
         }
         console.log("value:"+value);
@@ -522,7 +665,7 @@
         })
       },
    
-            //获取启用的网卡个数
+    //获取启用的网卡个数
     getUsedCardCount() {
       var that = this;
       var netBoards = that.netBoard;
@@ -629,6 +772,11 @@
     }
     .Group:nth-last-of-type(1){
         margin-bottom: .2rem;
+    }
+    .selectMode{
+      width: 70%;
+      height: .28rem;
+      text-indent: 3px;
     }
 </style>
 <style>

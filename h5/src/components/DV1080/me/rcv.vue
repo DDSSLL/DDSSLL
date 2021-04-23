@@ -740,7 +740,7 @@
   .userPrefixPop.mint-popup{
     background-color: #212227;
     width: 100%;
-    height: auto;
+    height: 100%;
   }
   .chevronDown{
     width: 100%;
@@ -802,11 +802,6 @@
   .mint-switch{
     transform: scale(.7);
     transform-origin: left;
-  }
-  .userPrefixPop.mint-popup{
-    background-color: #212227;
-    width: 100%;
-    height: auto;
   }
 </style>
 <style>

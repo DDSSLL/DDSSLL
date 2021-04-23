@@ -15,7 +15,7 @@
     <!-- 用户等级 -->
     <UserLevelMan v-if="user.userGroup == 1"></UserLevelMan>
     
-    <div class="Group" v-if="false">
+    <div class="Group">
       <div class="GroupTitle" @click="ChartConfShow=!ChartConfShow">
         图表配置
         <i class="titleIcon fa" :class="[ChartConfShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
@@ -24,7 +24,7 @@
         <div class="GroupItem" v-show="ChartConfShow">
           <mt-navbar v-model="ChartConfTab">
             <mt-tab-item id="1">单位</mt-tab-item>
-            <!-- <mt-tab-item id="2">概览图</mt-tab-item> -->
+            <mt-tab-item id="2">概览图</mt-tab-item>
             <mt-tab-item id="3">网卡图</mt-tab-item>
           </mt-navbar>
           <mt-tab-container v-model="ChartConfTab">
@@ -55,19 +55,18 @@
               </div>
               <div class="GroupItem">
                 <div class="GroupItemBtns">
-                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfUnit">确定</button>
-                  <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfUnit">恢复当前值</button>
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;position: static;line-height:0px" @click="setChartConfUnit">确定</button>
+                  <button class="setBtn" style="background:#EEE;color:#000;position: static;line-height:0px;width:auto;" @click="getChartConfUnit">恢复当前值</button>
                 </div>
               </div>
             </mt-tab-container-item>
-            <!-- <mt-tab-container-item id="2">
+            <mt-tab-container-item id="2">
               <div class="GroupItem">
                 <div class="GroupItemField">
                   <div class="GroupItemTitle">上传速率</div>
                   <div class="GroupItemValue">
-                    <select class="ItemSelect">
-                      <option v-for="item in ChartConf.total.up" :value="item">{{item}}</option>
-                    </select>
+                    <mt-checklist v-model="totalSel.up" :options="totalSelOptionsUp">
+                    </mt-checklist>
                   </div>
                 </div>
               </div>
@@ -75,9 +74,17 @@
                 <div class="GroupItemField">
                   <div class="GroupItemTitle">下载速率</div>
                   <div class="GroupItemValue">
-                    <select class="ItemSelect">
-                      <option v-for="item in ChartConf.total.down" :value="item">{{item}}</option>
-                    </select>
+                    <mt-checklist v-model="totalSel.down" :options="totalSelOptionsDown">
+                    </mt-checklist>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem" v-if="avbrShowFlg">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">可变码率</div>
+                  <div class="GroupItemValue">
+                    <mt-checklist v-model="totalSel.avbr" :options="totalSelOptionsAVBR">
+                    </mt-checklist>
                   </div>
                 </div>
               </div>
@@ -85,29 +92,38 @@
                 <div class="GroupItemField">
                   <div class="GroupItemTitle">传输丢包</div>
                   <div class="GroupItemValue">
-                    <select class="ItemSelect">
-                      <option v-for="item in ChartConf.total.lossDev" :value="item">{{item}}</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle">业务丢包</div>
-                    <div class="GroupItemValue">
-                      <select class="ItemSelect">
-                        <option v-for="item in ChartConf.total.lossRcv" :value="item">{{item}}</option>
-                      </select>
+                    <mt-checklist v-model="totalSel.trans" :options="totalSelOptionsTrans">
+                    </mt-checklist>
                   </div>
                 </div>
               </div>
               <div class="GroupItem">
-                <div class="GroupItemBtns">
-                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
-                  <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">业务丢包</div>
+                  <div class="GroupItemValue">
+                    <mt-checklist v-model="totalSel.buss" :options="totalSelOptionsBuss">
+                    </mt-checklist>
+                  </div>
                 </div>
               </div>
-            </mt-tab-container-item> -->
+              <div class="GroupItem">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle"></div>
+                  <div class="GroupItemValue" style="width:100%">
+                    <mt-button class="ItemBtn" style="margin-left:10px;" @click="chartClear">一键清空</mt-button>
+                    <mt-button class="ItemBtn" style="margin-left:10px;" @click="chartSelectReset">恢复当前值</mt-button>
+                    <mt-button class="ItemBtn" style="margin-left:10px;" @click="chartSelectDefaultReset">恢复默认值</mt-button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="GroupItem">
+                <div class="GroupItemBtns">
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;position: static;line-height:0px" @click="setChartConfTotal">确定</button>
+                  <button class="setBtn" style="background:#EEE;color:#000;position: static;line-height:0px;width:auto;" @click="getChartConfTotal">恢复当前值</button>
+                </div>
+              </div>
+            </mt-tab-container-item>
             <mt-tab-container-item id="3">
               <div class="GroupItem GroupItem0">
                 <div class="GroupItemField">
@@ -123,7 +139,7 @@
                   <div class="GroupItemField">
                     <div class="GroupItemTitle GroupItemTitle1">{{item.name}}</div>
                     <div class="GroupItemValue GroupItemValue1">
-                      <mt-checklist v-model="item.value" :options="ChartConf.simCheckList">
+                      <mt-checklist v-model="item.value" :options="ChartConf.simCheckList" @change="changeCardLineShow(item)">
                       </mt-checklist>
                     </div>
                   </div>
@@ -140,8 +156,8 @@
               </div>
               <div class="GroupItem">
                 <div class="GroupItemBtns">
-                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfCard">确定</button>
-                  <button class="setBtn" style="background:#EEE;color:#000;" @click="getChartConfCard">恢复当前值</button>
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;position: static;line-height:0px" @click="setChartConfCard">确定</button>
+    		          <button class="setBtn" style="background:#EEE;color:#000;position: static;line-height:0px;width:auto;" @click="getChartConfCard">恢复当前值</button>
                 </div>
               </div>
             </mt-tab-container-item>
@@ -178,11 +194,55 @@
     name: "Me",
     data(){
       return{
+        ADMIN:ADMIN,
         ChartConfTab:'1',
+        avbrShowFlg:false,
+        avbrFlag:"",
         //ChartConfTotalUp:[],
+        cardMatch : {
+          "Total":["Total","Total"],
+          "ETH0":["eth0","eth0"],
+          "WIFI":["WIFI","WIFI"],
+          "SIM1":["lte1","NR5G-NSA1"],
+          "SIM2":["lte2","NR5G-NSA2"],
+          "SIM3":["lte3","NR5G-NSA3"],
+          "SIM4":["lte4","NR5G-NSA4"],
+          "SIM5":["lte5","NR5G-NSA5"],
+          "SIM6":["lte6","NR5G-NSA6"],
+          "USB-5G1":["usb_5g1","usb-5g1"],
+          "USB-5G2":["usb_5g2","usb-5g2"],
+          "USB-LAN":["usb_lan","usb-lan"],
+          "USB-LAN2":["usb_lan2","usb-lan2"]
+        },
+        chartLegendArr : ["Total"],
+        /*checklist的选项*/
+        totalSelOptionsUp:[],
+        totalSelOptionsDown:[],
+        totalSelOptionsAVBR:[],
+        totalSelOptionsTrans:[],
+        totalSelOptionsBuss:[],
+        /*dev_line中保存的显示的line*/
+        chartGeneralView : {
+          "up":'Total',
+          "down":'Total',
+          "avbr":'Total',
+          "trans":'Total',
+          "buss":'Total'
+        },
+        totalSel:{
+          up:"Total",
+          down:"Total",
+          avbr:"Total",
+          trans:"Total",
+          buss:"Total",
+        },
         ChartConf:{
-          unit:{chartAutoVal:true,chartAuto:"1",chartInterval:"",chartMax:""},
-          total:{up: "", down: "", lossDev:"", lossRcv:""},
+          unit:{
+            chartAutoVal:true,
+            chartAuto:"1",
+            chartInterval:"",
+            chartMax:"",
+          },
           card:{
             dev_sn: "8000102140",
             eth0: "up,down,lossDev",
@@ -216,12 +276,13 @@
             {label: '上传速率',value: 'up'},
             {label: '下载速率',value: 'down'},
             {label: '传输丢包',value: 'lossDev'}],
-          selectBat:[]
+          selectBat:['up','down','lossDev'],
+          selectBatBak:['up','down','lossDev']
         },
         ChartConfShow:false,
-        DeviceShow:false,
-        ReceiverShow:false,
-        AccountShow:false,
+        /*DeviceShow:false,*/
+        /*ReceiverShow:false,*/
+        /*AccountShow:false,*/
         SystemShow:true,
       }
     },
@@ -236,28 +297,31 @@
         immediate: true,
         handler(val) {
           this.ActiveDevice = val;
-          this.getChartConfUnit();
-          this.getChartConfTotal();
+          //this.getChartConfUnit();
+          //this.getChartConfTotal();
           //this.getChartConfCard();
           //this.initCardChartSelect();
-          /*this.getReceiverList();
-          this.getAccountList();*/
         }
       }
     },
     mounted(){
-      console.log("dd me mounted")
+      this.getChartConfUnit();
+      this.initChartSelect();
       this.getChartConfTotal();
       this.initCardChartSelect();
       this.getChartConfCard();
     },
     activated(){  //生命周期-缓存页面激活
-      console.log("dd me activated")
-      /*this.getChartConfUnit();
+      var that = this;
+      this.$global.getDeviceParam(function(data){
+        that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
+        that.avbrShowFlg = that.avbrFlag;
+      });
+      this.getChartConfUnit();
+      this.initChartSelect();
       this.getChartConfTotal();
-      //this.getChartConfCard();
-      this.getReceiverList();
-      this.getAccountList();*/
+      this.initCardChartSelect();
+      this.getChartConfCard();
     },
     deactivated(){   //生命周期-缓存页面失活
 
@@ -273,141 +337,203 @@
           SET_DEVICE_PREFIX_SELECT
       }),
       getChartConfUnit(){
-          var that = this;
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  getChartParam:true,
-                  devSN: that.ActiveDevice?that.ActiveDevice.dev_sn:""
-              }),
-              Api:"getChartParam",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                  that.ChartConf.unit = formatUnit(res.data[0]);
-              }else{
-                  that.ChartConf.unit = {chartAutoVal:true};
-              }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
-          function formatUnit(item){
-              if(item.chartAuto == "1"){
-                  item.chartAutoVal = true;
-              }else{
-                  item.chartAutoVal = false;
-              }
-              return item;
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:this.$qs.stringify({
+            getChartParam:true,
+            devSN: that.ActiveDevice?that.ActiveDevice.dev_sn:""
+          }),
+          Api:"getChartParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.ChartConf.unit = formatUnit(res.data[0]);
+          }else{
+            that.ChartConf.unit = {chartAutoVal:true};
           }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+        function formatUnit(item){
+          if(item.chartAuto == "1"){
+            item.chartAutoVal = true;
+          }else{
+            item.chartAutoVal = false;
+          }
+          return item;
+        }
       },
       setChartConfUnit(){
-          var that = this;
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  setChartParam:true,
-                  devSN: that.ActiveDevice.dev_sn,
-                  chartAuto: that.ChartConf.unit.chartAutoVal? "1": "0",
-                  chartMax: that.ChartConf.unit.chartMax,
-                  chartInterval: that.ChartConf.unit.chartInterval
-              }),
-              Api:"setChartParam",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                that.$toast({
-                  message: "操作成功",
-                  position: 'middle',
-                  duration: 2000
-                });
-              }else{
-                  that.getChartConfUnit();
-              }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:this.$qs.stringify({
+            setChartParam:true,
+            devSN: that.ActiveDevice.dev_sn,
+            chartAuto: that.ChartConf.unit.chartAutoVal? "1": "0",
+            chartMax: that.ChartConf.unit.chartMax,
+            chartInterval: that.ChartConf.unit.chartInterval
+          }),
+          Api:"setChartParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.$toast({
+              message: "操作成功",
+              position: 'middle',
+              duration: 2000
+            });
+          }else{
+            that.getChartConfUnit();
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //概览图恢复当前配置
+      chartSelectReset(){
+        this.totalSel.up = this.chartGeneralView.up;
+        this.totalSel.down = this.chartGeneralView.down;
+        this.totalSel.avbr = this.chartGeneralView.avbr;
+        this.totalSel.trans = this.chartGeneralView.trans;
+        this.totalSel.buss = this.chartGeneralView.buss;
+      },
+      //概览图恢复默认配置
+      chartSelectDefaultReset(){
+        this.totalSel.up = "Total";
+        this.totalSel.down = "Total";
+        this.totalSel.avbr = "Total";
+        this.totalSel.trans = "Total";
+        this.totalSel.buss = "Total";
+      },
+      //概览图一键清空
+      chartClear(){
+        this.totalSel.up = "";
+        this.totalSel.down = "";
+        this.totalSel.avbr = "";
+        this.totalSel.trans = "";
+        this.totalSel.buss = "";
+      },
+      initChartSelect(){
+        var that = this;
+        var cardData = localStorage.cardData ? JSON.parse(localStorage.cardData) : "";
+        var upArr = Object.keys(cardData.seriesDataUp); //有上传数据的网卡
+        var downArr = Object.keys(cardData.seriesDataDown); //有下载数据的网卡
+        var showCard = this.$global.MergeArray(upArr, downArr); 
+        var optionBussDrop = "";
+        for(var i=0; i<that.chartLegendArr.length; i++){
+          if(that.chartLegendArr[i]=="Total" 
+            || $.inArray(that.cardMatch[that.chartLegendArr[i]][0], showCard) != -1
+            || $.inArray(that.cardMatch[that.chartLegendArr[i]][1], showCard) != -1){
+            var option = that.chartLegendArr[i];
+            that.totalSelOptionsUp = [];
+            that.totalSelOptionsDown = [];
+            that.totalSelOptionsAVBR = [];
+            that.totalSelOptionsTrans = [];
+            that.totalSelOptionsBuss = [];
+            that.totalSelOptionsUp.push({label:option,value:option});
+            that.totalSelOptionsDown.push({label:option,value:option});
+            that.totalSelOptionsAVBR.push({label:option,value:option});
+            that.totalSelOptionsTrans.push({label:option,value:option});
+            that.totalSelOptionsBuss.push({label:option,value:option});
+          }
+        }
       },
       getChartConfTotal(){
-          var that = this;
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  getChartShowContent:true,
-                  devSn: that.ActiveDevice?that.ActiveDevice.dev_sn:"",
-                  prefix: that.ActiveDevice?that.ActiveDevice.prefix:""
-              }),
-              Api:"getChartShowContent",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                var data = res.data[0];
-                for(var key in data){
-                  data[key] = data[key].split(",");
-                }
-                that.ChartConf.total = data;
-              }else{
-                that.$toast({
-                  message: res.res.reason,
-                  position: 'middle',
-                  duration: 5000
-                });
-              }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:this.$qs.stringify({
+            getChartShowContent:true,
+            devSn: that.ActiveDevice?that.ActiveDevice.dev_sn:"",
+            prefix: that.ActiveDevice?that.ActiveDevice.prefix:""
+          }),
+          Api:"getChartShowContent",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var data = res.data[0];
+            var up = data["up"];//.split(",").map(function(x){return formatCardShow(x)});
+            var down = data["down"];//.split(",").map(function(x){return formatCardShow(x)});
+            var trans = data["lossDev"];//.split(",").map(function(x){return formatCardShow(x)});//传输丢包
+            var buss = data["lossRcv"];//.split(",").map(function(x){return formatCardShow(x)});//业务丢包
+            that.chartGeneralView.up = up;
+            that.chartGeneralView.down = down;
+            that.chartGeneralView.trans = trans;
+            that.chartGeneralView.buss = buss;
+            that.totalSel.up = up;
+            that.totalSel.down = down;
+            that.totalSel.trans = trans;
+            that.totalSel.buss = buss;
+            if(that.avbrFlag){
+              var avbr = data["avbr"];//.split(",").map(function(x){return formatCardShow(x)});
+              that.chartGeneralView.avbr = avbr;//可变码率  
+              that.totalSel.avbr = avbr;
+            }else{
+              that.chartGeneralView.avbr = [];//可变码率  
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 5000
+            });
+          }
+        })
+        .catch(function (error) {
+            console.log(error)
+        })
       },
       setChartConfTotal(){
-          var that = this;
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  setChartShowContent:true,
-                  devSn: that.ActiveDevice.dev_sn,
-                  up: that.ChartConf.total.up,
-                  down: that.ChartConf.total.down,
-                  lossDev: that.ChartConf.total.lossDev,
-                  lossRcv: that.ChartConf.total.lossRcv
-              }),
-              Api:"setChartShowContent",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                  that.getChartConfTotal();
-              }else{
-                  that.getChartConfTotal();
-              }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:this.$qs.stringify({
+            setChartShowContent:true,
+            devSn: that.ActiveDevice.dev_sn,
+            up: that.totalSel.up?"Total":"",
+            down: that.totalSel.down?"Total":"",
+            avbr: that.totalSel.avbr?"Total":"",
+            lossDev: that.totalSel.trans?"Total":"",
+            lossRcv: that.totalSel.buss?"Total":""
+          }),
+          Api:"setChartShowContent",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.getChartConfTotal();
+          }else{
+            that.getChartConfTotal();
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
 
       setCardChartStyle(type){
-        console.log("setCardChartStyle:"+type);
-          //this.ChartConf.card.id = type;
         this.SET_CHART_STYLE(type);
       },
       getChartConfCard(){
-        console.log("!!!!!!!!!!")
         var that = this;
         var showCard = that.ChartConf.showCard;
         for(var j=0; j<showCard.length; j++){
@@ -417,7 +543,7 @@
             that.ChartConf.showCard[j]["value"] = that.chartCardView[showCard[j]["name"].toLowerCase()].split(",");
           }
         }
-        console.log(that.ChartConf.showCard)
+        that.initChartConfCard();
           /*this.$axios({
               method: 'post',
               url:"/page/index/chartData.php",
@@ -453,21 +579,29 @@
           .catch(function (error) {
               console.log(error)
           })*/
-          function formatUnit(item){
-              item.eth0Val = item.eth0.split(",");
-              item.sim1Val = item.sim1.split(",");
-              item.sim2Val = item.sim2.split(",");
-              item.sim3Val = item.sim3.split(",");
-              item.sim4Val = item.sim4.split(",");
-              item.sim5Val = item.sim5.split(",");
-              item.sim6Val = item.sim6.split(",");
-              item.wifiVal = item.wifi.split(",");
-              item.usb_5g1Val = item.usb_5g1.split(",");
-              item.usb_5g2Val = item.usb_5g2.split(",");
-              item.usb_lanVal = item.usb_lan.split(",");
-              item.usb_lan2Val = item.usb_lan2.split(",");
-              return item;
-          }
+        function formatUnit(item){
+          item.eth0Val = item.eth0.split(",");
+          item.sim1Val = item.sim1.split(",");
+          item.sim2Val = item.sim2.split(",");
+          item.sim3Val = item.sim3.split(",");
+          item.sim4Val = item.sim4.split(",");
+          item.sim5Val = item.sim5.split(",");
+          item.sim6Val = item.sim6.split(",");
+          item.wifiVal = item.wifi.split(",");
+          item.usb_5g1Val = item.usb_5g1.split(",");
+          item.usb_5g2Val = item.usb_5g2.split(",");
+          item.usb_lanVal = item.usb_lan.split(",");
+          item.usb_lan2Val = item.usb_lan2.split(",");
+          return item;
+        }
+      },
+      initChartConfCard(){
+        var that = this;
+        var chartCardView = that.chartCardView;
+        for(var key in chartCardView){
+          that.ChartConf.card[key] = chartCardView[key];
+          that.ChartConf.card[key+"Val"] = chartCardView[key].split(",");
+        }
       },
       initCardChartSelect(devSN){
         var that = this;
@@ -479,7 +613,7 @@
         var downArr = Object.keys(cardData.seriesDataDown); //有下载数据的网卡
         var showCard = this.$global.MergeArray(upArr, downArr); 
         var cardDiv = "";
-        
+        that.ChartConf.showCard = [];
         for(var i=0; i<showCard.length; i++){
           var obj = {};
           var newName = "";
@@ -492,7 +626,7 @@
           obj.key = showCard[i].toUpperCase();  
           that.ChartConf.showCard.push(obj);
         }
-
+        
         //获取数据库中保存的值
         //$("#cardSetting select").selectpicker('val',['up','down','lossDev']);
         /*for(var j=0; j<showCard.length; j++){
@@ -503,607 +637,103 @@
           }
         }*/
       },
-
+      changeCardLineShow(e){
+        var that = this;
+        var order = ["up", "down", "lossDev"];
+        that.ChartConf.card[e["name"].toLowerCase()+"Val"] = e.value.filter(function(item){
+          return !!item;
+        }).sort(function(a,b){
+          return order.indexOf(a) - order.indexOf(b);
+        });
+        that.ChartConf.card[e["name"].toLowerCase()] = e.value.filter(function(item){
+          return !!item;
+        }).sort(function(a,b){
+          return order.indexOf(a) - order.indexOf(b);
+        }).join(",");
+      },
       setChartConfCard(){
-          var that = this;
-          var paramData = {
-              "eth0":that.ChartConf.card.eth0Val.join(","),
-              "wifi":that.ChartConf.card.eth0Val.join(","),
-              "sim1":that.ChartConf.card.eth0Val.join(","),
-              "sim2":that.ChartConf.card.eth0Val.join(","),
-              "sim3":that.ChartConf.card.eth0Val.join(","),
-              "sim4":that.ChartConf.card.eth0Val.join(","),
-              "sim5":that.ChartConf.card.eth0Val.join(","),
-              "sim6":that.ChartConf.card.eth0Val.join(","),
-              "usb-5g1":that.ChartConf.card.eth0Val.join(","),
-              "usb-5g2":that.ChartConf.card.eth0Val.join(","),
-              "usb-lan":that.ChartConf.card.eth0Val.join(","),
-              "usb-lan2":that.ChartConf.card.eth0Val.join(","),
-              "id":that.ChartConf.card.id
-          };
-          this.$axios({
-              method: 'post',
-              url:"/page/index/chartData.php",
-              data:this.$qs.stringify({
-                  setCardChartShowContent:true,
-                  devSn: that.ActiveDevice.dev_sn,
-                  data: paramData
-              }),
-              Api:"setCardChartShowContent",
-              AppId:"android",
-              UserId:that.user.id
-          })
-          .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                  that.getChartConfCard();
-              }else{
-                  that.getChartConfCard();
+        var that = this;
+        for(var key in that.ChartConf.card){
+          if(key.indexOf("Val") != -1){
+            var card = key.substr(0, key.indexOf("Val")).toUpperCase();
+            console.log("card:"+card);
+            for(var i=0; i<that.ChartConf.showCard.length; i++){
+              if(that.ChartConf.showCard[i]["name"] == card){
+                that.ChartConf.card[key] = that.ChartConf.showCard[i]["value"];
               }
-          })
-          .catch(function (error) {
-              console.log(error)
-          })
+            }
+          }
+        }
+        var paramData = {
+          "eth0":that.ChartConf.card.eth0Val,
+          "wifi":that.ChartConf.card.wifiVal,
+          "sim1":that.ChartConf.card.sim1Val,
+          "sim2":that.ChartConf.card.sim2Val,
+          "sim3":that.ChartConf.card.sim3Val,
+          "sim4":that.ChartConf.card.sim4Val,
+          "sim5":that.ChartConf.card.sim5Val,
+          "sim6":that.ChartConf.card.sim6Val,
+          "usb-5g1":that.ChartConf.card["usb-5g1Val"],
+          "usb-5g2":that.ChartConf.card["usb_5g2Val"],
+          "usb-lan":that.ChartConf.card["usb_lan"],
+          "usb-lan2":that.ChartConf.card["usb_lan2"],
+        };
+        that.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:that.$qs.stringify({
+            setCardChartShowContent:true,
+            devSn: that.ActiveDevice.dev_sn,
+            data: JSON.stringify(paramData)
+          }),
+          Api:"setCardChartShowContent",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.$toast({
+              message: '操作成功'
+            });
+            that.getChartConfCard();
+          }else{
+            that.getChartConfCard();
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       setLineContent(e){
-        console.log("setLineContent")
-        console.log(e)
-      },
-      
-      
-      getAccountList(){
-        var that = this;
-        this.$axios({
-          method: 'post',
-          url:"/page/users/users.php",
-          data:this.$qs.stringify({
-            getUsers:true,
-            userId: that.user.id
-          }),
-          Api:"getUsers",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.accountList = res.data;
-            console.log("cccccccccccc")
-            console.log(that.accountList)
-          }else{
-            that.receiverList = [];
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
-
-      addReceiver(){
-        this.receiverConfigVisible = true;
-        this.receiverConfigType = "add";
-        this.clearRcvPopup();
-      },
-      addUser(){
-        this.userConfigVisible = true;
-        this.userConfigType = "add";
-        this.clearUserPopup();
-      },
-
-      editReceiver(item){
-        this.receiverConfigVisible = true;
-        this.receiverConfigType = "edit";
-        this.receiverConfigForm = {
-            rcvName:item.rcv_name,
-            rcvSn:item.rcv_sn
-        }
-      },
-      editUser(item){
-        this.userConfigVisible = true;
-        this.userConfigType = "edit";
-        this.userConfigForm = {
-            id:item.id,
-            name: item.name,
-            pwd: item.pwd,
-            pwd2: item.pwd,
-            mobilePhone: item.mobilePhone,
-            emailAddress: item.emailAddress,
-            remark: item.remark
-        }
-      },
-      getUserList(){
-        console.log("getUserList")
-        var that = this;
-        if(this.user.id == SUPER){
-          this.$axios({
-            method: 'post',
-            url:"/page/dev/devData.php",
-            data:this.$qs.stringify({
-              getPrefixs:true
-            }),
-            Api:"getPrefixs",
-            AppId:"android",
-            UserId:that.user.id
-          })
-          .then(function (response) {
-            let res = response.data;
-            if(res.res.success){
-              console.log("dddddddddddd")
-              console.log(res.data);
-              var userList = res.data;
-              that.deviceConfigUserOptions = userList;
-            }else{
-              that.deviceConfigUserOptions = [];
+        var selectBat = this.ChartConf.selectBat;
+        var selectBatBak = this.ChartConf.selectBatBak;
+        var del = (selectBat.length > selectBatBak.length)?false:true;
+        var addNew = "", delNew = "";
+        if(del){//批量选择选项 增加了
+          for(var i=0; i<selectBatBak.length; i++){
+            if(selectBat.indexOf(selectBatBak[i]) == -1){  
+              delNew = selectBatBak[i]
             }
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
-        }else{
-          var option = [{
-            text: this.user.id,
-            value: this.user.id
-          }];
-          that.deviceConfigUserOptions = option;
-          console.log("eeeeeeeeeeeeeeeee")
-          console.log(option[0].value);
-          that.deviceConfigForm.devUser = option[0].value;
-        }
-      },
-
-      editMatchRow(){
-        console.log("保存绑定");
-        //未修改
-        var that = this;
-        if (!this.editMatchChange) {
-          return;
-        }
-        var text = '是否切换配对关系？';
-        this.getDevPushStatus(this.deviceConfigForm.devSn, function(data) {
-          if (data == 'norcv') {
-            that.editMatch();
-          } else {
-            if (data == '1') {
-              text = '是否需要先停止推流再切换配对关系？'
-            }
-            //询问
-            that.$messagebox.confirm(text).then(
-              action => {
-                that.editMatch(index, layero);
-            }).catch();
           }
-        });
-      },
-      //切换
-      editMatch() {
-        console.log("editMatch")
-        var that = this;
-        this.$axios({
-          method: 'post',
-          url:"/page/index/indexData.php",
-          data:this.$qs.stringify({
-            editMatchByDevSn:true,
-            dev_sn:that.deviceConfigForm.devSn,
-            devName:that.deviceConfigForm.devName,
-            new_rcv_sn:that.deviceConfigForm.server,
-            new_board_id:that.deviceConfigForm.devSn
-          }),
-          Api:"editMatchByDevSn",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.getDeviceList();
-          }else{
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
-      //获取背包的推流状态
-      getDevPushStatus(devSn, callback) {
-        console.log("getDevPushStatus")
-        console.log(devSn);
-        var that = this;
-        this.$axios({
-          method: 'post',
-          url:"/page/index/indexData.php",
-          data:this.$qs.stringify({
-            getDevPushStatus:devSn
-          }),
-          Api:"getDevPushStatus",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            callback(res.data);
-          }else{
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
-      deleteMatchRow(){
-        var that = this;
-        var text = '是否解除配对关系？';
-        this.getDevPushStatus(this.deviceConfigForm.devSn, function(data) {
-          if (data == '1') {
-            text = '是否需要先停止推流再解除配对关系？'
-          }
-          that.$messagebox.confirm(text).then(
-            action => {
-              that.$axios({
-                method: 'post',
-                url:"/page/index/indexData.php",
-                data:that.$qs.stringify({
-                  delMatch:true,
-                  dev_sn:that.deviceConfigForm.devSn
-                }),
-                Api:"delMatch",
-                AppId:"android",
-                UserId:that.user.id
-              })
-              .then(function (response) {
-                let res = response.data;
-                if(res.res.success){
-                  that.getDeviceList();
-                }else{
-                  that.$toast({
-                    message: res.res.reason,
-                    position: 'middle',
-                    duration: 2000
-                  });
-                }
-              })
-              .catch(function (error) {
-                console.log(error)
-              })
-          }).catch(() => {
-             console.log("cancel");
-          });
-        });
-      },
-
-
-      clearRcvPopup(){
-        this.receiverConfigForm.rcvName = "";
-        this.receiverConfigForm.rcvSn = "";
-      },
-      clearUserPopup(){
-        this.userConfigForm.name = "";
-        this.userConfigForm.pwd = "";
-        this.userConfigForm.mobilePhone = "";
-        this.userConfigForm.emailAddress = "";
-        this.userConfigForm.remark = "";
-      },
-
-      submitReceiverConfig(){
-        var that = this;
-        var rcvSn = this.receiverConfigForm.rcvSn;
-        var mode = this.$global.getRcvMode(rcvSn.substr(-4));
-        var upgrade = 0;
-        if (!mode) {
-          that.$toast({
-            message: "接收机型号不支持!",
-            position: 'middle',
-            duration: 2000
-          });
-          return;
-        }
-        if(that.receiverConfigType == "add"){
-          for(var i=0; i<this.receiverList.length; i++){
-            if (this.receiverList[i].rcv_sn == rcvSn) {
-              that.$toast({
-                message: "该接收机已添加!",
-                position: 'middle',
-                duration: 2000
-              });
-              return;
+        }else{//批量选择选项 减少了
+          for(var i=0; i<selectBat.length; i++){
+            if(selectBat.indexOf(selectBatBak[i]) == -1){  
+              addNew = selectBat[i]
             }
           }
         }
-        
-        this.$axios({
-          method: 'post',
-          url:"/page/dev/devData.php",
-          data:this.$qs.stringify({
-            /*saveRcv:true,*/
-            rcvName: that.receiverConfigForm.rcvName,
-            rcvSn: that.receiverConfigForm.rcvSn,
-            rcvModel: mode,
-            userId: that.user.id,
-            prefix: that.user.id,
-            rcvUser: '',
-            type: that.receiverConfigType
-          }),
-          Api:"saveRcv",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.getReceiverList();
-            that.receiverConfigVisible = false;
+        this.ChartConf.selectBatBak = selectBat;
+        var showCard = this.ChartConf.showCard;
+        for(var j=0; j<this.ChartConf.showCard.length; j++){
+          if(addNew != ""){
+            this.ChartConf.showCard[j]["value"].push(addNew)  
           }else{
-            that.$toast({
-              message: res.res.reason,
-              position: 'middle',
-              duration: 2000
-            });
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
-      submitUserConfig(){
-        var that = this;
-        var name = this.userConfigForm.name;
-        var mobilePhone = this.userConfigForm.mobilePhone;
-        var emailAddress = this.userConfigForm.emailAddress;
-        var remark = this.userConfigForm.remark;
-        var pwd = this.userConfigForm.pwd;
-        if (this.userConfigForm.pwd != this.userConfigForm.pwd2) {
-          that.$toast({
-            message: "密码不一致!",
-            position: 'middle',
-            duration: 2000
-          });
-          return;
-        }
-        if (this.userConfigType == "add") {
-          for (var i = 0; i < this.accountList.length; i++) {
-            if (this.accountList[i].id == name) {
-              that.$toast({
-                message: "该用户已添加!",
-                position: 'middle',
-                duration: 2000
-              });
-              return;
+            if(this.ChartConf.showCard[j]["value"].indexOf(delNew) != -1){
+              this.ChartConf.showCard[j]["value"].splice(this.ChartConf.showCard[j]["value"].indexOf(delNew),1);    
             }
           }
         }
-        if (!this.$global.isValidMail(emailAddress)) {
-          that.$toast({
-            message: "请输入合法邮箱!",
-            position: 'middle',
-            duration: 2000
-          });
-          return;
-        }
-
-        if (this.userConfigType == "add") {//只有001-admin可以添加
-          this.$axios({
-            method: 'post',
-            url:"/page/users/users.php",
-            data:this.$qs.stringify({
-              addUser: name,
-              pwd: pwd,
-              group: 1,
-              prefix: name,
-              prefixName: name,
-              addPrefix: 1,
-              loginId: name,
-              enable: 1,
-              mobilePhone: mobilePhone,
-              emailAddress: emailAddress,
-              remark: remark
-            }),
-            Api:"addUser",
-            AppId:"android",
-            UserId:that.user.id
-          })
-          .then(function (response) {
-            let res = response.data;
-            if(res.res.success){
-              that.getUserList();
-              that.userConfigVisible = false;
-            }else{
-              that.$toast({
-                message: res.res.reason,
-                position: 'middle',
-                duration: 2000
-              });
-            }
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
-        } else {
-          console.log(this.userConfigForm)
-          var oldName = this.userConfigForm.id;
-          this.$axios({
-            method: 'post',
-            url:"/page/users/users.php",
-            data:this.$qs.stringify({
-              addUser: name,
-              oldUser: oldName,
-              pwd: pwd,
-              group: 1,
-              prefix: name,
-              loginId: oldName,
-              enable: 1,
-              mobilePhone: mobilePhone,
-              emailAddress: emailAddress,
-              remark: remark
-            }),
-            Api:"addUser",
-            AppId:"android",
-            UserId:that.user.id
-          })
-          .then(function (response) {
-            let res = response.data;
-            if(res.res.success){
-              that.getUserList();
-              that.userConfigVisible = false;
-            }else{
-              that.$toast({
-                message: res.res.reason,
-                position: 'middle',
-                duration: 2000
-              });
-            }
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
-        }
-      },
-      showDevAuthority(item){
-        console.log("showDevAuthority")
-        console.log(item)
-        var that = this;
-        this.devRightsList = [];
-        this.devRightsVisible = true;
-        this.$axios({
-          method: 'post',
-          url:"/page/users/users.php",
-          data:this.$qs.stringify({
-            getDevList: true,
-            userId: item.name,
-            userGroup: 1,
-            prefix: item.name,
-            logId: item.name,
-            logGroup: 1
-          }),
-          Api:"getDevList",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.devRightsList = res.data;
-          }else{
-            that.devRightsList = [];
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
-      
-      deleteUser(item){
-        var that = this;
-        this.$messagebox.confirm("确定删除此用户?").then(
-          action => {
-            this.$axios({
-              method: 'post',
-              url:"/page/users/users.php",
-              data:this.$qs.stringify({
-                delUserIds:"'"+item.id+"'"
-              }),
-              Api:"delUser",
-              AppId:"android",
-              UserId:that.user.id
-            })
-            .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                that.$toast({
-                  message: '操作成功'
-                });
-              }else{
-                that.$toast({
-                  message: '操作失败'
-                });
-              }
-              that.getAccountList();
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
-        });
-      },
-      showDevice(item){
-        console.log("showDevice")
-        console.log(item);
-        var that = this;
-        this.devicePopupList = [];
-        this.deviceVisible = true;
-        this.$axios({
-          method: 'post',
-          url:"/page/dev/devData.php",
-          data:this.$qs.stringify({
-            getboardByVirRcvSn:true,
-            rcvSN: item.rcv_sn,
-            user_Id:that.user.id
-          }),
-          Api:"getboardByVirRcvSn",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.devicePopupList = res.data;
-            console.log("that.devicePopupList")
-            console.log(that.devicePopupList)
-            console.log(that.ReceiverShow)
-          }else{
-            that.devicePopupList = [];
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
-      deleteReceiver(item){
-        console.log("deleteReceiver");
-        console.log(item);
-        var that = this;
-        var delBroad = false;
-        if(item.online == "直播"){
-          delBroad = true;
-          that.$toast({
-            message: "当前设备正在直播!",
-            position: 'middle',
-            duration: 2000
-          });
-          return;
-        }
-        var rcvSn = item.rcv_sn;
-        var text = '确认删除选中设备?';
-        this.$messagebox.confirm(text).then(
-          action => {
-            this.$axios({
-              method: 'post',
-              url:"/page/dev/devData.php",
-              data:this.$qs.stringify({
-                /*saveRcv:true,*/
-                delRcvSns: rcvSn,
-                userId: that.user.id
-              }),
-              Api:"delRcv",
-              AppId:"android",
-              UserId:that.user.id
-            })
-            .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                that.getReceiverList();
-                that.receiverConfigVisible = false;
-              }else{
-                that.$toast({
-                  message: res.res.reason,
-                  position: 'middle',
-                  duration: 2000
-                });
-              }
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
-        }).catch(()=>{
-          console.log("cancel");
-        });
       },
       logout(){
         clearInterval(this.DeviceTimer);
@@ -1133,7 +763,7 @@
 <style scoped>
     .me{
         background-color: #212227;
-        height: calc(100% - 54px);
+        height: calc(100% - 0.5rem);
         overflow:auto;
     }
     .Group{
@@ -1205,6 +835,26 @@
         border-radius: 5px;
         font-size: .12rem;
         background-color: #FFFFFF;
+    }
+    .ItemSelectBlack{
+        width:80%;
+        height: .26rem;
+        outline: none;
+        box-shadow: none;
+        border-radius: 5px;
+        font-size: .12rem;
+    }
+    .ItemBtn{
+        width: 30%;
+        height: .3rem;
+        display: inline-block;
+        background-color: #3d81f1;
+        color: #FFFFFF;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        box-shadow: none;
+        font-size: .12rem;
     }
     .lan,.wan{
         width: .6rem;
@@ -1371,7 +1021,7 @@
       border-bottom-right-radius:4px;
     }
     .mint-popup{border-radius: 6px;background-color: #EEE;}
-    .me .mint-popup{width: 90%;max-height: 90%;overflow-y: auto;border-radius: 4px;}
+    .me .mint-popup{width: 90%;overflow-y: auto;border-radius: 4px;}
     .me .popupContainer .mint-cell-title{width:40%;text-align: left;}
     .me .popupContainer .mint-cell-value{width:60%;text-align: right;padding:0;}
     .me .popupContainer .mint-cell{min-height:24px;}

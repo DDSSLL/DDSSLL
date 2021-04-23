@@ -31,11 +31,14 @@
             </span>
           </div>
         </div>
-        <div class="lock" v-if="pageType=='rcv'">
+        <div class="refreshIcon" v-if="pageType=='status'">
+          <i class="fa fa-2x fa-refresh" id="" aria-hidden="true" @click.stop="refreshChart"></i>
+        </div>
+        <div class="lock" v-else-if="pageType=='rcv'">
           <i class="fa fa-2x fa-lock" id="rcvlockIcon" aria-hidden="true" @click.stop="changeRcvLockState"></i>
         </div>
         <div class="lock" v-else>
-          <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState"></i>
+          <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState" :disable="lockDisable"></i>
         </div>
         
       </div>
@@ -101,7 +104,6 @@
           </mt-loadmore>
         </div>
       </mt-popup>
-
       <mt-popup v-model="deviceTypePop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop">
         <span class="chevronDown">
           <i class="fa fa-chevron-down" @click.stop="deviceTypePop=false"></i>
@@ -138,11 +140,13 @@
         SUPER : SUPER,
         timer:null,
         popupVisible:false,
+        lockDisable:false,
         deviceList:[{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}],
         active:{},
         //当前选中设备的相关参数
         deviceListShow:[],
                        
+        pageType:this.page,
         //用户组
         devicePrefixPop:false,
         allPrefix:[],
@@ -156,7 +160,6 @@
                             {label: '推流设备',value: '2'},
                             {label: '在线设备',value: '3'},
                             {label: '离线设备',value: '4'}],
-        pageType:this.page,
       }
     },
     computed: {
@@ -165,7 +168,6 @@
     created(){  //生命周期-页面创建后
       var that = this;
       that.initFilter();
-      //that.getDeviceList();
       clearInterval(this.DeviceTimer);
       this.timer = setInterval(function(){
         that.getDeviceList();
@@ -173,7 +175,6 @@
       this.SET_DEVICE_TIMER(this.timer);
     },
     activated(){
-      console.log("device activated")
       var that = this;
       that.initFilter();
     },
@@ -266,7 +267,7 @@
             //that.$refs.loadmore.onTopLoaded();
             if(!that.ActiveDevice){
               that.SET_ACTIVE_DEVICE(that.deviceList[0]);
-	    }
+            }
             for(var i=0; i<that.deviceList.length; i++){
               if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
                 that.refreshCurDevParam(that.deviceList[i]);
@@ -277,9 +278,9 @@
             that.deviceList = [];
           }
         })
-          .catch(function (error) {
-              console.log(error)
-          })
+        .catch(function (error) {
+            console.log(error)
+        })
       },
       //获取背包锁状态
       getDevLockStatus(){
@@ -309,6 +310,13 @@
           }else{
             $("#lockIcon").removeClass("fa-unlock").addClass("fa-lock");
           }
+          //没有权限不能解锁
+          var hasRights = that.$global.judgeUserHasDevRights();
+          if (!hasRights) {
+            that.lockDisable = true;
+          } else {
+            that.lockDisable = false;
+          }
         })
         .catch(function (error) {
             console.log(error)
@@ -331,6 +339,10 @@
           that.setDeviceParam('param_lock',1)
           that.setDeviceParam('lock_userid',that.user.id);
         }
+      },
+      //status页面刷新图表
+      refreshChart(){
+        this.$emit('refreshChart')
       },
       //修改接收机锁
       changeRcvLockState(){
@@ -407,7 +419,7 @@
             deviceListShow = that.deviceList;
             break;
         }
-        that.deviceListShow = deviceListShow  
+        that.deviceListShow = deviceListShow;
       }
     }
   }
@@ -466,9 +478,9 @@
     }
     .rate{
         box-sizing: border-box;
-        width: 24%;
+        width: 15%;
         /*padding-top: .08rem;*/
-        padding-right:0.15rem;
+        /*padding-right:0.15rem;*/
         display:flex;
     }
     .rate div{
@@ -497,7 +509,7 @@
         text-align: left;
     }
     .info{
-        width: 50%;
+        width: 70%;
         color: #FFFFFF;
         font-size: .15rem;
         box-sizing: border-box;
@@ -593,11 +605,11 @@
       margin: 10px;
       position: absolute;
     }
-    .lock{
+    .lock, .refreshIcon{
       height:100%;
       display:flex;
     }
-    .lock i{
+    .lock i, .refreshIcon i{
       margin:auto;
     }
     .lock .fa-lock{
@@ -605,6 +617,9 @@
     }
     .lock .fa-unlock{
       color: #75d1c7;
+    }
+    .refreshIcon .fa-refresh{
+      color:#fff;
     }
     .deviceFilterPop{
       height:auto;

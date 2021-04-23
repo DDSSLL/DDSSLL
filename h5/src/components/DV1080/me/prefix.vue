@@ -1421,7 +1421,7 @@
   .userPrefixPop.mint-popup{
     background-color: #212227;
     width: 100%;
-    height: auto;
+    height: 100%;
   }
   .chevronDown{
     width: 100%;

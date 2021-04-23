@@ -83,47 +83,50 @@
     </mt-popup>
     <!-- 网卡信息 -->
     <mt-popup class="cardInfoPop" v-model="deviceCardVisible" popup-transition="popup-fade">
-      <div class="popupContainer">
+      <div class="popupContainer" style="height:100%">
         <div class="popupTitle">
           网卡信息
           <i class="popupCloseBtn fa fa-times" @click="deviceCardVisible = false"></i>
         </div>
-        <template v-for="(item,i) in deviceCardList">
-          <div class="deviceCardItem">
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">网卡</span>
-              <span class="cellName cellValue" style="float: right;" :class="[(item.online=='1'&&(devOnline == '在线' || devOnline == '直播'))?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.card_name }}</span>
+        <div style="height: 100%;overflow: auto;">
+          <template v-for="(item,i) in deviceCardList">
+            <div class="deviceCardItem">
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">网卡</span>
+                <span class="cellName cellValue" style="float: right;" :class="[(item.online=='1'&&(devOnline == '在线' || devOnline == '直播'))?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.card_name }}</span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">状态</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.used=="0"?"禁用":"启用" }}</span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">IP</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.card_ip }}</span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">MAC</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.card_mac }}</span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">信号强度</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.rssi }}</span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">运营商</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.operator }}</span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">网络制式</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.sim_mode }}</span>
+              </div>
+              <div class="cellItem">
+                <span class="cellName cellLabel" style="float: left;">模块型号</span>
+                <span class="cellName cellValue" style="float: right;">{{ item.module_type }}</span>
+              </div>
             </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">状态</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.used=="0"?"禁用":"启用" }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">IP</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.card_ip }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">MAC</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.card_mac }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">信号强度</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.rssi }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">运营商</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.operator }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">网络制式</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.sim_mode }}</span>
-            </div>
-            <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">模块型号</span>
-              <span class="cellName cellValue" style="float: right;">{{ item.module_type }}</span>
-            </div>
-          </div>
-        </template>
+          </template>
+        </div>
+        
       </div>
     </mt-popup>
     <!-- 背包配置 -->
@@ -137,7 +140,7 @@
           <div class="fGrp">
             <div class="tl">背包名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.dev_name" required pattern="[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\(\)（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="disable.dev_name">
+              <input type="text" class="ItemInput" v-model="options.dev_name" required pattern="[A-Za-z0-9\u4e00-\u9fa5 @+\-()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="disable.dev_name">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">仪器名(长度1-15,仅支持中文,字母,数字,+,-,@,()和空格)</p>
             </div>
           </div>
@@ -699,7 +702,10 @@
             }
             that.$messagebox.confirm(text).then(
               action => {
-                that.$global.editMatch(rcv,board,dev_sn,dev_name);
+                that.$global.editMatch(rcv,board,dev_sn,dev_name, function(){
+                  that.options.rcv_sn = that.options.matchRcv;
+                  that.options.matchRcv_old = that.options.matchRcv;
+                });
             }).catch();
           }
         });
@@ -819,8 +825,8 @@
           .then(function (response) {
             let res = response.data;
             if(res.res.success){
-              that.getDeviceList();
               that.deviceConfigVisible = false;
+              that.getDeviceList();
             }else{
               that.$toast({
                 message: res.res.reason,
@@ -1039,7 +1045,9 @@
   .cardInfoPop.mint-popup{
     width: 90% !important;
     max-height: 90% !important;
-    overflow-y: auto !important;
+    /*overflow-y: auto !important;*/
+    overflow-y: hidden !important;
+    height:100%;
     border-radius: 4px !important;
     background-color: #EEE !important;
   }

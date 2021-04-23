@@ -5,7 +5,7 @@
         用户信息
         <i class="titleIcon fa" :class="[AccountShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
         <i class="titleIcon addBtn fa fa-refresh" @click.stop="getAccountList"></i>
-        <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addUser" v-if="user.id==SUPER"></i>
+        <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addUser" v-if="user.userGroup==ADMIN"></i>
       </div>
       <transition name="slide-fade">
         <div class="GroupItem" v-if="AccountShow">
@@ -542,7 +542,7 @@
               group: that.curUser.userGroup,
               prefix: that.curUser.prefix,
               loginId: id,
-              enable: that.user.id==SUPER?1:0,
+              enable: 1,
               mobilePhone: mobilePhone,
               emailAddress: emailAddress,
               remark: remark
@@ -580,7 +580,7 @@
               group: that.curUser.userGroup,
               prefix: that.curUser.prefix,
               loginId: id,
-              enable: that.user.id==SUPER?1:0,
+              enable: 1,
               mobilePhone: mobilePhone,
               emailAddress: emailAddress,
               remark: remark
@@ -850,7 +850,7 @@
   .userPrefixPop.mint-popup{
     background-color: #212227;
     width: 100%;
-    height: auto;
+    height: 100%;
   }
   .chevronDown{
     width: 100%;

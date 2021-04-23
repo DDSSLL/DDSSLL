@@ -143,13 +143,13 @@
                 this.activeTab = 'status';
             }
         },
-        ActiveDeviceType(val){
+        /*ActiveDeviceType(val){
           if(val == "DV1080"){
             this.activeTab = "status";
           }else if(val == "DV4000"){
             this.activeTab = "dv4000status";
           }
-        },
+        },*/
         $route() {
             // if the route changes...
             let token = localStorage.getItem("LOGIN")||''

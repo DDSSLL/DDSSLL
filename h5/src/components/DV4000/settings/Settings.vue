@@ -1,5 +1,5 @@
 <template>
-  <div class="settings">
+  <div class="settings mainPage">
     <Device></Device>
     <div class="Group"><!-- 传输控制 -->
       <div class="GroupTitle" @click="transControlShow=!transControlShow">
@@ -60,7 +60,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem"><!-- 5G模式 -->
+          <div class="GroupItem" v-if="options.Flag5g"><!-- 5G模式 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">5G模式</div>
               <div class="GroupItemValue">
@@ -90,6 +90,14 @@
               <div class="GroupItemValue">
                 <mt-switch v-model="options.DevAliasSwitch" @change="$global.setDeviceParam('DevAliasSwitch',options.DevAliasSwitch?'1':'0')" :disabled="!pageLock?false:true">
                 </mt-switch>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" ><!-- 别名 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">别名</div>
+              <div class="GroupItemValue">
+                <input type="text" class="ItemInput" v-model="options.DevAlias" @blur="changeDevAlias" :disabled="!pageLock?false:true">
               </div>
             </div>
           </div>
@@ -253,12 +261,12 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if=""><!-- 按钮 -->
+          <div class="GroupItem"><!-- 按钮 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle"></div>
               <div class="GroupItemValue" style="float:right">
-                <mt-button class="ItemBtn" type="primary" @click="saveMatch">绑定</mt-button>
-                <mt-button class="ItemBtn" style="margin-left:10px;" @click="unbindMatch">解绑</mt-button>
+                <mt-button class="ItemBtn" type="primary" @click="saveMatch" :disabled="!pageLock?false:true">绑定</mt-button>
+                <mt-button class="ItemBtn" style="margin-left:10px;" @click="unbindMatch" v-if="unbindBtnShow" :disabled="!pageLock?false:true">解绑</mt-button>
               </div>
             </div>
           </div>
@@ -335,6 +343,7 @@
         hdrShow : true,
         latencyShow : true,
         audioEncodeShow : true,
+        unbindBtnShow:false,
         card_sel:[],
         OPTIONS_FEC_LEVEL : [{text: "低",value: "0"}, 
                               {text: "中",value: "1"}, 
@@ -352,7 +361,8 @@
                             {text: "INFO",value: "2"},
                             {text: "DEBUG",value: "3"}],
         OPTIONS_NETMODE_PARAMS : [{text: "NSA",value: "0"}, 
-                                  {text: "SA",value: "1"}],
+                                  {text: "SA",value: "1"}, 
+                                  {text: "LTE ONLY",value: "2"}],
         OPTIONS_ETH0_TYPE : [{text: "固定IP地址",value: "0"}, 
                             {text: "自动获取IP地址",value: "1"}],
         OPTIONS_HDR_ORI : [],
@@ -385,9 +395,10 @@
           OpenfecMode:false,//纠错开关
           OpenfecLevel:0,//纠错能力
           Mode5G:0,//5G模式
+          Flag5g:false,//是否存在5G模式
           Eth0Type:0,//Eth0Type
           DevAliasSwitch:false,//显示别名
-          
+          DevAlias:"",//别名
           video_input:'0',//视频输入
           audio_input:'1',//音频输入
           video_encode:'0',//视频编码
@@ -411,7 +422,7 @@
         Device
     },
     computed: {
-        ...mapState(['user','navHide','ActiveDevice','ActiveDeviceType','paramLockAck','lockUserId','devParam','rcvParam'])
+        ...mapState(['user','navHide','ActiveDevice','paramLockAck','lockUserId','devParam','rcvParam'])//'ActiveDeviceType',
     },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {
@@ -434,7 +445,7 @@
           this.$global.getRcvList4000(this.formatRcvList);
         }
       },
-      '$store.state.paramLockAck':{
+      /*'$store.state.paramLockAck':{
         immediate: true,
         handler(val) {
           this.RADIO_TRANS_IP = [{
@@ -447,14 +458,14 @@
             disabled: !this.pageLock?false:true
           }]
         }
-      }
+      }*/
     },
     activated(){  //生命周期-缓存页面激活
       this.getLockStates();
       this.getSelectOptions();
       var that = this;
       localStorage.getSettingParam = setInterval(function(){
-        if(!that.pageLock){
+        if(that.pageLock){
           that.$global.getDeviceParam(that.formatData)
         }
       },1000)
@@ -482,6 +493,15 @@
         }else{
           that.pageLock = true;
         }
+        this.RADIO_TRANS_IP = [{
+          label: '内网',
+          value: '1',
+          disabled: !this.pageLock?false:true
+        },{
+          label: '公网',
+          value: '0',
+          disabled: !this.pageLock?false:true
+        }]
       },
       chooseIP(val){this.control.ip = val;},
       getSelectOptions(){
@@ -534,11 +554,13 @@
         that.options.OpenfecLevel = data['OpenfecLevel'];
         //5G模式
         that.options.Mode5G = data['5GMode'];
+        that.options.Flag5g = data['5gFlag'];
         //ETH0 IP
         that.options.Eth0Type = data['Eth0Type'];
         //显示别名
         that.options.DevAliasSwitch = (data['DevAliasSwitch'] == '1' ? true : false );
-        
+        //别名
+        that.options.DevAlias = data['dev_name'];
         /*------------------------输入编码------------------------*/
         //视频输入
         that.options.video_input = data['video_input'];
@@ -702,6 +724,85 @@
         //时延模式
         that.options.latency = that.options_old_265.latency;
       },
+      changeDevAlias(){
+        var that = this;
+        var aliasValue = that.options.DevAlias;
+        var len = that.Substr(aliasValue, 0);
+        if(len > 10){
+          that.$toast({
+            message: "别名长度不超过10",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        //别名名称校验
+        if (!that.nameDevAliasCheckType(aliasValue)) {
+          that.$toast({
+            message: "长度1~10，仅支持中文,字母,数字,+,-,@,(),和空格",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        that.$global.setDeviceParam('DevAlias', that.options.DevAlias);
+        that.setDevNameParam('dev_name', aliasValue);
+      },
+      Substr(str, start){
+        var len = 0;
+        var tmpStr = '';
+        for (var i = start; i < str.length; i++) { // 遍历字符串
+          if (/[\u4e00-\u9fa5]/.test(str[i])) { // 中文 长度也默认是1字节
+            len += 1;
+          } else {
+            len += 1;
+          }
+        }
+        return len;
+      },
+      nameDevAliasCheckType(name) {
+        var pattern = /^[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\(\)（）]{1,10}$/gi;
+        return pattern.test(name);
+      },
+      //设置背包名称dev_name参数(跟别名保持一致)
+      setDevNameParam(param, value) {
+        var that = this;
+        var devSN = that.ActiveDevice.dev_sn;
+        if (!devSN || !that.$global.isValidSn(devSN)) {
+            return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            devSN: devSN,
+            devNameCol : param,
+            value : value+"",
+          }),
+          Api:"SetDevNameParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.$toast({
+              message: '设置成功',
+              position: 'middle',
+              duration: 2000
+            });
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            }); 
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
       changeVideoInput(data){
         var that = this;
         var video_encode_option =  that.$global.getDevParamRange(that.ActiveDevice.dev_sn,that.user.prefix,'video_encode');
@@ -851,6 +952,11 @@
           //addSelOptions('edit_rcv_sel', result);
           that.options.RcvList = result;
           that.options.matchRcv = that.ActiveDevice.rcv_sn;
+          if(that.options.matchRcv != ""){
+            that.unbindBtnShow = true;
+          }else{
+            that.unbindBtnShow = false;
+          }
         }
         if(!that.ActiveDevice.rcv_sn){//当前配对的接收机为空，则板卡列表显示为空
           that.options.boardList = [];
@@ -980,14 +1086,18 @@
         that.$global.getDevPushStatus(dev_sn, function(data) {
           if (data == 'norcv') {
             console.log("norcv")
-            that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name);
+            that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name,function(){
+              that.unbindBtnShow = true;
+            });
           } else {
             if (data == '1') {
               text = '是否需要先停止推流再切换配对关系？'
             }
             that.$messagebox.confirm(text).then(
               action => {
-                that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name);
+                that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name,function(){
+                    that.unbindBtnShow = true;
+                });
             }).catch();
           }
         });
@@ -1037,6 +1147,7 @@
                   that.$global.getRcvList4000(that.formatRcvList);
                   that.options.matchBoard = "";
                   that.options.matchRcv = "";
+                  that.bindBtnShow = false;
                 }else{
                   that.$toast({
                     message: res.res.reason,
@@ -1188,6 +1299,15 @@
     .mint-switch{
         transform: scale(.7);
         transform-origin:left;
+    }
+    .ItemInput{
+      width:1.8rem;
+      height: .22rem;
+      line-height: .22rem;
+      outline: none;
+      border-radius: 5px;
+      font-size: .14rem;
+      margin-top: .02rem;
     }
     .slide-fade-enter-active {transition: all 1s ease;}
     .slide-fade-leave-active {transition: all 1s cubic-bezier(1.0, 0.5, 0.8, 1.0);}
