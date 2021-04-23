@@ -84,10 +84,10 @@
                   <!-- <p :class="[item.push_url ? 'addressTitleLineH' : '', 
                   item.push_status == 'running' ? 'pushStyle' : (item.push_status == '' ? 'defaultStyle' : 'errStyle')]" class="addressUrl" v-if="item.push_url">{{ item.push_url }}</p> -->
                 </div>
-                <div class="buttons" :style="{display:(disable.editDisable?'none':'')}">
+                <div class="buttons">
                   <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item)"></i>
-                  <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="delUrl(item)"></i>
-                  <i class="iconBtn fa" :class="[item.push_sel=='1'?'fa-pause':'fa-play']" aria-hidden="true" @click="changePushStatus(item)"></i>
+                  <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="delUrl(item)" :style="{display:(disable.editDisable?'none':'')}"></i>
+                  <i class="iconBtn fa" :class="[item.push_sel=='1'?'fa-pause':'fa-play']" aria-hidden="true" @click="changePushStatus(item)" :style="{display:(disable.editDisable?'none':'')}"></i>
                 </div>
               </div>
             </template>
@@ -277,7 +277,7 @@
               <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265、RTSP+H.265、SRT</p>
             </div>
           </div>
-          <div class="formItem" style="text-align: right;margin-bottom: 0;">
+          <div class="formItem" style="text-align: right;margin-bottom: 0;" v-if="show.saveUrlShow">
             <button class="modalBtn" @click="hideEditUrls">取消</button>
             <button class="modalBtn" @click="saveEditUrls" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
@@ -432,6 +432,7 @@
           recordOnShow:false,//录制大小。容量信息
           recordErrInfo:false,//录制开关报错信息
           source2:false,//源2显示
+          saveUrlShow:true,//编辑推流地址的确定按钮
         },
         pushUrlsEditVisible:false,
         source2Visible:false,//源2配置
@@ -1696,13 +1697,18 @@
         console.log(obj);
         var that = this;
         var disabled = that.disable.url_add;
-        if (disabled) {
+        /*if (disabled) {
           that.$toast({
             message: "没有权限！",
             position: 'middle',
             duration: 2000
           });
           return;
+        }*/
+        if(that.disable.editDisable){
+          that.show.saveUrlShow = false;  
+        }else{
+          that.show.saveUrlShow = true;  
         }
         that.pushUrlsEditVisible = true;
         if(that.ActiveDevice.board_id.length == 10){    //虚拟
