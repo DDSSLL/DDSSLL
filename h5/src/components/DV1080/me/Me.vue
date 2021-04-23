@@ -21,7 +21,7 @@
         <div class="GroupItem" v-show="ChartConfShow">
           <mt-navbar v-model="ChartConfTab">
             <mt-tab-item id="1">单位</mt-tab-item>
-            <!-- <mt-tab-item id="2">概览图</mt-tab-item> -->
+            <mt-tab-item id="2">概览图</mt-tab-item>
             <mt-tab-item id="3">网卡图</mt-tab-item>
           </mt-navbar>
           <mt-tab-container v-model="ChartConfTab">
@@ -57,24 +57,31 @@
                 </div>
               </div>
             </mt-tab-container-item>
-            <!-- <mt-tab-container-item id="2">
+            <mt-tab-container-item id="2">
               <div class="GroupItem">
                 <div class="GroupItemField">
-                  <div class="GroupItemTitle">上传速率</div>
+                  <div class="GroupItemTitle">发送速率</div>
                   <div class="GroupItemValue">
-                    <select class="ItemSelect">
-                      <option v-for="item in ChartConf.total.up" :value="item">{{item}}</option>
-                    </select>
+                    <mt-checklist v-model="totalSel.up" :options="totalSelOptionsUp">
+                    </mt-checklist>
                   </div>
                 </div>
               </div>
               <div class="GroupItem">
                 <div class="GroupItemField">
-                  <div class="GroupItemTitle">下载速率</div>
+                  <div class="GroupItemTitle">接收速率</div>
                   <div class="GroupItemValue">
-                    <select class="ItemSelect">
-                      <option v-for="item in ChartConf.total.down" :value="item">{{item}}</option>
-                    </select>
+                    <mt-checklist v-model="totalSel.down" :options="totalSelOptionsDown">
+                    </mt-checklist>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem" v-if="avbrShowFlg">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">可变码率</div>
+                  <div class="GroupItemValue">
+                    <mt-checklist v-model="totalSel.avbr" :options="totalSelOptionsAVBR">
+                    </mt-checklist>
                   </div>
                 </div>
               </div>
@@ -82,29 +89,38 @@
                 <div class="GroupItemField">
                   <div class="GroupItemTitle">传输丢包</div>
                   <div class="GroupItemValue">
-                    <select class="ItemSelect">
-                      <option v-for="item in ChartConf.total.lossDev" :value="item">{{item}}</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle">业务丢包</div>
-                    <div class="GroupItemValue">
-                      <select class="ItemSelect">
-                        <option v-for="item in ChartConf.total.lossRcv" :value="item">{{item}}</option>
-                      </select>
+                    <mt-checklist v-model="totalSel.trans" :options="totalSelOptionsTrans">
+                    </mt-checklist>
                   </div>
                 </div>
               </div>
               <div class="GroupItem">
-                <div class="GroupItemBtns">
-                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;" @click="setChartConfTotal">确定</button>
-                  <button class="setBtn" @click="getChartConfTotal">恢复当前值</button>
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">业务丢包</div>
+                  <div class="GroupItemValue">
+                    <mt-checklist v-model="totalSel.buss" :options="totalSelOptionsBuss">
+                    </mt-checklist>
+                  </div>
                 </div>
               </div>
-            </mt-tab-container-item> -->
+              <div class="GroupItem">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle"></div>
+                  <div class="GroupItemValue" style="width:100%">
+                    <mt-button class="ItemBtn" style="margin-left:10px;" @click="chartClear">一键清空</mt-button>
+                    <mt-button class="ItemBtn" style="margin-left:10px;" @click="chartSelectReset">恢复当前值</mt-button>
+                    <mt-button class="ItemBtn" style="margin-left:10px;" @click="chartSelectDefaultReset">恢复默认值</mt-button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="GroupItem">
+                <div class="GroupItemBtns">
+                  <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;position: static;line-height:0px" @click="setChartConfTotal">确定</button>
+                  <button class="setBtn" style="background:#EEE;color:#000;position: static;line-height:0px;width:auto;" @click="getChartConfTotal">恢复当前值</button>
+                </div>
+              </div>
+            </mt-tab-container-item>
             <mt-tab-container-item id="3">
               <div class="GroupItem GroupItem0">
                 <div class="GroupItemField">
@@ -126,7 +142,7 @@
                   </div>
                 </div>
               </template>
-             <!--  <div class="GroupItem GroupItem0">
+              <div class="GroupItem GroupItem0">
                 <div class="GroupItemField">
                   <div class="GroupItemTitle GroupItemTitle1">批量选择</div>
                   <div class="GroupItemValue GroupItemValue1">
@@ -134,7 +150,7 @@
                     </mt-checklist>
                   </div>
                 </div>
-              </div> -->
+              </div>
               <div class="GroupItem">
                 <div class="GroupItemBtns">
                   <button class="setBtn" style="background:rgb(43,162,69);margin-right:.06rem;color:#FFF;position: static;line-height:0px" @click="setChartConfCard">确定</button>
@@ -181,10 +197,53 @@
       return{
         ADMIN:ADMIN,
         ChartConfTab:'1',
+        avbrShowFlg:false,
+        avbrFlag:"",
         //ChartConfTotalUp:[],
+        cardMatch : {
+          "Total":["Total","Total"],
+          "ETH0":["eth0","eth0"],
+          "WIFI":["WIFI","WIFI"],
+          "SIM1":["lte1","NR5G-NSA1"],
+          "SIM2":["lte2","NR5G-NSA2"],
+          "SIM3":["lte3","NR5G-NSA3"],
+          "SIM4":["lte4","NR5G-NSA4"],
+          "SIM5":["lte5","NR5G-NSA5"],
+          "SIM6":["lte6","NR5G-NSA6"],
+          "USB-5G1":["usb_5g1","usb-5g1"],
+          "USB-5G2":["usb_5g2","usb-5g2"],
+          "USB-LAN":["usb_lan","usb-lan"],
+          "USB-LAN2":["usb_lan2","usb-lan2"]
+        },
+        chartLegendArr : ["Total"],
+        /*checklist的选项*/
+        totalSelOptionsUp:[],
+        totalSelOptionsDown:[],
+        totalSelOptionsAVBR:[],
+        totalSelOptionsTrans:[],
+        totalSelOptionsBuss:[],
+        /*dev_line中保存的显示的line*/
+        chartGeneralView : {
+          "up":'Total',
+          "down":'Total',
+          "avbr":'Total',
+          "trans":'Total',
+          "buss":'Total'
+        },
+        totalSel:{
+          up:"Total",
+          down:"Total",
+          avbr:"Total",
+          trans:"Total",
+          buss:"Total",
+        },
         ChartConf:{
-          unit:{chartAutoVal:true,chartAuto:"1",chartInterval:"",chartMax:""},
-          total:{up: "", down: "", lossDev:"", lossRcv:""},
+          unit:{
+            chartAutoVal:true,
+            chartAuto:"1",
+            chartInterval:"",
+            chartMax:"",
+          },
           card:{
             dev_sn: "8000102140",
             eth0: "up,down,lossDev",
@@ -215,10 +274,11 @@
           },
           showCard:[],
           simCheckList : [
-            {label: '上传速率',value: 'up'},
-            {label: '下载速率',value: 'down'},
+            {label: '发送速率',value: 'up'},
+            {label: '接收速率',value: 'down'},
             {label: '传输丢包',value: 'lossDev'}],
-          selectBat:[]
+          selectBat:['up','down','lossDev'],
+          selectBatBak:['up','down','lossDev']
         },
         ChartConfShow:false,
         /*DeviceShow:false,*/
@@ -240,7 +300,7 @@
         handler(val) {
           this.ActiveDevice = val;
           //this.getChartConfUnit();
-          this.getChartConfTotal();
+          //this.getChartConfTotal();
           //this.getChartConfCard();
           //this.initCardChartSelect();
         }
@@ -248,13 +308,21 @@
     },
     mounted(){
       this.getChartConfUnit();
+      this.initChartSelect();
       this.getChartConfTotal();
       this.initCardChartSelect();
       this.getChartConfCard();
     },
     activated(){  //生命周期-缓存页面激活
+      var that = this;
+      this.$global.getDeviceParam(function(data){
+        that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
+        that.avbrShowFlg = that.avbrFlag;
+      });
       this.getChartConfUnit();
+      this.initChartSelect();
       this.getChartConfTotal();
+      this.initCardChartSelect();
       this.getChartConfCard();
     },
     deactivated(){   //生命周期-缓存页面失活
@@ -262,13 +330,13 @@
     },
     methods:{
       ...mapMutations({
-        SET_USER,
-        SET_NAV_STATUS,
-        SET_ACTIVE_DEVICE,
-        SET_TIMER_CLEAR,
-        SET_CHART_STYLE,
-        SET_DEVICE_TYPE_SELECT,
-        SET_DEVICE_PREFIX_SELECT
+          SET_USER,
+          SET_NAV_STATUS,
+          SET_ACTIVE_DEVICE,
+          SET_TIMER_CLEAR,
+          SET_CHART_STYLE,
+          SET_DEVICE_TYPE_SELECT,
+          SET_DEVICE_PREFIX_SELECT
       }),
       getChartConfUnit(){
         var that = this;
@@ -335,6 +403,55 @@
           console.log(error)
         })
       },
+      //概览图恢复当前配置
+      chartSelectReset(){
+        this.totalSel.up = this.chartGeneralView.up;
+        this.totalSel.down = this.chartGeneralView.down;
+        this.totalSel.avbr = this.chartGeneralView.avbr;
+        this.totalSel.trans = this.chartGeneralView.trans;
+        this.totalSel.buss = this.chartGeneralView.buss;
+      },
+      //概览图恢复默认配置
+      chartSelectDefaultReset(){
+        this.totalSel.up = "Total";
+        this.totalSel.down = "Total";
+        this.totalSel.avbr = "Total";
+        this.totalSel.trans = "Total";
+        this.totalSel.buss = "Total";
+      },
+      //概览图一键清空
+      chartClear(){
+        this.totalSel.up = "";
+        this.totalSel.down = "";
+        this.totalSel.avbr = "";
+        this.totalSel.trans = "";
+        this.totalSel.buss = "";
+      },
+      initChartSelect(){
+        var that = this;
+        var cardData = localStorage.cardData ? JSON.parse(localStorage.cardData) : "";
+        var upArr = Object.keys(cardData.seriesDataUp); //有上传数据的网卡
+        var downArr = Object.keys(cardData.seriesDataDown); //有下载数据的网卡
+        var showCard = this.$global.MergeArray(upArr, downArr); 
+        var optionBussDrop = "";
+        for(var i=0; i<that.chartLegendArr.length; i++){
+          if(that.chartLegendArr[i]=="Total" 
+            || $.inArray(that.cardMatch[that.chartLegendArr[i]][0], showCard) != -1
+            || $.inArray(that.cardMatch[that.chartLegendArr[i]][1], showCard) != -1){
+            var option = that.chartLegendArr[i];
+            that.totalSelOptionsUp = [];
+            that.totalSelOptionsDown = [];
+            that.totalSelOptionsAVBR = [];
+            that.totalSelOptionsTrans = [];
+            that.totalSelOptionsBuss = [];
+            that.totalSelOptionsUp.push({label:option,value:option});
+            that.totalSelOptionsDown.push({label:option,value:option});
+            that.totalSelOptionsAVBR.push({label:option,value:option});
+            that.totalSelOptionsTrans.push({label:option,value:option});
+            that.totalSelOptionsBuss.push({label:option,value:option});
+          }
+        }
+      },
       getChartConfTotal(){
         var that = this;
         this.$axios({
@@ -353,10 +470,25 @@
           let res = response.data;
           if(res.res.success){
             var data = res.data[0];
-            for(var key in data){
-              data[key] = data[key].split(",");
+            var up = data["up"];//.split(",").map(function(x){return formatCardShow(x)});
+            var down = data["down"];//.split(",").map(function(x){return formatCardShow(x)});
+            var trans = data["lossDev"];//.split(",").map(function(x){return formatCardShow(x)});//传输丢包
+            var buss = data["lossRcv"];//.split(",").map(function(x){return formatCardShow(x)});//业务丢包
+            that.chartGeneralView.up = up;
+            that.chartGeneralView.down = down;
+            that.chartGeneralView.trans = trans;
+            that.chartGeneralView.buss = buss;
+            that.totalSel.up = up;
+            that.totalSel.down = down;
+            that.totalSel.trans = trans;
+            that.totalSel.buss = buss;
+            if(that.avbrFlag){
+              var avbr = data["avbr"];//.split(",").map(function(x){return formatCardShow(x)});
+              that.chartGeneralView.avbr = avbr;//可变码率  
+              that.totalSel.avbr = avbr;
+            }else{
+              that.chartGeneralView.avbr = [];//可变码率  
             }
-            that.ChartConf.total = data;
           }else{
             that.$toast({
               message: res.res.reason,
@@ -366,7 +498,7 @@
           }
         })
         .catch(function (error) {
-          console.log(error)
+            console.log(error)
         })
       },
       setChartConfTotal(){
@@ -377,10 +509,11 @@
           data:this.$qs.stringify({
             setChartShowContent:true,
             devSn: that.ActiveDevice.dev_sn,
-            up: that.ChartConf.total.up,
-            down: that.ChartConf.total.down,
-            lossDev: that.ChartConf.total.lossDev,
-            lossRcv: that.ChartConf.total.lossRcv
+            up: that.totalSel.up?"Total":"",
+            down: that.totalSel.down?"Total":"",
+            avbr: that.totalSel.avbr?"Total":"",
+            lossDev: that.totalSel.trans?"Total":"",
+            lossRcv: that.totalSel.buss?"Total":""
           }),
           Api:"setChartShowContent",
           AppId:"android",
@@ -398,6 +531,7 @@
           console.log(error)
         })
       },
+
       setCardChartStyle(type){
         this.SET_CHART_STYLE(type);
       },
@@ -481,7 +615,7 @@
         var downArr = Object.keys(cardData.seriesDataDown); //有下载数据的网卡
         var showCard = this.$global.MergeArray(upArr, downArr); 
         var cardDiv = "";
-        
+        that.ChartConf.showCard = [];
         for(var i=0; i<showCard.length; i++){
           var obj = {};
           var newName = "";
@@ -494,7 +628,7 @@
           obj.key = showCard[i].toUpperCase();  
           that.ChartConf.showCard.push(obj);
         }
-
+        
         //获取数据库中保存的值
         //$("#cardSetting select").selectpicker('val',['up','down','lossDev']);
         /*for(var j=0; j<showCard.length; j++){
@@ -521,6 +655,17 @@
       },
       setChartConfCard(){
         var that = this;
+        for(var key in that.ChartConf.card){
+          if(key.indexOf("Val") != -1){
+            var card = key.substr(0, key.indexOf("Val")).toUpperCase();
+            console.log("card:"+card);
+            for(var i=0; i<that.ChartConf.showCard.length; i++){
+              if(that.ChartConf.showCard[i]["name"] == card){
+                that.ChartConf.card[key] = that.ChartConf.showCard[i]["value"];
+              }
+            }
+          }
+        }
         var paramData = {
           "eth0":that.ChartConf.card.eth0Val,
           "wifi":that.ChartConf.card.wifiVal,
@@ -563,8 +708,34 @@
         })
       },
       setLineContent(e){
-        console.log("setLineContent")
-        console.log(e)
+        var selectBat = this.ChartConf.selectBat;
+        var selectBatBak = this.ChartConf.selectBatBak;
+        var del = (selectBat.length > selectBatBak.length)?false:true;
+        var addNew = "", delNew = "";
+        if(del){//批量选择选项 增加了
+          for(var i=0; i<selectBatBak.length; i++){
+            if(selectBat.indexOf(selectBatBak[i]) == -1){  
+              delNew = selectBatBak[i]
+            }
+          }
+        }else{//批量选择选项 减少了
+          for(var i=0; i<selectBat.length; i++){
+            if(selectBat.indexOf(selectBatBak[i]) == -1){  
+              addNew = selectBat[i]
+            }
+          }
+        }
+        this.ChartConf.selectBatBak = selectBat;
+        var showCard = this.ChartConf.showCard;
+        for(var j=0; j<this.ChartConf.showCard.length; j++){
+          if(addNew != ""){
+            this.ChartConf.showCard[j]["value"].push(addNew)  
+          }else{
+            if(this.ChartConf.showCard[j]["value"].indexOf(delNew) != -1){
+              this.ChartConf.showCard[j]["value"].splice(this.ChartConf.showCard[j]["value"].indexOf(delNew),1);    
+            }
+          }
+        }
       },
       logout(){
         clearInterval(this.DeviceTimer);
@@ -572,7 +743,9 @@
         this.SET_TIMER_CLEAR();
         var that = this;
         this.$toast({
-          message: '操作成功'
+          message: '操作成功',
+          position: 'middle',
+          duration: 2000
         });
         setTimeout(function(){
           that.SET_USER(null);
@@ -664,6 +837,26 @@
         border-radius: 5px;
         font-size: .12rem;
         background-color: #FFFFFF;
+    }
+    .ItemSelectBlack{
+        width:80%;
+        height: .26rem;
+        outline: none;
+        box-shadow: none;
+        border-radius: 5px;
+        font-size: .12rem;
+    }
+    .ItemBtn{
+        width: 30%;
+        height: .3rem;
+        display: inline-block;
+        background-color: #3d81f1;
+        color: #FFFFFF;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        box-shadow: none;
+        font-size: .12rem;
     }
     .lan,.wan{
         width: .6rem;
@@ -869,6 +1062,9 @@
     }
     #systemInfo .mint-cell-value{
       flex:1
+    }
+    #systemInfo .mint-cell-wrapper{
+      font-size:.14rem !important;
     }
     .userPrefixPop.mint-popup{
       background-color: #212227;

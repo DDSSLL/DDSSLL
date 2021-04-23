@@ -63,7 +63,7 @@
             <mt-tab-container-item id="2">
               <div class="GroupItem">
                 <div class="GroupItemField">
-                  <div class="GroupItemTitle">上传速率</div>
+                  <div class="GroupItemTitle">发送速率</div>
                   <div class="GroupItemValue">
                     <mt-checklist v-model="totalSel.up" :options="totalSelOptionsUp">
                     </mt-checklist>
@@ -72,7 +72,7 @@
               </div>
               <div class="GroupItem">
                 <div class="GroupItemField">
-                  <div class="GroupItemTitle">下载速率</div>
+                  <div class="GroupItemTitle">接收速率</div>
                   <div class="GroupItemValue">
                     <mt-checklist v-model="totalSel.down" :options="totalSelOptionsDown">
                     </mt-checklist>
@@ -273,8 +273,8 @@
           },
           showCard:[],
           simCheckList : [
-            {label: '上传速率',value: 'up'},
-            {label: '下载速率',value: 'down'},
+            {label: '发送速率',value: 'up'},
+            {label: '接收速率',value: 'down'},
             {label: '传输丢包',value: 'lossDev'}],
           selectBat:['up','down','lossDev'],
           selectBatBak:['up','down','lossDev']

@@ -156,6 +156,7 @@ export default {
       legendTop:20,
       xData : [],
       colorGV: {},
+      avbrFlag:false,
       chartLegendArr : ["Total"],
       chartGeneralView : {
         "up":["Total"],
@@ -180,6 +181,14 @@ export default {
       lineStyle : {
         width: 1,
         type: 'solid' //'dotted'虚线 'solid'实线
+      },
+      ChartConf:{
+        unit:{
+          chartAuto:"1",
+          chartInterval:"",
+          chartMax:"",
+          speedInput:"",
+        }
       },
       commonOptionXAxis : [{
         type: "category",
@@ -297,8 +306,9 @@ export default {
           fontSize: '14',
           fontWeight: 'normal',
           rich: {
-            'totalUp':      {color: colorGV['上传速率'],fontWeight: 'bold',fontSize: '14'},
-            'totalDown':    {color: colorGV['下载速率'],fontWeight: 'bold',fontSize: '14'},
+            'totalUp':      {color: colorGV['发送速率'],fontWeight: 'bold',fontSize: '14'},
+            'totalDown':    {color: colorGV['接收速率'],fontWeight: 'bold',fontSize: '14'},
+            'totalAVBR':    {color: colorGV['可变码率'],fontWeight: 'bold',fontSize: '14'},
             'TotalLossDev': {color: colorGV['传输丢包'],fontWeight: 'bold',fontSize: '14'},
             'TotalLossRcv': {color: colorGV['业务丢包'],  fontWeight: 'bold',fontSize: '14'},
 
@@ -421,10 +431,16 @@ export default {
     }
   },
   activated(){  //生命周期-缓存页面激活
+    var that = this;
     this.initColorGV(this.cardLineStyle);
+    this.getChartConfUnit();
+    this.$global.getDeviceParam(function(data){
+      that.ChartConf.unit.speedInput = data.dev_sr/1000;
+      that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
+
+    });
   },
   deactivated(){   //生命周期-缓存页面失活
-
   },
   created(){
     console.log("status created"); 
@@ -438,6 +454,32 @@ export default {
     ...mapMutations({
         SET_CHART_TIMER
     }),
+    getChartConfUnit(){
+      var that = this;
+      this.$axios({
+        method: 'post',
+        url:"/page/index/chartData.php",
+        data:this.$qs.stringify({
+          getChartParam:true,
+          devSN: that.ActiveDevice?that.ActiveDevice.dev_sn:""
+        }),
+        Api:"getChartParam",
+        AppId:"android",
+        UserId:that.user.id
+      })
+      .then(function (response) {
+        let res = response.data;
+        if(res.res.success){
+          var data = res.data[0];
+          that.ChartConf.unit.chartAuto = data.chartAuto;
+          that.ChartConf.unit.chartInterval = data.chartInterval;
+          that.ChartConf.unit.chartMax = data.chartMax;
+        }
+      })
+      .catch(function (error) {
+          console.log(error)
+      })
+    },
     refreshChart(){
       console.log("refreshChart")
       var cardData = JSON.parse(localStorage.cardData);
@@ -543,13 +585,14 @@ export default {
         keyArr.push(curChart);
         localStorage.chartKey = JSON.stringify(keyArr);//存所有要请求数据的背包
         allChartData[curChart] = {
-          "seriesDataUp": {}, //各网卡的上传速率
-          "seriesDataDown": {}, //各网卡的下载速率
+          "seriesDataUp": {}, //各网卡的发送速率
+          "seriesDataDown": {}, //各网卡的接收速率
           "seriesCardLost": {}, //各网卡的上行丢包率
           "seriesDevLost": [], //总的上传丢包率
           "seriesTotalLoss": [], //总的下载丢包率
           "seriesDataDev": [], //上传总速率
-          "seriesDataRcv": [] //下载总速率
+          "seriesDataRcv": [], //下载总速率
+          "seriesAVBR": [],   //AVBR
         };
         //11个网卡上先都填充0
         for (var i = 0; i < cardIdArr.length; i++) {
@@ -570,6 +613,7 @@ export default {
         }
         allChartData[curChart].seriesDataDev = new Array(xSplit).fill(0); //上行总速率
         allChartData[curChart].seriesDataRcv = new Array(xSplit).fill(0); //下行总速率
+        allChartData[curChart].seriesAVBR = new Array(xSplit).fill(0); //AVBR
         allChartData[curChart].seriesDevLost = new Array(xSplit).fill(0); //上行总丢包率
         allChartData[curChart].seriesTotalLoss = new Array(xSplit).fill(0); //下行总丢包率
         localStorage.allChartData = JSON.stringify(allChartData);
@@ -626,6 +670,7 @@ export default {
           continue;
         }
         var dataAll = data[key][0]; //上行速率，下行速率，上行丢包率
+        var dataAVBR = data[key][1] ? data[key][1]["AvbrKbps"] : 0; //AVBR
         var dataDev = data[key][1]["dev_push_br"]; //上行总速率
         var dataRcv = data[key][2] ? data[key][2]["rcv_br"] : 0; //下行速率
         var dataDownLoss = data[key][3] ? data[key][3]["TotalLossRate"] : 0; //下行总丢包
@@ -657,6 +702,7 @@ export default {
         var seriesDataRcv = allChartData[curChartDevRcvBoard].seriesDataRcv;
         var seriesDevLost = allChartData[curChartDevRcvBoard].seriesDevLost;
         var seriesTotalLoss = allChartData[curChartDevRcvBoard].seriesTotalLoss;
+        var seriesAVBR = allChartData[curChartDevRcvBoard].seriesAVBR;
         for (var i = 0; i < dataAll.length; i++) {
           if (cardIdArr.indexOf(dataAll[i]['card_id']) == -1) {
             continue;
@@ -768,6 +814,8 @@ export default {
         seriesDataDev.pop();
         seriesDataRcv.unshift(dataRcv);
         seriesDataRcv.pop();
+        seriesAVBR.unshift(dataAVBR);
+        seriesAVBR.pop();   
         seriesTotalLoss.unshift(dataDownLoss);
         seriesTotalLoss.pop();
         seriesDevLost.unshift(dataUpLoss);
@@ -788,8 +836,12 @@ export default {
         allChartData[curChartDevRcvBoard].seriesDataRcv = seriesDataRcv;
         allChartData[curChartDevRcvBoard].seriesDevLost = seriesDevLost;
         allChartData[curChartDevRcvBoard].seriesTotalLoss = seriesTotalLoss;
+        allChartData[curChartDevRcvBoard].seriesAVBR = seriesAVBR;
         localStorage.allChartData = JSON.stringify(allChartData);
         if (curChart.split("/")[0] == key) { //当前要显示的放在sessionStorage.cardData中
+          if(that.avbrFlag == "false"){
+            allChartData[curChart]["seriesAVBR"] = new Array(xSplit).fill(0);
+          }
           localStorage.cardData = JSON.stringify(allChartData[curChart]);
         }
       }
@@ -836,26 +888,30 @@ export default {
       var maxYaxis = 0;
       var minYaxis = 0;
       var interval = 0;
-      //if (localStorage.chartAuto == "true") {
-        maxYaxis = Math.ceil(sessionStorage.speedInput * rateMax);
+      var chartAuto = that.ChartConf.unit.chartAuto;
+      var chartInterval = that.ChartConf.unit.chartInterval;
+      var chartMax = that.ChartConf.unit.chartMax;
+      var speedInput = that.ChartConf.unit.speedInput;
+      if (chartAuto == "1") {
+        maxYaxis = Math.ceil(speedInput * rateMax);
         maxYaxis = maxYaxis + 5 - maxYaxis % 5;
-        minYaxis = Math.floor(sessionStorage.speedInput * rateMin);
+        minYaxis = Math.floor(speedInput * rateMin);
         minYaxis = minYaxis - minYaxis % 5;
-      /*} else {
-        interval = sessionStorage.chartInterval;
-        maxYaxis = sessionStorage.chartMax;
-        minYaxis = (sessionStorage.chartMax - sessionStorage.chartInterval * 5) > 0 ? (sessionStorage.chartMax - sessionStorage.chartInterval * 5) : 0;
-      }*/
+      } else {
+        interval = chartInterval;
+        maxYaxis = chartMax;
+        minYaxis = (chartMax - chartInterval * 5) > 0 ? (chartMax - chartInterval * 5) : 0;
+      }
       if (!that.myChartTotal) {
         that.myChartTotal = echarts.init(document.getElementById('totalChart'));
       }
       that.myChartTotal.resize();
       var upShow = that.chartGeneralView.up.map(function(item){if(item==""){return ""};return item+"↑";});
       var downShow = that.chartGeneralView.down.map(function(item){if(item==""){return ""};return item+"↓";});
+      var avbrShow = that.chartGeneralView.avbr.map(function(item){if(item==""){return ""};return item+"可变码率";});
       var transShow = that.chartGeneralView.trans.map(function(item){if(item==""){return ""};return item+"传输丢包";});
       var bussShow = that.chartGeneralView.buss.map(function(item){if(item==""){return ""};return item+"业务丢包";});
-      var legendName = upShow.concat(downShow).concat(transShow).concat(bussShow).filter(function (el) {return el !== '';});
-      
+      var legendName = upShow.concat(downShow).concat(avbrShow).concat(transShow).concat(bussShow).filter(function (el) {return el !== '';});
       var dataAll = {};
       var maxDevLoss = 0;
       var maxRcvLoss = 0;
@@ -911,6 +967,8 @@ export default {
           }
         }else if(legendName[k].indexOf("业务丢包") != -1){//业务丢包
           dataAll[legendName[k]] = cardData.seriesTotalLoss.map(function(x){return (x/10).toFixed(1)*1});  
+        }else if(legendName[k].indexOf("可变码率") != -1){//可变码率
+          dataAll[legendName[k]] = cardData.seriesAVBR.map(function(x){return (x/1000).toFixed(3)*1});  
         }
       }
       var maxDevLoss = 0;
@@ -940,13 +998,14 @@ export default {
       else{
         maxLoss = 30;
       }
-
       for(var m=0; m<legendName.length; m++){
         var name = "";
         if(legendName[m] == "Total↑"){
-          name = "上传速率";
+          name = "发送速率";
         }else if(legendName[m] == "Total↓"){
-          name = "下载速率";
+          name = "接收速率";
+        }else if(legendName[m] == "Total可变码率"){
+          name = "可变码率";
         }else if(legendName[m] == "Total传输丢包"){
           name = "传输丢包";
         }else if(legendName[m] == "Total业务丢包"){
@@ -992,7 +1051,6 @@ export default {
           data: dataAll[legendName[m]]
         })
       }
-      
       var xAxisOption = {};
       var yAxisOption1 = that.copy(that.commonOptionYAxis1);
       var yAxisOption2 = that.copy(that.commonOptionYAxis2);
@@ -1037,9 +1095,11 @@ export default {
         }*/
         var name = "";
         if(legendName[n] == "Total↑"){
-          name = "上传速率";
+          name = "发送速率";
         }else if(legendName[n] == "Total↓"){
-          name = "下载速率";
+          name = "接收速率";
+        }else if(legendName[n] == "Total可变码率"){
+          name = "可变码率";
         }else if(legendName[n] == "Total传输丢包"){
           name = "传输丢包";
         }else if(legendName[n] == "Total业务丢包"){
@@ -1066,7 +1126,7 @@ export default {
 
 
       //文件回传且Y轴选自适应,图像的Y轴不设置yAxis，其他情况设置yAxis
-      /*if(!(sessionStorage.chartAuto == "true" && $('#back_enable').bootstrapSwitch('state') == true)){
+      if(!(chartAuto == "1" && false)){
         option.yAxis[0].min = minYaxis;
         option.yAxis[0].max = maxYaxis;
       }
@@ -1074,12 +1134,14 @@ export default {
       option.yAxis[1].max = maxLoss;
       if (interval) {
         option.yAxis[0].interval = interval * 1;
-      }*/
+      }
       option.legend.data = legendName.map(function(x){
                               if(x == "Total↑"){
-                                return "上传速率";
+                                return "发送速率";
                               }else if(x == "Total↓"){
-                                return "下载速率";
+                                return "接收速率";
+                              }else if(x == "Total可变码率"){
+                                return "可变码率";
                               }else if(x == "Total传输丢包"){
                                 return "传输丢包";
                               }else if(x == "Total业务丢包"){
@@ -1116,8 +1178,9 @@ export default {
         that.myChartCards[devSn] = {};
         that.myChartCards[devSn][chartName] = echarts.init(document.getElementById('chart_' + key));
         if(that.bigChartShow){
-          that.myChartCards[devSn][chartName+"_big"] = echarts.init(document.getElementById('chart_big_' + key));
+          that.myChartCards[devSn][chartName+"_big"] = echarts.init(document.getElementById('chart_big_' + key));  
         }
+        
       }else{
         if(!that.myChartCards[devSn][chartName]){
           that.myChartCards[devSn][chartName] = echarts.init(document.getElementById('chart_' + key));
@@ -1162,10 +1225,10 @@ export default {
         function typeFormat(typeText){
           var showText = ""
           switch(typeText){
-            case "上传速率":
+            case "发送速率":
               showText = "↑";
               break;
-            case "下载速率":
+            case "接收速率":
               showText = "↓";
               break;
             case "传输丢包":
@@ -1227,14 +1290,14 @@ export default {
             dw2 = "%";
           }
           if(cardLineArr[j] == "up"){
-            seriesName = "上传速率";
+            seriesName = "发送速率";
             data = dataUps;
-            legendName.push("上传速率");
+            legendName.push("发送速率");
             title1Text += "{"+colorObj[keyName+'↑']+"|"+ dataUps[0] + "}"+dw1+"/";
           }else if(cardLineArr[j] == "down"){
-            seriesName = "下载速率";
+            seriesName = "接收速率";
             data = dataDowns;
-            legendName.push("下载速率");
+            legendName.push("接收速率");
             title1Text += "{"+colorObj[keyName+'↓']+"|" + dataDowns[0] + "}"+dw1+"/";
           }else{
             seriesName = "传输丢包";
@@ -1462,6 +1525,11 @@ export default {
           that.chartGeneralView["down"] = data["down"].split(",").map(function(x){return that.formatCardShow(x)});
           that.chartGeneralView["trans"] = data["lossDev"].split(",").map(function(x){return that.formatCardShow(x)});//传输丢包
           that.chartGeneralView["buss"] = data["lossRcv"].split(",").map(function(x){return that.formatCardShow(x)});//业务丢包
+          if(that.avbrFlag){
+            that.chartGeneralView["avbr"] = data["avbr"].split(",").map(function(x){return that.formatCardShow(x)});  
+          }else{
+            that.chartGeneralView["avbr"] = [];
+          }
           that.getCardChartShowContent(devSn,cardData)
         }else{
           console.log(res)
@@ -1888,7 +1956,7 @@ export default {
     width:33%;
     height:25%;
   }
-    .bigChartStyle{
+  .bigChartStyle{
     width:100%;
     height:25%;
   }

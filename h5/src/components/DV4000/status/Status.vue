@@ -306,8 +306,8 @@ export default {
           fontSize: '14',
           fontWeight: 'normal',
           rich: {
-            'totalUp':      {color: colorGV['上传速率'],fontWeight: 'bold',fontSize: '14'},
-            'totalDown':    {color: colorGV['下载速率'],fontWeight: 'bold',fontSize: '14'},
+            'totalUp':      {color: colorGV['发送速率'],fontWeight: 'bold',fontSize: '14'},
+            'totalDown':    {color: colorGV['接收速率'],fontWeight: 'bold',fontSize: '14'},
             'totalAVBR':    {color: colorGV['可变码率'],fontWeight: 'bold',fontSize: '14'},
             'TotalLossDev': {color: colorGV['传输丢包'],fontWeight: 'bold',fontSize: '14'},
             'TotalLossRcv': {color: colorGV['业务丢包'],  fontWeight: 'bold',fontSize: '14'},
@@ -598,8 +598,8 @@ export default {
         keyArr.push(curChart);
         localStorage.chartKey = JSON.stringify(keyArr);//存所有要请求数据的背包
         allChartData[curChart] = {
-          "seriesDataUp": {}, //各网卡的上传速率
-          "seriesDataDown": {}, //各网卡的下载速率
+          "seriesDataUp": {}, //各网卡的发送速率
+          "seriesDataDown": {}, //各网卡的接收速率
           "seriesCardLost": {}, //各网卡的上行丢包率
           "seriesDevLost": [], //总的上传丢包率
           "seriesTotalLoss": [], //总的下载丢包率
@@ -1014,9 +1014,9 @@ export default {
       for(var m=0; m<legendName.length; m++){
         var name = "";
         if(legendName[m] == "Total↑"){
-          name = "上传速率";
+          name = "发送速率";
         }else if(legendName[m] == "Total↓"){
-          name = "下载速率";
+          name = "接收速率";
         }else if(legendName[m] == "Total可变码率"){
           name = "可变码率";
         }else if(legendName[m] == "Total传输丢包"){
@@ -1108,9 +1108,9 @@ export default {
         }*/
         var name = "";
         if(legendName[n] == "Total↑"){
-          name = "上传速率";
+          name = "发送速率";
         }else if(legendName[n] == "Total↓"){
-          name = "下载速率";
+          name = "接收速率";
         }else if(legendName[n] == "Total可变码率"){
           name = "可变码率";
         }else if(legendName[n] == "Total传输丢包"){
@@ -1150,9 +1150,9 @@ export default {
       }
       option.legend.data = legendName.map(function(x){
                               if(x == "Total↑"){
-                                return "上传速率";
+                                return "发送速率";
                               }else if(x == "Total↓"){
-                                return "下载速率";
+                                return "接收速率";
                               }else if(x == "Total可变码率"){
                                 return "可变码率";
                               }else if(x == "Total传输丢包"){
@@ -1238,10 +1238,10 @@ export default {
         function typeFormat(typeText){
           var showText = ""
           switch(typeText){
-            case "上传速率":
+            case "发送速率":
               showText = "↑";
               break;
-            case "下载速率":
+            case "接收速率":
               showText = "↓";
               break;
             case "传输丢包":
@@ -1302,14 +1302,14 @@ export default {
             dw2 = "%";
           }
           if(cardLineArr[j] == "up"){
-            seriesName = "上传速率";
+            seriesName = "发送速率";
             data = dataUps;
-            legendName.push("上传速率");
+            legendName.push("发送速率");
             title1Text += "{"+colorObj[keyName+'↑']+"|"+ dataUps[0] + "}"+dw1+"/";
           }else if(cardLineArr[j] == "down"){
-            seriesName = "下载速率";
+            seriesName = "接收速率";
             data = dataDowns;
-            legendName.push("下载速率");
+            legendName.push("接收速率");
             title1Text += "{"+colorObj[keyName+'↓']+"|" + dataDowns[0] + "}"+dw1+"/";
           }else{
             seriesName = "传输丢包";
