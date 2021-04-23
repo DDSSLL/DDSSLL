@@ -121,7 +121,7 @@
           <div class="fGrp">
             <div class="tl">用户名<span class="redText">*</span></div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="curUser.name" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()" :readonly="curUser.nameReadonly">
+              <input type="text" class="ItemInput" v-model="curUser.name" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+\-()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()" :readonly="curUser.nameReadonly">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()</p>
             </div>
           </div>
@@ -450,13 +450,15 @@
           if(that.curUser.userGroupOptionsOri[0].value != 1){
             var arr = [{"text":"管理员","value":1}]
             that.user.userGroupOptions = arr.concat(that.user.userGroupOptionsOri);
-          }  
+          }
+          that.curUser.userGroup = 1;  
         }else{//非001-admin用户，不能添加管理员
           if(that.curUser.userGroupOptionsOri[0].value == 1){
             that.curUser.userGroupOptions = that.curUser.userGroupOptionsOri.filter(function(item){
               return (item.value != 1)
             })
           }    
+          that.curUser.userGroup = 2;
         }
         that.curUser.userGroupDisable = false;
         that.curUser.nEnable = true;//启用
