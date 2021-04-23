@@ -1,4 +1,4 @@
-window.cardIdArr = ['eth0', 'lte1', 'lte2', 'lte3', 'lte4', 'lte5',
+ window.cardIdArr = ['eth0', 'lte1', 'lte2', 'lte3', 'lte4', 'lte5',
     'lte6', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'
 ];
 var DEV_MODE = [{sn: 2146,name: 'DV1080'},
@@ -46,8 +46,8 @@ window.HDXPRESS_SERVE = "http://1080.hdxpress.cn:8088/";//1080二级域名，对
 window.UHDXPRESS_BUILD = "http://4000.uhdxpress.com";//4000一级域名
 window.UHDXPRESS_SERVE = "http://192.168.100.110:8088/";//4000二级域名
 window.colorGV = {
-    '上传速率':'#FFFF00',
-    '下载速率': '#22aadd',
+    '发送速率':'#FFFF00',
+    '接收速率': '#22aadd',
     '可变码率': '#73d13d',
     '传输丢包': '#f1a1ff',
     '业务丢包': '#f5222d',
@@ -113,7 +113,7 @@ window.colorGV = {
     'WIFI业务丢包':'#597ef7'
 };
 window.colorObj = {
-    "上传速率":'totalUp', "下载速率":'totalDown',"可变码率":'totalAVBR',
+    "发送速率":'totalUp', "接收速率":'totalDown',"可变码率":'totalAVBR',
     "传输丢包":'TotalLossDev', "业务丢包":'TotalLossRcv',
     "SIM1↑":'SIM1Up',"SIM1↓":'SIM1Down',"SIM1传输丢包":'SIM1LossDev',"SIM1业务丢包":'SIM1LossRcv',
     "SIM2↑":'SIM2Up',"SIM2↓":'SIM2Down',"SIM2传输丢包":'SIM2LossDev',"SIM2业务丢包":'SIM2LossRcv',
