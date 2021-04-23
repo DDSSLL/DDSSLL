@@ -80,7 +80,7 @@
       return{
         SUPER : SUPER,
         ADVANCE : ADVANCE,
-         NORMAL : NORMAL,
+        NORMAL : NORMAL,
         ADMIN : ADMIN,
         userLevelShow:false,//用户等级tab
         userLevelMemberPop:false,
@@ -161,12 +161,14 @@
             }
             groupObj[groupName].push(memberArr[i]);
           }
-          var showMem = "";
+          /*var showMem = "";
           for(var key in groupObj){
             showMem += groupObj[key].join(", ")+"<br>";
-          }
+          }*/
         }else{
-          showMem = member.replace(/,/g, ", ");
+          //showMem = member.replace(/,/g, ", ");
+          groupObj[that.user.prefix] = [];
+          groupObj[that.user.prefix].push(member);
         }
         return groupObj;
       },
