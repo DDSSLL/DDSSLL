@@ -8,7 +8,7 @@
       </div>
       <transition name="slide-fade">
         <div v-show="transControlShow">
-          <div class="GroupItem"><!-- 传输IP -->
+          <div class="GroupItem" v-if="show.dev_push_ip"><!-- 传输IP -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">传输IP</div>
               <div class="GroupItemValue">
@@ -30,7 +30,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="this.user.prefix==this.PREFIX"><!-- 重传开关 -->
+          <div class="GroupItem" v-if="show.ResendMode"><!-- 重传开关 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">重传开关</div>
               <div class="GroupItemValue">
@@ -39,7 +39,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="this.user.prefix==this.PREFIX"><!-- 纠错开关 -->
+          <div class="GroupItem" v-if="show.OpenfecMode"><!-- 纠错开关 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">纠错开关</div>
               <div class="GroupItemValue">
@@ -48,7 +48,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="this.user.prefix==this.PREFIX && this.options.OpenfecMode"><!-- 纠错能力 -->
+          <div class="GroupItem" v-if="show.OpenfecLevel"><!-- 纠错能力 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">纠错能力</div>
               <div class="GroupItemValue">
@@ -171,7 +171,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="this.user.prefix == this.PREFIX"><!-- 码率控制 -->
+          <div class="GroupItem" v-if="show.bitrate_mode"><!-- 码率控制 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">码率控制</div>
               <div class="GroupItemValue">
@@ -295,7 +295,7 @@
         </div>
       </transition>
     </div>
-    <div class="Group"  v-if="this.user.prefix==this.PREFIX"><!-- 日志记录 -->
+    <div class="Group"  v-if="show.logShow"><!-- 日志记录 -->
       <div class="GroupTitle" @click="logShow=!logShow">
         日志记录
         <i class="titleIcon fa" :class="[logShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
@@ -415,6 +415,14 @@
           matchRcv:"",
           boardList:[],
           matchBoard:"",
+        },
+        show:{
+          dev_push_ip:false,
+          logShow:false,
+          ResendMode:false,
+          OpenfecMode:false,
+          OpenfecLevel:false,
+          bitrate_mode:false,
         }
       }
     },
@@ -463,6 +471,7 @@
     activated(){  //生命周期-缓存页面激活
       this.getLockStates();
       this.getSelectOptions();
+      this.userFunction();
       var that = this;
       localStorage.getSettingParam = setInterval(function(){
         if(that.pageLock){
@@ -502,6 +511,29 @@
           value: '0',
           disabled: !this.pageLock?false:true
         }]
+      },
+      userFunction(){
+        var logName = this.user.name;
+        var logPrefix = this.user.prefix;
+        if (logPrefix == PREFIX || logName=='debug') {
+          this.show.dev_push_ip = true;
+          this.show.logShow = true;
+          this.show.ResendMode = true;
+          this.show.OpenfecMode = true;
+          if(this.options.OpenfecMode){
+            this.show.OpenfecLevel = true;  
+          }else{
+            this.show.OpenfecLevel = false;
+          }
+          this.show.bitrate_mode = true;
+        } else {
+          this.show.dev_push_ip = false;
+          this.show.logShow = false;
+          this.show.ResendMode = false;
+          this.show.OpenfecMode = false;
+          this.show.OpenfecLevel = false;
+          this.show.bitrate_mode = false;
+        }
       },
       chooseIP(val){this.control.ip = val;},
       getSelectOptions(){
@@ -816,8 +848,11 @@
           that.options.video_encode = '4';
         }else{
           that.OPTIONS_VIDEOENCODE = video_encode_option;
-          if(data)
+          if(data["video_encode"]){
             that.options.video_encode = data["video_encode"];
+          }else{
+            that.options.video_encode = 0;
+          }
         }
         that.$global.setDeviceParam('video_input', that.options.video_input);
         that.changeVideoEncode();

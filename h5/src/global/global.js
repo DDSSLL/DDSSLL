@@ -151,8 +151,11 @@ export default {
                           {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
                           {value: "2",text: "H.265 Main(4:2:2/8bit)"}, 
                           {value: "3",text: "H.265 Main(4:2:2/10bit)"}],
+  OPTIONS_VIDEOENCODE_1080 : [{value: "0",text: "H.264"}],
   OPTIONS_BITRATEMODE : [{value: "0",text: "CBR"}, 
                         {value: "1",text: "VBR"}],
+  OPTIONS_BITRATEMODE_1080 : [{value: "0",text: "CBR"}, 
+                              {value: "1",text: "AVBR"}],
   OPTIONS_BITRATEMODE2 : [{value: "0",text: "CBR"}],
   OPTIONS_HDR : [{text: "SDR",value: "0"}, 
                 {text: "HLG",value: "1"}],
@@ -167,6 +170,8 @@ export default {
                         {value: "4",text: "HDMI"}],
   OPTIONS_VIDEOINPUT2 : [{value: "3",text: "3G-SDI[1]"}, 
                         {value: "4",text: "HDMI"}],
+  OPTIONS_VIDEOINPUT_1080 : [{value: "0",text: "3G-SDI"}, 
+                            {value: "1",text: "HDMI"}],
   OPTIONS_VIDEOINPUT406 : [{value: "0",text: "SDI"}],
   OPTIONS_AUDIO_ENCODE : [{text: "AAC",value: "0"}, 
                           {text: "LPCM",value: "1"}, 
@@ -248,6 +253,8 @@ export default {
                   "lte5":6, "lte6":7, "usb-lan":8, "usb-5g1":9, "usb-5g2":10},
   SRT_TRANS_IF2 : ["eth0","wifi","lte1","lte2","lte3","lte4",
                     "lte5","lte6","usb-lan","usb-5g1","usb-5g2"],
+  ACT_LATENCY_MIN : 50,
+  ACT_LATENCY_MAX : 3000,
   getCurrentTime() {
     var date = new Date();
     var year = '' + date.getFullYear();
@@ -614,7 +621,7 @@ export default {
   getPushUrls(cb){
     //var that = this;
     var board = store.state.ActiveDevice.board_id+"";
-    var boardId = board.indexOf("2999") != -1 ? board: board - 1;
+    var boardId = board.length==10 ? board: board - 1;
     axios({
       method: 'post',
       url:"/page/index/indexData.php",
@@ -739,6 +746,14 @@ export default {
     }
     return res;
   },
+  //判断是否是合法互动推拉流延时
+  isValidActLatency(latency) {
+    var res = false;
+    if (+latency >= this.ACT_LATENCY_MIN && +latency <= this.ACT_LATENCY_MAX) {
+        res = true;
+    }
+    return res;
+  },
   //获取背包参数
   getDeviceParam(cb){
     axios({
@@ -803,15 +818,19 @@ export default {
     })
   },  
   //设置多个背包参数
-  setDevParamList(devSN, content, paramArr, valueArr) {
+  setDevParamList(paramArr, valueArr,setDevSn) {
+    var devSN = store.state.ActiveDevice.dev_sn
+    if(setDevSn){
+      devSN = setDevSn 
+    }
     if (!devSN || !this.isValidSn(devSN)) {
       return;
     }
     var that = this;
-    content.$axios({
+    axios({
       method: 'post',
       url:"/page/index/indexData.php",
-      data:content.$qs.stringify({
+      data:qs.stringify({
         devParamList:"true",
         devSN: devSN,
         ParamList: paramArr,
@@ -819,7 +838,7 @@ export default {
       }),
       Api:"devParamList",
       AppId:"android",
-      UserId:content.user.id
+      UserId:store.state.user.id
     })
     .then(function (response) {
       let res = response.data
@@ -910,6 +929,30 @@ export default {
       }
     }
     return res;
+  },
+  // 判断是否是有效IP
+  isValidIP(ip) {
+    var reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/,
+        sectionArray = null,
+        i = 0;
+
+    if ("string" !== typeof ip) {
+      return false;
+    }
+
+    sectionArray = ip.split(".");
+
+    if (4 !== sectionArray.length) {
+      return false;
+    }
+
+    for (i = 0; i < sectionArray.length; i += 1) {
+      if (sectionArray[i].length > 1 && "0" === sectionArray[i].charAt(0)) {
+        return false;
+      }
+    }
+
+    return reg.test(ip);
   },
   //判断是否是有效端口  在0到65535之间
   isValidPort(port) {
@@ -1233,6 +1276,10 @@ export default {
     return res;
   },
   cardEnum2Id(cardenum) {
+    if(cardenum == '' || cardenum == null){
+      cardenum = 0;
+    }
+    cardenum = +cardenum;
     return this.SRT_TRANS_IF2[cardenum];
   },
   //获取直播速率范围
@@ -1250,5 +1297,98 @@ export default {
       }
     }
     return res;
-  }
+  },
+  //获取某个参数
+  getDevOneParam(param, callback) {
+    var devSN = store.state.ActiveDevice.dev_sn;
+    if (!devSN || !this.isValidSn(devSN)) {
+      if (typeof(callback) == 'function') {
+        callback([]);
+      }
+      return;
+    }
+    axios({
+      method: 'post',
+      url:"/page/index/indexData.php",
+      data:qs.stringify({
+        getDevOneParam:devSN ,
+        devParamCol:param
+      }),
+      Api:"getDevOneParam",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        if (typeof(callback) == 'function') {
+          callback(res.data[0]);
+        }
+      }else{
+        that.$toast({
+          message: res.res.reason,
+          position: 'middle',
+          duration: 2000
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
+  getNetBoard(cb){
+    axios({
+      method: 'post',
+      url:"/page/index/indexData.php",
+      data:qs.stringify({
+        getDevCardParam:true, 
+        devSN: store.state.ActiveDevice.dev_sn
+      }),
+      Api:"getDevCardParam",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        if(cb){
+          cb(res.data[0])
+        }
+        /*that.netBoard = that.formatSwitch(res.data[0]);
+        that.updateCardSelOptioins(res.data[0]);//更新单卡选择select*/
+      }else{
+        if(cb){
+          cb([]);
+        }
+        //that.netBoard = [];
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
+  //密码校验 6-16位字母数字，至少包含一个字母一个数字
+  pwdCheckType(pwd){
+    var password = pwd;
+    var numberCount,//数字字符数目
+        letterCount,//字母字符数目
+        numberRegExp = /[0-9]/,//数字正则
+        letterRegExp = /[a-z]/i,//字母正则,不区分大小写
+        length = (password = password || '').length;
+    if(length < 6 || length > 16){
+      return false;
+    }
+    numberCount = letterCount = 0;
+    for(var i = 0, char; i < length; i++){
+      char = password.charAt(i);//取得每个字符
+      if(numberRegExp.test(char)){
+        numberCount += 1;//数字字符数目加1
+      }else if(letterRegExp.test(char)){
+        letterCount += 1;//字母字符数目加1
+      }else{
+      }
+    }
+    //全是数字、全是字母、全是特殊符号：返回false
+    return !(numberCount == length || letterCount == length || (numberCount==0&&letterCount==0));
+  },
 }

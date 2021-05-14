@@ -40,6 +40,10 @@ export default {
     [types.SET_DEVICE_TYPE_SELECT]: (state, datas) => {
         state.deviceTypeSelect = datas
     },
+    //设置设备里诶博爱显示模式
+    [types.SET_DEVICE_MODE_SELECT]: (state, datas) => {
+        state.deviceModeSelect = datas
+    },
     // 设置设备列表显示用户组
     [types.SET_DEVICE_PREFIX_SELECT]: (state, datas) => {
         state.devicePrefixSelect = datas

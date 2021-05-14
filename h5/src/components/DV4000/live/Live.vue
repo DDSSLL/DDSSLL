@@ -167,7 +167,7 @@
               <div class="GroupItemField">
                 <div class="GroupItemTitle">分辨率</div>
                 <div class="GroupItemValue">
-                  <select class="ItemSelect" v-model="options.HDMI_resolution" @change="editBoardListParam('value7',options.HDMI_resolution)" :disabled="disable.HDMI_resolution">
+                  <select class="ItemSelect" v-model="options.HDMI_resolution" @change="changeHDMIResolution" :disabled="disable.HDMI_resolution">
                   <template v-for="item in $global.OPTIONS_HDMI_RESULUTION">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -538,6 +538,33 @@
         var that = this;
         this.editBoardListParam('push_resolution', that.options.sel_resolution);
       },
+      changeHDMIResolution(){
+        var that = this;
+        var value = that.options.HDMI_resolution;
+        var old_framerate = that.options.HDMI_framerate;
+        if (value == '2' || value == '3') {
+          //1080I/720P  帧率只有 60 59.94 50
+          var newOption = [];
+          for (var i = 0; i < that.$global.OPTIONS_FRAMERATE_6.length; i++) {
+            if (i <= 2) {
+              newOption.push(that.$global.OPTIONS_FRAMERATE_6[i]);
+            }
+          }
+          that.OPTIONS_FRAMERATE_HDMI = newOption;
+          //如果之前的帧率<50 重新设置帧率为50
+          if (old_framerate == 3 || old_framerate == 4 || old_framerate == 5) {
+            that.HDMI_framerate = 2;
+            that.editBoardListParam('value8', 2);
+            that.options.HDMI_framerate = 2;
+          } else {
+            that.options.HDMI_framerate = old_framerate;
+          }
+        } else {
+          that.OPTIONS_FRAMERATE_HDMI = that.$global.OPTIONS_FRAMERATE_6;
+          that.options.HDMI_framerate = old_framerate;
+        }
+        this.editBoardListParam('value7',that.options.HDMI_resolution)
+      },
       initDevParam(data){
         console.log("initDevParam")
         console.log(data)
@@ -882,8 +909,13 @@
           that.disable.encodeReset = false;//复位
           that.disable.encodeStop = false;//停止
           that.disable.HDMI_througu = false;//HDMI输出透传
-          that.disable.HDMI_resolution = false;//HDMI分辨率
-          that.disable.HDMI_framerate = false;//HDMI帧率
+          if(that.options.HDMI_througu){//透传打开
+            that.disable.HDMI_resolution = true;//HDMI分辨率
+            that.disable.HDMI_framerate = true;//HDMI帧率  
+          }else{
+            that.disable.HDMI_resolution = false;//HDMI分辨率
+            that.disable.HDMI_framerate = false;//HDMI帧率
+          }
           that.disable.record_sel =false;//录机IP
           that.disable.record_port = false;//录机端口
           that.disable.rcv_record = false;//录制开关
@@ -1041,8 +1073,13 @@
         } else { //不透传
           that.options.HDMI_througu = false;
           if (that.getSelRcvBoard('disabled') == false) {
-            that.disable.HDMI_resolution = false;
-            that.disable.HDMI_framerate = false;
+            if(that.disable.HDMI_througu){
+              that.disable.HDMI_resolution = true;
+              that.disable.HDMI_framerate = true;  
+            }else{
+              that.disable.HDMI_resolution = false;
+              that.disable.HDMI_framerate = false;  
+            }
           }
           //HDMI输出分辨率
           that.options.HDMI_resolution = res.data[0].value7;

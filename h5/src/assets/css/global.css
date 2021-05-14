@@ -43,3 +43,6 @@
 .mt-range-runway{
   width: calc(100% + 24px);
 }
+select:disabled,input:disabled{
+  border: 1px solid #333 !important;
+}

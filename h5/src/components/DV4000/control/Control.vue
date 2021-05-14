@@ -187,12 +187,16 @@
     },
     activated(){  //生命周期-缓存页面激活
       var that = this;
-      this.getNetBoard();
+      this.$global.getNetBoard(function(data){
+        that.netBoard = that.formatSwitch(data);
+      });
       this.$global.getDeviceParam(this.formatData)
       this.getLockStates();
 
       localStorage.getControlParam = setInterval(function(){
-        that.getNetBoard();
+        that.$global.getNetBoard(function(data){
+          that.netBoard = that.formatSwitch(data);
+        });
         //if(that.paramLockAck != "1"){//页面锁定
         if(that.pageLock){//页面锁定
           that.$global.getDeviceParam(that.formatData)
@@ -302,34 +306,7 @@
           that.pageLock = true;
         }
       },
-      getNetBoard(cb){
-        var that = this;
-        this.$axios({
-          method: 'post',
-          url:"/page/index/indexData.php",
-          data:this.$qs.stringify({
-            getDevCardParam:true,
-            devSN: that.ActiveDevice.dev_sn
-          }),
-          Api:"getDevCardParam",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            that.netBoard = that.formatSwitch(res.data[0]);
-            if(cb){
-              cb();
-            }
-          }else{
-            that.netBoard = [];
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
+
       formatSwitch(arr){
         var that = this;
         arr.forEach(function(item){
@@ -395,7 +372,8 @@
         })
         .then(function (response) {
           //页面随activeDevice实时刷新，无需调用getNetBoard
-          that.getNetBoard(function(){
+          that.$global.getNetBoard(function(data){
+            that.netBoard = that.formatSwitch(data);
             var cardUsed = that.getUsedCardCount();  
             if (cardUsed == 0) {
               that.common.dev_push_enableVal = false;

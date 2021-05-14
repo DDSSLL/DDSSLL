@@ -21,6 +21,7 @@ export default {
     //设备列表显示类型
     deviceTypeSelect:1,
     devicePrefixSelect:"all",
+    deviceModeSelect:'allMode',
     //设备定时器ID
     DeviceTimer:null,
     //图表定时器ID
