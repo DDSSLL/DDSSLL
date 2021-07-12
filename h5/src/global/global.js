@@ -1,6 +1,3 @@
- window.cardIdArr = ['eth0', 'lte1', 'lte2', 'lte3', 'lte4', 'lte5',
-    'lte6', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'
-];
 var DEV_MODE = [{sn: 2146,name: 'DV1080'},
                 {sn: 2150,name: 'QUK100'}];
 var RCV_MODE = [{sn: 2141,name: 'DV4000R'}, 
@@ -39,18 +36,26 @@ window.ORANGE = '#ff9945';
 window.BLUE = '#45ffe9';
 window.WHITE = '#ffffff';
 window.DEPTH_MAX = 4;
+window.MBPS_MAX = 12;
 window.MBPS_MAX2 = 80;
 window.MBPS_MIN = 0.5;
+window.DStreamer_BUILD = "http://4000.uhdxpress.com:8088/";//4000一级域名:117.131.178.104:8088
+window.DStreamer_SERVE = "http://192.168.100.110:8088/";//4000二级域名
 window.HDXPRESS_BUILD = "http://www.hdxpress.cn";//1080一级域名  47.104.164.249
 window.HDXPRESS_SERVE = "http://1080.hdxpress.cn:8088/";//1080二级域名，对应地址：47.104.161.61
 window.UHDXPRESS_BUILD = "http://4000.uhdxpress.com";//4000一级域名
-window.UHDXPRESS_SERVE = "http://192.168.100.110:8088/";//4000二级域名
+//window.UHDXPRESS_SERVE = "http://192.168.100.110:8088/";//4000二级域名
+window.UHDXPRESS_SERVE = "http://139.129.91.106/";//4000二级域名
+window.VIR_RCV = '2999'; //虚拟接收机
+window.PRA_RCV = '2141'; //实体接收机
 window.colorGV = {
     '发送速率':'#FFFF00',
     '接收速率': '#22aadd',
     '可变码率': '#73d13d',
     '传输丢包': '#f1a1ff',
     '业务丢包': '#f5222d',
+    '信号输入': '#f5a122',
+    'SRT拉流': '#68F55F',
 
     'SIM1↑':'#fa8c16',
     'SIM1↓':'#ffc069',
@@ -114,7 +119,7 @@ window.colorGV = {
 };
 window.colorObj = {
     "发送速率":'totalUp', "接收速率":'totalDown',"可变码率":'totalAVBR',
-    "传输丢包":'TotalLossDev', "业务丢包":'TotalLossRcv',
+    "传输丢包":'TotalLossDev', "业务丢包":'TotalLossRcv',"SRT拉流":'TotalSRT',
     "SIM1↑":'SIM1Up',"SIM1↓":'SIM1Down',"SIM1传输丢包":'SIM1LossDev',"SIM1业务丢包":'SIM1LossRcv',
     "SIM2↑":'SIM2Up',"SIM2↓":'SIM2Down',"SIM2传输丢包":'SIM2LossDev',"SIM2业务丢包":'SIM2LossRcv',
     "SIM3↑":'SIM3Up',"SIM3↓":'SIM3Down',"SIM3传输丢包":'SIM3LossDev',"SIM3业务丢包":'SIM3LossRcv',
@@ -151,6 +156,18 @@ export default {
                           {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
                           {value: "2",text: "H.265 Main(4:2:2/8bit)"}, 
                           {value: "3",text: "H.265 Main(4:2:2/10bit)"}],
+  OPTIONS_VIDEOENCODE_4000 : [{value: "0",text: "H.265 Main(4:2:0/8bit)"}, 
+                        {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
+                        {value: "2",text: "H.265 Main(4:2:2/8bit)"}, 
+                        {value: "3",text: "H.265 Main(4:2:2/10bit)"}, 
+                        {value: "4",text: "H.264"}],
+  OPTIONS_VIDEOENCODE2_4000 : [{value: "0",text: "H.265 Main(4:2:0/8bit)"}, 
+                          {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
+                          {value: "4",text: "H.264"}],
+  OPTIONS_VIDEOENCODE3_4000 : [{value: "0",text: "H.265 Main(4:2:0/8bit)"}, 
+                          {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
+                          {value: "2",text: "H.265 Main(4:2:2/8bit)"}, 
+                          {value: "3",text: "H.265 Main(4:2:2/10bit)"}],
   OPTIONS_VIDEOENCODE_1080 : [{value: "0",text: "H.264"}],
   OPTIONS_BITRATEMODE : [{value: "0",text: "CBR"}, 
                         {value: "1",text: "VBR"}],
@@ -163,6 +180,10 @@ export default {
   OPTIONS_LATENCY : [{text: "标准时延",value: "0"}, 
                     {text: "超低时延",value: "1"}],
   OPTIONS_LATENCY2 : [{text: "标准时延",value: "0"}],
+  OPTIONS_LATENCY_5000 :[{text: "高画质",value: "0"},
+                        {text: "低延时",value: "1"}, 
+                        {text: "超低延时",value: "2"}],
+  OPTIONS_LATENCY2_5000 : [{text: "低时延",value: "1"}],
   OPTIONS_VIDEOINPUT : [{value: "0",text: "12G-SDI"}, 
                         {value: "1",text: "4x3G SQ"}, 
                         {value: "2",text: "4x3G 2SI"}, 
@@ -176,8 +197,17 @@ export default {
   OPTIONS_AUDIO_ENCODE : [{text: "AAC",value: "0"}, 
                           {text: "LPCM",value: "1"}, 
                           {text: "MPEG1L2",value: "2"}],
+  OPTIONS_AUDIO_ENCODE_1080 : [{text: "AAC",value: "0"}],
+  OPTIONS_AUDIO_ENCODE_4000 : [{text: "AAC",value: "0"}, 
+                          {text: "LPCM",value: "1"}, 
+                          {text: "MPEG1L2",value: "2"}],
   OPTIONS_AUDIO_ENCODE2 : [{text: "AAC",value: "0"}],
+  OPTIONS_AUDIO_ENCODE2_4000 : [{text: "AAC",value: "0"}],
   OPTIONS_AUDIOINPUT : [{value: "0",text: "0-CH"}, 
+                        {value: "1",text: "2-CH"}, 
+                        {value: "2",text: "4-CH"}],
+  OPTIONS_AUDIOINPUT_1080 : [{value: "1",text: "2-CH"}],
+  OPTIONS_AUDIOINPUT_4000 : [{value: "0",text: "0-CH"}, 
                         {value: "1",text: "2-CH"}, 
                         {value: "2",text: "4-CH"}],
   OPTIONS_AUDIOINPUT_HDMI264 : [{value: "1",text: "2-CH"}],
@@ -192,6 +222,27 @@ export default {
                         {text: "1280x720p50",value: "8"}, 
                         {text: "720x576p50",value: "11"}, 
                         {text: "720x480p59.94",value: "12"}],
+  OPTIONS_HDMI_FORMAT_4000 : [{text: "自动",value: "0"}, 
+                              {text: "1920x1080p29.97",value: "1"}, 
+                              {text: "1920x1080p59.94",value: "2"}, 
+                              {text: "1920x1080p50",value: "3"}, 
+                              {text: "1920x1080p25",value: "4"}, 
+                              {text: "1920x1080i59.94",value: "5"}, 
+                              {text: "1920x1080i50",value: "6"}, 
+                              {text: "1280x720p59.94",value: "7"}, 
+                              {text: "1280x720p50",value: "8"}, 
+                              {text: "720x576p50",value: "11"}, 
+                              {text: "720x480p59.94",value: "12"}],
+  OPTIONS_HDMI_FORMAT_1080 :[{text: "1920x1080p30",value: "1"},
+                              {text: "1920x1080p60",value: "2"}, 
+                              {text: "1920x1080p50",value: "3"}, 
+                              {text: "1920x1080p25",value: "4"}, 
+                              {text: "1280x720p60",value: "7"}, 
+                              {text: "1280x720p50",value: "8"}, 
+                              {text: "1280x720p30",value: "9"}, 
+                              {text: "1280x720p25",value: "10"}, 
+                              {text: "720x576p50",value: "11"}, 
+                              {text: "720x480p60",value: "12"}],
   OPTIONS_AUDIO_BR : [{text: "256kbps",value: "256"}, 
                       {text: "128kbps",value: "128"},
                       {text: "64kbps",value: "64"}],
@@ -247,7 +298,10 @@ export default {
   OPTIONS_RECORD_PATH : [{text: "USB",value: "0"}, 
                         {text: "NAS",value: "1"}],
   //DV4000 参数---end
-
+  OPTIONS_PBKEYLEN : [{text: "32",value: "32"}, 
+                      {text: "16",value: "16"}],
+  OPTIONS_RCV_TYPE:[{label: "虚拟服务器", value: "0"}, 
+                    {label: "实体接收机", value: "1"}],
   //网卡id转枚举类型
   SRT_TRANS_IF : {"eth0":0, "wifi":1, "lte1":2, "lte2":3, "lte3":4, "lte4":5, 
                   "lte5":6, "lte6":7, "usb-lan":8, "usb-5g1":9, "usb-5g2":10},
@@ -255,6 +309,8 @@ export default {
                     "lte5","lte6","usb-lan","usb-5g1","usb-5g2"],
   ACT_LATENCY_MIN : 50,
   ACT_LATENCY_MAX : 3000,
+  cardIdArr_1080 : ['eth0', 'lte1', 'lte2', 'lte3', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'],
+  cardIdArr_4000 : ['eth0', 'lte1', 'lte2', 'lte3', 'lte4', 'lte5', 'lte6', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'],
   getCurrentTime() {
     var date = new Date();
     var year = '' + date.getFullYear();
@@ -330,7 +386,41 @@ export default {
     return res;
   },
   //获取接收机列表
-  getRcvList(row, cb) {
+  getRcvList(cb) {
+    var that = this;
+    axios({
+      method: 'post',
+      url:"/page/index/indexData.php",
+      data:qs.stringify({
+        getAllRcvName:'rcv',
+        userId:store.state.user.id,
+        userGroup:store.state.user.userGroup,
+        prefix:store.state.user.prefix
+      }),
+      Api:"getAllRcvName",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        var data = res.data;
+        if(data){
+          cb(data);
+        }
+      }else{
+        Toast({
+          message: res.res.reason,
+          position: 'middle',
+          duration: 2000
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
+  /*getRcvList(row, cb) {
     var that = this;
     axios({
       method: 'post',
@@ -389,7 +479,7 @@ export default {
     .catch(function (error) {
       console.log(error)
     })
-  },
+  },*/
   //获取接收机列表--4000
   getRcvList4000(cb) {
     var that = this;
@@ -425,7 +515,7 @@ export default {
     })
   },
   //根据接收机sn查找空闲板卡
-  getUnusedBoard(rcvSn,cb) {
+  getUnusedBoard(rcvSn,curBoard,cb) {
     //获取可用板卡列表
     var that = this;
     axios({
@@ -443,13 +533,13 @@ export default {
     })
     .then(function (response) {
       let res = response.data;
-      console.log("getUnusedBoard success")
+      console.log("getUnusedBoard success:"+rcvSn+"/"+curBoard)
       console.log(res)
       if(res.res.success){
         var data = res.data;
         var result = [];
         if(cb){
-          cb(data);
+          cb(rcvSn,curBoard,data);
         }
       }else{
         Toast({
@@ -509,7 +599,9 @@ export default {
         dev_sn: dev_sn,
         devName: dev_name,
         new_rcv_sn: rcv,
-        new_board_id: board
+        new_board_id: board,
+        prefix : store.state.user.prefix,
+        user_id : store.state.user.id,
       }),
       Api:"editMatchByDevSn",
       AppId:"android",
@@ -519,7 +611,7 @@ export default {
       let res = response.data;
       if(res.res.success){
         //虚拟
-        if(rcv.substr(-4) == "2999"){
+        if(rcv.substr(-4) == VIR_RCV){
           //添加板卡
           axios({
             method: 'post',
@@ -553,6 +645,7 @@ export default {
             console.log(error)
           })
         }
+        that.setDevParamList(['param_lock','dev_push_enable'],[1,0],'');//切换配对时关闭推流开关
         Toast({
           message: "绑定成功",
           position: 'middle',
@@ -560,7 +653,7 @@ export default {
         });
         //chars数据删除--start
         var bindChart = "";
-        if (rcv.substr(-4) == "2999") {
+        if (rcv.substr(-4) == VIR_RCV) {
           bindChart = dev_sn + "/" + rcv + "/" + dev_sn;
         } else {
           bindChart = dev_sn + "/" + rcv + "/" + board;
@@ -619,9 +712,13 @@ export default {
   },
   //获取推流地址相关信息
   getPushUrls(cb){
-    //var that = this;
-    var board = store.state.ActiveDevice.board_id+"";
-    var boardId = board.length==10 ? board: board - 1;
+    var rcvSn = store.state.ActiveDevice.rcv_sn;
+    var devSN = store.state.ActiveDevice.dev_sn;
+    var boardId = store.state.ActiveDevice.board_id+"";
+    if(!this.isValidRcvSn(rcvSn) && this.isValidSn(devSN)){ //背包无配对
+      rcvSn = -1;
+      boardId = devSN;
+    }
     axios({
       method: 'post',
       url:"/page/index/indexData.php",
@@ -681,40 +778,43 @@ export default {
     })
   },
   //获取背包参数范围
-  getDevParamRange(devSn, prefix, param) {
+  getDevParamRange(devSn, prefix, param, extraParam) {
     var that = this;
     var sn = devSn.substr(-4);
     var devMode = that.getDevMode(sn);
+    var devSeries = this.getDevSeries(sn);
     var res = [];
     if (param == 'video_encode') {//视频编码
       if (devMode == 'DV3000T') {
-        res = that.OPTIONS_VIDEOENCODE2;
+        res = that.OPTIONS_VIDEOENCODE2_4000;
       }else if(devMode == 'DV406'){
-        res = that.OPTIONS_VIDEOENCODE3;
+        res = that.OPTIONS_VIDEOENCODE3_4000;
       }else{
         if(prefix == PREFIX){
-          res = that.OPTIONS_VIDEOENCODE;
+          res = that.OPTIONS_VIDEOENCODE_4000;
         }else{
-          res = that.OPTIONS_VIDEOENCODE3;
+          res = that.OPTIONS_VIDEOENCODE3_4000;
         }
       }
-    }else if (param == 'bitrate_mode') {
-      if (prefix != PREFIX) {
-        res = that.OPTIONS_BITRATEMODE2;
-      } else {
-        res = that.OPTIONS_BITRATEMODE;
-      }
-    }else if (param == 'hdr') {
+    }else if (param === 'bitrate_mode') {
+      res = that.OPTIONS_BITRATEMODE;
+    }
+    else if (param == 'hdr') {
       if (devMode == 'DV3000T') {
         res = that.OPTIONS_HDR2;
       } else {
         res = that.OPTIONS_HDR;
       }
     }else if (param == 'latency') {
-      if (devMode == 'DV3000T') {
-        res = that.OPTIONS_LATENCY2;
-      } else {
-        res = that.OPTIONS_LATENCY;
+      if (devMode === 'DV5000T') {
+        res = that.OPTIONS_LATENCY_5000;
+      }else{
+        //接收机类型
+        if(extraParam){//虚拟接收机
+          res = that.OPTIONS_LATENCY2;
+        }else{
+          res = that.OPTIONS_LATENCY;
+        }
       }
     }else if (param == 'video_input') {
       if (devMode == 'DV3000T') {
@@ -726,9 +826,9 @@ export default {
       }
     }else if (param == 'audio_encode'){
       if(prefix == PREFIX){
-        res = that.OPTIONS_AUDIO_ENCODE;
+        res = that.OPTIONS_AUDIO_ENCODE_4000;
       }else{
-        res = that.OPTIONS_AUDIO_ENCODE2;
+        res = that.OPTIONS_AUDIO_ENCODE2_4000;
       }
     }
     return res;
@@ -1299,13 +1399,18 @@ export default {
     return res;
   },
   //获取某个参数
-  getDevOneParam(param, callback) {
-    var devSN = store.state.ActiveDevice.dev_sn;
-    if (!devSN || !this.isValidSn(devSN)) {
-      if (typeof(callback) == 'function') {
-        callback([]);
+  getDevOneParam(devSn, param, callback) {
+    var devSN = "";
+    if(devSn != ""){
+      devSN = devSn;
+    }else{
+      devSN = store.state.ActiveDevice.dev_sn;
+      if (!devSN || !this.isValidSn(devSN)) {
+        if (typeof(callback) == 'function') {
+          callback([]);
+        }
+        return;
       }
-      return;
     }
     axios({
       method: 'post',
@@ -1367,6 +1472,14 @@ export default {
       console.log(error)
     })
   },
+  //名称校验 支持中文/字母/数字/+/_/@/(/) /长度：15
+  nameCheckType2(name) {
+    var pattern = /^[A-Za-z0-9\u4e00-\u9fa5\@\+\_\(\)（）]{1,15}$/gi;
+    if(name == SUPER){
+        return true;
+    }
+    return pattern.test(name);
+  },
   //密码校验 6-16位字母数字，至少包含一个字母一个数字
   pwdCheckType(pwd){
     var password = pwd;
@@ -1391,4 +1504,111 @@ export default {
     //全是数字、全是字母、全是特殊符号：返回false
     return !(numberCount == length || letterCount == length || (numberCount==0&&letterCount==0));
   },
+  //数字+小数点+一位小数
+  checkNumber1(value, cb) {
+    var curValue = value;
+    curValue = curValue.replace(/[^\d\.]/g, ''); //清除“数字”和“.”以外的字符
+    curValue = curValue.replace(/\.{2,}/g, "."); //只保留第一个. 清除多余的
+    curValue = curValue.replace(/^(\-)*(\d+)\.(\d).*$/, '$1$2.$3'); //只能输入1个小数
+    if (curValue == '.') { //首位不能是小数点
+      curValue = '';
+    }
+    if (curValue.indexOf(".") < 0 && curValue != "") { //以上已经过滤，此处控制的是如果没有小数点，首位不能为类似于 01、02
+      curValue = parseFloat(curValue);
+    }
+    if (value != curValue) {
+      value = curValue;
+    }
+    if(cb){
+      cb(value)
+    }
+  },
+  /*************************
+  *描述：获取背包属于哪个系列
+  * 输入：背包序列号
+  * 输出：‘4000’ ‘1080’
+  ************************/
+  getDevSeries(devSn){
+    if(!this.isValidSn(devSn)){
+      return false;
+    }
+    var sn_4 = devSn.substr(-4);
+    sn_4 = +sn_4;
+    //DV4000T,DV3000T,DV406,CM-T5G 2000
+    if(sn_4 === 2140 || sn_4 === 2142 || sn_4 === 2147 || sn_4 === 2148){
+      return '4000';
+    }
+    //DV1080,QUK100,DV1080P,ICBT-201
+    else if(sn_4 === 2146 || sn_4 === 2150 || sn_4 === 7189 || sn_4 === 7207){
+      return '1080';
+    }
+    else{
+      return false;
+    }
+  },
+  /*************************
+  *描述：获取接收机属于虚拟的还是实体的
+  * 输入：接收机序列号
+  * 输出：‘2999’ ‘2141’
+  ************************/
+  getRcvSeries(sn){
+    if(!this.isValidRcvSn(sn)){
+      return false;
+    }
+    var sn_4 = sn.substr(-4);
+    sn_4 = +sn_4;
+    if(sn_4 === 2999){
+      return VIR_RCV;
+    }
+    else {
+      return PRA_RCV;
+    }
+  },
+  //判断URL合法性
+  checkUrl(url) {
+    var result = '';
+    if (url == '') {
+      return result;
+    }
+    if (url.indexOf('rtmp://') != 0 && url.indexOf('rtsp://') != 0 && url.indexOf('udp://') != 0 &&
+      url.indexOf('rtp://') != 0 && url.indexOf('srt://')) {
+      result = "仅支持 'rtmp://'、'rtsp://'、'udp://'、'rtp://'、'srt://'";
+    }
+    if(url.indexOf(' ') >= 0){
+      result = "不能有空格！";
+    }
+    return result;
+  },
+  //判断背包和虚拟接收机是否跨组配对以及背包推流开关
+  getPushAndPrefixMatch(devSn,rcvSn,callback){
+    axios({
+      method: 'post',
+      url:"/page/index/indexData.php",
+      data:qs.stringify({
+        getPushAndPrefixMatch : true,
+        devSn : devSn,
+        rcvSn : rcvSn,
+      }),
+      Api:"getPushAndPrefixMatch",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        if (typeof(callback) == 'function') {
+          callback(res.data);
+        }
+      }else{
+        that.$toast({
+          message: res.res.reason,
+          position: 'middle',
+          duration: 2000
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  }
 }

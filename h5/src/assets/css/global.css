@@ -1,5 +1,5 @@
 .mainPage{
-  height: calc(100% - 1.05rem) !important;
+  height: calc(100% - 1.15rem) !important;
 }
 .devicePrefixFilterPop{
   height:100% !important;
@@ -45,4 +45,33 @@
 }
 select:disabled,input:disabled{
   border: 1px solid #333 !important;
+}
+.size2{
+  font-size: .2rem;
+  width: .2rem;
+}
+.popTitle{
+  padding: .15rem;
+  background: #000;
+  text-indent: 0px;
+}
+.popTitleBack{
+  display: inline;
+}
+.popContentStyle{
+  height:calc(100% - 1rem);
+  overflow-y:auto;
+}
+.chevronWidth{
+  width: .25rem;
+}
+.chevronColor{
+  color:#fff;
+}
+.popListTitle{
+  padding:.18rem 0.08rem !important;
+}
+.searchInput{
+   float:right;
+   width: 30%;
 }

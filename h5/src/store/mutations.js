@@ -16,9 +16,9 @@ export default {
         state.ActiveDevice = datas
     },
     // 设置设备定时器
-    [types.SET_DEVICE_TIMER]: (state, datas) => {
+    /*[types.SET_DEVICE_TIMER]: (state, datas) => {
         state.DeviceTimer = datas;
-    },
+    },*/
     // 设置图表定时器
     [types.SET_CHART_TIMER]: (state, datas) => {
         state.ChartTimer = datas;

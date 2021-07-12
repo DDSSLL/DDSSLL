@@ -23,7 +23,7 @@ export default {
     devicePrefixSelect:"all",
     deviceModeSelect:'allMode',
     //设备定时器ID
-    DeviceTimer:null,
+    /*DeviceTimer:null,*/
     //图表定时器ID
     ChartTimer:null,
     //当前登录设备型号
@@ -32,5 +32,5 @@ export default {
     //图表样式
     cardLineStyle:'old',
     chartCardView : {
-      },
+    },
 }

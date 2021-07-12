@@ -15,6 +15,15 @@ module.exports = {
         "me":"我的",
         "login":"登录"
     },
+    basic:{
+        "status":"状态",
+        "control":"控制",
+        "live1080":"直播",
+        "live4000":"接收机",
+        "settings":"参数",
+        "me":"我的",
+        "login":"登录"
+    },
     tip:{
         "authSuccess":"登录成功"
     }
