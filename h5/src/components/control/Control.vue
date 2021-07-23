@@ -1,7 +1,7 @@
 <template>
   <div class="control mainPage">
     <keep-alive>
-      <Device></Device>
+      <Device page='dev'></Device>
     </keep-alive>
     <div class="Group" v-if="show.devMod">
       <div class="GroupItem" style="padding: .1rem;border-bottom:0;">
@@ -19,12 +19,97 @@
     </div>
     <div v-if="common.WorkModePush">
       <div class="Group">
+        <div class="GroupTitle" @click="commonSettingShow=!commonSettingShow">
+          常用设置
+          <i class="titleIcon fa" :class="[commonSettingShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+        </div>
+        <transition name="slide-fade">
+          <div v-show="commonSettingShow">
+            <div class="GroupItem pushEnableSwitch" style="padding: .1rem;border-bottom:0;">
+              <div class="GroupItemField">
+                <div class="GroupItemTitle">传输开关</div>
+                <div class="GroupItemValue">
+                  <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="dis.dev_push_enable"></mt-switch>
+                        <span v-if="show.pushDisShow" style="color:red">{{transErrReason}}</span>
+                </div>
+              </div>
+            </div>
+            <div class="GroupItem">
+              <div class="GroupItemField">
+                <div class="GroupItemTitle">视频比特率(Mbps)</div>
+                <div class="GroupItemValue">
+                  <mt-range
+                    v-model="common.dev_srVal_range"
+                    class="ItemRange byteRange"
+                    :min="BITRATE_MIN*10"
+                    :max="BITRATE_MAX*10"
+                    :step="1"
+                    :bar-height="5"
+                    :disabled="dis.dev_srVal_range"
+                    @change="changeVideoBitrate">
+                    <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{BITRATE_MIN}}</div>
+                    <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{BITRATE_MAX}}</div>
+                  </mt-range>
+                  <input type="text" class="ItemIpt" v-model.number="common.dev_srVal_input" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.dev_srVal_input">
+                </div>
+              </div>
+            </div>
+            <div class="GroupItem">
+              <div class="GroupItemField">
+                <div class="GroupItemTitle">延时(s)</div>
+                <div class="GroupItemValue">
+                  <mt-range
+                    v-model="common.dev_delayVal_range"
+                    class="ItemRange byteRange"
+                    :min="DELAY_MIN*10"
+                    :max="DELAY_MAX*10"
+                    :step.number="1"
+                    :bar-height="5"
+                    :disabled="dis.dev_delayVal_range"
+                    @change="setDeviceParam('dev_delay_range')">
+                    <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{DELAY_MIN}}</div>
+                    <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{DELAY_MAX}}</div>
+                  </mt-range>
+                  <input type="text" class="ItemIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="dis.dev_delayVal_input">
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+      <div class="Group">
         <div class="GroupTitle" @click="cardConfigShow=!cardConfigShow">
           网卡设置
           <i class="titleIcon fa" :class="[cardConfigShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
         </div>
         <transition name="slide-fade">
           <div v-show="cardConfigShow">
+            <div v-if="show.transModeShow">
+              <div class="GroupItem">
+              <div class="GroupItemField">
+                <div class="GroupItemTitle">模式切换</div>
+                  <div class="GroupItemValue">
+                    <select class="ItemSelect" v-model="common.PushTsType" @change="changeTransMode"  :disabled="dis.PushTsType">
+                      <template v-for="item in OPTIONS_TRANS_MODE">
+                        <option :value="item.value">{{ item.text }}</option>
+                      </template>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="GroupItem" v-if="show.cardSelShow">
+                <div class="GroupItemField">
+                  <div class="GroupItemTitle">网卡选择</div>
+                  <div class="GroupItemValue">
+                    <select class="ItemSelect" v-model="common.PushCard" @change="changeCard"  :disabled="dis.PushCard">
+                      <template v-for="item in OPTIONS_TRANS_PULL_CARD">
+                        <option :value="item.value">{{ item.text }}</option>
+                      </template>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="GroupItem" style="padding: .1rem;border-bottom:0;">
               <table class="netBoardTable">
                 <thead>
@@ -60,65 +145,6 @@
                   </template>
                 </tbody>
               </table>
-            </div>
-          </div>
-        </transition>
-      </div>
-      <div class="Group">
-        <div class="GroupTitle" @click="commonSettingShow=!commonSettingShow">
-          常用设置
-          <i class="titleIcon fa" :class="[commonSettingShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
-        </div>
-        <transition name="slide-fade">
-          <div v-show="commonSettingShow">
-            <div class="GroupItem pushEnableSwitch" style="padding: .1rem;border-bottom:0;">
-              <div class="GroupItemField">
-                <div class="GroupItemTitle">传输开关</div>
-                <div class="GroupItemValue">
-                  <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="dis.dev_push_enable"></mt-switch>
-                        <span v-if="show.pushDisShow" style="color:red">{{transErrReason}}</span>
-                </div>
-              </div>
-            </div>
-            <div class="GroupItem">
-              <div class="GroupItemField">
-                <div class="GroupItemTitle">视频比特率(Mbps)</div>
-                <div class="GroupItemValue">
-                  <mt-range
-                    v-model="common.dev_srVal_range"
-                    class="ItemRange byteRange"
-                    :min="BITRATE_MIN*10"
-                    :max="BITRATE_MAX*10"
-                    :step="1"
-                    :bar-height="5"
-                    :disabled="dis.dev_srVal_range"
-                    @change="setDeviceParam('dev_sr_range')">
-                    <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{BITRATE_MIN}}</div>
-                    <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{BITRATE_MAX}}</div>
-                  </mt-range>
-                  <input type="text" class="ItemIpt" v-model.number="common.dev_srVal_input" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.dev_srVal_input">
-                </div>
-              </div>
-            </div>
-            <div class="GroupItem">
-              <div class="GroupItemField">
-                <div class="GroupItemTitle">延时(s)</div>
-                <div class="GroupItemValue">
-                  <mt-range
-                    v-model="common.dev_delayVal_range"
-                    class="ItemRange byteRange"
-                    :min="DELAY_MIN*10"
-                    :max="DELAY_MAX*10"
-                    :step.number="1"
-                    :bar-height="5"
-                    :disabled="dis.dev_delayVal_range"
-                    @change="setDeviceParam('dev_delay_range')">
-                    <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{DELAY_MIN}}</div>
-                    <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{DELAY_MAX}}</div>
-                  </mt-range>
-                  <input type="text" class="ItemIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="dis.dev_delayVal_input">
-                </div>
-              </div>
             </div>
           </div>
         </transition>
@@ -318,7 +344,7 @@
         commonSettingShow:true,
         pageLock:false,
         BITRATE_MIN : 0.5, //Mbps   数据库里的dev_sr
-        BITRATE_MAX : 20,
+        BITRATE_MAX : 100,
         DELAY_MIN : 0.5, //s
         DELAY_MAX : 20,
         delayMin : 0,
@@ -348,7 +374,6 @@
           WorkModePush:true,//推流模式
           WorkModeAct:false,//互动模式
           WorkModeOri:0,//记录原始工作模式
-          cardSelShow:true,//推流网卡选择
           PushTsType:0,//传输模式
           PushCard:"",//单卡选择
           PullTsNet:"",//拉流-网卡选择
@@ -370,6 +395,8 @@
           devMod:false,//背包模式
           ActPullAddr:false,//拉流地址
           ActPushAddr:false,//推流地址
+          transModeShow:false,//模式切换
+          cardSelShow:true,//推流网卡选择
         },
         dis:{
           dev_push_enable:false,//传输开关
@@ -385,6 +412,7 @@
           PullTsOpen:false,//拉流-传输开关
         },
         modeArr: ['_push','_act'], //不同模式下的视频比特率
+        modeArr_4000:['_push'],
         netBoard:[],
         mode:{
           lte1:"",
@@ -412,8 +440,8 @@
         OPTIONS_WORK_MODE:[{value: "0",text: "推流"},
                           /*{value: "1",text: "拉流"},*/
                           {value: "2",text: "互动"}],
-        OPTIONS_TRANS_MODE:[{value: "0",text: "汇聚"},
-                            {value: "1",text: "单卡"}],
+        OPTIONS_TRANS_MODE:[{value: "0",text: "多卡汇聚"},
+                            {value: "1",text: "单卡直推"}],
         OPTIONS_TRANS_PUSH_CARD:[],
         OPTIONS_TRANS_PULL_CARD:[],
         OPTIONS_ACTDEVSN:[],
@@ -454,6 +482,7 @@
         handler(val) {
           this.controlShow();
           this.getDevList();
+          this.getDeviceControlParam(true);
         }
       }
     },
@@ -469,7 +498,7 @@
       this.initDeviceParam();
       this.getDeviceControlParam(initParam);
       
-      localStorage.getControlParam1080 = setInterval(function(){
+      localStorage.getControlParam = setInterval(function(){
         that.getNetBoard(function(data){
           that.netBoard = that.formatNetBoard(data); 
         });
@@ -479,7 +508,7 @@
       },500)
     },
     deactivated(){   //生命周期-缓存页面失活
-      clearInterval(localStorage.getControlParam1080);
+      clearInterval(localStorage.getControlParam);
     },
     methods:{
       ...mapMutations({
@@ -491,8 +520,10 @@
           this.show.devMod = false;
           this.common.WorkModePush = true;//4000显示网卡设置
           this.common.WorkModeAct = false;//互动模式下的参数
+          this.show.transModeShow = false;//模式切换
         }else if(this.curDevSeries == "1080"){
           this.show.devMod = true;
+          this.show.transModeShow = true;//模式切换
           if(this.common.WorkMode == "0"){
             this.common.WorkModePush = true;//推流模式下显示网卡设置
             this.common.WorkModeAct = false;//互动模式下的参数
@@ -507,6 +538,40 @@
         //互动推拉流地址延时 默认125ms
         this.common.actPushLatency = 125;
         this.common.actPullLatency = 125;
+        //视频比特率范围
+        this.initSpeedEvent();
+        //延时范围
+        this.initDelay();
+      },
+      initDelay(){
+        if(this.curDevSeries == "4000"){
+          this.DELAY_MIN = 0.1;
+        }else if(this.curDevSeries == "1080"){
+          this.DELAY_MIN = 0.5;
+        }
+      },
+      initSpeedEvent(){
+        //视频比特率范围
+        var that = this;
+        var res = "";
+        res = this.$global.getVideoBr(that.ActiveDevice.dev_sn);
+        this.BITRATE_MIN = res.min;
+        this.BITRATE_MAX = res.max;
+      },
+      changeVideoBitrate(){
+        this.setDeviceParam('dev_sr_range');
+        //视频比特率变化影响延时范围
+        if(this.common.dev_srVal_input > 40){
+          this.DELAY_MAX = 10;
+        }else{
+          this.DELAY_MAX = 20;
+        }
+        if(this.common.dev_delayVal > this.DELAY_MAX){
+          this.common.dev_delayVal = this.DELAY_MAX;
+          this.common.dev_delayVal_input = this.DELAY_MAX;
+          this.common.dev_delayVal_range = this.DELAY_MAX*10;
+          this.setDeviceParam('dev_sr_input');
+        }
       },
       setActAddr(){
         var devSN = this.ActiveDevice.dev_sn;
@@ -719,11 +784,11 @@
         that.OPTIONS_ACTDEVSN = filterOwnList;
         //addSelOptions('actDevSn', filterOwnList);
       },
-      formatNet(data){
+      /*formatNet(data){
         var that = this;
         that.netBoard = that.formatSwitch(data);
-        that.updateCardSelOptioins(data);//更新单卡选择select*/
-      },
+        that.updateCardSelOptioins(data);//更新单卡选择select
+      },*/
       userFunction(){
         if (this.user.id == SUPER) {
           this.show.SEI = true;//setting
@@ -1081,28 +1146,56 @@
           that.common.dev_srt = true;
           that.$global.getPushUrls(that.formatPushUrlState);
         }
-        //传输模式
-        that.common.PushTsType = data["PushTsType"];
-        if(data["PushTsType"] == "1"){
-          that.common.cardSelShow = true;//显示网卡选择
-        }else{
-          that.common.cardSelShow = false;//隐藏网卡选择
+        if(this.curDevSeries == "1080"){
+          //传输模式
+          that.common.PushTsType = data["PushTsType"];
+          if(data["PushTsType"] == "1"){
+            that.show.cardSelShow = true;//显示网卡选择
+          }else{
+            that.show.cardSelShow = false;//隐藏网卡选择
+          }
+          //单卡选择
+          that.common.PushCard = that.$global.cardEnum2Id(data['PushTsNet']);
         }
-        //单卡选择
-        that.common.PushCard = data['PushCard'];
         //拉流-网卡选择
         that.common.PullTsNet = data['PullTsNet'];
         //拉流-传输开关
         that.common.PullTsOpen = data['PullTsOpen'];
         //视频比特率范围
+        if(data["video_encode"] == "4"){
+          that.BITRATE_MAX = that.$global.BITRATE_MAX3_4000;
+        }
+        if(data["latency"] == 1){//超低延时
+          that.BITRATE_MIN = that.$global.BITRATE_MIN2_4000;
+        }
         that.common.dev_srVal = (data.dev_sr / 1000).toFixed(1); //(Mbps)
-        that.common.dev_srVal_range = that.common.dev_srVal*10;
-        that.common.dev_srVal_input = that.common.dev_srVal;
+        if(that.common.dev_srVal > that.BITRATE_MAX){
+          that.common.dev_srVal = that.BITRATE_MAX;
+          that.common.dev_srVal_input = that.BITRATE_MAX;
+          this.setDeviceParam('dev_sr_input');
+        }else if(that.common.dev_srVal < that.BITRATE_MIN){
+          that.common.dev_srVal = that.BITRATE_MIN;
+          that.common.dev_srVal_input = that.BITRATE_MIN;
+          this.setDeviceParam('dev_sr_input');
+        }else{
+          that.common.dev_srVal_range = that.common.dev_srVal*10;
+          that.common.dev_srVal_input = that.common.dev_srVal;  
+        }
+        
         //视频比特率  互动
         that.common.dev_srVal_range_act = that.common.dev_srVal*10;
         that.common.dev_srVal_input_act = that.common.dev_srVal;
+        
         //延时
+        if(that.common.dev_srVal_input > 40){
+          this.DELAY_MAX = 10;
+        }else{
+          this.DELAY_MAX = 20;
+        }
         that.common.dev_delayVal = (data.dev_delay / 1000).toFixed(1); //(s)
+        if(that.common.dev_delayVal > this.DELAY_MAX){
+          that.common.dev_delayVal = this.DELAY_MAX
+        }
         that.common.dev_delayVal_range = that.common.dev_delayVal*10;
         that.common.dev_delayVal_input = that.common.dev_delayVal;
         //互动背包
@@ -1231,19 +1324,15 @@
         var that = this;
         that.setDeviceParam('PushTsType');
         if(that.common.PushTsType == "1"){//单卡
-          that.common.cardSelShow = true;
+          that.show.cardSelShow = true;
         }else{
-          that.common.cardSelShow = false;
+          that.show.cardSelShow = false;
         }
       },
       changeCard(){
         var that = this;
         var cardId = that.common.PushCard;
-        that.setDeviceParam('SrtTransIf',that.$global.cardId2Enum(cardId));
-        that.setDeviceParam('PushTsNet',cardId);
-        that.setDeviceParam('PushCard',cardId);
-        that.common.PullTsNet = cardId;
-        //$('#srtTransport_sel').selectpicker('val',cardId);//互动  传输通道
+        this.setDeviceParam('PushTsNet',that.$global.cardId2Enum(cardId));
       },
       //检查推流地址是否只选了一个，大于一个全部取消勾选，加提示
       /*checkPushUrlOnlyOne(cb){
@@ -1386,7 +1475,7 @@
         this.show.pushDisShow = false;
         if (this.common.dev_push_enableVal == true) {
           //单卡模式直接开启,汇聚模式判断是否有启用的网卡
-          if(this.common.PushTsType == true){
+          if(this.common.PushTsType == 0){
             var cardUsed = that.getUsedCardCount();
             if (cardUsed == 0) {
               that.$toast({
@@ -1604,7 +1693,7 @@
           value = that.common.dev_push_enableVal? "1" : "0";
         }else if(key == "dev_sr_input"){
           value = parseFloat(that.common.dev_srVal_input) * 1000;
-          that.common.dev_srVal_range = that.common.dev_srVal_input;
+          that.common.dev_srVal_range = that.common.dev_srVal_input*10;
           devParamCol = "dev_sr";
         }else if(key == "dev_sr_range"){
           value = parseFloat(that.common.dev_srVal_range/10) * 1000;
@@ -1612,11 +1701,13 @@
           devParamCol = "dev_sr";
         }else if(key == "dev_delay_input"){
           value = parseFloat(that.common.dev_delayVal_input) * 1000;
-          that.common.dev_delayVal_range = that.common.dev_delayVal_input;
+          that.common.dev_delayVal_range = that.common.dev_delayVal_input*10;
+          that.common.dev_delayVal = that.common.dev_delayVal_input;
           devParamCol = "dev_delay";
         }else if(key == "dev_delay_range"){
           value = parseFloat(that.common.dev_delayVal_range/10) * 1000;
           that.common.dev_delayVal_input = that.common.dev_delayVal_range/10;
+          that.common.dev_delayVal = that.common.dev_delayVal_input;
           devParamCol = "dev_delay";
         }else if(key == "PushTsType"){//传输模式
           value = that.common.PushTsType;

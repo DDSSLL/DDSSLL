@@ -11,14 +11,14 @@
         <i class="tab tab-control" v-bind:class="{ 'tab-control-active': activeTab == 'control' }"></i>
         {{ $t('basic.control') }}
       </mt-tab-item>
+      <mt-tab-item id="settings">
+        <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab == 'settings' }"></i>
+        {{ $t('basic.settings') }}
+      </mt-tab-item>
       <mt-tab-item id="live">
         <i class="tab tab-live" v-bind:class="{ 'tab-live-active': activeTab == 'live' }"></i>
         <span v-if="curDevSeries=='1080'">{{ $t('basic.live1080') }}</span>
         <span v-else>{{ $t('basic.live4000') }}</span>
-      </mt-tab-item>
-      <mt-tab-item id="settings">
-        <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab == 'settings' }"></i>
-        {{ $t('basic.settings') }}
       </mt-tab-item>
       <mt-tab-item id="me">
         <i class="tab tab-me" v-bind:class="{ 'tab-me-active': activeTab == 'me' }"></i>
@@ -99,7 +99,7 @@
               if(this.curDevSeries == '4000'){
                 this.$router.push("/live4000");
               }else{
-                this.$router.push("/live");
+                this.$router.push("/live1080");
               }
               break;
             case 'settings': this.$router.push("/settings");break;

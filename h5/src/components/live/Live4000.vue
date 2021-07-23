@@ -8,38 +8,6 @@
       </div>
       <transition name="slide-fade">
         <div v-show="boardUrlShow">
-          <!-- <div class="GroupItem" v-show="show.boardMbps">
-            <div class="GroupItemField">
-              <div class="GroupItemTitle">传输速率(Mbps)</div>
-              <div class="GroupItemValue">
-                <mt-range
-                  v-model="options.board_mbps_range"
-                  class="ItemRange byteRange"
-                  :min="MBPS_MIN*10"
-                  :max="MBPS_MAX*10"
-                  :step="1"
-                  :bar-height="5"
-                  :disabled="disable.board_mbps"
-                  @change="changeBoardMbpsRange">
-                  <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{MBPS_MIN}}</div>
-                  <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{MBPS_MAX}}</div>
-                </mt-range>
-                <input type="text" class="ItemIpt byteIpt" v-model.number="options.board_mbps" @blur="changeBoardMbps" :disabled="disable.board_mbps">
-              </div>
-            </div>
-          </div>
-          <div class="GroupItem" v-show="show.sel_resolution">
-            <div class="GroupItemField">
-              <div class="GroupItemTitle">分辨率</div>
-              <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.sel_resolution" @change="changeResolution" :disabled="disable.sel_resolution">
-                  <template v-for="item in $global.OPTIONS_PUSH_RESULUTION">
-                    <option :value="item.value">{{ item.text }}</option>
-                  </template>
-                </select>
-              </div>
-            </div>
-          </div> -->
           <div class="GroupItem" v-show="show.sel_resolution">
             <div class="GroupItemField">
               <div class="GroupItemTitle">源1 (背包透传)</div>
@@ -54,7 +22,7 @@
           <div class="GroupItem" v-show="show.source2">
             <div class="GroupItemField">
               <div class="GroupItemTitle">源2
-                <a id="urlParam2Edit" style="color:#3d81f1;" @click="showUrlSourceWin" :style="{display:(disable.editDisable?'none':'')}">
+                <a id="urlParam2Edit" style="color:#3d81f1;" @click="showUrlSourceWin">
                   <i class="fa fa-pencil-square-o fa-lg"></i>
                 </a>
               </div>
@@ -66,34 +34,17 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem"><!-- 推流地址 -->
+          <!-- <div class="GroupItem">
             <div class="GroupItemField">
               <div class="GroupItemTitle">推流地址</div>
               <div style="display:inline-block;line-height:.3rem;" v-if="show.showAddUrl">
                 <i class="titleIcon fa fa-plus fa-large" @click="addUrl"></i>
               </div>
-              
-              <!-- <div class="GroupItemValue">
-                <mt-button class="ItemBtn" style="margin-left:10px;" :disabled="disable.url_add" @click="addUrl">添加</mt-button>
-                <mt-button class="ItemBtn" style="margin-left:10px;" :disabled="disable.url_all" @click="clickUrlAll">{{options.pushBtnName}}</mt-button>
-              </div> -->
             </div>
           </div>
           <div class="addressGroup" style="padding:0">
             <PushUrl @childFn="parentFn" v-bind:lockState="rcvParamLock" v-bind:workMode="workMode"></PushUrl>
-            <!-- <template v-for="(item,i) in options.address">
-              <div class="address" :key="i">
-                <div class="title">
-                  <p :class="[item.push_status == 'running' ? 'pushStyle' : (item.push_status == '' ? 'defaultStyle' : 'errStyle')]">{{ item.remark?item.remark : "推流地址"+(i+1) }}</p>
-                </div>
-                <div class="buttons">
-                  <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item)" :style="{display:(disable.editDisable?'none':'')}"></i>
-                  <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="delUrl(item)" :style="{display:(disable.editDisable?'none':'')}"></i>
-                  <i class="iconBtn fa" :class="[item.push_sel=='1'?'fa-pause':'fa-play']" aria-hidden="true" @click="changePushStatus(item)" :style="{display:(disable.editDisable?'none':'')}"></i>
-                </div>
-              </div>
-            </template> -->
-          </div>
+          </div> -->
         </div>
       </transition> 
     </div>
@@ -249,50 +200,6 @@
         </div>
       </transition>
     </div>
-    <mt-popup v-model="pushUrlsEditVisible" popup-transition="popup-fade">
-      <div class="pushEditModal">
-        <div class="modalTitle">
-          推流地址
-          <i class="closeBtn fa fa-close" @click="hideEditUrls"></i>
-        </div>
-        <div class="formContainer">
-          <div class="formItem">
-            <div class="formItemTitle">备注名</div>
-            <div class="formItemVal formItemTextArea">
-              <mt-field label="" placeholder="" type="textarea" rows="3" v-model="activePushObj.remark"  :disabled="this.dev_push_enable"></mt-field>
-            </div>
-          </div>
-          <div class="formItem">
-            <div class="formItemTitle">视频源</div>
-            <div class="formItemVal">
-              <select class="ItemSelect2" v-model="activePushObj.videoSource" @change="changeVideoSource">
-                <template v-for="item in videoSource">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-          <div class="formItem">
-            <div class="formItemTitle">地址类型</div>
-            <div class="formItemVal">
-              <mt-radio v-model="activePushObj.addressType" :options="OPTIONS_ADDRESS_TYPE" @change="changeAddressType">
-              </mt-radio>
-            </div>
-          </div>
-          <div class="formItem formItemTextArea">
-            <div class="formItemTitle">推流地址</div>
-            <div class="formItemVal">
-              <mt-field label="" placeholder="" type="textarea" rows="3" v-model="activePushObj.push_url"  :disabled="this.dev_push_enable"></mt-field>
-              <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265、RTSP+H.265、SRT</p>
-            </div>
-          </div>
-          <div class="formItem" style="text-align: right;margin-bottom: 0;" v-if="show.saveUrlShow">
-            <button class="modalBtn" @click="hideEditUrls">取消</button>
-            <button class="modalBtn" @click="saveEditUrls" style="background-color: #3d81f1;color:#fff;">确定</button>
-          </div>
-        </div>
-      </div>
-    </mt-popup>
     <!-- 编辑源2 -->
     <mt-popup v-model="source2Visible" popup-transition="popup-fade">
       <div class="pushEditModal">
@@ -339,7 +246,7 @@
               </select>
             </div>
           </div>
-          <div class="formItem" style="text-align: right;margin-bottom: 0;" v-if="show.showUrlShow">
+          <div class="formItem" style="text-align: right;margin-bottom: 0;">
             <button class="modalBtn" @click="source2Visible=false">取消</button>
             <button class="modalBtn" @click="clickUrlParam2Btn" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
@@ -352,7 +259,7 @@
 
 <script>
   import Device from '../basic/Device';
-  import PushUrl from './PushUrl';
+  /*import PushUrl from './PushUrl';*/
   import { mapState } from 'vuex';
   export default {
     name: "Live",
@@ -367,6 +274,7 @@
         MBPS_MIN : 0,
         MBPS_MAX : 0,
         URL_MAX:5,
+        hasRcvRight:true,
         OPTIONS_RECORD_SEL:[],
         OPTIONS_SDI_RESULUTION_SDI:this.$global.OPTIONS_SDI_RESULUTION,
         OPTIONS_FRAMERATE_SDI: this.$global.OPTIONS_FRAMERATE_6,
@@ -377,6 +285,7 @@
         OPTIONS_URL_SOURCE1: [{text: "源1(背包透传)",value: "1"}],
         OPTIONS_ADDRESS_TYPE: [{label: "RTMP",value: "0"}, 
                               {label: "SRT",value: "1"}],
+
         dev_options:{
           video_encode:"",
           latency:"",
@@ -451,12 +360,12 @@
           recordErrInfo:false,//录制开关报错信息
           source2:false,//源2显示
           saveUrlShow:true,//编辑推流地址的确定按钮
-          showUrlShow:true,//编辑源2的确定按钮
+          //showUrlShow:true,//编辑源2的确定按钮
           showAddUrl:false,//添加推流地址
         },
         pushUrlsEditVisible:false,
         source2Visible:false,//源2配置
-        activePushObj:{},
+        //activePushObj:{},
         dev_push_enable:false,
         getPushUrl:"",//获取推流地址的intervalId
       }
@@ -484,13 +393,16 @@
             if(this.curDevSeries == '4000'){
               this.$router.push("/live4000");
             }else{
-              this.$router.push("/live");
+              this.$router.push("/live1080");
             }
-            if(this.$route.fullPath == "/dv4000live"){
+            if(this.$route.fullPath == "/live4000"){
               if(val){
                 var that = this;
-                that.getRcvParam();
-                that.source2Show();
+                this.$global.getDeviceParam(this.initDevParam);//获取设备参数
+                this.$global.getMbps();
+                this.getRcvParam();
+                this.getDevState();//源1
+                this.source2Show();//源2
               }
             }
           }
@@ -501,203 +413,23 @@
       this.$global.getDeviceParam(this.initDevParam);//获取设备参数
       this.$global.getMbps();
       this.getRcvParam();
-      this.source2Show();
-      var that = this;
-      this.getPushUrlFun();
+      this.getDevState();//源1
+      this.source2Show();//源2
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(this.getPushUrl);
     },
     components: {
-      Device,PushUrl
+      Device
     },
     methods:{
-      getPushUrlFun(){
-        var that = this;
-        this.getPushUrl = setInterval(()=>{
-          this.getBoardUrl(function(data){
-            that.formatBoardUrl(data);
-          });
-        },500)
-      },
-      getBoardUrl(){
-        var that = this;
-        this.$global.getPushUrls(function(data){
-          that.formatBoardUrl(data);
-        });
-      },
-      formatBoardUrl(data){
-        this.options.address = data;
-        if(data.length >= this.URL_MAX){
-          this.show.showAddUrl = false;
-        }else{
-          this.show.showAddUrl = true;
-        }
-      },
-            
-      source2Show(){
-        var that = this;
-        if(that.ActiveDevice.rcv_sn == "" 
-        || (that.ActiveDevice.rcv_sn == "" && that.ActiveDevice.board_id.length == 10)){//没有配对或者是虚拟接收机
-          that.show.source2 = false;
-        }else{
-          that.show.source2 = true;
-        }
-      },
-      //修改接收机锁定状态
-      changeRcvLockState(data){
-        if(data == "lock"){
-          this.rcvParamLock = true;
-          this.setRcvParamDisable(true);
-        }else{
-          this.rcvParamLock = false;
-          this.setRcvParamDisable(false);
-        }
-      },
-      setRcvParamDisable(disFlg){
-        if(disFlg){
-          this.setBoardSettingDisabled(disFlg);
-        }else{
-          this.setBoardSettingDisabled(this.getSelRcvBoard('disabled'))
-        }
-      },
-      changeBoardMbpsRange(){
-        var that = this;
-        if(that.options.board_mbps == that.options.board_mbps_range){//修改input，联动range，下发命令，不需要再修改输入框
-          that.editBoardListParam('value15', that.options.board_mbps*1024*1024/10);
-        }else{//滑动滑块，下发命令，联动修改输入框
-          that.editBoardListParam('value15', that.options.board_mbps_range*1024*1024/10,function(){
-            that.options.board_mbps = that.options.board_mbps_range;
-          })
-        }
-      },
-      changeBoardMbps(){
-        var that = this;
-        that.options.board_mbps_range = that.options.board_mbps/10;
-        that.changeBoardMbpsRange();
-      },
-      changeResolution(){
-        //分辨率
-        var that = this;
-        this.editBoardListParam('push_resolution', that.options.sel_resolution);
-      },
-      changeHDMIResolution(){
-        var that = this;
-        var value = that.options.HDMI_resolution;
-        var old_framerate = that.options.HDMI_framerate;
-        if (value == '2' || value == '3') {
-          //1080I/720P  帧率只有 60 59.94 50
-          var newOption = [];
-          for (var i = 0; i < that.$global.OPTIONS_FRAMERATE_6.length; i++) {
-            if (i <= 2) {
-              newOption.push(that.$global.OPTIONS_FRAMERATE_6[i]);
-            }
-          }
-          that.OPTIONS_FRAMERATE_HDMI = newOption;
-          //如果之前的帧率<50 重新设置帧率为50
-          if (old_framerate == 3 || old_framerate == 4 || old_framerate == 5) {
-            that.HDMI_framerate = 2;
-            that.editBoardListParam('value8', 2);
-            that.options.HDMI_framerate = 2;
-          } else {
-            that.options.HDMI_framerate = old_framerate;
-          }
-        } else {
-          that.OPTIONS_FRAMERATE_HDMI = that.$global.OPTIONS_FRAMERATE_6;
-          that.options.HDMI_framerate = old_framerate;
-        }
-        this.editBoardListParam('value7',that.options.HDMI_resolution)
-      },
-      //修改视频源
-      changeVideoSource(){
-        var urlId = this.activePushObj.id;
-        var sourceIndex = this.activePushObj.videoSource;
-        this.editUrl(urlId,'sourceIndex',sourceIndex);
-      },
+      //获取背包参数
       initDevParam(data){
         var that = this;
         that.dev_options.video_encode = data["video_encode"];
         that.dev_options.latency = data["latency"];
       },
-      //获取直播速率范围
-      /*getMbps() {
-        this.MBPS_MIN = 0.5
-        var prefix = this.user.prefix;
-        if(prefix == "001" || prefix == "xs"){
-          this.MBPS_MAX = 80
-        }else{
-          this.MBPS_MAX = 12
-        }
-      },*/
-      //获取接收机相关数据
-      getRcvParam() {
-        var that = this;
-        that.getDevState();//获取背包参数
-        var rcv_sn = that.ActiveDevice.rcv_sn;
-        var boardId = that.ActiveDevice.board_id;
-        if(rcv_sn == ""){
-          that.show.pushUrl = false;
-          that.show.record = false;
-          that.show.showOutput = false;
-          return;
-        }else{
-          that.show.pushUrl = true;
-          that.show.record = true;
-          that.show.showOutput = true;
-        }
-        //接收机序列号合法判断
-        if (!that.$global.isValidRcvSn(rcv_sn)) {
-          //无配对接收机
-          that.options.board_mbps = "";
-          that.OPTIONS_RECORD_SEL = [];
-          that.options.record_ip = "";
-          that.options.record_port = "";
-          /*$('#record_path').val('');
-          $('#record_name').val('');
-          $('#record_maxsize').val('');*/
-          return;
-        }
-        //虚拟接收机隐藏输出
-        if (boardId.length == 10) {
-          that.show.showOutput = false;
-        } else {
-          that.show.showOutput = true;
-        }
-
-        //当前选中行的接收机板卡
-        var selRcvSn = that.ActiveDevice.rcv_sn;
-        var selBoardId = that.ActiveDevice.board_id;
-        that.getRcvRights(selRcvSn, selBoardId, function(data) {
-          for (var i = 0; i < data.length; i++) {
-            //接收机sn_板卡id_boardListId_操作权限_查看权限
-            var value = data[i].value;
-            if (value.split('_')[0] == selRcvSn && value.split('_')[1] == selBoardId) {
-              that.options.rcv_board_param = value;
-              //根据权限设置控件是否禁用
-              if(that.rcvParamLock){
-                that.setRcvParamDisable(true);
-              }else{
-                that.setBoardSettingDisabled(that.getSelRcvBoard('disabled'));  
-              }
-              break;
-            }
-          }
-          var rcvSn = that.getSelRcvBoard('rcvSn');
-          var boardId = that.getSelRcvBoard('boardId');
-          if (rcvSn) {
-            //获取板卡参数
-            that.getBoardListParam(rcvSn, boardId);
-          }
-          //获取录机参数
-          that.initRecordList(rcvSn, boardId);
-          /*if (getSelRcvBoard('setting') == "1") { //用户有接收机权限
-            hasRcvRight = true;
-          } else {
-            hasRcvRight = false;
-          }*/
-        });
-      },
-      //获取背包参数
+      //获取背包状态参数，用于显示源1
       getDevState(){
         var that = this;
         this.$axios({
@@ -743,6 +475,122 @@
           console.log(error)
         })  
       },
+      //源2
+      source2Show(){
+        var that = this;
+        if(that.ActiveDevice.rcv_sn == "" 
+        || (that.ActiveDevice.rcv_sn == "" && that.ActiveDevice.board_id.length == 10)){//没有配对或者是虚拟接收机
+          that.show.source2 = false;
+        }else{
+          that.show.source2 = true;
+        }
+      },
+      //修改接收机锁定状态
+      changeRcvLockState(data){
+        console.log("changeRcvLockState")
+        if(this.hasRcvRight){
+          if(data == "lock"){
+            this.rcvParamLock = true;
+            //this.setRcvParamDisable(true);
+          }else{
+            this.rcvParamLock = false;
+            //this.setRcvParamDisable(false);
+          }  
+        }
+        this.getRcvParam()
+        console.log("this.rcvParamLock:"+this.rcvParamLock)
+      },
+      setRcvParamDisable(disFlg){
+        if(disFlg){
+          this.setBoardSettingDisabled(disFlg);
+        }else{
+          this.setBoardSettingDisabled(this.getSelRcvBoard('disabled'))
+        }
+      },
+      changeHDMIResolution(){
+        var that = this;
+        var value = that.options.HDMI_resolution;
+        var old_framerate = that.options.HDMI_framerate;
+        if (value == '2' || value == '3') {
+          //1080I/720P  帧率只有 60 59.94 50
+          var newOption = [];
+          for (var i = 0; i < that.$global.OPTIONS_FRAMERATE_6.length; i++) {
+            if (i <= 2) {
+              newOption.push(that.$global.OPTIONS_FRAMERATE_6[i]);
+            }
+          }
+          that.OPTIONS_FRAMERATE_HDMI = newOption;
+          //如果之前的帧率<50 重新设置帧率为50
+          if (old_framerate == 3 || old_framerate == 4 || old_framerate == 5) {
+            that.HDMI_framerate = 2;
+            that.editBoardListParam('value8', 2);
+            that.options.HDMI_framerate = 2;
+          } else {
+            that.options.HDMI_framerate = old_framerate;
+          }
+        } else {
+          that.OPTIONS_FRAMERATE_HDMI = that.$global.OPTIONS_FRAMERATE_6;
+          that.options.HDMI_framerate = old_framerate;
+        }
+        this.editBoardListParam('value7',that.options.HDMI_resolution)
+      },
+      //获取接收机相关数据
+      getRcvParam() {
+        console.log("getRcvParam")
+        var that = this;
+        var rcv_sn = that.ActiveDevice.rcv_sn;
+        var boardId = that.ActiveDevice.board_id;
+        if(rcv_sn == "" || boardId.length == 10){//没有接收机或者虚拟接收机 隐藏二次分发
+          that.show.pushUrl = false;//视频分发
+          that.show.record = false;//录机
+          that.show.showOutput = false;//输出
+          return;
+        }else{
+          that.show.pushUrl = true;
+          that.show.record = true;
+          that.show.showOutput = true;
+        }
+        //接收机序列号合法判断
+        if (!that.$global.isValidRcvSn(rcv_sn)) {
+          //无配对接收机
+          that.options.board_mbps = "";
+          that.OPTIONS_RECORD_SEL = [];
+          that.options.record_ip = "";
+          that.options.record_port = "";
+          return;
+        }
+        //当前选中行的接收机板卡
+        that.$global.getRcvRights(rcv_sn, boardId, function(data) {
+          var rcvSn = that.getSelRcvBoard('rcvSn');
+          var boardId = that.ActiveDevice.board_id;
+          for (let i=0; i<data.length; i++) {
+            //接收机sn_板卡id_boardListId_操作权限_查看权限
+            var value = data[i].value;
+            if (value.split('_')[0] == rcv_sn && value.split('_')[1] == boardId) {
+              that.options.rcv_board_param = value;
+              //根据权限设置控件是否禁用
+              if(that.rcvParamLock){
+                that.setRcvParamDisable(true);
+              }else{
+                that.setBoardSettingDisabled(that.getSelRcvBoard('disabled'));  
+              }
+              break;
+            }
+          }
+          if (rcvSn) {
+            //获取板卡参数
+            that.getBoardListParam(rcvSn, boardId);
+          }
+          //获取录机参数
+          that.initRecordList(rcvSn, boardId);
+          if (that.options.rcv_board_param.split("_")[3] == "1") { //用户有接收机权限
+            that.hasRcvRight = true;
+          } else {
+            that.hasRcvRight = false;
+          }
+        });
+      },
+
       //获取录机列表
       initRecordList(rcvSn, boardId) {
         var that = this;
@@ -863,7 +711,7 @@
           })     
         },1000)
       },
-      //获取接收板卡权限
+      /*//获取接收板卡权限
       getRcvRights(rcvSn, boardId, cb) {
         var that = this;
         this.$axios({
@@ -892,7 +740,7 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
+      },*/
       //获取当前所选的接收机板卡
       getSelRcvBoard(type) {
         var that = this;
@@ -929,8 +777,8 @@
           that.disable.sel_resolution = true;//分辨率
           that.disable.url_add = true;//添加推流地址
           that.disable.url_all = true;//推流地址一键
-          that.disable.SDI_resolution = true;//SDI分辨率
-          that.disable.SDI_framerate = true;//SDI帧率
+          /*that.disable.SDI_resolution = true;//SDI分辨率
+          that.disable.SDI_framerate = true;//SDI帧率*/
           that.disable.encodeReset = true;//复位
           that.disable.encodeStop = true;//停止
           that.disable.HDMI_througu = true;//HDMI输出透传
@@ -945,8 +793,8 @@
           that.disable.sel_resolution = false;//分辨率
           that.disable.url_add = false;//添加推流地址
           that.disable.url_all = false;//推流地址一键
-          that.disable.SDI_resolution = false;//SDI分辨率
-          that.disable.SDI_framerate = false;//SDI帧率
+          /*that.disable.SDI_resolution = false;//SDI分辨率
+          that.disable.SDI_framerate = false;//SDI帧率*/
           that.disable.encodeReset = false;//复位
           that.disable.encodeStop = false;//停止
           that.disable.HDMI_througu = false;//HDMI输出透传
@@ -1043,10 +891,15 @@
             that.disable.SDI_resolution = true;//SDI分辨率
             that.disable.SDI_framerate = true;//SDI帧率
           }
+          that.OPTIONS_SDI_RESULUTION_SDI = that.$global.OPTIONS_SDI_RESULUTION;
           that.getDevParamM50('SDI');
         } else { //4k
           if(!that.getSelRcvBoard('disabled')){
-            that.disable.SDI_resolution = false;//SDI分辨率
+            if(this.rcvParamLock){
+              that.disable.SDI_resolution = true;//SDI分辨率  
+            }else{
+              that.disable.SDI_resolution = false;//SDI分辨率
+            }
             that.disable.SDI_framerate = true;//SDI帧率
           }
           that.getDevParamM50('SDI', 'framerate');  //设置帧率 背包透传
@@ -1557,76 +1410,6 @@
           console.log(error)
         })
       },
-      //点击添加URL
-      addUrl() {
-        var that = this;
-        if (that.options.address.length >= that.URL_MAX) {
-          that.$toast({
-            message: "已达添加上限!",
-            position: 'middle',
-            duration: 2000
-          });
-          return;
-        }
-        var boardListId = that.options.rcv_board_param.split("_")[2]
-        var rcvSn = that.options.rcv_board_param.split("_")[0]
-        var boardId = that.options.rcv_board_param.split("_")[1]
-        var pushUrl = "";
-        that.$axios({
-          method: 'post',
-          url:"/page/index/indexData.php",
-          data:this.$qs.stringify({
-            addUrl: boardListId,
-            rcvSn : rcvSn,
-            boardId : boardId,
-            url : pushUrl,
-          }),
-          Api:"addUrl",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
-      //数据库删除url
-      delUrl(item) {
-        var text = "确定删除该推流地址?";
-        var that = this;
-        var ids = item.id;
-        that.$messagebox.confirm(text).then(
-          action => {
-            that.$axios({
-              method: 'post',
-              url:"/page/index/indexData.php",
-              data:this.$qs.stringify({
-                delUrl: ids
-              }),
-              Api:"delUrl",
-              AppId:"android",
-              UserId:that.user.id
-            })
-            .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                that.$toast({
-                  message: '删除成功！',
-                  position: 'middle',
-                  duration: 2000
-                });
-              }
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
-        }).catch();
-      },
       //开启或停止推流
       changePushStatus(item){
         var that = this;
@@ -1731,7 +1514,7 @@
           console.log(error)
         })
       },
-      showEditUrls(obj){
+      /*showEditUrls(obj){
         var that = this;
         that.activePushObj = obj;
         var isSrt = obj.push_url.indexOf('srt://');
@@ -1743,7 +1526,7 @@
           that.videoSource = that.OPTIONS_URL_SOURCE;
           that.activePushObj.videoSource = obj.sourceIndex;
         }
-      },
+      },*/
       hideEditUrls(){
         this.pushUrlsEditVisible = false;
         this.activePushObj = {};
@@ -1838,11 +1621,11 @@
         that.source2Visible = true;
         var rcvSn = that.getSelRcvBoard('rcvSn');
         var boardId = that.getSelRcvBoard('boardId');
-        if(that.disable.editDisable){
+        /*if(that.disable.editDisable){
           that.show.showUrlShow = false;  
         }else{
           that.show.showUrlShow = true;  
-        }
+        }*/
         this.$axios({
           method: 'post',
           url:"/page/index/indexData.php",

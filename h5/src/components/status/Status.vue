@@ -1,6 +1,9 @@
 <template>
   <div class="main mainPage">
-    <Device page='status' @refreshChart='refreshChart'></Device>
+    <Device page='status'></Device><!--  @refreshChart='refreshChart' -->
+    <div class="refreshIcon" @click.stop="refreshChart">
+      <i class="fa fa-refresh" aria-hidden="true"></i>
+    </div>
     <div class="chartArea">
       <div class="mainChart" id="mainChart">
         <div id="totalChart" class="totalChart"></div>
@@ -250,6 +253,37 @@ export default {
           formatter: '{value}'
         }
       },
+      commonOptionYAxis3 : {
+        type: 'value',
+        name: '',
+        nameTextStyle: {
+          color: '#ddd'
+        },
+        axisTick: {
+          show: false
+        },
+        axisLine: {
+          show: false,
+          lineStyle: {
+            color: '#32346c'
+          }
+        },
+        splitLine: {
+          show: false,
+          lineStyle: {
+            color: '#32346c '
+          }
+        },
+        axisLabel: {
+          show: false,
+          textStyle: {
+            color: '#bac0c0',
+            fontWeight: 'normal',
+            fontSize: '12'
+          },
+          formatter: '{value}'
+        }
+      },
       commonOptionTitle : [{
         text: "",
         left: 10,
@@ -258,7 +292,7 @@ export default {
       }, {
         text: "",
         right: 10,
-        top: 0,
+        top: 20,
         textStyle: {
           color: '#BFBFBF',
           fontSize: '14',
@@ -441,7 +475,6 @@ export default {
     console.log("status created"); 
   },
   mounted() { //生命周期-页面初始化完成
-    console.log("status mounted")
     var that = this;
     that.initColorGV(that.cardLineStyle);
     that.formatXData();
@@ -482,7 +515,6 @@ export default {
       var cardData = JSON.parse(localStorage.cardData);
       var allChartData = JSON.parse(localStorage.allChartData);
       var curChart = localStorage.curChart.replace(/\"/g, "");
-
       var dataUpLoss = cardData.seriesCardLost;
       var dataDev = cardData.seriesDataDev;
       var dataRcv = cardData.seriesDataRcv;
@@ -492,7 +524,11 @@ export default {
       var dataRcvLoss = cardData.seriesTotalLoss;
       var dataAVBR = cardData.seriesAVBR;
       var dataVInput = cardData.seriesVInput;
-      var dataSrt = cardData.seriesSrt;
+      var dataSrt = "";
+      if(this.curDevSeries == "4000"){
+        dataSrt = cardData.seriesSrt; 
+      }
+      
 
       for (var key in dataUpLoss) {
         dataUpLoss[key]["data"] = dataUpLoss[key]["data"].map(function(item) {
@@ -527,9 +563,12 @@ export default {
       dataVInput = dataVInput.map(function(item) {
         return 0;
       });
-      dataSrt = dataSrt.map(function(item) {
-        return 0;
-      });
+      if(this.curDevSeries == "4000"){
+        dataSrt = dataSrt.map(function(item) {
+          return 0;
+        });  
+      }
+      
 
       cardData.seriesCardLost = dataUpLoss;
       cardData.seriesDataDev = dataDev;
@@ -597,8 +636,8 @@ export default {
         keyArr.push(curChart);
         localStorage.chartKey = JSON.stringify(keyArr);//存所有要请求数据的背包
         allChartData[curChart] = {
-          "seriesDataUp": {},   //各网卡的发送速率
-          "seriesDataDown": {}, //各网卡的接收速率
+          "seriesDataUp": {},   //各网卡的上传速率
+          "seriesDataDown": {}, //各网卡的下载速率
           "seriesCardLost": {}, //各网卡的上行丢包率
           "seriesDevLost": [],  //总的上传丢包率
           "seriesTotalLoss": [],//总的下载丢包率
@@ -606,8 +645,11 @@ export default {
           "seriesDataRcv": [],  //下载总速率
           "seriesAVBR": [],     //AVBR
           "seriesVInput": [],   //信号输入
-          "seriesSrt": []       //SRT拉流速率
+          "TotalSendPktStr": [],//总流量
         };
+        if(that.curDevSeries == "4000"){
+          allChartData[curChart]["seriesSrt"] = []; //SRT拉流速率
+        }
         //11个网卡上先都填充0
         for (var i = 0; i < that.cardIdArr.length; i++) {
           //上行速率
@@ -631,7 +673,10 @@ export default {
         allChartData[curChart].seriesTotalLoss = new Array(xSplit).fill(0); //下行总丢包率
         allChartData[curChart].seriesAVBR = new Array(xSplit).fill(0); //AVBR
         allChartData[curChart].seriesVInput = new Array(xSplit).fill(0); //信号输入
-        allChartData[curChart].seriesSrt = new Array(xSplit).fill(0); //SRT拉流速率
+        allChartData[curChart].TotalSendPktStr = '';
+        if(that.curDevSeries == "4000"){
+          allChartData[curChart].seriesSrt = new Array(xSplit).fill(0); //SRT拉流速率
+        }
         localStorage.allChartData = JSON.stringify(allChartData);
       }
       var devSns = keyArr.map(x=> x.split("/")[0]);
@@ -692,7 +737,11 @@ export default {
         var dataRcv = data[key][2] ? data[key][2]["rcv_br"] : 0; //下行速率
         var dataDownLoss = data[key][3] ? data[key][3]["TotalLossRate"] : 0; //下行总丢包
         var dataUpLoss = data[key][4]["dev_lost_br"]; //上行总丢包
-        var dataSrt = data[key][5] ? data[key][5]["SrtKbps"] : 0; //srt拉流速率
+        var TotalPktStr = data[key][1]["TotalSendPktStr"];
+        var dataSrt = "";
+        if(that.curDevSeries == "4000"){
+          dataSrt = data[key][5] ? data[key][5]["SrtKbps"] : 0; //srt拉流速率
+        }
         var curChartDevRcvBoard = "";//当前设备的 devsn/rcvsn/boardid
         for (var i = 0; i < keyArr.length; i++) {
           if (keyArr[i].split("/")[0] == key) {
@@ -842,8 +891,10 @@ export default {
         seriesAVBR.pop();   
         seriesVInput.unshift(dataVInput);
         seriesVInput.pop();
-        seriesSrt.unshift(dataSrt);
-        seriesSrt.pop();
+        if(this.curDevSeries == "4000" && seriesSrt){
+          seriesSrt.unshift(dataSrt);
+          seriesSrt.pop();  
+        }
 
         if($.isEmptyObject(validSeriesDataUp) && $.isEmptyObject(validSeriesDataDown) &&
           $.isEmptyObject(validSeriesCardLost)){
@@ -861,7 +912,11 @@ export default {
         allChartData[curChartDevRcvBoard].seriesTotalLoss = seriesTotalLoss;
         allChartData[curChartDevRcvBoard].seriesAVBR = seriesAVBR;
         allChartData[curChartDevRcvBoard].seriesVInput = seriesVInput;
-        allChartData[curChartDevRcvBoard].seriesSrt = seriesSrt;
+        allChartData[curChartDevRcvBoard].TotalSendPktStr = TotalPktStr;
+        if(that.curDevSeries == "4000"){
+          allChartData[curChartDevRcvBoard].seriesSrt = seriesSrt;  
+        }
+        
         localStorage.allChartData = JSON.stringify(allChartData);
         if (curChart.split("/")[0] == key) { //当前要显示的放在sessionStorage.cardData中
           if(that.avbrFlag == "false"){
@@ -1129,6 +1184,10 @@ export default {
       var xAxisOption = {};
       var yAxisOption1 = that.copy(that.commonOptionYAxis1);
       var yAxisOption2 = that.copy(that.commonOptionYAxis2);
+      var yAxisOption3 = "";
+      if(that.curDevSeries == "4000"){
+        yAxisOption3 = that.copy(that.commonOptionYAxis3);
+      }
       var option = {
         title: that.commonOptionTitle,
         legend: {
@@ -1154,12 +1213,12 @@ export default {
         grid: that.commonOptionGrid,
         tooltip: that.commonOptionTooltipFalse,
         xAxis: Object.assign(that.commonOptionXAxis[0], {data: that.xData}),
-        yAxis: [yAxisOption1, yAxisOption2],
+        yAxis: (that.curDevSeries=="4000")?[yAxisOption1, yAxisOption2, yAxisOption3]:[yAxisOption1, yAxisOption2],
         series: series,
         animation: false
       };
-      option.title[0].text = "概览";
-      option.grid.top = '60';
+      option.title[0].text = "概览" + cardData.TotalSendPktStr;
+      option.grid.top = '70';
       option.legend.top = 20;
       var title = "";
       for(var n=0; n<legendName.length; n++){
@@ -1186,6 +1245,12 @@ export default {
         }
         if(n==0 || n%(legendName.length-1) != 0){
           title += "/";
+        }
+      }
+      if(that.curDevSeries == "4000"){
+        //srt拉流
+        if(that.showDevSrt){
+          title += ["SRT拉流 : ", '{'+colorObj['SRT拉流']+'|' + dataAll['SRT拉流'][0] + '}Mbps  '].join("");
         }
       }
       option.title[1].text = title;
@@ -1216,6 +1281,12 @@ export default {
                                 return x;
                               }
                           });
+      if(that.curDevSeries == "4000"){
+        //srt拉流
+        if(that.showDevSrt){
+          option.legend.data.push("SRT拉流");
+        }
+      }
       that.myChartTotal.setOption(option, true);
     },
     initChartCards(cardData){
@@ -2059,5 +2130,12 @@ export default {
     font-weight: 500;
     height: 20px;
     padding: 10px .08rem;
+  }
+  .refreshIcon{
+    color: #fff;
+    position: absolute;
+    right: 20px;
+    font-size: 1.5em;
+    z-index:999;
   }
 </style>

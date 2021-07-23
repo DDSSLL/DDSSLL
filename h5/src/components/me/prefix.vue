@@ -1,72 +1,75 @@
 <template>
   <div class="PrefixMan">
     <div class="Group" style="height:100%">
-      <div class="GroupTitle" @click="prefixListShow=!prefixListShow">
+      <div class="GroupTitle popListTitle" @click="prefixListShow=!prefixListShow">
         用户组信息
         <i class="titleIcon fa chevronStyle size2" :class="[prefixListShow == true ? 'fa-chevron-left': 'fa-chevron-right']"></i>
         <!--<i class="titleIcon addBtn fa fa-refresh" @click.stop="getPrefixList"></i>
         <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addPrefix"></i>-->
       </div>
       <!-- <transition name="slide-fade"> -->
-      <mt-popup v-model="prefixListShow" position="right" popup-transition="popup-slide" class="rightPop">
+      <mt-popup v-model="prefixListShow" position="right" popup-transition="popup-fade" class="rightPop">
         <div class="GroupItem" v-if="prefixListShow" style="height:100%">
-          <div style="padding: .1rem;background: #000;">
+          <div class="popTitle">
             <div class="back">
-              <i class="fa fa-chevron-left size2" aria-hidden="true" style="color: #fff;"  @click="prefixListShow=false"></i>
-              <span style="color:#fff">用户组信息</span>
-              <i class="titleIcon addBtn fa fa-refresh" @click.stop="getPrefixList"></i>
-              <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addPrefix"></i>
+              <div  @click="prefixListShow=false" class="popTitleBack">
+                <i class="fa fa-chevron-left chevronWidth chevronColor" aria-hidden="true"></i>
+                <span style="color:#fff">用户组信息</span>
+                <i class="titleIcon addBtn fa fa-refresh" @click.stop="getPrefixList"></i>
+                <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addPrefix"></i>
+              </div>
             </div>
           </div>
-
-          <template v-for="(item,i) in prefixList">
-            <mt-cell-swipe
-              :right="[ 
-              {content: '编辑',handler:() => editPrefix(item)},
-              {content: '删除',style:{display:(item.prefix==user.prefix)?'none':''}, handler:() => delPrefix(item)}
-              ]">
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">id</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.prefix }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">名称</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.prefix_name }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">组深度</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.depth }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">父组</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.parent_name?item.parent_name.split("/")[1]:"" }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">标题</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.showTitle }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">管理员</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.level1 }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">高级用户</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.level2 }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">普通用户</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.level3 }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">背包</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.dev }}</span>
-              </div>
-              <div class="cellItem">
-                <span class="cellName cellLabel" style="float: left;">接收机</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.rcv }}</span>
-              </div>
-            </mt-cell-swipe>
-          </template>
+          <div class="popContentStyle">
+            <template v-for="(item,i) in prefixList">
+              <mt-cell-swipe
+                :right="[ 
+                {content: '编辑',handler:() => editPrefix(item)},
+                {content: '删除',style:{display:(item.prefix==user.prefix)?'none':''}, handler:() => delPrefix(item)}
+                ]">
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">id</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.prefix }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">名称</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.prefix_name }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">组深度</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.depth }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">父组</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.parent_name?item.parent_name.split("/")[1]:"" }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">标题</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.showTitle }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">管理员</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.level1 }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">高级用户</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.level2 }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">普通用户</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.level3 }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">背包</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.dev }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">接收机</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.rcv }}</span>
+                </div>
+              </mt-cell-swipe>
+            </template>
+          </div>
         </div>
       </mt-popup>
       <!-- </transition> -->
@@ -171,7 +174,7 @@
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
-            <button @click="prefixConfigVisible = false" style="margin-right: .06rem;">取消</button>
+            <button type="button" @click="prefixConfigVisible = false" style="margin-right: .06rem;">取消</button>
             <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
         </form>
@@ -297,7 +300,7 @@
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
-            <button type="button" @click="prefixDelVisible = false" style="margin-right: .06rem;">取消</button>
+            <button class="modalBtn" type="button" @click="prefixDelVisible = false" style="margin-right: .06rem;">取消</button>
             <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
         </form>
@@ -549,10 +552,10 @@
         this.options.level3_pwd = "";
         this.options.level3_pwd2 = "";
         this.options.level3List = [];
+
+        this.checkAdminCount();
       },
       editPrefix(item){
-        console.log("editPrefix")
-        console.log(item)
         var that = this;
         that.options.prefixType = "edit";
         that.prefixConfigVisible = true;
@@ -563,6 +566,7 @@
         that.$global.getChildGrpArr(item.prefix,function(data){
           if(item.prefix == PREFIX || data.length>1){
             that.show.parentPrefix = false;
+            that.options.parentPrefix = item.parent;
           } else{
             that.show.parentPrefix = true;
             //可修改的父组范围
@@ -1417,9 +1421,9 @@
     font-weight:500;
     color: #B7B7B7;
   }
-  .GroupItem{
+  /*.GroupItem{
       padding: .05rem .08rem;
-  }
+  }*/
   .GroupItemField{
       overflow: hidden;
   }
@@ -1742,6 +1746,10 @@
   }
   .delGrpDiv .fGrp .mint-checklist-title{
     margin:3px  0;
+  }
+  .popContentStyle{
+    height:calc(100% - .5rem) !important;
+    overflow-y:auto;
   }
   /*.mint-toast{
     z-index:2010 !important;

@@ -1,6 +1,6 @@
 <template>
   <div class="live mainPage">
-    <Device page='rcv' @changeRcvLockState='changeRcvLockState'></Device>
+    <Device page='dev'></Device>
     <!-- <Device></Device> -->
     <div class="Group" v-if="show.devMod">
       <div class="GroupItem" style="padding: .1rem;border-bottom:0;text-indent:.1rem">
@@ -14,37 +14,26 @@
     </div>
     <div class="Group" v-if="common.WorkMode!='互动'">
       <div v-if="common.WorkMode == '推流'">
-        <div class="GroupTitle">传输设置</div>
-        <div class="GroupItem" style="padding: .1rem;border-bottom:0;text-indent:.1rem">
-          <div class="GroupItemField">
-            <div class="GroupItemTitle">传输模式</div>
-            <div class="GroupItemValue" style="margin-top: 5px;">
-              <mt-radio
-                title=""
-                v-model="common.transMode"
-                :options="RADIO_TRANS_MODE"
-                @change="changeTransMode">
-              </mt-radio>
-            </div>
+        <div class="GroupTitle">推流地址</div>
+        <transition name="slide-fade">
+          <div v-show="liveUrlShow1080">
+            <div class="addressGroup" style="padding:0">
+              <div v-if="curDevSeries=='4000'">
+                <PushUrl  v-bind:lockState="pageLock" v-bind:workMode="common.WorkMode"></PushUrl>  
+              </div>
+              <div v-else>
+                <PushUrl  v-bind:lockState="pageLock" v-bind:workMode="common.WorkMode" v-bind:transMode="common.transMode"></PushUrl>
+              </div>
+            </div>      
           </div>
-          <div class="GroupItemField" v-if="show.cardSelShow" style="margin-top:10px;">
-            <div class="GroupItemTitle">网卡选择</div>
-            <div class="GroupItemValue">
-              <select class="ItemSelect" v-model="common.PushCard" @change="setPushTsNet"  :disabled="rcvParamLock">
-                <template v-for="item in OPTIONS_CARD">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-        </div>
+        </transition>
       </div>
       <div v-if="common.WorkMode == '拉流'">
         <div class="GroupTitle">拉流地址</div>
       </div>
-      <div class="Group" v-if="common.WorkMode!='互动'">
+      <!-- <div class="Group" v-if="common.WorkMode!='互动'">
         <PushUrl @childFn="parentFn" v-bind:lockState="rcvParamLock" v-bind:workMode="common.WorkMode" v-bind:transMode="common.transMode" v-bind:cardId="common.cardId"></PushUrl>
-      </div>
+      </div> -->
       <mt-popup v-model="pushUrlsEditVisible" popup-transition="popup-fade">
         <div class="pushEditModal">
           <div class="modalTitle">
@@ -78,13 +67,15 @@
 
 <script>
   import Device from '../basic/Device';
-  import PushUrl from './PushUrl';
+  import PushUrl from '../basic/PushUrl';
   import { mapState } from 'vuex';
   export default {
-    name: "Live",
+    name: "Live1080",
     data(){
       return{
         curDevSeries:"",
+        pageLock:false,
+        liveUrlShow1080:true,
         //pageLock:false,
         devTypeArr : ["推流","拉流","互动"],
         OPTIONS_CARD : [{text: "ETH0",value: "eth0"}, 
@@ -95,7 +86,6 @@
                         {text: "USB-5G1",value: "usb-5g1"}, 
                         {text: "USB-5G2",value: "usb-5g2"},
                         {text: "WiFi",value: "wifi"}],
-        rcvParamLock: true,
         pushUrlsEditVisible:false,
         activePushObj:{},
         dev_push_enable:false,
@@ -128,7 +118,7 @@
         immediate: true,
         handler(val) {
           var that = this;
-          if(this.$route.fullPath == "/live"){
+          if(this.$route.fullPath == "/live1080"){
             this.getLockStates();
             this.$global.getNetBoard(function(data){
               that.formatCardSel(data)
@@ -139,17 +129,23 @@
       '$store.state.ActiveDevice.dev_sn': {
         immediate: true,
         handler(val) {
-          if(this.$route.fullPath == "/live"){
+          if(this.$route.fullPath == "/live1080"){
             this.curDevSeries = this.$global.getDevSeries(this.ActiveDevice.dev_sn);
             if(this.curDevSeries == '4000'){
               this.$router.push("/live4000");
             }else{
-              this.$router.push("/live");
+              this.$router.push("/live1080");
             }
             clearInterval(localStorage.getPushUrl1080);
             this.getPushUrl();
             this.getDeviceParam();
           }
+        }
+      },
+      '$store.state.paramLockAck':{
+        immediate: true,
+        handler(val) {
+          this.getLockStates();
         }
       }
     },
@@ -190,7 +186,7 @@
         }
         this.OPTIONS_CARD = onlineArr;
       },
-      changeTransMode(){
+      /*changeTransMode(){
         if(this.common.transMode==1){
           //this.$global.setDeviceParam('PushTsType', 1);
           this.show.cardSelShow = true;
@@ -199,10 +195,10 @@
           this.$global.setDeviceParam('PushTsType', 0);
           this.show.cardSelShow = false;
         }
-      },
+      },*/
       getLockStates(){
         var that = this;
-        /*if(that.paramLockAck == "1"){
+        if(that.paramLockAck == "1"){
           if(that.lockUserId == that.user.id || that.lockUserId == ""){
             that.pageLock = false;
           }else{
@@ -210,8 +206,8 @@
           }
         }else{
           that.pageLock = true;
-        }*/
-        that.RADIO_TRANS_MODE = [{
+        }
+        /*that.RADIO_TRANS_MODE = [{
           label: '汇聚',
           value: '0',
           disabled: this.rcvParamLock?true:false
@@ -219,7 +215,7 @@
           label: '单卡',
           value: '1',
           disabled: this.rcvParamLock?true:false
-        }]
+        }]*/
       },
       userFunction(){
         if (this.user.id == SUPER) {

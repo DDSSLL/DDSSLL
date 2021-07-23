@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <div id="body">
-      <h1 class="title">{{ title }}</h1>
+      <h1 class="title"><LoginSetBtn v-if="hidShow" v-bind:content="title"></LoginSetBtn></h1>
       <div v-if="show.loginPageShow">
         <div class="form-item">
           <input type="text" autocomplete="false" class="loginIpt" v-model="user.login_name" placeholder="登录账号">
@@ -22,7 +22,7 @@
           <span class="registerBtn" @click="registerNew">注册一个新账号</span>
         </div>
         <!-- <appVersion v-if="hidShow"></appVersion> -->
-        <LoginSetBtn v-if="hidShow"></LoginSetBtn>   
+        
       </div>  
       <div v-if="show.registerPageShow">
         <div class="form-item">
@@ -87,6 +87,7 @@
         hidShow:true,
         /*HDXPRESS_BUILD:HDXPRESS_BUILD,*/
         DStreamer_BUILD:DStreamer_BUILD,
+        DStreamer_SERVE:DStreamer_SERVE,
         show:{
           loginPageShow:true,
           registerPageShow:false,
@@ -395,6 +396,7 @@
             localStorage.setItem("PASSWORD_1080",that.user.password);
             localStorage.setItem("DEVICE",that.activedevicetype);
             localStorage.setItem("SAVEM_1080",that.user.saveMe_1080);
+            that.$axios.defaults.baseURL = that.DStreamer_BUILD;
           }
         })
         .catch(function (error) {

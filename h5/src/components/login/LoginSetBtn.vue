@@ -1,7 +1,14 @@
 <template>
   <div class="LoginSetBtn">
-    <div class="setBtn"  @click="loginSetting" v-if="showConfigBtn">
-      <i class="fa fa-cog fa-2x" aria-hidden="true"></i>
+    <div v-if="content">
+      <div class="titleShow"  @click="loginSetting" v-if="showConfigBtn">
+        <span>{{ title }}</span>
+      </div>
+    </div>
+    <div v-else>
+      <div class="setBtn"  @click="loginSetting" v-if="showConfigBtn">
+        <i class="fa fa-cog fa-2x" aria-hidden="true"></i>
+      </div>
     </div>
     <div class="loginGroup" v-show="showConfig">
       <mt-button class="deviceLogin" :class="[activedevicetype == 'DV4000' ? 'deviceLoginActive': '']" @click="GoDV4000Login('DV4000')">DV4000</mt-button>
@@ -46,9 +53,11 @@
 	import $ from 'jquery';
 	export default {
     name: "LoginSetBtn",
+    props:['content'],
     data(){
       return{
-        title:'HDXpress',
+        //title:'HDXpress',
+        title:this.content,
         singleClick : true,
         /*ActiveDeviceType:'DV1080',*/
         showConfigBtn:true,
@@ -74,7 +83,7 @@
       '$store.state.activedevicetype': {
         immediate: true,
         handler(val) {
-          if(val){
+          /*if(val){
             var that = this;
             switch(this.activedevicetype){
               case "DV1080":
@@ -87,7 +96,7 @@
                 that.title = 'OTHER';
                 break;
             }
-          }
+          }*/
         }
       }
     },

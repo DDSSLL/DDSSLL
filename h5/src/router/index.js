@@ -6,7 +6,7 @@ import Wifi from '@/components/common/Wifi'
 import Login from '@/components/login/Login'
 import Status from '@/components/status/Status'
 import Control from '@/components/control/Control'
-import Live from '@/components/live/Live'
+import Live1080 from '@/components/live/Live1080'
 import Live4000 from '@/components/live/Live4000'
 import Settings from '@/components/settings/Settings'
 import Me from '@/components/me/Me'
@@ -69,9 +69,9 @@ export default new Router({
         }
       },
       {
-        path: '/live',
-        name: 'Live',
-        component: Live,
+        path: '/live1080',
+        name: 'Live1080',
+        component: Live1080,
         meta: {
           keepAlive: true
         }

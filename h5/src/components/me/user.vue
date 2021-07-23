@@ -33,14 +33,14 @@
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">用户ID</span>
                   <span class="cellName cellValue" style="float: right;">
-                    <span v-show="[item.id==user.id]">
+                    <span v-show="item.id==user.id">
                       <i class="fa fa-user" style="color: #23b7e5"></i>
                     </span>
                     {{ item.id }}
                   </span>
                 </div>
                 <div class="cellItem">
-                  <span class="cellName cellLabel" style="float: left;">用户名</span>
+                  <span class="cellName cellLabel" style="float: left;">昵称</span>
                   <span class="cellName cellValue" style="float: right;">
                     {{ item.name }}
                   </span>
@@ -97,14 +97,14 @@
           <input type="password" style="display:none" id="loginPassword"/>
           <input type="text" style="display:none" id="loginUserName"/>
           <div class="fGrp">
-            <div class="tl">用户ID<span class="redText">*</span></div>
+            <div class="tl">登录账号<span class="redText">*</span></div>
             <div class="vl">
               <input type="text" class="ItemInput" v-model="curUser.id" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()" :disabled="curUser.idDisable">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()</p>
             </div>
           </div>
           <div class="fGrp">
-            <div class="tl">用户名<span class="redText">*</span></div>
+            <div class="tl">昵称<span class="redText">*</span></div>
             <div class="vl">
               <input type="text" class="ItemInput" v-model="curUser.name" required>
             </div>

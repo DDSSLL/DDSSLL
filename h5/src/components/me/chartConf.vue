@@ -280,6 +280,11 @@
       }
     },
     mounted(){
+      var that = this;
+      this.$global.getDeviceParam(function(data){
+        that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
+        that.avbrShowFlg = that.avbrFlag;
+      });
       this.getChartConfUnit();
       this.initChartSelect();
       this.getChartConfTotal();
@@ -381,7 +386,7 @@
             return;
           }
         }
-        if(interval > max){
+        if(interval*1 > max*1){
           that.$toast({
             message: "刻度数值不可大于速率最大值",
             position: 'middle',
@@ -647,7 +652,6 @@
         for(var key in that.ChartConf.card){
           if(key.indexOf("Val") != -1){
             var card = key.substr(0, key.indexOf("Val")).toUpperCase();
-            console.log("card:"+card);
             for(var i=0; i<that.ChartConf.showCard.length; i++){
               if(that.ChartConf.showCard[i]["name"] == card){
                 that.ChartConf.card[key] = that.ChartConf.showCard[i]["value"];

@@ -1,6 +1,6 @@
 <template>
   <div class="settings mainPage">
-    <Device></Device>
+    <Device page='dev'></Device>
     <div class="Group"><!-- 传输控制 -->
       <div class="GroupTitle" @click="transConfigShow=!transConfigShow">
         传输控制
@@ -159,7 +159,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem"><!-- 音频编码 -->
+          <div class="GroupItem" v-if="audioEncShow"><!-- 音频编码 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">音频编码</div>
               <div class="GroupItemValue">
@@ -300,6 +300,27 @@
         </div>
       </transition>
     </div>
+    <div class="Group" v-if="dev4000Show"><!-- 直播地址 -->
+      <div class="GroupTitle" @click="liveUrlShow=!liveUrlShow">
+        直播地址
+        <i class="titleIcon fa" :class="[liveUrlShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+      </div>
+      <transition name="slide-fade">
+        <div v-show="liveUrlShow">
+          <!-- <div class="GroupItem">
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">推流地址</div>
+              <div style="display:inline-block;line-height:.3rem;" v-if="showAddUrl">
+                <i class="titleIcon fa fa-plus fa-large" @click="clickAddUrl"></i>
+              </div>
+            </div>
+          </div> -->
+          <div class="addressGroup" style="padding:0">
+            <PushUrl  v-bind:lockState="pageLock" v-bind:workMode="workMode"></PushUrl><!-- @childFn="parentFn" -->
+          </div>      
+        </div>
+      </transition>
+    </div>
     <div class="Group"  v-if="this.user.id==this.SUPER"><!-- 日志记录 -->
       <div class="GroupTitle"  @click="logShow=!logShow">
         日志记录
@@ -328,12 +349,14 @@
 <script>
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER,SET_NAV_STATUS } from '../../store/mutation-types';
+  import PushUrl from '../basic/PushUrl';
   import Device from '../basic/Device';
   import $ from 'jquery';
   export default {
     name: "Settings",
     data(){
       return{
+        workMode:"推流",
         curDevSeries:"",
         curRcvSeries:"",
         dev1080Show:false,
@@ -341,10 +364,15 @@
         transConfigShow:true,
         inputEncodeShow:false,
         matchConfigShow:false,
+        liveUrlShow:false,
+        showAddUrl:false,
         logShow:false,
         pageLock:false,
+        URL_MAX:5,
+        getPushUrl:"",
         SUPER : SUPER,
         RADIO_TRANS_IP : [],
+        audioEncShow:true,
         hdrShow : true,
         latencyShow : true,
         feclevel_show : false,
@@ -427,13 +455,15 @@
           matchBoard:"",
           matchBoardBak:"",
           rcvType:"0",
+          rcv_board_param:"",
+          address:"",
         },
         boardShow:false,//板卡显示
         unbindBtnShow:false,
       }
     },
     components: {
-        Device
+        Device,PushUrl
     },
     computed: {
         ...mapState(['user','navHide','paramLockAck','lockUserId','ActiveDevice'])//"ActiveDeviceType",
@@ -487,12 +517,95 @@
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(localStorage.getSettingParam1080);
+      clearInterval(this.getPushUrl);
     },
     methods:{
       ...mapMutations({
         SET_USER,
         SET_NAV_STATUS
       }),
+      /*clickAddUrl(){
+        this.getRcvParam();
+      },
+      //获取接收机相关数据
+      getRcvParam() {
+        var that = this;
+        //当前选中行的接收机板卡
+        var selRcvSn = that.ActiveDevice.rcv_sn;
+        var selBoardId = that.ActiveDevice.board_id;
+        that.$global.getRcvRights(selRcvSn, selBoardId, function(data) {
+          for (var i = 0; i < data.length; i++) {
+            //接收机sn_板卡id_boardListId_操作权限_查看权限
+            var value = data[i].value;
+            if (value.split('_')[0] == selRcvSn && value.split('_')[1] == selBoardId) {
+              that.options.rcv_board_param = value;
+              //根据权限设置控件是否禁用
+              break;
+            }
+          }
+          that.addUrl();
+        });
+      },
+      //点击添加URL
+      addUrl() {
+        var that = this;
+        if (that.options.address.length >= that.URL_MAX) {
+          that.$toast({
+            message: "已达添加上限!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        var boardListId = that.options.rcv_board_param.split("_")[2]
+        var rcvSn = that.options.rcv_board_param.split("_")[0]
+        var boardId = that.options.rcv_board_param.split("_")[1]
+        var pushUrl = "";
+        that.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            addUrl: boardListId,
+            rcvSn : rcvSn,
+            boardId : boardId,
+            url : pushUrl,
+          }),
+          Api:"addUrl",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },*/
+      /*getPushUrlFun(){
+        var that = this;
+        this.getPushUrl = setInterval(()=>{
+          this.getBoardUrl(function(data){
+            that.formatBoardUrl(data);
+          });
+        },500)
+      },
+      getBoardUrl(){
+        var that = this;
+        this.$global.getPushUrls(function(data){
+          that.formatBoardUrl(data);
+        });
+      },
+      formatBoardUrl(data){
+        this.options.address = data;
+        if(data.length >= this.URL_MAX){
+          this.showAddUrl = false;
+        }else{
+          this.showAddUrl = true;
+        }
+      },*/
       changeLatency(){
         var that = this;
         this.changeDevParam('latency');
@@ -509,13 +622,10 @@
         }
       },
       latencyChange(DV4000RV){
-        console.log("latencyChange")
-
         //时延模式
         var that = this;
         var options = [];
         options = this.$global.getDevParamRange(that.ActiveDevice.dev_sn, that.user.prefix, 'latency', DV4000RV);//4000T和虚拟接收机配对时无超低时延
-        console.log(options)
         that.OPTIONS_LATENCY = options;
         if(DV4000RV){//4000T切换配对时，从实体配对的超低时延(1)切换到虚拟接收机时，只有标准时延，背包参数latency要从1(超低时延)变更为0(标准时延)、1080T默认为0标准时延
           that.$global.setDeviceParam('latency', 0);
@@ -535,7 +645,7 @@
             })
             return;
           }else{
-            this.setDeviceParam('Eth0Type', options['Eth0Type'])
+            that.setDeviceParam('Eth0Type', that.options['Eth0Type'])
           }
         });
       },
@@ -563,7 +673,7 @@
         var curRcvSn = that.ActiveDevice.rcv_sn;
         var curRcvName = that.ActiveDevice.rcv_name;
         if (data.length == 0) {
-          that.options.RcvList = [{value: curRcvSn,text:curRcvNamen}];
+          that.options.RcvList = [{value: curRcvSn,text:curRcvName}];
           that.options.matchRcv = curRcvSn;
         } else {
           for (var k = 0; k < data.length; k++) {
@@ -575,7 +685,7 @@
           if (!bFind) {
             result.push({
               value: curRcvSn?curRcvSn:"",
-              text: curRcvNamen?curRcvNamen:""
+              text: curRcvName?curRcvName:""
             });
           }
           $.each(data, function(key, value) {
@@ -603,7 +713,7 @@
         for (var i = 0; i < result.length; i++) {
           if (result[i]['value'] == curRcvSn) {
             that.options.matchRcv = result[i]['value'];
-            that.options.matchRcvBak = result[i]['value'];
+            //that.options.matchRcvBak = result[i]['value'];
             //$('#edit_rcv_sel').selectpicker('val', result[i]['value']);
             //$('#edit_rcv_sel').attr("oVal", result[i]['value']);
             that.$global.getUnusedBoard(result[i]['value'],"",that.formatUnusedBoard);
@@ -802,11 +912,11 @@
         that.options.DevAliasSwitch = (data['DevAliasSwitch'] == '1')?true:false;//显示别名开关
         that.options.DevAlias = data['dev_name'];//别名
         /*------------------------输入编码------------------------*/
+        //视频输入
+        that.options.video_input = data['video_input'];
         if(that.curDevSeries == "4000"){
           that.changeVideoInput(data);
         }
-        //视频输入
-        that.options.video_input = data['video_input'];
         //音频输入
         that.options.audio_input = data['audio_input'];
         //音频编码
@@ -906,6 +1016,8 @@
             that.OPTIONS_VIDEOENCODE = [{value: "4",text: "H.264"}];
           }
           that.options.video_encode = '4';
+          that.audioEncShow = false;//HDMI隐藏音频编码
+          that.hdrShow = false;//HDMI隐藏HDR
         }else{
           that.OPTIONS_VIDEOENCODE = video_encode_option;
           if(data["video_encode"]){
@@ -913,6 +1025,8 @@
           }else{
             that.options.video_encode = 0;
           }
+          that.audioEncShow = true;//非HDMI显示音频编码
+          that.hdrShow = true;//非HDMI显示HDR
         }
         that.$global.setDeviceParam('video_input', that.options.video_input);
         that.changeVideoEncode();
@@ -1426,5 +1540,8 @@
     }
     .settings .mint-radiolist-label{
         padding-left:0px;
+    }
+    .mint-field.is-textarea{
+      width:100%;
     }
 </style>

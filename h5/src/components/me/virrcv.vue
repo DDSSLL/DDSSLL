@@ -166,8 +166,8 @@
               </div>
               <div v-if="rollbackDiv">
                 <span style="color: #2de505;">已是最新版本!</span>
-                <div id="rollbackBtnDiv">
-                  <button type="button" id="rollbackBtn" @click="upgradeVirRcv('rollback')">回退</button>
+                <div v-if="rollbackBtnDiv">
+                  <button type="button" @click="upgradeVirRcv('rollback')">回退</button>
                   <span> -> </span>
                   <span>{{ oldVerStr }}</span>
                 </div>
@@ -219,6 +219,7 @@
         },
         noNewVer:false,
         rollbackDiv:false,
+        rollbackBtnDiv:false,
         upgradeDiv:false,
         newVerStr:"",
         oldVerStr:"",
@@ -293,7 +294,7 @@
           that.rcvAddShow = true;
           that.rcvDelShow = true;
           that.userPrefixShow = true;
-          that.$global.getUserPrefixArr(function(data) {
+          that.$global.getChildGrpArr(that.user.prefix, function(data) {
             var data = that.$global.initPrefixData(data);
             that.selectPrefixOptions = data.selectPrefixOptions;
             that.selectPrefix = data.selectPrefix;
@@ -446,7 +447,9 @@
         if (item['newestVer'] != ''){
           this.noNewVer = false;
           //已是最新版本
-          if(item['newestVer'] == item['softVer']){
+          var newVer = item['newestVer'].replace(/[^0-9]/ig,"");
+          var softVer = item['softVer'].replace(/[^0-9]/ig,"");
+          if(newVer == softVer){
             this.rollbackDiv = true;
             this.upgradeDiv = false;
             //回退按钮是否显示

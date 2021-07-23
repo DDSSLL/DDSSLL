@@ -59,6 +59,7 @@
     name: "Me",
     data(){
       return{
+        ADMIN:ADMIN,
         SystemShow:true,
         RoadTestShow:false,
       }

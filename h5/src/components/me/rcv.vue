@@ -150,7 +150,7 @@
                       </div>
                       <div class="cellItem">
                         <span class="cellName cellLabel" style="float: left;">解码</span>
-                        <span class="cellName cellValue" style="float: right;">{{ item.DecVer }}</span>
+                        <span class="cellName cellValue" style="float: right;">{{ item.DecSoftVer }}</span>
                       </div>
                       <div class="cellItem">
                         <span class="cellName cellLabel" style="float: left;">汇聚</span>
@@ -404,7 +404,7 @@
           <div class="fGrp">
             <div class="tl">序列号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.rcvSn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="receiverConfigType == 'edit'"> 
+              <input type="text" class="ItemInput" v-model="options.rcvSn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="receiverConfigType == 'edit'">
             </div>
           </div>
           <div class="fGrp">
@@ -425,6 +425,93 @@
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
               </select>
+            </div>
+          </div>
+          <div class="fGrp">
+            <div class="tl linkTitle" @click="ipSettingShow = !ipSettingShow">IP设置</div>
+            <div class="vl">
+            </div>
+          </div>
+          <div v-if="ipSettingShow">
+            <div class="fGrp">
+              <div class="tl">DHCP</div>
+              <div class="vl">
+                <mt-switch v-model="ipSetting.enableDhcpState" @change=""></mt-switch>
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">本地IP</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="ipSetting.localIp" placeholder="本地IP">
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">映射IP</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="ipSetting.mapIp" placeholder="映射IP">
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">子网掩码</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="ipSetting.netmask" placeholder="子网掩码">
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">网关</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="ipSetting.gateway" placeholder="网关">
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">DNS</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="ipSetting.dns" placeholder="DNS">
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">代理</div>
+              <div class="vl">
+                <mt-switch v-model="ipSetting.enableVpnState" @change=""></mt-switch>
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl linkTitle" @click="proxySettingShow = !proxySettingShow">Proxy设置</div>
+              <div class="vl">
+              </div>
+            </div>
+            <div v-if="proxySettingShow">
+              <div class="fGrp">
+                <div class="tl">TunNet</div>
+                <div class="vl">
+                  <input type="text" class="ItemInput" v-model="ipSetting.tun_net" placeholder="TunNet">
+                </div>
+              </div>
+              <div class="fGrp">
+                <div class="tl">VPNServer</div>
+                <div class="vl">
+                  <input type="text" class="ItemInput" v-model="ipSetting.vpn_server" placeholder="VPNServer">
+                </div>
+              </div>
+              <div class="fGrp">
+                <div class="tl">VPNPort</div>
+                <div class="vl">
+                  <input type="text" class="ItemInput" v-model="ipSetting.vpn_port" placeholder="VPNPort">
+                </div>
+              </div>
+              <div class="fGrp">
+                <div class="tl">VPNDns</div>
+                <div class="vl">
+                  <input type="text" class="ItemInput" v-model="ipSetting.vpn_dns" placeholder="VPNDns">
+                </div>
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl" style="color: #ffb37f;">修改IP参数请点击<i class="fa fa-hand-o-right" aria-hidden="true"></i></div>
+              <div class="vl">
+                <button type="button" @click="rcvIpEffect" :disable="ipEffectDis">{{ipEffectText}}</button>
+                <button type="button" @click="rcvEffectStopIp">停止</button><!--停止生效-->
+              </div>
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
@@ -510,6 +597,26 @@
           EncAChs:"",//音频通道
           EncAbr:"",//音频比特率
           transDelay:"",//延时
+        },
+        ipSettingShow:false,//IP设置
+        proxySettingShow:false,//代理
+        ipEffectText:"立即生效",
+        ipEffectDis:false,
+        ipTimer:"",
+        ipSetting:{
+          enableVpnState:"",
+          enableDhcpState:"",
+          startDate:"",
+          endDate:"",
+          tun_net:"",
+          vpn_server:"",
+          vpn_port:"",
+          vpn_dns:"",
+          localIp:"",
+          mapIp:"",
+          netmask:"",
+          gateway:"",
+          dns:"",
         },
       }
     },
@@ -719,7 +826,7 @@
           that.rcvAddShow = true;
           that.rcvDelShow = true;
           that.userPrefixShow = true;
-          that.$global.getUserPrefixArr(function(data) {
+          that.$global.getChildGrpArr(that.user.prefix, function(data) {
             var data = that.$global.initPrefixData(data);
             that.selectPrefixOptions = data.selectPrefixOptions;
             that.selectPrefix = data.selectPrefix;
@@ -823,6 +930,7 @@
         })
       },
       editReceiver(item){
+        var that = this;
         this.receiverConfigVisible = true;
         this.receiverConfigType = "edit";
         this.getDevPrefixList(item);
@@ -833,8 +941,34 @@
           rcv_online:item.online,
           rcv_autoUpgrade:item.autoUpgrade,
         }
+        this.rcvVpnData(item.rcv_sn, function(data){
+          var vpnData = data;
+          if(vpnData['vpnEnable'] == 1){
+            that.ipSetting.enableVpnState = true;
+          }else if(vpnData['vpnEnable'] == 0){
+            that.ipSetting.enableVpnState = false;
+          }
+          if(vpnData['dhcp'] == 1){
+            that.ipSetting.enableDhcpState = true;
+          }else if(vpnData['dhcp'] == 0){
+            that.ipSetting.enableDhcpState = false;
+          }
+          that.ipSetting.startDate = vpnData['vpnStartTime'];
+          that.ipSetting.endDate = vpnData['vpnEndTime'];
+          that.ipSetting.tun_net = vpnData['tunNet'];
+          that.ipSetting.vpn_server = vpnData['vpsIp'];
+          that.ipSetting.vpn_port = vpnData['vpsPort'];
+          that.ipSetting.vpn_dns = vpnData['vpnDns'];
+          that.ipSetting.localIp = vpnData['localIp'];
+          that.ipSetting.mapIp = vpnData['mapIp'];
+          that.ipSetting.netmask = vpnData['netmask'];
+          that.ipSetting.gateway = vpnData['gateway'];
+          that.ipSetting.dns = vpnData['dns'];
+          /*getRcvEditData(row,"entity");
+          $("#rcvManDiv").modal('show');*/
+        })
         //升级
-        if (item['newestVer'] != ''){
+        /*if (item['newestVer'] != ''){
           this.noNewVer = false;
           //已是最新版本
           if(item['newestVer'] == item['softVer']){
@@ -858,7 +992,362 @@
           this.upgradeDiv = false;
           this.rollbackDiv = false;
           this.noNewVer = true;
+        }*/
+      },
+      //查询实体接收机对应的VPN参数
+      rcvVpnData(rcv_sn,callback){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:this.$qs.stringify({
+            selectRcvVpn: true,
+            rcv_sn: rcv_sn
+          }),
+          Api:"selectRcvVpn",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if (typeof(callback) == 'function') {
+              callback(res.data[0]);
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //实体接收机IP设置立即生效
+      rcvIpEffect(){
+        var that = this;
+        //IP设置参数有效性
+        var rcv_sn = this.options.rcvSn;
+        var localIp = this.ipSetting.localIp;
+        var mapIp = this.ipSetting.mapIp;
+        var netmask = this.ipSetting.netmask;
+        var gateway = this.ipSetting.gateway;
+        var dns = this.ipSetting.dns;
+        var state = this.ipSetting.enableDhcpState;
+        var dhcp = '0';
+        if(state){
+         dhcp = '1';
         }
+        var dataJson = {
+          rcv_sn: rcv_sn,
+          localIp: localIp,
+          mapIp:mapIp,
+          netmask:netmask,
+          gateway:gateway,
+          dns:dns,
+          dhcp:dhcp
+        };
+        if(!this.checkIpValid(dataJson)){//校验参数合法性
+          return;
+        }
+        //代理
+        var vpnEnable = this.ipSetting.enableVpnState;
+        if(vpnEnable){
+          dataJson.vpnEnable = '1';
+        } else {
+          dataJson.vpnEnable = '0';
+        }
+        //是否设置vpn参数
+        dataJson.setVpn = '0';
+        //vpn参数
+        if(this.proxySettingShow || dataJson.vpnEnable === '1'){
+          dataJson.setVpn = '1';
+          var startDate = this.ipSetting.startDate;
+          var endDate = this.ipSetting.endDate;
+          var tun_net = this.ipSetting.tun_net;
+          var vpn_server = this.ipSetting.vpn_server;
+          var vpn_port = this.ipSetting.vpn_port;
+          var vpn_dns = this.ipSetting.vpn_dns;
+
+          dataJson.startDate = startDate;
+          dataJson.endDate = endDate;
+          dataJson.tun_net = tun_net;
+          dataJson.vpn_server = vpn_server;
+          dataJson.vpn_port = vpn_port;
+          dataJson.vpn_dns = vpn_dns;
+
+          var paramValid = true;
+          if(!this.checkVpnValid(dataJson)){//校验参数合法性
+            paramValid = false;
+          }
+          if(this.validDate(startDate,endDate)){//参数合法且当前系统时间在有效期内,vpnValid置1
+            dataJson.vpnValid = '1';
+          } else{
+            dataJson.vpnValid = '0';
+            paramValid = false;
+          }
+          //参数不合法
+          if(!paramValid){
+            if(dataJson.vpnEnable === '1'){
+              this.ipSetting.enableVpnState = false;
+              this.$toast({
+                message: "请联系技术支持配置代理参数!",
+                position: 'middle',
+                duration: 2000
+              });
+            }
+            return;
+          }
+          else{
+            //参数合法，且打开代理，映射IP需要等于vpn服务器ip
+            if(dataJson.vpnEnable === '1'){
+              dataJson.mapIp = dataJson.vpn_server;
+              this.ipSetting.mapIp = dataJson.mapIp;
+            }
+          }
+        }
+        //存数据，立即生效
+        dataJson.rst = '1';
+
+        this.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:this.$qs.stringify({
+            saveRcvIpVpn: true,
+            setIpVpnParam: dataJson
+          }),
+          Api:"saveRcvIpVpn",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.ipEffectText = "生效中";
+            that.ipEffectDis = true;
+            that.ipTimer = setInterval(function() {//检测rst值
+              that.getEffect(rcv_sn,function(data) {
+                if(data == 'finish'){
+                  clearInterval(that.ipTimer);
+                  that.ipEffectText = "立即生效";
+                  that.ipEffectDis = false;
+                  that.$toast({
+                    message: '已生效',
+                    position: 'middle',
+                    duration: 2000
+                  });
+                }
+              });
+            }, 1000);
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      rcvEffectStopIp(){
+        this.rcvEffectStop('ip')
+      },
+      //停止接收机立即生效
+      rcvEffectStop(type){
+        if(type == 'vpn'){
+          clearInterval(vpnTimer);
+        }else if(type == 'ip'){
+          clearInterval(this.ipTimer);
+        }
+        this.setRcvOneParam('rst', 0);
+        this.ipEffectText = "立即生效";
+        this.ipEffectDis = false;
+      },
+      //设置接收机VPN某个参数
+      setRcvOneParam(param, value) {
+        var that = this;
+        var rcv_sn = this.options.rcv_sn;
+        this.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:this.$qs.stringify({
+            rcvSN : rcv_sn,
+            rcvParamCol : param,
+            value : value+"",
+          }),
+          Api:"SetRcvParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            showLayer('设置成功', btn_id);
+            that.$toast({
+              message: "设置成功",
+              position: 'middle',
+              duration: 2000
+            });
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      checkIpValid(dataJson){
+        if(!this.$global.isValidIP(dataJson.localIp)){
+          this.$toast({
+            message: "请输入正确格式的本地IP!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        if(!this.$global.isValidIP(dataJson.mapIp)){
+          this.$toast({
+            message: "请输入正确格式的映射IP!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        if(!this.$global.isValidIP(dataJson.netmask)){
+          this.$toast({
+            message: "请输入正确格式的子网掩码!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        if(!this.$global.isValidIP(dataJson.gateway)){
+          this.$toast({
+            message: "请输入正确格式的网关!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        if(!this.$global.isValidIP(dataJson.dns)){
+          this.$toast({
+            message: "请输入正确格式的DNS!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        return true;
+      },
+      checkVpnValid(dataJson){
+        if(dataJson.startDate == ''){
+          this.$toast({
+            message: "请输入有效期范围!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        if(dataJson.endDate == ''){
+          this.$toast({
+            message: "请输入有效期范围!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        if(!this.$global.isValidIP(dataJson.tun_net)){
+          this.$toast({
+            message: "请输入正确格式的TunNet!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        if(!this.$global.isValidIP(dataJson.vpn_server)){
+          this.$toast({
+            message: "请输入正确格式的VPNServer!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        if(!this.$global.isValidPort(dataJson.vpn_port)){
+          this.$toast({
+            message: "请输入正确格式的VPNPort!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        if(!this.$global.isValidIP(dataJson.vpn_dns)){
+          this.$toast({
+            message: "请输入正确格式的VPNDns!",
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        return true;
+      },
+      //判断当前系统时间是否在有效期内
+      validDate(d1,d2){
+        //如果时间格式是正确的，那下面这一步转化时间格式就可以不用了
+        var dateBegin = new Date(d1);//将-转化为/，使用new Date
+        var dateEnd = new Date(d2);//将-转化为/，使用new Date
+        var dateNow = new Date();//获取当前时间
+        var beginDiff = dateNow.getTime() - dateBegin.getTime();//时间差的毫秒数
+        var beginDayDiff = Math.floor(beginDiff / (24 * 3600 * 1000));//计算出相差天数
+        var endDiff = dateEnd.getTime() - dateNow.getTime();//时间差的毫秒数
+        var endDayDiff = Math.floor(endDiff / (24 * 3600 * 1000));//计算出相差天数
+        if (endDayDiff < 0) {//已过期，已失效
+          return false;
+        }
+        if (beginDayDiff < 0) {//没到开始时间,未来有效
+          return false;
+        }
+        return true;
+      },
+      //获取编码器复位成功标志
+      getEffect(rcv_sn,callback) {
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:this.$qs.stringify({
+            getEffect: true,
+            rcv_sn: rcv_sn
+          }),
+          Api:"getEffect",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if (typeof(callback) == 'function') {
+              callback(res.data);
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       deleteReceiver(item){
         var that = this;
@@ -1346,4 +1835,7 @@
   /*.mint-toast{
     z-index:2010 !important;
   }*/
+  .linkTitle{
+    color:#5AB1A7;
+  }
 </style>

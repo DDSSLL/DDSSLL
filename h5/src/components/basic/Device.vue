@@ -37,14 +37,19 @@
             </span>
           </div>
         </div>
-        <div class="refreshIcon" v-if="pageType=='status'">
+        <!-- <div class="refreshIcon" v-if="pageType=='status'">
           <i class="fa fa-2x fa-refresh" aria-hidden="true" @click.stop="refreshChart"></i>
-        </div>
-        <div class="lock" v-else-if="pageType=='rcv'">
-          <i class="fa fa-2x fa-lock" id="rcvlockIcon" aria-hidden="true" @click.stop="changeRcvLockState"></i>
-        </div>
-        <div class="lock" v-else>
-          <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState" :disable="lockDisable"></i>
+        </div> -->
+        <div class="iconStyle">
+          <div class="lock" v-if="pageType=='rcv'">
+            <i class="fa fa-2x fa-lock" id="rcvlockIcon" aria-hidden="true" @click.stop="changeRcvLockState"></i>
+          </div>
+          <div class="lock" v-else-if="pageType=='dev'">
+            <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState" :disable="lockDisable"></i>
+          </div>
+          <div class="stateInfo" v-if="ActiveDevice.infoStatus == 'infoRed'">
+            <i class="fa fa-2x fa-exclamation-circle" aria-hidden="true"></i>
+          </div>  
         </div>
       </div>
     </div>
@@ -111,8 +116,8 @@
         </div>
       </mt-popup>
       <mt-popup v-model="deviceTypePop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop">
-        <span class="chevronDown">
-          <i class="fa fa-chevron-down" @click.stop="deviceTypePop=false"></i>
+        <span class="chevronDown" @click.stop="deviceTypePop=false">
+          <i class="fa fa-chevron-down"></i>
         </span>
         <mt-radio
           v-model="deviceType"
@@ -121,8 +126,8 @@
         </mt-radio>
       </mt-popup>
       <mt-popup v-model="devicePrefixPop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop devicePrefixFilterPop">
-        <span class="chevronDown">
-          <i class="fa fa-chevron-down" @click.stop="devicePrefixPop=false"></i>
+        <span class="chevronDown" @click.stop="devicePrefixPop=false">
+          <i class="fa fa-chevron-down"></i>
         </span>
         <mt-checklist
           v-model="devicePrefix"
@@ -131,8 +136,8 @@
         </mt-checklist>
       </mt-popup>
       <mt-popup v-model="deviceModePop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop">
-        <span class="chevronDown">
-          <i class="fa fa-chevron-down" @click.stop="deviceModePop=false"></i>
+        <span class="chevronDown" @click.stop="deviceModePop=false">
+          <i class="fa fa-chevron-down"></i>
         </span>
         <mt-radio
           v-model="deviceMode"
@@ -196,6 +201,9 @@
           <mt-cell title="码率控制">
             <span>{{status.bitrateMode_str}}</span>
           </mt-cell>
+          <mt-cell title="流量总计">
+            <span>{{status.TotalSendPktStr}}</span>
+          </mt-cell>
           <!-- <mt-cell title="历史数据" value=""  icon="fa-file-text-o">
             <span>{{status.OutputFormat}}</span>
           </mt-cell> -->
@@ -214,6 +222,7 @@
     props:['page'],
     data(){
       return{
+        curDevSeries:"",
         SUPER:SUPER,
         ADMIN:ADMIN,
         timer:null,
@@ -226,6 +235,7 @@
         deviceListShow:[],
         //deviceType:"1",
         pageType:this.page,
+        /*hasRcvRight:this.hasRcvRight,*/
         //用户组
         devicePrefixPop:false,
         allPrefix:[],
@@ -265,6 +275,7 @@
           audioEnc_str:"",
           audioBitrate_str:"",
           bitrateMode_str:"",
+          TotalSendPktStr:"",
         },
         interval:{
           getParam:"",
@@ -323,9 +334,11 @@
         this.status.audioEnc_str = "";
         this.status.audioBitrate_str = "";
         this.status.bitrateMode_str = "";
+        this.status.TotalSendPktStr = "";
         this.show.extBattery = false;
       },
       showDevStatus(devSn){
+        this.curDevSeries = this.$global.getDevSeries(devSn);
         this.popupTagsVisible = true;
         //定时刷新设备参数 500ms
         this.startTimerParam(devSn,500);
@@ -358,14 +371,15 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.initDevState(res)
+            that.initDevState(res,devSn)
           }
         })
         .catch(function (error) {
           console.log(error)
         })
       },
-      initDevState(res){
+      initDevState(res,devSn){
+        var that = this;
         //序列号
         this.status.devSn_str = res.data[0].dev_sn;
         //温度
@@ -433,16 +447,6 @@
           this.show.extBattery = true;
           this.status.battery2 = "battery"+prefix2+suffix2;
         }
-        //在线且没在充电中，才显示电池电量低
-        /*if (res.data[0].online == 1 && exBat.indexOf("CHARGING") == -1) {
-          if(inBat <= 40 || (exBat != "nonexistent" && exBat<=40 )){
-            showWarn('devWarn', true, '电池电量低');
-          } else {
-            showWarn('devWarn', false);
-          }
-        } else {
-          $("#devWarn").css('color', 'transparent');
-        }*/
         //GPS锁定
         this.status.gpsStatus = res.data[0].GpsStatusStr;
         //输入分辨率
@@ -488,52 +492,58 @@
             latency_text = this.$global.OPTIONS_LATENCY[i]["text"];
           }
         }
-        this.status.delay_str = res.data[0]["dev_delay"] / 1000 + "s";
+        if(this.curDevSeries == "1080"){
+          latency_text = "";
+        }
+        this.status.delay_str = res.data[0]["dev_delay"] / 1000 + "s " + latency_text;
         //视频比特率
         this.status.videoBr_str = res.data[0]["dev_sr"] / 1000 + "Mbps";
         //视频编码
         var videoEncodeStr = "";
-        for (var i = 0; i < this.$global.OPTIONS_VIDEOENCODE_1080.length; i++) {
-          if (this.$global.OPTIONS_VIDEOENCODE_1080[i]["value"] == res.data[0]["video_encode"]) {
-            videoEncodeStr = this.$global.OPTIONS_VIDEOENCODE_1080[i]["text"];
+        var videoEncodeOption = this.$global.getDevParamRange(devSn,that.user.prefix,'video_encode')
+        for (var i = 0; i < videoEncodeOption.length; i++) {
+          if (videoEncodeOption[i]["value"] == res.data[0]["video_encode"]) {
+            videoEncodeStr = videoEncodeOption[i]["text"];
           }
         }
         this.status.videoEnc_str = videoEncodeStr;
         //音频编码
         var audio_encode_text = "";
-        for (var i = 0; i < this.$global.OPTIONS_AUDIO_ENCODE.length; i++) {
-          if (this.$global.OPTIONS_AUDIO_ENCODE[i]["value"] == res.data[0]["AudioEnc"]) {
-            audio_encode_text = this.$global.OPTIONS_AUDIO_ENCODE[i]["text"];
+        for (var i = 0; i < this.$global.OPTIONS_AUDIO_ENCODE_4000.length; i++) {
+          if (this.$global.OPTIONS_AUDIO_ENCODE_4000[i]["value"] == res.data[0]["AudioEnc"]) {
+            audio_encode_text = this.$global.OPTIONS_AUDIO_ENCODE_4000[i]["text"];
           }
         }
         this.status.audioEnc_str = audio_encode_text;
         //音频比特率
         this.status.audioBitrate_str = res.data[0]["AudioBitrate"]+'kbps';
         //视频输入
-        var video_inpit_text = "";
-        for (var i = 0; i < this.$global.OPTIONS_VIDEOINPUT_1080.length; i++) {
-          if (this.$global.OPTIONS_VIDEOINPUT_1080[i]["value"] == res.data[0]["video_input"]) {
-            video_inpit_text = this.$global.OPTIONS_VIDEOINPUT_1080[i]["text"];
+        var video_input_text = "";
+        var videoInputOption = this.$global.getDevParamRange(devSn,that.user.prefix,'video_input')
+        for (var i = 0; i < videoInputOption.length; i++) {
+          if (videoInputOption[i]["value"] == res.data[0]["video_input"]) {
+            video_input_text = videoInputOption[i]["text"];
           }
         }
-        this.status.videoInput_str = video_inpit_text;
+        this.status.videoInput_str = video_input_text;
         //音频输入
         var audio_input_text = "";
-        for (var i = 0; i < this.$global.OPTIONS_AUDIOINPUT.length; i++) {
-          if (this.$global.OPTIONS_AUDIOINPUT[i]["value"] == res.data[0]["audio_input"]) {
-            audio_input_text = this.$global.OPTIONS_AUDIOINPUT[i]["text"];
+        for (var i = 0; i < this.$global.OPTIONS_AUDIOINPUT_4000.length; i++) {
+          if (this.$global.OPTIONS_AUDIOINPUT_4000[i]["value"] == res.data[0]["audio_input"]) {
+            audio_input_text = this.$global.OPTIONS_AUDIOINPUT_4000[i]["text"];
           }
         }
         this.status.audioInput_str = audio_input_text;
         //码率控制
         var bitrateMode_text = "";
-        for (var i = 0; i < this.$global.OPTIONS_BITRATEMODE_1080.length; i++) {
-          if (this.$global.OPTIONS_BITRATEMODE_1080[i]["value"] == res.data[0]["bitrate_mode"]) {
-            bitrateMode_text = this.$global.OPTIONS_BITRATEMODE_1080[i]["text"];
+        for (var i = 0; i < this.$global.OPTIONS_BITRATEMODE.length; i++) {
+          if (this.$global.OPTIONS_BITRATEMODE[i]["value"] == res.data[0]["bitrate_mode"]) {
+            bitrateMode_text = this.$global.OPTIONS_BITRATEMODE[i]["text"];
           }
         }
         this.status.bitrateMode_str = bitrateMode_text;
-
+        //流量总计
+        this.status.TotalSendPktStr = res.data[0].TotalSendPktStr;
         /*if (localStorage.mobileShow != "true") {
           $("#backpackStatus").css('overflow-y', 'auto');
         }*/
@@ -586,7 +596,7 @@
       initFilter(){
         var that = this;
         that.formatDeviceTypeName();
-        that.$global.getUserPrefixArr(that.formatPrefix)
+        that.$global.getChildGrpArr(that.user.prefix, that.formatPrefix);
         that.formatDeviceModeName();
       },
       formatPrefix(data){
@@ -597,6 +607,11 @@
         }
         that.allPrefix = arr;
         that.devicePrefix = that.devicePrefixSelect.split(",");
+        if(document.body.clientHeight*1 <= that.allPrefix.length*48){
+          $(".devicePrefixFilterPop").css('height','100%')
+        }else{
+          $(".devicePrefixFilterPop").css('height','auto')
+        }
       },
       //更新当前设备参数
       refreshCurDevParam(datas){
@@ -627,7 +642,7 @@
               var row = that.deviceList[j];
               //汇聚模式背包汇聚都上线或单卡模式
               if (row.match_used == '1' 
-                || (that.$global.getDevSeries(row.dev_sn) == "1080" && row.PushTsType == 0 )) {
+                || (that.$global.getDevSeries(row.dev_sn) == "1080" && row.PushTsType == 1 )) {
                 if (row.dev_push_status != '0') {
                   row.statusCircle = 'sk-spinner sk-spinner-three-bounce';
                 }else{
@@ -645,8 +660,25 @@
               var extBat = fextBat["exBat"];
               var fintBat = that.formatIntBat(row.IntBat);
               var intBat = fintBat["inBat"];
-              if (online == 1 && extBat.indexOf("CHARGING") == -1) {
+              /*if (online == 1 && extBat.indexOf("CHARGING") == -1) {
                 if(intBat <= 40 || (extBat != "nonexistent" && extBat<=40 )){
+                  row["infoStatus"] = "infoRed";
+                }else{
+                  row["infoStatus"] = "infoGreen";
+                }
+              } else {
+                row["infoStatus"] = "infoGray";
+              }*/
+
+              //在线,有可能显示电池电量低
+              if (online == 1){
+                if(extBat == "nonexistent" 
+                  && row.IntBat.indexOf("CHARGING") == -1 
+                  && intBat <= 40){
+                  //无外电池、无充电、内电池电量低
+                  row["infoStatus"] = "infoRed";
+                }else if(extBat != "nonexistent" && extBat<=40){
+                  //有外电池，外电池电量低
                   row["infoStatus"] = "infoRed";
                 }else{
                   row["infoStatus"] = "infoGreen";
@@ -800,18 +832,26 @@
         }
       },
       //status页面刷新图表
-      refreshChart(){
+      /*refreshChart(){
         this.$emit('refreshChart')
-      },
+      },*/
       //修改接收机锁
-      changeRcvLockState(){
-        if($("#rcvlockIcon").hasClass("fa-lock")){
-          this.$emit('changeRcvLockState',"unlock")
-          $("#rcvlockIcon").removeClass("fa-lock").addClass("fa-unlock");
-        }else{
-          this.$emit('changeRcvLockState',"lock")
-          $("#rcvlockIcon").removeClass("fa-unlock").addClass("fa-lock");
-        }
+      changeRcvLockState(data){
+        var that = this;
+        var selRcvSn = this.ActiveDevice.rcv_sn;
+        var selBoardId = this.ActiveDevice.board_id;
+        this.$global.getRcvRights(selRcvSn, selBoardId, function(data) {
+          that.hasRcvRight = data[0]["value"].split("_")[3]=="1"?true:false;
+          if (that.hasRcvRight) {
+              if($("#rcvlockIcon").hasClass("fa-lock")){
+                that.$emit('changeRcvLockState',"unlock")
+                $("#rcvlockIcon").removeClass("fa-lock").addClass("fa-unlock");
+              }else{
+                that.$emit('changeRcvLockState',"lock")
+                $("#rcvlockIcon").removeClass("fa-unlock").addClass("fa-lock");
+              }  
+            }
+        })
       },
       setDeviceParam(key,val){
         var that = this;
@@ -846,9 +886,10 @@
         this.getDeviceList();
       },
       changeActiveDevice(item){
-        // /this.SET_ACTIVE_DEVICE(item);
         this.refreshCurDevParam(item);
         this.popupVisible = false;
+        this.$emit('changeRcvLockState',"lock")
+        $("#rcvlockIcon").removeClass("fa-unlock").addClass("fa-lock");
       },
       filterDevice(){
         var that = this;
@@ -905,7 +946,7 @@
         top: 0;
         width: 100%;
         height: 60px;
-        z-index: 9;
+        z-index: 1000;
         /*background-color: #106fb1;*/
         background-color: #353535;
     }
@@ -1087,11 +1128,12 @@
       margin: 10px;
       position: absolute;
     }
-    .lock, .refreshIcon{
+    /*.lock, .refreshIcon, .stateInfo{
       height:100%;
-      display:flex;
-    }
-    .lock i, .refreshIcon i{
+      display:inline-block;
+      vertical-align:text-top;
+    }*/
+    .lock i, .refreshIcon i, .stateInfo i{
       margin:auto;
     }
     .lock .fa-lock{
@@ -1116,6 +1158,9 @@
     }
     .devStatusDiv .mint-cell{
       background-color:transparent;
+      color:#fff !important; 
+      min-height: 48px !important;
+      display: block !important;
     }
 </style>
 <style>
@@ -1129,6 +1174,10 @@
     color:#fff !important; 
     min-height: 48px !important;
     display: block !important;
+  }
+  .devStatusDiv .mint-cell-wrapper{
+    padding:0 10px !important;
+    background-image: linear-gradient(180deg,#d9d9d9,#d9d9d9 50%,transparent 0) !important;
   }
   .channelList .mint-loadmore-text{color: #FFF;}
   .nowrap{
@@ -1240,5 +1289,18 @@
   .deviceListDiv .mint-loadmore-content{
     height:calc(100% - .4rem);
     margin-top:.4rem;
+  }
+  .stateInfo{
+    color:red;
+    margin-left:10px;
+  }
+  .iconStyle{
+    display: flex;
+    height: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    float: right;
+    margin-right: 10px;
   }
 </style>

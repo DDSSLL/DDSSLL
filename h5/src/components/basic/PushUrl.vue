@@ -1,18 +1,26 @@
 <template>
   <div class="pushurl">
+    <div class="GroupItem">
+      <div class="GroupItemField">
+        <div class="GroupItemTitle">推流地址</div>
+        <div style="display:inline-block;line-height:.3rem;" v-if="show.showAddUrl">
+          <i class="titleIcon fa fa-plus fa-large" @click="clickAddUrl"></i>
+        </div>
+      </div>
+    </div>
     <div class="addressGroup">
       <div v-if="workMode=='推流'">
         <template v-for="(item,i) in address">
           <div class="address" :key="i">
             <div class="title widthPart">
-              <p :class="[item.push_url ? 'addressTitleLineH' : '']">{{ item.remark?item.remark : "推流地址"+(i+1) }}</p>
+              <p :class="[item.push_url?'addressTitleLineH':'',item.remarkColor]">{{ item.remark?item.remark : "推流地址"+(i+1) }}</p>
               <p :class="[item.push_url ? 'addressTitleLineH' : '', 
               item.push_status == 'running' ? 'pushStyle' : (item.push_status == '' ? 'defaultStyle' : 'errStyle')]" class="addressUrl" v-if="item.push_url">{{ item.push_url }}</p>
             </div>
             <div class="buttons">
-              <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);" @change="changeUrlEnable(item)"  :disabled="lockState || dev_push_enable"></mt-switch>  
+              <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);" @change="changeUrlEnable4000(item)"></mt-switch>  
               <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item,i)"></i>
-              <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="delUrl(item)" :style="{display:(lockState||dev_push_enable)?'none':'inline-block'}"></i>
+              <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="clickTrash(item)" :style="{display:lockState?'none':'inline-block'}"></i>
             </div>
           </div>
         </template>
@@ -74,7 +82,7 @@
               <div class="formItem">
                 <div class="formItemTitle">{{activePushObj.urlType}}</div>
                 <div class="formItemVal">
-                  <mt-field label="" placeholder="" type="textarea" rows="3" v-model="activePushObj.push_srt_url"></mt-field>
+                  <mt-field label="" placeholder="" type="textarea" rows="3" v-model="activePushObj.push_srt_url"  @change="getSrtParam(activePushObj.push_srt_url)"></mt-field>
                   <p class="rtmpTip"><span>{{activePushObj.url_error}}</span></p>
                 </div>
               </div>
@@ -124,13 +132,16 @@
   import $ from 'jquery';
   export default {
     name: "PushUrl",
-    props:['lockState','workMode','transMode','cardId'],
+    props:['lockState','workMode','transMode'/*,'cardId'*/],
     data(){
       return{
         SUPER:SUPER,
         ADMIN:ADMIN,
+        URL_MAX:5,
+        curDevSeries:"",
         address:[],
         addressPull:[],
+        rcv_board_param:"",
         dev_push_enable:"",
         showSubmitBtn:false,
         activePushObj:{
@@ -152,7 +163,13 @@
         show:{
           rtmp_url:true,
           srt_url:false,
+          showAddUrl:true,
         },
+        /*common:{
+          WorkMode:"",
+          transMode:"",
+          PushCard:"",
+        },*/
         pushUrlsEditVisible:false,
         OPTIONS_URL_SOURCE: [{text: "自动",value: "0"}, 
                             {text: "源1(背包透传)",value: "1"}, 
@@ -167,23 +184,28 @@
     },
     created(){  //生命周期-页面创建后
       var that = this;
-      //this.getPushUrl();
-      this.getURL();
     },
     activated(){
-      //this.getPushUrl();
-      this.getURL();
+      console.log("activated")
+      var that = this;
+      console.log("that.ActiveDevice.dev_sn:"+that.ActiveDevice.dev_sn)
+      
+      console.log("this.curDevSeries:"+this.curDevSeries)
     },
     deactivated(){   //生命周期-缓存页面失活
-      clearInterval(localStorage.getPushUrl1080);
+      clearInterval(localStorage.getPushUrl);
+      clearInterval(this.getPushUrlInterval);
     },
     watch:{
       '$store.state.ActiveDevice.dev_sn': {
         immediate: true,
         handler(val) {
-          clearInterval(localStorage.getPushUrl1080);
-          //this.getPushUrl();
+          var that = this;
+          clearInterval(localStorage.getPushUrl);
+          localStorage.removeItem('getPushUrl');
+          this.curDevSeries = this.$global.getDevSeries(that.ActiveDevice.dev_sn);
           this.getURL();
+          console.log("lockState:"+this.lockState);
         }
       }
     },
@@ -191,6 +213,66 @@
       ...mapMutations({
         SET_ACTIVE_DEVICE
       }),
+      clickAddUrl(){
+        this.getRcvParam();
+      },
+      //获取接收机相关数据
+      getRcvParam() {
+        var that = this;
+        //当前选中行的接收机板卡
+        var selRcvSn = that.ActiveDevice.rcv_sn;
+        var selBoardId = that.ActiveDevice.board_id;
+        that.$global.getRcvRights(selRcvSn, selBoardId, function(data) {
+          for (var i = 0; i < data.length; i++) {
+            //接收机sn_板卡id_boardListId_操作权限_查看权限
+            var value = data[i].value;
+            if (value.split('_')[0] == selRcvSn && value.split('_')[1] == selBoardId) {
+              that.rcv_board_param = value;
+              //根据权限设置控件是否禁用
+              break;
+            }
+          }
+          that.addUrl();
+        });
+      },
+      //点击添加URL
+      addUrl() {
+        var that = this;
+        if (that.address.length >= that.URL_MAX) {
+          that.$toast({
+            message: "已达添加上限!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        var boardListId = that.rcv_board_param.split("_")[2]
+        var rcvSn = that.rcv_board_param.split("_")[0]
+        var boardId = that.rcv_board_param.split("_")[1]
+        var pushUrl = "";
+        that.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            addUrl: boardListId,
+            rcvSn : rcvSn,
+            boardId : boardId,
+            url : pushUrl,
+          }),
+          Api:"addUrl",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
       getURL(){
         if(this.workMode == "推流"){
           this.getPushUrl();
@@ -202,25 +284,32 @@
         var that = this;
         that.address = [];
         that.$global.getPushUrls(that.formatPushUrls);
-        that.getPushParam();
-        localStorage.getPushUrl1080 = setInterval(function(){
-          if(that.dev_push_enable){
+        if(localStorage.getPushUrl){
+          clearInterval(localStorage.getPushUrl)
+        }else{
+          localStorage.getPushUrl = setInterval(function(){
             that.$global.getPushUrls(that.formatPushUrls);  
-          }
-          that.getPushParam();
-        },500)
+            //that.getPushParam();
+          },500)
+        }
       },
       formatPushUrls(data){
+        console.log("formatPushUrls")
         var that = this;
-        var devSeries = this.$global.getDevSeries(this.ActiveDevice.dev_sn);
         for(let i=0; i<data.length; i++){
-          if (data[i].push_status != 'running' && data[i].push_status != '') {
+          data[i].remarkColor = 'grayColor';
+          if(data[i]['push_status'] == 'running'){
+            data[i].remarkColor = 'greenColor';
+          }else if(data[i].push_status == ''){
+            data[i].remarkColor = 'grayColor';
+          }else{
             data[i].push_url += ('(' + data[i].push_status + ')');
-          } 
+            data[i].remarkColor = 'redColor';
+          }
           var disFlag = false;
-          if(devSeries=="1080"){
+          if(that.curDevSeries=="1080"){
             //单卡推流
-            if((devSeries=="1080") && !that.transMode){
+            if((that.curDevSeries=="1080") && that.transMode=="1"){
               if (data[i].oneCardEnable == 1){//设置选中
                 data[i]["enable"] = true;
               }else{
@@ -234,7 +323,7 @@
                 data[i]["enable"] = false;
               }
             }
-          }else if(devSeries=="4000"){
+          }else if(that.curDevSeries=="4000"){
             if (data[i].nEnable == 1){
               data[i]["enable"] = true;
             }else{
@@ -243,10 +332,16 @@
           }
         }
         that.address = data;
+        if(that.curDevSeries == "4000"){
+          if(data.length >= this.URL_MAX){
+            that.show.showAddUrl = false;
+          }else{
+            that.show.showAddUrl = true;
+          }
+        }
       },
       //获取背包拉流地址
       getDevPullUrl(){
-        console.log("getDevPullUrl")
         var that = this;
         this.$axios({
           method: 'post',
@@ -260,7 +355,6 @@
           UserId:that.user.id
         })
         .then(function (response) {
-          console.log(response)
           let res = response.data;
           if(res.res.success){
             that.formatPullUrls(res.data);
@@ -271,8 +365,6 @@
         })
       },
       formatPullUrls(data){
-        console.log("formatPullUrls")
-        console.log(data)
         for(var i=0; i<data.length; i++){
           if(data[i]["url_enable"] == "1"){
             data[i]["enable"] = true;
@@ -283,7 +375,8 @@
         this.addressPull = data;
       },
       //获取推流开关参数
-      getPushParam(){
+      /*getPushParam(){
+        console.log("getPushParam")
         var that = this;
         this.$axios({
           method: 'post',
@@ -313,8 +406,20 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
+      },*/
       //URL地址nEnable
+      changeUrlEnable4000(item){
+        console.log("changeUrlEnable4000")
+        console.log(item);
+        if( this.lockState || this.dev_push_enable){
+          this.$toast({
+            message: '请先解锁或停止推流！',
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+      },
       changeUrlEnable(item){
         var that = this;
         this.$axios({
@@ -341,10 +446,8 @@
       },
       //拉流地址enable
       changePullUrlEnable(item){
-        console.log("changePullUrlEnable")
         var that= this;
         var urlData = this.addressPull;
-        console.log(urlData)
         for(var i=0; i<urlData.length; i++){
           if(urlData[i].url_enable == '1'){
             urlData[i].enable = false;
@@ -427,7 +530,23 @@
           console.log(error)
         })
       },
-      delUrl(item) {
+      clickTrash(item){
+        if(this.curDevSeries == "1080"){
+          this.delUrl(item.id);
+        }else if(this.curDevSeries == "4000"){
+          if (item.enable){
+            this.$toast({
+              message: '请先取消勾选再进行删除！',
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }else{
+            this.delUrl(item.id);
+          }
+        }
+      },
+      delUrl(delId) {
         var that = this;
         this.$messagebox.confirm("确定删除该推流地址?").then(
           action => {
@@ -435,7 +554,7 @@
               method: 'post',
               url:"/page/index/indexData.php",
               data:this.$qs.stringify({
-                delUrl:item.id
+                delUrl:delId
               }),
               Api:"delUrl",
               AppId:"android",
@@ -445,19 +564,24 @@
               let res = response.data;
               if(res.res.success){
                 that.$toast({
-                  message: '操作成功'
+                  message: '删除成功！',
+                  position: 'middle',
+                  duration: 2000
                 });
                 that.getPushUrl();
               }else{
                 that.$toast({
-                  message: '操作失败'
+                  message: '删除失败！',
+                  position: 'middle',
+                  duration: 2000
                 });
               }
             })
             .catch(function (error) {
               console.log(error)
             })
-        });
+          }
+        );
       },
       delPullUrl(item){
         var that = this;
@@ -474,12 +598,10 @@
         });
       },
       showEditUrls(obj, index){
-        console.log("showEditUrls")
-        console.log(this.workMode)
         var that = this;
         this.pushUrlsEditVisible = true;
         //推流还是拉流
-        if(this.workMode=="推流"){
+        if(this.workMode == "推流"){
           var isSrt = obj.push_url.indexOf('srt://');
           //虚拟接收机或SRT，只支持背包透传
           if((this.ActiveDevice.board_id && this.ActiveDevice.board_id.length == 10) || isSrt>=0){    
@@ -487,7 +609,7 @@
             this.activePushObj.sourceIndex = 1;
           } else{
             this.videoSource = this.OPTIONS_URL_SOURCE;
-            this.activePushObj.sourceIndex = obj.sourceIndex;
+            this.activePushObj.sourceIndex = obj.sourceIndex?obj.sourceIndex:0;
           }
           //推流
           this.activePushObj.urlId = obj.id;
@@ -503,15 +625,13 @@
             this.activePushObj.push_srt_url = "";
             this.activePushObj.push_url = obj.push_url;
           }
-          if(!lockState && !dev_push_enable){
+          if(!this.lockState && !this.dev_push_enable){
             this.showSubmitBtn = true;
           }else{
             this.showSubmitBtn = false;
           }
         }
         else if(this.workMode=="拉流"){
-          console.log("laliu")
-          console.log(obj)
           //拉流
           this.activePushObj.pull_urlId = obj.url_id;
           this.activePushObj.pull_devSn = obj.dev_sn;
@@ -590,7 +710,7 @@
         var urlId = this.activePushObj.urlId;
         var rcvSn = this.activePushObj.rcvSn;
         var boardID = this.activePushObj.boardID;
-        var url = '';
+        var urlAddress = '';
         var remark = this.activePushObj.remark;
         var urlType = this.activePushObj.addressType;
         var srtLtcy = this.activePushObj.srt_latency;
@@ -599,16 +719,16 @@
         var srtSid = this.activePushObj.srt_streamID;
         //推流类型
         if(urlType == 0){//RTMP
-          url = this.activePushObj.push_url;
+          urlAddress = this.activePushObj.push_url;
         } else {//SRT
-          url = this.activePushObj.push_srt_url;
+          urlAddress = this.activePushObj.push_srt_url;
           //拼接地址
           var suburl = '';//地址?前的内容
           var newurl = '';//拼接后的地址
-          if(url.indexOf('?') >= 0){
-            suburl = url.split('?')[0];
+          if(urlAddress.indexOf('?') >= 0){
+            suburl = urlAddress.split('?')[0];
           } else{
-            suburl = url;
+            suburl = urlAddress;
           }
           newurl += suburl + '?';
           //延时
@@ -638,19 +758,26 @@
           if(newurl.substr(newurl.length-1,1) == '?'){
             newurl = newurl.substr(0,newurl.length-1);
           }
-          url = newurl;
+          urlAddress = newurl;
         }
-        var result = this.$global.checkUrl(url);
+        var result = this.$global.checkUrl(urlAddress);
         if (result != '') {
-          this.activePushObj.url_error = result;
+          that.$toast({
+            message: result,
+            position: 'middle',
+            duration: 2000
+          });
+          if(this.show.srt_url){
+            this.activePushObj.url_error = result;
+          }
           return;
         }
         //重复判断
         var datas = this.address;
         for (var i = 0; i < datas.length; i++) {
-          if ( datas[i].push_url == url && datas[i].id != urlId) {
+          if(datas[i].remark == ""){
             that.$toast({
-              message: '推流地址重复！',
+              message: '请填写推流地址备注名  ！',
               position: 'middle',
               duration: 2000
             });
@@ -664,6 +791,14 @@
             });
             return;
           }
+          if ( datas[i].push_url == urlAddress && datas[i].id != urlId) {
+            that.$toast({
+              message: '推流地址重复！',
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
         }
         this.$axios({
           method: 'post',
@@ -672,7 +807,7 @@
             editUrlRemark:urlId,
             rcvSn: rcvSn,
             boardId: boardID,
-            url: url,
+            url: urlAddress,
             remark: remark
           }),
           Api:"editUrl",
@@ -682,8 +817,8 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.$global.getPushUrls(that.formatPushUrls);
             that.pushUrlsEditVisible = false;
+            that.editUrl(urlId, 'url_type', urlType) 
           }else{
             that.$toast({
               message: res.res.reason,
@@ -804,6 +939,38 @@
           this.savePullUrl();
         }
       },
+      //数据库编辑url
+      editUrl(id, col, value) {
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            editUrl : id,
+            col : col,
+            value : value,
+          }),
+          Api:"editUrlStatus",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.$global.getPushUrls(that.formatPushUrls);
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+            that.$global.getPushUrls(that.formatPushUrls);
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      }
     }
   }
   
@@ -930,5 +1097,35 @@
     }
     .pushEditModal .mint-radiolist .mint-radio-label{
       color:#000;
+    }
+    .GroupItem{
+        padding: .05rem .2rem;
+        border-bottom: 1px solid #333;
+    }
+    .GroupItemField{
+        overflow: hidden;
+        /*margin-bottom: .1rem;*/
+    }
+    .GroupItemTitle{
+        width: 35%;
+        float: left;
+        line-height: .3rem;
+        text-align: left;
+        font-size: .14rem;
+        color: #EEEEEE;
+    }
+    .GroupItemValue{
+        width: 65%;
+        float: left;
+        text-align: left;
+    }
+    .grayColor{
+      color:#fff;
+    }
+    .greenColor{
+      color:#2de505;
+    }
+    .redColor{
+      color:#FF4D52;
     }
 </style>

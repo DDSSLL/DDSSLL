@@ -1,29 +1,28 @@
-var DEV_MODE = [{sn: 2146,name: 'DV1080'},
-                {sn: 2150,name: 'QUK100'}];
-var RCV_MODE = [{sn: 2141,name: 'DV4000R'}, 
-                {sn: 2143,name: 'DV4001R'}, 
-                {sn: 2144,name: 'DV4002R'}, 
-                {sn: 2145,name: 'DV4008R'}, 
-                {sn: 2147,name: 'DV4000PCIE'},
-                {sn: 2999,name: 'DV4000RV'}];
-var DEV_MODE_4000 = [{sn: 2140,name: 'DV4000T'}, 
+var DEV_MODE = [{sn: 2140,name: 'DV4000T'}, 
                 {sn: 2142,name: 'DV3000T'}, 
-                {sn: 2144,name: 'DV1080old'}, 
                 {sn: 2146,name: 'DV1080'}, 
                 {sn: 2147,name: 'DV406'}, 
                 {sn: 2148,name: 'CM-T5G 2000'}, 
+                {sn: 2150,name: 'QUK100'}, 
+                {sn: 2151,name: 'CM-T5G 3000'}, 
+                {sn: 7189,name: 'DV1080P'}, 
+                {sn: 7207,name: 'ICBT-201'}, 
+                {sn: 2153,name: 'DV5000T'}, 
+                {sn: 2155,name: 'CM-T5G 1000'},
                 {sn: "",name: 'MH5000-31'}, //华为5G
                 {sn: "",name: 'EC200T'},    //高通4G
                 {sn: "",name: 'RG500QEA'}   //高通5G
               ];
-var RCV_MODE_4000 = [{sn: 2141,name: 'DV4000R'}, 
+var RCV_MODE = [{sn: 2141,name: 'DV4000R'}, 
                 {sn: 2143,name: 'DV4001R'}, 
                 {sn: 2144,name: 'DV4002R'}, 
                 {sn: 2145,name: 'DV4008R'}, 
                 {sn: 2147,name: 'DV4000PCIE'}, 
                 {sn: 2999,name: 'DV4000RV'}, 
                 {sn: 2149,name: 'CM-IR5000T'}, 
-                {sn: 7188,name: 'DV4004R'}];
+                {sn: 7188,name: 'DV4004R'},
+                {sn: 7192,name: 'CM-IR5500T'}, 
+                {sn: 2152,name: 'CM-IR6000T'}];
 window.xSplit = 300;
 window.ADMIN = '1'; //管理员用户组
 window.ADVANCE = '2'; //高级用户组
@@ -39,8 +38,10 @@ window.DEPTH_MAX = 4;
 window.MBPS_MAX = 12;
 window.MBPS_MAX2 = 80;
 window.MBPS_MIN = 0.5;
-window.DStreamer_BUILD = "http://4000.uhdxpress.com:8088/";//4000一级域名:117.131.178.104:8088
-window.DStreamer_SERVE = "http://192.168.100.110:8088/";//4000二级域名
+window.DStreamer_BUILD = "http://www.uhdxpress.com/";//4000运营平台
+window.DStreamer_SERVE = "http://111.160.79.84:8088";//测试平台
+//window.DStreamer_BUILD = "http://4000.uhdxpress.com:8088/";//4000一级域名:117.131.178.104:8088
+//window.DStreamer_SERVE = "http://192.168.100.110:8088/";//4000二级域名
 window.HDXPRESS_BUILD = "http://www.hdxpress.cn";//1080一级域名  47.104.164.249
 window.HDXPRESS_SERVE = "http://1080.hdxpress.cn:8088/";//1080二级域名，对应地址：47.104.161.61
 window.UHDXPRESS_BUILD = "http://4000.uhdxpress.com";//4000一级域名
@@ -144,34 +145,19 @@ export default {
   //项目公共方法或常量
   //代码中使用 this.$global.xxx 来访问方法或常量
   //DV4000 参数---start
-  OPTIONS_VIDEOENCODE : [{value: "0",text: "H.265 Main(4:2:0/8bit)"}, 
-                        {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
-                        {value: "2",text: "H.265 Main(4:2:2/8bit)"}, 
-                        {value: "3",text: "H.265 Main(4:2:2/10bit)"}, 
-                        {value: "4",text: "H.264"}],
-  OPTIONS_VIDEOENCODE2 : [{value: "0",text: "H.265 Main(4:2:0/8bit)"}, 
-                          {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
-                          {value: "4",text: "H.264"}],
-  OPTIONS_VIDEOENCODE3 : [{value: "0",text: "H.265 Main(4:2:0/8bit)"}, 
-                          {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
-                          {value: "2",text: "H.265 Main(4:2:2/8bit)"}, 
-                          {value: "3",text: "H.265 Main(4:2:2/10bit)"}],
   OPTIONS_VIDEOENCODE_4000 : [{value: "0",text: "H.265 Main(4:2:0/8bit)"}, 
-                        {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
-                        {value: "2",text: "H.265 Main(4:2:2/8bit)"}, 
-                        {value: "3",text: "H.265 Main(4:2:2/10bit)"}, 
-                        {value: "4",text: "H.264"}],
-  OPTIONS_VIDEOENCODE2_4000 : [{value: "0",text: "H.265 Main(4:2:0/8bit)"}, 
-                          {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
-                          {value: "4",text: "H.264"}],
-  OPTIONS_VIDEOENCODE3_4000 : [{value: "0",text: "H.265 Main(4:2:0/8bit)"}, 
-                          {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
-                          {value: "2",text: "H.265 Main(4:2:2/8bit)"}, 
-                          {value: "3",text: "H.265 Main(4:2:2/10bit)"}],
+                              {value: "1",text: "H.265 Main(4:2:0/10bit)"}, 
+                              {value: "2",text: "H.265 Main(4:2:2/8bit)"}, 
+                              {value: "3",text: "H.265 Main(4:2:2/10bit)"}, 
+                              {value: "4",text: "H.264"}],
   OPTIONS_VIDEOENCODE_1080 : [{value: "0",text: "H.264"}],
+  OPTIONS_VIDEOENCODE_5000 : [{value: "0",text: "HEVC"}, 
+                              {value: "1",text: "AVC"}, 
+                              {value: "2",text: "MPEG"}],
+  OPTIONS_VIDEOENCODE_3000 : [{value: "0",text: "H.265 Main(4:2:0/8bit)"},
+                              {value: "1",text: "H.265 Main(4:2:0/10bit)"},
+                              {value: "4",text: "H.264"}],                 
   OPTIONS_BITRATEMODE : [{value: "0",text: "CBR"}, 
-                        {value: "1",text: "VBR"}],
-  OPTIONS_BITRATEMODE_1080 : [{value: "0",text: "CBR"}, 
                               {value: "1",text: "AVBR"}],
   OPTIONS_BITRATEMODE2 : [{value: "0",text: "CBR"}],
   OPTIONS_HDR : [{text: "SDR",value: "0"}, 
@@ -189,39 +175,44 @@ export default {
                         {value: "2",text: "4x3G 2SI"}, 
                         {value: "3",text: "3G-SDI[1]"}, 
                         {value: "4",text: "HDMI"}],
-  OPTIONS_VIDEOINPUT2 : [{value: "3",text: "3G-SDI[1]"}, 
+  OPTIONS_VIDEOINPUT_PCIE_4000 : [{value: "0",text: "12G-SDI"}, 
+                                  {value: "1",text: "4x3G SQ"}, 
+                                  {value: "2",text: "4x3G 2SI"}, 
+                                  {value: "4",text: "HDMI"}],
+  OPTIONS_VIDEOINPUT_4000 : [{value: "0",text: "12G-SDI"}, 
+                            {value: "1",text: "4x3G SQ"}, 
+                            {value: "2",text: "4x3G 2SI"}, 
+                            {value: "3",text: "3G-SDI[1]"}, 
+                            {value: "4",text: "HDMI"}],
+  OPTIONS_VIDEOINPUT_3000 : [{value: "3",text: "3G-SDI[1]"}, 
                         {value: "4",text: "HDMI"}],
   OPTIONS_VIDEOINPUT_1080 : [{value: "0",text: "3G-SDI"}, 
                             {value: "1",text: "HDMI"}],
-  OPTIONS_VIDEOINPUT406 : [{value: "0",text: "SDI"}],
-  OPTIONS_AUDIO_ENCODE : [{text: "AAC",value: "0"}, 
-                          {text: "LPCM",value: "1"}, 
-                          {text: "MPEG1L2",value: "2"}],
+  OPTIONS_VIDEOINPUT_406 : [{value: "0",text: "SDI"}],
+  //5000单路编码视频输入接口
+  OPTIONS_S_VIDEOINPUT_5000 : [{value: "0",text: "12G-SDI"}, 
+                              {value: "1",text: "4x3G SQ"}, 
+                              {value: "2",text: "4x3G 2SI"}, 
+                              {value: "3",text: "HDMI"}],
+  //5000多路编码视频输入接口CH1
+  OPTIONS_M_VIDEOINPUT_5000_CH1 : [{value: "0",text: " SDI1"},
+                                  {value: "4",text: "HDMI"}],
+  //5000多路编码视频输入接口CH2
+  OPTIONS_M_VIDEOINPUT_5000_CH2 : [{value: "1",text: " SDI2"}],
+  //5000多路编码视频输入接口CH3
+  OPTIONS_M_VIDEOINPUT_5000_CH3 : [{value: "2",text: "SDI3"}],
+  //5000多路编码视频输入接口CH4
+  OPTIONS_M_VIDEOINPUT_5000_CH4 : [{value: "3",text: "SDI4"}],
   OPTIONS_AUDIO_ENCODE_1080 : [{text: "AAC",value: "0"}],
   OPTIONS_AUDIO_ENCODE_4000 : [{text: "AAC",value: "0"}, 
                           {text: "LPCM",value: "1"}, 
                           {text: "MPEG1L2",value: "2"}],
-  OPTIONS_AUDIO_ENCODE2 : [{text: "AAC",value: "0"}],
   OPTIONS_AUDIO_ENCODE2_4000 : [{text: "AAC",value: "0"}],
-  OPTIONS_AUDIOINPUT : [{value: "0",text: "0-CH"}, 
-                        {value: "1",text: "2-CH"}, 
-                        {value: "2",text: "4-CH"}],
   OPTIONS_AUDIOINPUT_1080 : [{value: "1",text: "2-CH"}],
   OPTIONS_AUDIOINPUT_4000 : [{value: "0",text: "0-CH"}, 
                         {value: "1",text: "2-CH"}, 
                         {value: "2",text: "4-CH"}],
   OPTIONS_AUDIOINPUT_HDMI264 : [{value: "1",text: "2-CH"}],
-  OPTIONS_HDMI_FORMAT : [{text: "自动",value: "0"}, 
-                        {text: "1920x1080p29.97",value: "1"}, 
-                        {text: "1920x1080p59.94",value: "2"}, 
-                        {text: "1920x1080p50",value: "3"}, 
-                        {text: "1920x1080p25",value: "4"}, 
-                        {text: "1920x1080i59.94",value: "5"}, 
-                        {text: "1920x1080i50",value: "6"}, 
-                        {text: "1280x720p59.94",value: "7"}, 
-                        {text: "1280x720p50",value: "8"}, 
-                        {text: "720x576p50",value: "11"}, 
-                        {text: "720x480p59.94",value: "12"}],
   OPTIONS_HDMI_FORMAT_4000 : [{text: "自动",value: "0"}, 
                               {text: "1920x1080p29.97",value: "1"}, 
                               {text: "1920x1080p59.94",value: "2"}, 
@@ -311,6 +302,20 @@ export default {
   ACT_LATENCY_MAX : 3000,
   cardIdArr_1080 : ['eth0', 'lte1', 'lte2', 'lte3', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'],
   cardIdArr_4000 : ['eth0', 'lte1', 'lte2', 'lte3', 'lte4', 'lte5', 'lte6', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'],
+  BITRATE_MIN_1080 : 0.5, //Mbps   数据库里的dev_sr
+  BITRATE_MAX_1080 : 20,
+  BITRATE_MIN_4000 : 0.5, //Mbps   数据库里的dev_sr
+  BITRATE_MIN2_4000 : 8, //Mbps   超级时延，视频
+  BITRATE_MAX_4000 : 100,
+  BITRATE_MAX2_4000 : 40,
+  BITRATE_MAX3_4000 : 20,
+  BITRATE_MIN_5000 : 0.1, //Mbps   数据库里的video_bitrate
+  BITRATE_MAX_5000 : 200,//单路0.1-200
+  BITRATE_MAX2_5000 : 20,//多路编码视频比特率0.1-20
+  DELAY_MIN_4000 : 0.1, //s
+  DELAY_MIN_1080 : 0.5, //s
+  DELAY_MAX1 : 20,  //视频比特率<=40M
+  DELAY_MAX2 : 10, //视频比特率>40M
   getCurrentTime() {
     var date = new Date();
     var year = '' + date.getFullYear();
@@ -358,28 +363,20 @@ export default {
   },
   //获取设备类型
   getDevMode(sn) {
-    var dev_mode = DEV_MODE;
-    if(store.state.activedevicetype == "DV4000"){
-      dev_mode = DEV_MODE_4000;
-    }
     var res = false;
-    for (var i = 0; i < dev_mode.length; i++) {
-      if (sn == dev_mode[i].sn) {
-        res = dev_mode[i].name;
+    for (var i = 0; i < DEV_MODE.length; i++) {
+      if (sn == DEV_MODE[i].sn) {
+        res = DEV_MODE[i].name;
         break;
       }
     }
     return res;
   },
   getRcvMode(sn){
-    var rcv_mode = RCV_MODE;
-    if(store.state.activedevicetype == "DV4000"){
-      rcv_mode = RCV_MODE_4000;
-    }
     var res = false;
-    for (var i = 0; i < rcv_mode.length; i++) {
-      if (sn == rcv_mode[i].sn) {
-        res = rcv_mode[i].name;
+    for (var i = 0; i < RCV_MODE.length; i++) {
+      if (sn == RCV_MODE[i].sn) {
+        res = RCV_MODE[i].name;
         break;
       }
     }
@@ -533,8 +530,6 @@ export default {
     })
     .then(function (response) {
       let res = response.data;
-      console.log("getUnusedBoard success:"+rcvSn+"/"+curBoard)
-      console.log(res)
       if(res.res.success){
         var data = res.data;
         var result = [];
@@ -782,21 +777,19 @@ export default {
     var that = this;
     var sn = devSn.substr(-4);
     var devMode = that.getDevMode(sn);
-    var devSeries = this.getDevSeries(sn);
+    var devSeries = this.getDevSeries(devSn);
     var res = [];
     if (param == 'video_encode') {//视频编码
-      if (devMode == 'DV3000T') {
-        res = that.OPTIONS_VIDEOENCODE2_4000;
-      }else if(devMode == 'DV406'){
-        res = that.OPTIONS_VIDEOENCODE3_4000;
-      }else{
-        if(prefix == PREFIX){
-          res = that.OPTIONS_VIDEOENCODE_4000;
-        }else{
-          res = that.OPTIONS_VIDEOENCODE3_4000;
-        }
+      if (devMode === 'DV5000T') {
+        res = that.OPTIONS_VIDEOENCODE_5000;
+      }else if(devMode === 'DV3000T'){
+          res = that.OPTIONS_VIDEOENCODE_3000;
       }
-    }else if (param === 'bitrate_mode') {
+      else{
+        res = (devSeries=="1080")?that.OPTIONS_VIDEOENCODE_1080:that.OPTIONS_VIDEOENCODE_4000;
+      }
+    }
+    else if (param === 'bitrate_mode') {
       res = that.OPTIONS_BITRATEMODE;
     }
     else if (param == 'hdr') {
@@ -805,7 +798,8 @@ export default {
       } else {
         res = that.OPTIONS_HDR;
       }
-    }else if (param == 'latency') {
+    }
+    else if (param == 'latency') {
       if (devMode === 'DV5000T') {
         res = that.OPTIONS_LATENCY_5000;
       }else{
@@ -816,15 +810,27 @@ export default {
           res = that.OPTIONS_LATENCY;
         }
       }
-    }else if (param == 'video_input') {
+    }
+    else if (param == 'video_input') {
       if (devMode == 'DV3000T') {
-        res = that.OPTIONS_VIDEOINPUT2;
+        res = that.OPTIONS_VIDEOINPUT_3000;
       }else if(devMode == 'DV406'){
-        res = that.OPTIONS_VIDEOINPUT406;
-      }else {
-        res = that.OPTIONS_VIDEOINPUT;
+        res = that.OPTIONS_VIDEOINPUT_406;
+      }else if(devMode === 'DV5000T'){
+        res = that.OPTIONS_S_VIDEOINPUT_5000;
+      }else if(devSeries === '1080'){
+        res = that.OPTIONS_VIDEOINPUT_1080;
+      }else if(devSeries === '4000'){
+        //判断是否是PCIE版本,序列号>200是PCIE
+        var subsn = devSn.substr(3,3);
+        if(+subsn > 200){
+          res = that.OPTIONS_VIDEOINPUT_PCIE_4000;
+        }else{
+          res = that.OPTIONS_VIDEOINPUT_4000;
+        }
       }
-    }else if (param == 'audio_encode'){
+    }
+    else if (param == 'audio_encode'){
       if(prefix == PREFIX){
         res = that.OPTIONS_AUDIO_ENCODE_4000;
       }else{
@@ -1398,6 +1404,37 @@ export default {
     }
     return res;
   },
+  //获取视频比特率的范围
+  getVideoBr(devSn) {
+    var devSeries = this.getDevSeries(devSn);
+    var sn = devSn.substr(-4);
+    var devMode = this.getDevMode(sn);
+    var prefix = store.state.user.prefix;
+    var res = {};
+    if (devMode === 'DV5000T') {
+      res = {
+        min: this.BITRATE_MIN_5000,
+        max: this.BITRATE_MAX_5000
+      };
+    }else if(devSeries == "1080"){
+      res = {
+        min: this.BITRATE_MIN_1080,
+        max: this.BITRATE_MAX_1080
+      };
+    }else if(devSeries == "4000"){
+      res = {
+        min: this.BITRATE_MIN_4000,
+        max: this.BITRATE_MAX_4000
+      };
+      if (devMode == 'DV3000T') {
+        res.max = this.BITRATE_MAX3_4000; //20M
+      }
+      else {
+        res.max = this.BITRATE_MAX_4000; //100M
+      }
+    }
+    return res;
+  },
   //获取某个参数
   getDevOneParam(devSn, param, callback) {
     var devSN = "";
@@ -1535,11 +1572,11 @@ export default {
     var sn_4 = devSn.substr(-4);
     sn_4 = +sn_4;
     //DV4000T,DV3000T,DV406,CM-T5G 2000
-    if(sn_4 === 2140 || sn_4 === 2142 || sn_4 === 2147 || sn_4 === 2148){
+    if(sn_4 == 2140 || sn_4 == 2142 || sn_4 == 2147 || sn_4 == 2148 || sn_4 === 2153 || sn_4 === 2155){
       return '4000';
     }
     //DV1080,QUK100,DV1080P,ICBT-201
-    else if(sn_4 === 2146 || sn_4 === 2150 || sn_4 === 7189 || sn_4 === 7207){
+    else if(sn_4 == 2146 || sn_4 == 2150 || sn_4 == 7189 || sn_4 == 7207){
       return '1080';
     }
     else{
@@ -1610,5 +1647,34 @@ export default {
     .catch(function (error) {
       console.log(error)
     })
-  }
+  },
+  //获取接收板卡权限
+  getRcvRights(rcvSn, boardId, cb) {
+    axios({
+      method: 'post',
+      url:"/page/index/indexData.php",
+      data:qs.stringify({
+        getRcvRights : true,
+        userId : store.state.user.id,
+        userGroup : store.state.user.userGroup,
+        prefix : store.state.user.prefix,
+        rcvSn : rcvSn,
+        boardId : boardId,
+      }),
+      Api:"getRcvRights",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        if (typeof(cb) == 'function') {
+          cb(res.data);
+        }
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
 }

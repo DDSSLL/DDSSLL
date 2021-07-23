@@ -25,7 +25,7 @@
                   版本号
                 </div>
                 <div class="GroupItemField">
-                  <mt-cell title="网页版本" :value="software_ver"></mt-cell>
+                  <mt-cell title="APP版本" :value="app_ver"></mt-cell>
                   <mt-cell title="服务版本" :value="server_ver"></mt-cell>
                   <mt-cell title="数据库版本" :value="mysqlVer"></mt-cell>
                 </div>
@@ -118,7 +118,7 @@
     data(){
       return{
         systemConfShow:false,
-        software_ver:"V1.02.01",
+        app_ver:"1.02.02",
         server_ver:"",
         mysqlVer:"",
         ftp_ip:"",
