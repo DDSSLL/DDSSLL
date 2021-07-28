@@ -10,12 +10,12 @@
         <div class="rate">
           <div v-if="this.ActiveDevice.dev_push_status!='0'">
             <span class="us">{{ (+this.ActiveDevice.dev_push_br / 1000).toFixed(3) }}</span>
-            <span class="ds">{{ (+this.ActiveDevice.rcv_br / 1000).toFixed(3) }}</span>
+            <span class="ds" v-if="ActiveDevice.PushTsType!=1">{{ (+this.ActiveDevice.rcv_br / 1000).toFixed(3) }}</span>
             <span class="rl" v-if="this.ActiveDevice.TotalLossRate && this.ActiveDevice.TotalLossRate!=0" >{{ (+this.ActiveDevice.TotalLossRate / 10).toFixed(1) + '%' }}</span>  
           </div>
           <div v-else class="noSpeedInfo">--</div>
         </div>
-        <div class="info nowrap" style="width:45%">
+        <div class="info nowrap" style="width:50%">
           <div style="width:100%">
             <span class="T">
               <span class="TCircle" :class="[this.ActiveDevice.online== 1 ? (this.ActiveDevice.dev_push_status!=0 ? 'red' : 'green') : 'gray']"></span>
@@ -80,7 +80,7 @@
                 <div class="rate">
                   <div v-if="item['dev_push_status']!='0'">
                     <span class="us">{{ (+item['dev_push_br'] / 1000).toFixed(3) }}</span>
-                    <span class="ds">{{ (+item['rcv_br'] / 1000).toFixed(3) }}</span>
+                    <span class="ds" v-if="item.PushTsType!=1">{{ (+item['rcv_br'] / 1000).toFixed(3) }}</span>
                     <span class="rl" v-if="item['TotalLossRate'] && item['TotalLossRate']!=0" >{{ (+item['TotalLossRate'] / 10).toFixed(1) + '%' }}</span>  
                   </div>
                   <div v-else class="noSpeedInfo">--</div>
@@ -713,7 +713,7 @@
           }
         })
         .catch(function (error) {
-          console.log(error)
+          console.log(error);
         })
       },
       formatIntBat(inBat){
@@ -969,6 +969,7 @@
     .listChannel{
         border-bottom: 1px solid #474B50;
         overflow: hidden;
+        overflow-y:auto;
         height: .5rem;
         background-color: #212227;
         padding: .05rem 0;

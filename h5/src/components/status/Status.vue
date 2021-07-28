@@ -162,7 +162,7 @@ export default {
       legendTop:20,
       xData : [],
       colorGV: {},
-      avbrFlag:false,
+      avbrFlag:true,
       chartLegendArr : ["Total"],
       chartGeneralView : {
         "up":["Total"],
@@ -920,7 +920,7 @@ export default {
         localStorage.allChartData = JSON.stringify(allChartData);
         if (curChart.split("/")[0] == key) { //当前要显示的放在sessionStorage.cardData中
           if(that.avbrFlag == "false"){
-            allChartData[curChart]["seriesAVBR"] = new Array(xSplit).fill(0);
+            //allChartData[curChart]["seriesAVBR"] = new Array(xSplit).fill(0);
           }
           localStorage.cardData = JSON.stringify(allChartData[curChart]);
         }

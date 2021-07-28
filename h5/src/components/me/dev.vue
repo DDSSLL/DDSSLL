@@ -137,7 +137,7 @@
               </div>
               <div class="cellItem">
                 <span class="cellName cellLabel" style="float: left;">模块型号</span>
-                <span class="cellName cellValue" style="float: right;">{{ item.module_type }}</span>
+                <span class="cellName cellValue" style="float: right;text-align:right" v-html="item.module_type"></span>
               </div>
             </div>
           </template>
@@ -563,6 +563,17 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
+            var data = res.data;
+            var dataLen = data.length;
+            for(var i=0; i<dataLen; i++){
+              var showStr = data[i]["module_type"];
+              if (that.user.id == SUPER || that.user.id=='debug'){
+                if(data[i]['IMEI'].length > 1 && data[i]['firmware_ver'].length > 1){
+                  showStr += '<br/>'+data[i]['IMEI']+"<br/>"+data[i]['firmware_ver'];
+                }
+              }
+              data[i]["module_type"] = showStr;
+            }
             that.deviceCardList = res.data;
           }else{
             that.deviceCardList = [];

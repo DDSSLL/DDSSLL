@@ -1005,9 +1005,10 @@
   .cardInfoPop .popupContainer{
     font-size:.14rem;
   }
-  .popupContainer .mint-cell-title{width:40%;text-align: left;}
+  /*.popupContainer .mint-cell-title{width:40%;text-align: left;}
   .popupContainer .mint-cell-value{width:60%;text-align: right;padding:0;}
-  .popupContainer .mint-cell{min-height:24px;}
+  .popupContainer .mint-cell{min-height:24px;}*/
+  .popupContainer .mint-checklist .mint-cell{background-color:transparent !important;}
   .popupContainer .fGrp{overflow: hidden;padding: .1rem;}
   .popupContainer .fGrp .tl{width: 25%;float: left;  text-align: right;padding-top:0.07rem;margin-right: 5%;}
   .popupContainer .fGrp .vl{width: 62%;float: left; text-align: right}

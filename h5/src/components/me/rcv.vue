@@ -397,7 +397,7 @@
           <div class="fGrp">
             <div class="tl">名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.rcvName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格">
+              <input type="text" class="ItemInput" v-model="options.rcvName" required title="长度1-15,中文,字母,数字,+,-,@,(),空格">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()和空格</p>
             </div>
           </div>
@@ -427,7 +427,7 @@
               </select>
             </div>
           </div>
-          <div class="fGrp">
+          <div class="fGrp" v-if="ipConfigShow">
             <div class="tl linkTitle" @click="ipSettingShow = !ipSettingShow">IP设置</div>
             <div class="vl">
             </div>
@@ -503,6 +503,172 @@
                 <div class="tl">VPNDns</div>
                 <div class="vl">
                   <input type="text" class="ItemInput" v-model="ipSetting.vpn_dns" placeholder="VPNDns">
+                </div>
+              </div>
+            </div>
+            <div class="fGrp" v-if="decodeContentShow">
+              <div class="tl linkTitle" @click="decodeSettingShow = !decodeSettingShow">解码卡设置</div>
+              <div v-if="decodeSettingShow">
+                <div class="fGrp">
+                  <div class="tl" style="width:100%;text-align:left;line-height:normal">端口有效范围：1024-65535，不同板卡端口设置应避免重合，否则会有冲突</div>
+                </div>
+                <div v-if="ipSetting.decboard0Show">
+                  <div class="fGrp">
+                    <div class="tl">板卡1 TCP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput " v-model="ipSetting.TcpPort0">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">UDP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart0">
+                      -
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop0">
+                    </div>
+                  </div>
+                </div>
+                <div v-if="ipSetting.decboard1Show">
+                  <div class="fGrp">
+                    <div class="tl">板卡2 TCP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort1">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">UDP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart1">
+                      -
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop1">
+                    </div>
+                  </div>
+                </div>
+                <div v-if="ipSetting.decboard2Show">
+                  <div class="fGrp">
+                    <div class="tl">板卡3 TCP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort2">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">UDP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart2">
+                      -
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop2">
+                    </div>
+                  </div>
+                </div>
+                <div v-if="ipSetting.decboard3Show">
+                  <div class="fGrp">
+                    <div class="tl">板卡4 TCP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort3">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">UDP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart3">
+                      -
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop3">
+                    </div>
+                  </div>
+                </div>
+                <div v-if="ipSetting.decboard4Show">
+                  <div class="fGrp">
+                    <div class="tl">板卡5 TCP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort4">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">UDP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart4">
+                      -
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop4">
+                    </div>
+                  </div>
+                </div>
+                <div v-if="ipSetting.decboard5Show">
+                  <div class="fGrp">
+                    <div class="tl">板卡6 TCP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort5">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">UDP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart5">
+                      -
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop5">
+                    </div>
+                  </div>
+                </div>
+                <div v-if="ipSetting.decboard6Show">
+                  <div class="fGrp">
+                    <div class="tl">板卡7 TCP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort6">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">UDP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart6">
+                      -
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop6">
+                    </div>
+                  </div>
+                </div>
+                <div v-if="ipSetting.decboard7Show">
+                  <div class="fGrp">
+                    <div class="tl">板卡8 TCP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort7">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">UDP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart7">
+                      -
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop7">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fGrp" v-if="encodeContentShow">
+              <div class="tl linkTitle" @click="encodeSettingShow = !encodeSettingShow">编码卡设置</div>
+              <div v-if="encodeSettingShow">
+                <div class="fGrp">
+                  <div class="tl" style="width:100%;text-align:left;line-height:normal">端口有效范围：1024-65535，不同板卡端口设置应避免重合，否则会有冲突</div>
+                </div>
+                <div>
+                  <div class="fGrp">
+                    <div class="tl">板卡 SRT</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput " v-model="ipSetting.encSrtPort">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">TCP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput " v-model="ipSetting.encTcpPort">
+                    </div>
+                  </div>
+                  <div class="fGrp">
+                    <div class="tl">UDP</div>
+                    <div class="vl leftvl">
+                      <input type="text" class="ItemInput" v-model="ipSetting.EncUdpPortStart">
+                      -
+                      <input type="text" class="ItemInput" v-model="ipSetting.EncUdpPortStop">
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -598,8 +764,13 @@
           EncAbr:"",//音频比特率
           transDelay:"",//延时
         },
+        ipConfigShow:false,//IP设置
         ipSettingShow:false,//IP设置
         proxySettingShow:false,//代理
+        decodeContentShow:false,
+        decodeSettingShow:false,//解码卡设置
+        encodeContentShow:false,//编码卡设置
+        encodeSettingShow:false,
         ipEffectText:"立即生效",
         ipEffectDis:false,
         ipTimer:"",
@@ -617,6 +788,43 @@
           netmask:"",
           gateway:"",
           dns:"",
+          boardDecIdArr:[],
+          decboard0Show:false,
+          TcpPort0:"",
+          UdpPortStart0:"",
+          UdpPortStop0:"",
+          decboard1Show:true,
+          TcpPort1:"",
+          UdpPortStart1:"",
+          UdpPortStop1:"",
+          decboard2Show:true,
+          TcpPort2:"",
+          UdpPortStart2:"",
+          UdpPortStop2:"",
+          decboard3Show:true,
+          TcpPort3:"",
+          UdpPortStart3:"",
+          UdpPortStop3:"",
+          decboard4Show:true,
+          TcpPort4:"",
+          UdpPortStart4:"",
+          UdpPortStop4:"",
+          decboard5Show:true,
+          TcpPort5:"",
+          UdpPortStart5:"",
+          UdpPortStop5:"",
+          decboard6Show:true,
+          TcpPort6:"",
+          UdpPortStart6:"",
+          UdpPortStop6:"",
+          decboard7Show:true,
+          TcpPort7:"",
+          UdpPortStart7:"",
+          UdpPortStop7:"",
+          encSrtPort:"",
+          encTcpPort:"",
+          EncUdpPortStart:"",
+          EncUdpPortStop:"",
         },
       }
     },
@@ -941,32 +1149,39 @@
           rcv_online:item.online,
           rcv_autoUpgrade:item.autoUpgrade,
         }
-        this.rcvVpnData(item.rcv_sn, function(data){
-          var vpnData = data;
-          if(vpnData['vpnEnable'] == 1){
-            that.ipSetting.enableVpnState = true;
-          }else if(vpnData['vpnEnable'] == 0){
-            that.ipSetting.enableVpnState = false;
-          }
-          if(vpnData['dhcp'] == 1){
-            that.ipSetting.enableDhcpState = true;
-          }else if(vpnData['dhcp'] == 0){
-            that.ipSetting.enableDhcpState = false;
-          }
-          that.ipSetting.startDate = vpnData['vpnStartTime'];
-          that.ipSetting.endDate = vpnData['vpnEndTime'];
-          that.ipSetting.tun_net = vpnData['tunNet'];
-          that.ipSetting.vpn_server = vpnData['vpsIp'];
-          that.ipSetting.vpn_port = vpnData['vpsPort'];
-          that.ipSetting.vpn_dns = vpnData['vpnDns'];
-          that.ipSetting.localIp = vpnData['localIp'];
-          that.ipSetting.mapIp = vpnData['mapIp'];
-          that.ipSetting.netmask = vpnData['netmask'];
-          that.ipSetting.gateway = vpnData['gateway'];
-          that.ipSetting.dns = vpnData['dns'];
-          /*getRcvEditData(row,"entity");
-          $("#rcvManDiv").modal('show');*/
-        })
+        if(item.online == "在线"){//在线才可以进行IP设置
+          this.ipConfigShow = true;
+          this.rcvIpData(item.rcv_sn, function(data){
+            var vpnData = data;
+            if(vpnData['vpnEnable'] == 1){
+              that.ipSetting.enableVpnState = true;
+            }else if(vpnData['vpnEnable'] == 0){
+              that.ipSetting.enableVpnState = false;
+            }
+            if(vpnData['dhcp'] == 1){
+              that.ipSetting.enableDhcpState = true;
+            }else if(vpnData['dhcp'] == 0){
+              that.ipSetting.enableDhcpState = false;
+            }
+            that.ipSetting.startDate = vpnData['vpnStartTime'];
+            that.ipSetting.endDate = vpnData['vpnEndTime'];
+            that.ipSetting.tun_net = vpnData['tunNet'];
+            that.ipSetting.vpn_server = vpnData['vpsIp'];
+            that.ipSetting.vpn_port = vpnData['vpsPort'];
+            that.ipSetting.vpn_dns = vpnData['vpnDns'];
+            that.ipSetting.localIp = vpnData['localIp'];
+            that.ipSetting.mapIp = vpnData['mapIp'];
+            that.ipSetting.netmask = vpnData['netmask'];
+            that.ipSetting.gateway = vpnData['gateway'];
+            that.ipSetting.dns = vpnData['dns'];
+            /*getRcvEditData(row,"entity");
+            $("#rcvManDiv").modal('show');*/
+            that.showDecBoard(vpnData);
+            that.showEncBoard(vpnData);
+          })
+        }else{
+          this.ipConfigShow = false;
+        }
         //升级
         /*if (item['newestVer'] != ''){
           this.noNewVer = false;
@@ -995,16 +1210,16 @@
         }*/
       },
       //查询实体接收机对应的VPN参数
-      rcvVpnData(rcv_sn,callback){
+      rcvIpData(rcv_sn,callback){
         var that = this;
         this.$axios({
           method: 'post',
           url:"/page/dev/devData.php",
           data:this.$qs.stringify({
-            selectRcvVpn: true,
+            selectRcvIp: true,
             rcv_sn: rcv_sn
           }),
-          Api:"selectRcvVpn",
+          Api:"selectRcvIp",
           AppId:"android",
           UserId:that.user.id
         })
@@ -1013,6 +1228,116 @@
           if(res.res.success){
             if (typeof(callback) == 'function') {
               callback(res.data[0]);
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //解码卡是否显示并获取显示数据
+      showDecBoard(rcvData){
+        var that = this;
+        var rcv_sn = rcvData['rcv_sn'];
+        this.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:this.$qs.stringify({
+            getboardByRcvSn: true,
+            rcvSN: rcv_sn
+          }),
+          Api:"getboardByRcvSn",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var boardDatas = res.data;
+            if(boardDatas.length == 0){
+              that.decodeContentShow = false;//解码卡设置hide
+            }else{
+              that.decodeContentShow = true;//解码卡设置show
+              var jArr = [1,2,3,4,5,6,7,8];
+              var difArr = [];
+              for (var i = 0; i < boardDatas.length; i++) {
+                var board_id = boardDatas[i]["board_id"];
+                that.ipSetting.boardDecIdArr.push(board_id);
+              }
+              difArr = that.$global.array_diff(jArr, that.ipSetting.boardDecIdArr);
+              //动态判断显示哪些解码卡
+              if(difArr.length ==0){
+                for(var i = 0; i < that.ipSetting.boardDecIdArr.length; i++){
+                  var boardId = that.ipSetting.boardDecIdArr[i] - 1;
+                  that.ipSetting["decboard"+boardId+"Show"] = true;
+                }
+              }else{
+                for(var i = 0; i < difArr.length; i++){
+                  var boardId = difArr[i] - 1;
+                  that.ipSetting["decboard"+boardId+"Show"] = false;
+                }
+                for(var i = 0; i < that.ipSetting.boardDecIdArr.length; i++){
+                  var boardId = that.ipSetting.boardDecIdArr[i] - 1;
+                  that.ipSetting["decboard"+boardId+"Show"] = true;
+                }
+              }
+              //显示的解码卡获取数据
+              for(var i = 0; i < that.ipSetting.boardDecIdArr.length; i++){
+                var boardId = that.ipSetting.boardDecIdArr[i] - 1;
+                var tcp = "tcp"+ boardId;
+                var udpS = "udpS"+ boardId;
+                var udpE = "udpE"+ boardId;
+                that.ipSetting["TcpPort"+boardId] = rcvData[tcp];
+                that.ipSetting["UdpPortStart"+boardId] = rcvData[udpS];
+                that.ipSetting["UdpPortStop"+boardId] = rcvData[udpE];
+              }
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //编码卡是否显示并获取显示数据(编码卡只有1个)
+      showEncBoard(rcvData){
+        var that = this;
+        var rcv_sn = rcvData['rcv_sn'];
+        this.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:this.$qs.stringify({
+            getEncBoardByRcvSn: true,
+            rcvSN: rcv_sn
+          }),
+          Api:"getEncBoardByRcvSn",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var boardDatas = res.data;
+            if(boardDatas.length == 0){
+              that.encodeContentShow = false;//编码卡设置hide
+            }else{
+              that.encodeContentShow = true;//编码卡设置show
+              that.ipSetting.encSrtPort
+              that.ipSetting.encSrtPort = rcvData['encSrcPort'];
+              that.ipSetting.encTcpPort = rcvData['encTcp'];
+              that.ipSetting.EncUdpPortStart = rcvData['encUdpS'];
+              that.ipSetting.EncUdpPortStop = rcvData['encUdpE'];
             }
           }else{
             that.$toast({
@@ -1109,6 +1434,37 @@
             }
           }
         }
+        //解码卡参数
+        dataJson.decFlag = '0';
+        if(this.decodeContentShow){
+          if (!this.checkInput("dec",that.ipSetting.boardDecIdArr)) {
+            return;
+          }
+          for(var i = 0; i < this.ipSetting.boardDecIdArr.length; i++){
+            dataJson.decFlag = '1';//表示存在解码卡显示的标志
+            var boardId = this.ipSetting.boardDecIdArr[i] - 1;
+            if(this.ipSetting["decboard"+boardId+"Show"]){
+              var tcp = "tcp"+ boardId;
+              var udpS = "udpS"+ boardId;
+              var udpE = "udpE"+ boardId;
+              dataJson[tcp] = this.ipSetting["TcpPort"+boardId];
+              dataJson[udpS] = this.ipSetting["UdpPortStart"+boardId];
+              dataJson[udpE] = this.ipSetting["UdpPortStop"+boardId];
+            }
+          }
+        }
+        //编码卡参数
+        dataJson.encFlag = '0';
+        if(this.encodeContentShow){
+          if (!this.checkInput("enc",[])) {
+            return;
+          }
+          dataJson.encFlag = '1';//表示存在解码卡显示的标志
+          dataJson['encSrcPort'] = this.ipSetting["encSrtPort"];
+          dataJson['encTcp'] = this.ipSetting["encTcpPort"];
+          dataJson['encUdpS'] = this.ipSetting["EncUdpPortStart"];
+          dataJson['encUdpE'] = this.ipSetting["EncUdpPortStop"];
+        }
         //存数据，立即生效
         dataJson.rst = '1';
 
@@ -1116,10 +1472,10 @@
           method: 'post',
           url:"/page/dev/devData.php",
           data:this.$qs.stringify({
-            saveRcvIpVpn: true,
-            setIpVpnParam: dataJson
+            saveRcvIpSet: true,
+            setIpParam: dataJson
           }),
-          Api:"saveRcvIpVpn",
+          Api:"saveRcvIpSet",
           AppId:"android",
           UserId:that.user.id
         })
@@ -1400,7 +1756,45 @@
         var that = this;
         var rcvSn = this.options.rcvSn;
         var mode = this.$global.getRcvMode(rcvSn.substr(-4));
+        var name = this.options.rcvName;
+        var sn = this.options.rcvSn;
         var upgrade = 0;
+        //接收机名称校验
+        var len = this.$global.SubstrFitCn(name, 0);//匹配中文，中文按一个字符处理
+        if(len > 15){
+          this.$toast({
+            message: "接收机名称长度不超过15!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if (!this.$global.nameCheckType4(name)) {//未匹配中文长度(中文按一个字符处理)
+          this.$toast({
+            message: "请按要求输入接收机名称!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        //接收机sn校验
+        var sub = sn.substr(-4);
+        if(sub == "2999"){//实体接收机(包括4000)只支持添加实体接收机(!=2999)
+          this.$toast({
+            message: "该序列号不支持添加!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if (!this.$global.isValidRcvSn(sn)) {
+          this.$toast({
+            message: "请输入10位数字序列号!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
         if (!mode) {
           that.$toast({
             message: "接收机型号不支持!",
@@ -1462,6 +1856,7 @@
         this.receiverConfigType = "add";
         this.options.rcv_online = "离线";
         this.options.rcv_autoUpgrade = "0";
+        this.ipConfigShow = false;
         this.getDevPrefixList();
         this.clearRcvPopup();
       },
@@ -1559,8 +1954,142 @@
         .catch(function (error) {
           console.log(error)
         })
-      }
-    }
+      },
+      //检查输入框是否合法
+      checkInput(type,boardIdArr) {
+        var that = this;
+        var res = true;
+        var errStr = '输入不合法！';
+        var id = '';
+        if(type == 'dec'){//解码卡参数
+          //板卡
+          for (var i = 0; i < boardIdArr.length; i++) {
+            var boardId = boardIdArr[i] - 1;
+            //TCP
+            var tcp = this.ipSetting["TcpPort"+boardId];
+            if (!that.isValidBoardPort(tcp)) {
+              res = false;
+              //id = '#TcpPort' + boardId;
+              break;
+            }
+            //TCP端口查重
+            for (var k = 0; k < boardIdArr.length; k++) {
+              if (i == k) {
+                continue;
+              }
+              var index = boardIdArr[k] - 1;
+              if (tcp == this.ipSetting["TcpPort"+index]) {
+                res = false;
+                //id = '#TcpPort' + boardId;
+                errStr = (boardId+1)+' 与 板卡' + (index + 1) + ' 的TCP端口冲突！';
+                break;
+              }
+            }
+            //UDP
+            var udpStart = this.ipSetting["UdpPortStart"+boardId];
+            var udpStop = this.ipSetting["UdpPortStop"+boardId];
+            if (!this.isValidBoardPort(udpStart)) {
+              res = false;
+              //id = '#UdpPortStart' + boardId;
+              break;
+            }
+            if (!this.isValidBoardPort(udpStop)) {
+              res = false;
+              //id = '#UdpPortStop' + boardId;
+              break;
+            }
+            //UDP起止范围大于0，不超过10
+            if ((+udpStop) - (+udpStart) >= 10) {
+              res = false;
+              //id = '#UdpPortStop' + boardId;
+              errStr = "板卡"+(boardId+1)+'端口号相距不超过10！';
+              break;
+            }
+            if ((+udpStop) - (+udpStart) <= 0) {
+              res = false;
+              //id = '#UdpPortStop' + boardId;
+              errStr = "板卡"+(boardId+1)+'起始端口号不能超过终止端口号！';
+              break;
+            }
+            //UDP端口查重
+            for (var m = 0; m < boardIdArr.length; m++) {
+              if (i == m) {
+                continue;
+              }
+              var indexM = boardIdArr[m] - 1;
+              var otherStart = this.ipSetting["UdpPortStart"+indexM];
+              var otherStop = this.ipSetting["UdpPortStop"+indexM];
+              if (udpStart >= otherStart && udpStart <= otherStop) {
+                res = false;
+                //id = '#UdpPortStart' + boardId;
+                errStr = "板卡"+(boardId+1)+' 与 板卡' + (indexM + 1) + ' 的UDP端口范围冲突！';
+                break;
+              }
+              if (udpStop >= otherStart && udpStop <= otherStop) {
+                res = false;
+                //id = '#UdpPortStop' + boardId;
+                errStr = "板卡"+(boardId+1)+' 与 板卡' + (indexM + 1) + ' 的UDP端口范围冲突！';
+                break;
+              }
+            }
+            if (!res) {
+              break;
+            }
+          }
+        }else if(type == 'enc'){//编码卡参数
+          //SRT
+          var srt = this.ipSetting["encSrtPort"];
+          if (!this.isValidBoardPort(srt)) {
+            res = false;
+            //id = '#encSrtPort';
+          }
+          //TCP
+          var tcp = this.ipSetting["encTcpPort"];
+          if (!this.isValidBoardPort(tcp)) {
+            res = false;
+            //id = '#encTcpPort';
+          }
+          //UDP
+          var udpStart = this.ipSetting["EncUdpPortStart"];
+          var udpStop = this.ipSetting["EncUdpPortStop"];
+          if (!this.isValidBoardPort(udpStart)) {
+            res = false;
+            //id = '#EncUdpPortStart';
+          }
+          if (!this.isValidBoardPort(udpStop)) {
+            res = false;
+            //id = '#EncUdpPortStop';
+          }
+          //UDP起止范围大于0，不超过10
+          if ((+udpStop) - (+udpStart) >= 10) {
+            res = false;
+            //id = '#EncUdpPortStop';
+            errStr = '编码卡UDP端口号相距不超过10！';
+          }
+          if ((+udpStop) - (+udpStart) <= 0) {
+            res = false;
+            //id = '#EncUdpPortStop';
+            errStr = '编码卡UDP起始端口号不能超过终止端口号！';
+          }
+        }
+        if (!res) {
+          this.$toast({
+            message: errStr,
+            position: 'middle',
+            duration: 5000
+          });
+        }
+        return res;
+      },
+      // 判断是否是有效端口  在1024到65535之间
+      isValidBoardPort(port){
+        if(+port < 1024){
+          return false;
+        }
+        var re =  /^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
+        return re.test(port);
+      },
+    },
   }
 </script>
 
@@ -1837,5 +2366,11 @@
   }*/
   .linkTitle{
     color:#5AB1A7;
+  }
+  .leftvl{
+    text-align:left !important;
+  }
+  .leftvl input{
+    width:30% !important;
   }
 </style>

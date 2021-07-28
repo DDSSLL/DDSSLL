@@ -155,6 +155,12 @@
               </select>
             </div>
           </div>
+          <div class="fGrp" v-if="receiverConfigType=='edit'">
+            <div class="tl">系统配置</div>
+            <div class="vl">
+               <mt-field type="textarea" rows="3" v-model="options.infoStr" readonly="readonly"></mt-field>
+            </div>
+          </div>
           <div class="fGrp">
             <div class="tl">立即更新</div>
             <div style="margin-top:5px;">
@@ -884,7 +890,7 @@
   }
   .popupContainer .mint-cell-title{width:40%;text-align: left;}
   .popupContainer .mint-cell-value{width:60%;text-align: right;padding:0;}
-  .popupContainer .mint-cell{min-height:24px;}
+  .popupContainer .mint-cell{min-height:24px;background-color:#fff !important;}
   .popupContainer .fGrp{overflow: hidden;padding: .1rem;}
   .popupContainer .fGrp .tl{width: 25%;float: left;  text-align: right;padding-top:0.07rem;margin-right: 5%;}
   .popupContainer .fGrp .vl{width: 62%;float: left; text-align: right}

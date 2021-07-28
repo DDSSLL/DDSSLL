@@ -437,9 +437,9 @@
           "usb-5g1":false,
           "usb-5g2":false,
         },
-        OPTIONS_WORK_MODE:[{value: "0",text: "推流"},
-                          /*{value: "1",text: "拉流"},*/
-                          {value: "2",text: "互动"}],
+        OPTIONS_WORK_MODE:[/*{value: "0",text: "推流"},
+                          {value: "1",text: "拉流"},
+                          {value: "2",text: "互动"}*/],
         OPTIONS_TRANS_MODE:[{value: "0",text: "多卡汇聚"},
                             {value: "1",text: "单卡直推"}],
         OPTIONS_TRANS_PUSH_CARD:[],
@@ -534,6 +534,26 @@
         }
       },
       initDeviceParam(){
+        var that = this;
+        //工作模式
+        this.$global.getDevOptions(that.ActiveDevice.dev_sn,function(data){
+          var options_workmode = [];
+          for(var i=0;i<data.length;i++){
+            options_workmode[i] = {};
+            //options_workmode[i]['value']=data[i];
+            if(data[i] == 'push'){
+              options_workmode[i]['text']='推流';
+              options_workmode[i]['value']=0;
+            }else if(data[i] == 'pull'){
+              options_workmode[i]['text']='拉流';
+              options_workmode[i]['value']=1;
+            }else if(data[i] == 'act'){
+              options_workmode[i]['text']='互动';
+              options_workmode[i]['value']=2;
+            }
+          }
+          that.OPTIONS_WORK_MODE = options_workmode;
+        });
         this.OPTIONS_TRANS_SRT = this.OPTIONS_CARD;
         //互动推拉流地址延时 默认125ms
         this.common.actPushLatency = 125;
@@ -1475,7 +1495,7 @@
         this.show.pushDisShow = false;
         if (this.common.dev_push_enableVal == true) {
           //单卡模式直接开启,汇聚模式判断是否有启用的网卡
-          if(this.common.PushTsType == 0){
+          if(this.common.PushTsType == 0 || this.curDevSeries=="4000"){
             var cardUsed = that.getUsedCardCount();
             if (cardUsed == 0) {
               that.$toast({
@@ -1742,7 +1762,7 @@
         var netBoards = that.netBoard;
         var usedCardCount = 0;
         for(let i=0; i<netBoards.length; i++){
-          if(netBoards[i].cardShow == 1 && netBoards[i].used == 1){
+          if(netBoards[i].bShow && netBoards[i].used){
             usedCardCount++;
           }
         }

@@ -92,7 +92,7 @@
               <div class="GroupItemField">
                 <div class="GroupItemTitle">解码器</div>
                 <div class="GroupItemValue">
-                  <mt-button class="ItemBtn" type="primary" @click="clickEncodeResetBtn" :disabled="disable.encodeReset">{{options.encodeResetName}}</mt-button>
+                  <mt-button class="ItemBtn" type="primary" @click="clickEncodeResetBtn" :disabled="rcvParamLock || disable.encodeReset">{{options.encodeResetName}}</mt-button>
                   <mt-button class="ItemBtn" style="margin-left:10px;" @click="clickEncodeStartBtn" :disabled="disable.encodeStop">停止</mt-button>
                 </div>
               </div>
@@ -212,7 +212,7 @@
             <div class="formItemTitle">视频比特率</div>
             <div class="formItemVal">
               <input type="text" class="ItemInput" v-model="options.url_VBr_input" style="width:30%">&nbsp;Mbps
-              <span style="font-size: 12px;color: #666;text-align: left;margin-top:5px;" v-if="user.prefix != PREFIX">(0.5-12Mbps)</span>
+              <span style="font-size: 12px;color: #666;text-align: left;margin-top:5px;" v-if="user.prefix != PREFIX">(0.5-8Mbps)</span>
               <span style="font-size: 12px;color: #666;text-align: left;margin-top:5px;" v-else>(0.5-80Mbps)</span>
             </div>
           </div>

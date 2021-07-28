@@ -12,13 +12,14 @@
       <div v-if="workMode=='推流'">
         <template v-for="(item,i) in address">
           <div class="address" :key="i">
+            <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);float:left" @change="changeUrlEnable4000(item)"></mt-switch>  
             <div class="title widthPart">
               <p :class="[item.push_url?'addressTitleLineH':'',item.remarkColor]">{{ item.remark?item.remark : "推流地址"+(i+1) }}</p>
               <p :class="[item.push_url ? 'addressTitleLineH' : '', 
               item.push_status == 'running' ? 'pushStyle' : (item.push_status == '' ? 'defaultStyle' : 'errStyle')]" class="addressUrl" v-if="item.push_url">{{ item.push_url }}</p>
             </div>
             <div class="buttons">
-              <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);" @change="changeUrlEnable4000(item)"></mt-switch>  
+              <!-- <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);" @change="changeUrlEnable4000(item)"></mt-switch>   -->
               <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item,i)"></i>
               <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="clickTrash(item)" :style="{display:lockState?'none':'inline-block'}"></i>
             </div>
@@ -188,9 +189,6 @@
     activated(){
       console.log("activated")
       var that = this;
-      console.log("that.ActiveDevice.dev_sn:"+that.ActiveDevice.dev_sn)
-      
-      console.log("this.curDevSeries:"+this.curDevSeries)
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(localStorage.getPushUrl);
@@ -246,9 +244,9 @@
           });
           return;
         }
-        var boardListId = that.rcv_board_param.split("_")[2]
-        var rcvSn = that.rcv_board_param.split("_")[0]
-        var boardId = that.rcv_board_param.split("_")[1]
+        var boardListId = (that.rcv_board_param?that.rcv_board_param.split("_")[2]:-1);
+        var rcvSn = (that.rcv_board_param?that.rcv_board_param.split("_")[0]:-1);
+        var boardId = (that.rcv_board_param?that.rcv_board_param.split("_")[1]:that.ActiveDevice.dev_sn)
         var pushUrl = "";
         that.$axios({
           method: 'post',
@@ -332,12 +330,10 @@
           }
         }
         that.address = data;
-        if(that.curDevSeries == "4000"){
-          if(data.length >= this.URL_MAX){
-            that.show.showAddUrl = false;
-          }else{
-            that.show.showAddUrl = true;
-          }
+        if(data.length >= this.URL_MAX){
+          that.show.showAddUrl = false;
+        }else{
+          that.show.showAddUrl = true;
         }
       },
       //获取背包拉流地址
@@ -568,7 +564,7 @@
                   position: 'middle',
                   duration: 2000
                 });
-                that.getPushUrl();
+                //that.getPushUrl();
               }else{
                 that.$toast({
                   message: '删除失败！',
@@ -719,9 +715,9 @@
         var srtSid = this.activePushObj.srt_streamID;
         //推流类型
         if(urlType == 0){//RTMP
-          urlAddress = this.activePushObj.push_url;
+          urlAddress = this.activePushObj.push_url.trim();
         } else {//SRT
-          urlAddress = this.activePushObj.push_srt_url;
+          urlAddress = this.activePushObj.push_srt_url.trim();
           //拼接地址
           var suburl = '';//地址?前的内容
           var newurl = '';//拼接后的地址
@@ -774,15 +770,15 @@
         }
         //重复判断
         var datas = this.address;
+        if(remark == ""){
+          that.$toast({
+            message: '请填写推流地址备注名  ！',
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
         for (var i = 0; i < datas.length; i++) {
-          if(datas[i].remark == ""){
-            that.$toast({
-              message: '请填写推流地址备注名  ！',
-              position: 'middle',
-              duration: 2000
-            });
-            return;
-          }
           if (datas[i].remark != '' && datas[i].id != urlId && datas[i].remark == remark) {
             that.$toast({
               message: '推流地址备注重复！',
@@ -825,7 +821,7 @@
               position: 'middle',
               duration: 2000
             });
-            that.$global.getPushUrls(that.formatPushUrls);
+            //that.$global.getPushUrls(that.formatPushUrls);
           }
         })
         .catch(function (error) {
@@ -957,14 +953,14 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.$global.getPushUrls(that.formatPushUrls);
+            //that.$global.getPushUrls(that.formatPushUrls);
           }else{
             that.$toast({
               message: res.res.reason,
               position: 'middle',
               duration: 2000
             });
-            that.$global.getPushUrls(that.formatPushUrls);
+            //that.$global.getPushUrls(that.formatPushUrls);
           }
         })
         .catch(function (error) {
@@ -1013,7 +1009,7 @@
   }
   .address .buttons{
     float: left;
-    width: 32%;
+    width: 17%;
     padding-right: 2%;
     text-align: right;
   }
@@ -1024,7 +1020,7 @@
     margin-top: .08rem;
   }
   .widthPart{
-    width:65%;
+    width:60%;
   }
   .pushurl .mint-popup{
     width:90%;

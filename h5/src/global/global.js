@@ -22,7 +22,9 @@ var RCV_MODE = [{sn: 2141,name: 'DV4000R'},
                 {sn: 2149,name: 'CM-IR5000T'}, 
                 {sn: 7188,name: 'DV4004R'},
                 {sn: 7192,name: 'CM-IR5500T'}, 
-                {sn: 2152,name: 'CM-IR6000T'}];
+                {sn: 2152,name: 'CM-IR6000T'}, 
+                {sn: 2154,name: 'DV1080R'}, 
+                {sn: 2156,name: 'DV1080R+'}];
 window.xSplit = 300;
 window.ADMIN = '1'; //管理员用户组
 window.ADVANCE = '2'; //高级用户组
@@ -35,7 +37,7 @@ window.ORANGE = '#ff9945';
 window.BLUE = '#45ffe9';
 window.WHITE = '#ffffff';
 window.DEPTH_MAX = 4;
-window.MBPS_MAX = 12;
+window.MBPS_MAX = 8;
 window.MBPS_MAX2 = 80;
 window.MBPS_MIN = 0.5;
 window.DStreamer_BUILD = "http://www.uhdxpress.com/";//4000运营平台
@@ -160,9 +162,9 @@ export default {
   OPTIONS_BITRATEMODE : [{value: "0",text: "CBR"}, 
                               {value: "1",text: "AVBR"}],
   OPTIONS_BITRATEMODE2 : [{value: "0",text: "CBR"}],
-  OPTIONS_HDR : [{text: "SDR",value: "0"}, 
+  OPTIONS_HDR_4000 : [{text: "SDR",value: "0"}, 
                 {text: "HLG",value: "1"}],
-  OPTIONS_HDR2 : [{text: "SDR",value: "0"}],
+  OPTIONS_HDR_1080 : [{text: "SDR",value: "0"}],
   OPTIONS_LATENCY : [{text: "标准时延",value: "0"}, 
                     {text: "超低时延",value: "1"}],
   OPTIONS_LATENCY2 : [{text: "标准时延",value: "0"}],
@@ -779,13 +781,15 @@ export default {
     var devMode = that.getDevMode(sn);
     var devSeries = this.getDevSeries(devSn);
     var res = [];
+    if(devMode === 'CM-T5G 1000'){
+      devMode = 'DV3000T';
+    }
     if (param == 'video_encode') {//视频编码
       if (devMode === 'DV5000T') {
         res = that.OPTIONS_VIDEOENCODE_5000;
       }else if(devMode === 'DV3000T'){
-          res = that.OPTIONS_VIDEOENCODE_3000;
-      }
-      else{
+        res = that.OPTIONS_VIDEOENCODE_3000;
+      }else{
         res = (devSeries=="1080")?that.OPTIONS_VIDEOENCODE_1080:that.OPTIONS_VIDEOENCODE_4000;
       }
     }
@@ -794,9 +798,9 @@ export default {
     }
     else if (param == 'hdr') {
       if (devMode == 'DV3000T') {
-        res = that.OPTIONS_HDR2;
+        res = that.OPTIONS_HDR_1080;
       } else {
-        res = that.OPTIONS_HDR;
+        res = that.OPTIONS_HDR_4000;
       }
     }
     else if (param == 'latency') {
@@ -821,13 +825,7 @@ export default {
       }else if(devSeries === '1080'){
         res = that.OPTIONS_VIDEOINPUT_1080;
       }else if(devSeries === '4000'){
-        //判断是否是PCIE版本,序列号>200是PCIE
-        var subsn = devSn.substr(3,3);
-        if(+subsn > 200){
-          res = that.OPTIONS_VIDEOINPUT_PCIE_4000;
-        }else{
-          res = that.OPTIONS_VIDEOINPUT_4000;
-        }
+        res = that.OPTIONS_VIDEOINPUT_4000;
       }
     }
     else if (param == 'audio_encode'){
@@ -1411,6 +1409,9 @@ export default {
     var devMode = this.getDevMode(sn);
     var prefix = store.state.user.prefix;
     var res = {};
+    if(devMode === 'CM-T5G 1000'){
+      devMode = 'DV3000T';
+    }
     if (devMode === 'DV5000T') {
       res = {
         min: this.BITRATE_MIN_5000,
@@ -1677,4 +1678,60 @@ export default {
       console.log(error)
     })
   },
+  //获取背包支持开启的选件
+  getDevOptions(devSN,cb) {
+    axios({
+      method: 'post',
+      url:"/page/index/indexData.php",
+      data:qs.stringify({
+        getDevOptions : true,
+        devSN : devSN,
+      }),
+      Api:"getDevOptions",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        if (typeof(cb) == 'function') {
+          cb(res.data);
+        }
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
+  //获取2个数组中无重复的数据
+  array_diff(arr1,arr2){
+    var temp = []; //临时数组1
+    var temparray = [];//临时数组2
+    for (var i = 0; i < arr2.length; i++) {
+      temp[arr2[i]] = true;//把数组B的值当成临时数组1的键并赋值为真
+    }
+    for (var i = 0; i < arr1.length; i++) {
+      if (!temp[arr1[i]]) {
+        temparray.push(arr1[i]);//同时把数组A的值当成临时数组1的键并判断是否为真，如果不为真说明没重复，就合并到一个新数组里，这样就可以得到一个全新并无重复的数组
+      }
+    };
+    return temparray;
+  },
+  //获取字符串长度，包括中文，中文也按一个字符处理
+  SubstrFitCn(str, start){
+    var len = 0;
+    var tmpStr = '';
+    for (var i = start; i < str.length; i++) { // 遍历字符串
+      if (/[\u4e00-\u9fa5]/.test(str[i])) { // 中文 长度也默认是1字节
+        len += 1;
+      } else {
+        len += 1;
+      }
+    }
+    return len;
+  },
+  nameCheckType4(name) {
+    var pattern = /^[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\(\)（）]/;
+    return pattern.test(name);
+  }
 }
