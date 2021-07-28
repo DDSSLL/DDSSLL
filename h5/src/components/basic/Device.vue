@@ -15,7 +15,7 @@
           </div>
           <div v-else class="noSpeedInfo">--</div>
         </div>
-        <div class="info nowrap" style="width:45%">
+        <div class="info nowrap" style="width:50%">
           <div style="width:100%">
             <span class="T">
               <span class="TCircle" :class="[this.ActiveDevice.online== 1 ? (this.ActiveDevice.dev_push_status!=0 ? 'red' : 'green') : 'gray']"></span>
@@ -713,7 +713,7 @@
           }
         })
         .catch(function (error) {
-          console.log(error)
+          console.log(error);
         })
       },
       formatIntBat(inBat){
@@ -969,6 +969,7 @@
     .listChannel{
         border-bottom: 1px solid #474B50;
         overflow: hidden;
+        overflow-y:auto;
         height: .5rem;
         background-color: #212227;
         padding: .05rem 0;

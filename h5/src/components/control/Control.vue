@@ -1475,7 +1475,7 @@
         this.show.pushDisShow = false;
         if (this.common.dev_push_enableVal == true) {
           //单卡模式直接开启,汇聚模式判断是否有启用的网卡
-          if(this.common.PushTsType == 0){
+          if(this.common.PushTsType == 0 || this.curDevSeries=="4000"){
             var cardUsed = that.getUsedCardCount();
             if (cardUsed == 0) {
               that.$toast({
@@ -1742,7 +1742,7 @@
         var netBoards = that.netBoard;
         var usedCardCount = 0;
         for(let i=0; i<netBoards.length; i++){
-          if(netBoards[i].cardShow == 1 && netBoards[i].used == 1){
+          if(netBoards[i].bShow && netBoards[i].used){
             usedCardCount++;
           }
         }

@@ -92,7 +92,7 @@
               <div class="GroupItemField">
                 <div class="GroupItemTitle">解码器</div>
                 <div class="GroupItemValue">
-                  <mt-button class="ItemBtn" type="primary" @click="clickEncodeResetBtn" :disabled="disable.encodeReset">{{options.encodeResetName}}</mt-button>
+                  <mt-button class="ItemBtn" type="primary" @click="clickEncodeResetBtn" :disabled="rcvParamLock || disable.encodeReset">{{options.encodeResetName}}</mt-button>
                   <mt-button class="ItemBtn" style="margin-left:10px;" @click="clickEncodeStartBtn" :disabled="disable.encodeStop">停止</mt-button>
                 </div>
               </div>
