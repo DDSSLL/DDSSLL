@@ -69,7 +69,7 @@
               <button @click="devicePrefixPop = true" class="TypeSelect White" v-if="user.userGroup==ADMIN">{{this.devicePrefixCurName}}</button><!-- 用户组 -->
             </div>
           </div>
-          <mt-loadmore :top-method="getDeviceList" ref="loadmore" class="deviceListDiv">
+          <div class="deviceListDiv">
             <template v-for="(item,i) in deviceListShow">
               <div class="listChannel" @click="changeActiveDevice(item)" :class="[!!ActiveDevice?(ActiveDevice.dev_name == item.dev_name ? 'activeChanel' : ''):'']">
                 <div class="status">
@@ -112,7 +112,7 @@
                 </div>
               </div>
             </template>
-          </mt-loadmore>
+          </div>
         </div>
       </mt-popup>
       <mt-popup v-model="deviceTypePop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop">
@@ -568,6 +568,8 @@
             if($.inArray("all",selectPrefix) != -1){
               selectPrefix.splice(selectPrefix.indexOf("all"),1); 
             }
+          }else if(selectPrefix.length == 0){
+            selectPrefix = ["all"];
           }
           that.devicePrefix = selectPrefix;  
         } 
@@ -1287,7 +1289,7 @@
     background: #000;
     height: .4rem;
   }
-  .deviceListDiv .mint-loadmore-content{
+  .deviceListDiv{
     height:calc(100% - .4rem);
     margin-top:.4rem;
   }
