@@ -474,7 +474,7 @@
           /*管理员*/
           data["level1"] = $.map(userListDataOri, function(item, i){
             if(item["prefix"] == data["prefix"] && item["userGroup"] == 1){
-              return item["name"];
+              return item["id"];
             }else{
               return ""
             }
@@ -482,7 +482,7 @@
           /*高级用户*/
           data["level2"] = $.map(userListDataOri, function(item, i){
             if(item["prefix"] == data["prefix"] && item["userGroup"] == 2){
-              return item["name"];
+              return item["id"];
             }else{
               return ""
             }
@@ -490,7 +490,7 @@
           /*普通用户*/
           data["level3"] = $.map(userListDataOri, function(item, i){
             if(item["prefix"] == data["prefix"] && item["userGroup"] == 3){
-              return item["name"];
+              return item["id"];
             }else{
               return ""
             }
