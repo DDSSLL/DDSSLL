@@ -642,7 +642,7 @@ export default {
             console.log(error)
           })
         }
-        that.setDevParamList(['param_lock','dev_push_enable'],[1,0],'');//切换配对时关闭推流开关
+        //that.setDevParamList(['param_lock','dev_push_enable'],[1,0],'');//切换配对时关闭推流开关
         Toast({
           message: "绑定成功",
           position: 'middle',

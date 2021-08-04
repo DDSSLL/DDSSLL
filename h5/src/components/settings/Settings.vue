@@ -268,7 +268,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">{{options.serveName}}</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.matchRcv" @change="changeMatchRcv"  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.matchRcv" @change="changeMatchRcv">
                   <template v-for="item in options.RcvList">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -280,7 +280,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">板卡</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.matchBoard" @change=""  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.matchBoard" @change="">
                   <template v-for="item in options.boardList">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -292,8 +292,8 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle"></div>
               <div class="GroupItemValue" style="float:right">
-                <mt-button class="ItemBtn" type="primary" @click="saveMatch" :disabled="!pageLock?false:true">绑定</mt-button>
-                <mt-button class="ItemBtn" style="margin-left:10px;" @click="unbindMatch" v-if="unbindBtnShow" :disabled="!pageLock?false:true">解绑</mt-button>
+                <mt-button class="ItemBtn" type="primary" @click="saveMatch">绑定</mt-button>
+                <mt-button class="ItemBtn" style="margin-left:10px;" @click="unbindMatch" v-if="unbindBtnShow">解绑</mt-button>
               </div>
             </div>
           </div>
@@ -1294,11 +1294,11 @@
               } 
             );
           } else {
-            if (data == 'push_samePrefix') {
+            /*if (data == 'push_samePrefix') {
               text = '是否需要先停止推流再切换配对关系？'
             }else if(data == 'push_difPrefix'){
               text = '是否需要停止推流并且进行跨组配对？'
-            }else if(data == 'nopush_difPrefix'){
+            }else */if(data == 'nopush_difPrefix'){
               text = '是否进行背包和接收机跨组配对切换？'
             }
             that.$messagebox.confirm(text).then(
