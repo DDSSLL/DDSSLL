@@ -29,76 +29,77 @@
                   <mt-cell title="服务版本" :value="server_ver"></mt-cell>
                   <mt-cell title="数据库版本" :value="mysqlVer"></mt-cell>
                 </div>
-                <div class="GroupTitle">
-                  备份服务器设置
-                </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle">服务器IP</div>
-                    <div class="GroupItemValue">
-                      <input type="text" class="inputStyle1" v-model="ftp_ip">
+                <div v-if="user.id==SUPER">
+                  <div class="GroupTitle">
+                    备份服务器设置
+                  </div>
+                  <div class="GroupItem">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">服务器IP</div>
+                      <div class="GroupItemValue">
+                        <input type="text" class="inputStyle1" v-model="ftp_ip">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="GroupItem">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">映射IP</div>
+                      <div class="GroupItemValue">
+                        <input type="text" class="inputStyle1" v-model="ftp_ipMapping">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="GroupItem">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">服务器端口</div>
+                      <div class="GroupItemValue">
+                        <input type="text" class="inputStyle1" v-model="ftp_port">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="GroupItem">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">UDP端口</div>
+                      <div class="GroupItemValue">
+                        <input type="text" class="inputStyle1" v-model="udp_port" style="width:60%">
+                        <span style="color:#fff">(默认：21)</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="GroupItem">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">用户名</div>
+                      <div class="GroupItemValue">
+                        <input type="text" class="inputStyle1" v-model="ftp_user">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="GroupItem">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">密码</div>
+                      <div class="GroupItemValue">
+                        <input type="text" class="inputStyle1" v-model="ftp_pwd">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="GroupItem">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle">文件根目录</div>
+                      <div class="GroupItemValue">
+                        <input type="text" class="inputStyle1" v-model="ftp_path">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="GroupItem">
+                    <div class="GroupItemField">
+                      <div class="GroupItemTitle"></div>
+                      <div class="GroupItemValue" style="float:right">
+                        <mt-button class="ItemBtn" type="primary" @click="setFtpParam">保存</mt-button>
+                        <mt-button class="ItemBtn" style="margin-left:10px;" @click="clearFtpParam">清空</mt-button>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle">映射IP</div>
-                    <div class="GroupItemValue">
-                      <input type="text" class="inputStyle1" v-model="ftp_ipMapping">
-                    </div>
-                  </div>
-                </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle">服务器端口</div>
-                    <div class="GroupItemValue">
-                      <input type="text" class="inputStyle1" v-model="ftp_port">
-                    </div>
-                  </div>
-                </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle">UDP端口</div>
-                    <div class="GroupItemValue">
-                      <input type="text" class="inputStyle1" v-model="udp_port" style="width:60%">
-                      <span style="color:#fff">(默认：21)</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle">用户名</div>
-                    <div class="GroupItemValue">
-                      <input type="text" class="inputStyle1" v-model="ftp_user">
-                    </div>
-                  </div>
-                </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle">密码</div>
-                    <div class="GroupItemValue">
-                      <input type="text" class="inputStyle1" v-model="ftp_pwd">
-                    </div>
-                  </div>
-                </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle">文件根目录</div>
-                    <div class="GroupItemValue">
-                      <input type="text" class="inputStyle1" v-model="ftp_path">
-                    </div>
-                  </div>
-                </div>
-                <div class="GroupItem">
-                  <div class="GroupItemField">
-                    <div class="GroupItemTitle"></div>
-                    <div class="GroupItemValue" style="float:right">
-                      <mt-button class="ItemBtn" type="primary" @click="setFtpParam">保存</mt-button>
-                      <mt-button class="ItemBtn" style="margin-left:10px;" @click="clearFtpParam">清空</mt-button>
-                    </div>
-                  </div>
-                </div>
-                 
               </div>
             </transition>
           </div>
@@ -117,6 +118,7 @@
     name: "systemConf",
     data(){
       return{
+        SUPER:SUPER,
         systemConfShow:false,
         app_ver:"1.02.02",
         server_ver:"",

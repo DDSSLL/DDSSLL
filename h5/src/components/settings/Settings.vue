@@ -1,6 +1,16 @@
 <template>
   <div class="settings mainPage">
     <Device page='dev'></Device>
+    <div class="Group" v-if="dev1080Show">
+      <div class="GroupItem" style="padding: .1rem;border-bottom:0;text-indent:.1rem">
+        <div class="GroupItemField">
+          <div class="GroupItemTitle">背包模式</div>
+          <div class="GroupItemValue">
+            <span style="font-size: .14rem;vertical-align: baseline;line-height: .3rem;color:#fff;">{{options.WorkMode}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="Group"><!-- 传输控制 -->
       <div class="GroupTitle" @click="transConfigShow=!transConfigShow">
         传输控制
@@ -20,7 +30,7 @@
                   title=""
                   v-model="options.dev_push_ip"
                   :options="RADIO_TRANS_IP"
-                  @change="setDeviceParam('dev_push_ip',options.dev_push_ip=='1'?'1':'')">
+                  @change="$global.setDeviceParam('dev_push_ip',options.dev_push_ip=='1'?'1':'')">
                 </mt-radio>
               </div>
             </div>
@@ -29,7 +39,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">录制开关</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.record" @change="setDeviceParam('record',options.record?'1':'0')" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.record" @change="$global.setDeviceParam('record',options.record?'1':'0')" :disabled="!pageLock?false:true">
                 </mt-switch>
               </div>
             </div>
@@ -38,7 +48,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">重传开关</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.ResendMode" @change="setDeviceParam('ResendMode',options.ResendMode?'1':'0')" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.ResendMode" @change="$global.setDeviceParam('ResendMode',options.ResendMode?'1':'0')" :disabled="!pageLock?false:true">
                 </mt-switch>
               </div>
             </div>
@@ -47,16 +57,16 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">纠错开关</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.OpenfecMode" @change="setDeviceParam('OpenfecMode',options.OpenfecMode?'1':'0')" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.OpenfecMode" @change="$global.setDeviceParam('OpenfecMode',options.OpenfecMode?'1':'0')" :disabled="!pageLock?false:true">
                 </mt-switch>
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="this.user.id==this.SUPER && this.feclevel_show"><!-- 纠错能力 -->
+          <div class="GroupItem" v-if="user.id==SUPER && options.OpenfecMode"><!-- 纠错能力 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">纠错能力</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.OpenfecLevel" @change="setDeviceParam('OpenfecLevel', options.OpenfecLevel)"  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.OpenfecLevel" @change="$global.setDeviceParam('OpenfecLevel', options.OpenfecLevel)"  :disabled="!pageLock?false:true">
                   <template v-for="item in OPTIONS_FEC_LEVEL">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -80,7 +90,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">WiFi/热点</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.WiFiSwitch" @change="setDeviceParam('WiFiSwitch', options['WiFiSwitch']?1:0)" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.WiFiSwitch" @change="$global.setDeviceParam('WiFiSwitch', options['WiFiSwitch']?1:0)" :disabled="pageLock||(options.dev_push_enable==1)?true:false">
                 </mt-switch>
               </div>
             </div>
@@ -89,7 +99,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">显示别名</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.DevAliasSwitch" @change="setDeviceParam('DevAliasSwitch',options.DevAliasSwitch?'1':'0')" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.DevAliasSwitch" @change="$global.setDeviceParam('DevAliasSwitch',options.DevAliasSwitch?'1':'0')" :disabled="!pageLock?false:true">
                 </mt-switch>
               </div>
             </div>
@@ -117,7 +127,7 @@
               <div class="GroupItemField">
                 <div class="GroupItemTitle">SEI</div>
                 <div class="GroupItemValue">
-                  <mt-switch v-model="options.SEI" @change="setDeviceParam('SEI',options.SEI?'1':'0')" :disabled="!pageLock?false:true">
+                  <mt-switch v-model="options.SEI" @change="$global.setDeviceParam('SEI',options.SEI?'1':'0')" :disabled="!pageLock?false:true">
                   </mt-switch>
                 </div>
               </div>
@@ -139,7 +149,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">音频输入</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.audio_input" @change="setDeviceParam('audio_input',options.audio_input)"  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.audio_input" @change="$global.setDeviceParam('audio_input',options.audio_input)"  :disabled="!pageLock?false:true">
                   <template v-for="item in OPTIONS_AUDIOINPUT">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -163,7 +173,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">音频编码</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.AudioEnc" @change="setDeviceParam('AudioEnc',options.AudioEnc)" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.AudioEnc" @change="$global.setDeviceParam('AudioEnc',options.AudioEnc)" :disabled="!pageLock?false:true">
                   <template v-for="item in OPTIONS_AUDIO_ENCODE">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -175,7 +185,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">音频比特率</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.AudioBitrate" @change="setDeviceParam('AudioBitrate',options.AudioBitrate)" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.AudioBitrate" @change="$global.setDeviceParam('AudioBitrate',options.AudioBitrate)" :disabled="!pageLock?false:true">
                   <template v-for="item in OPTIONS_AUDIO_BR">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -225,7 +235,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">编码分辨率</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="$global.setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="!pageLock?false:true">
                   <template v-for="item in OPTIONS_HDMI_FORMAT">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -332,7 +342,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">日志记录</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.ArmSenderLogLevel" @change="setDeviceParam('ArmSenderLogLevel',options.ArmSenderLogLevel)"  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.ArmSenderLogLevel" @change="$global.setDeviceParam('ArmSenderLogLevel',options.ArmSenderLogLevel)"  :disabled="!pageLock?false:true">
                   <template v-for="item in OPTIONS_LOG_LEVEL">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -420,6 +430,8 @@
           latency:"",
         },
         options:{
+          WorkMode:"",//传输模式
+          dev_push_enable:"",//推流开关
           curDevSn:"",//序列号
           dev_push_ip:'0',//传输IP
           //PushTsType:'0',//传输模式
@@ -613,7 +625,7 @@
           if(this.options.latency == 1){//超低时延，无AVBR
             this.OPTIONS_BITRATEMODE = this.$global.OPTIONS_BITRATEMODE2;
             this.options.bitrate_mode = 0;
-            this.setDeviceParam('bitrate_mode',0)
+            this.$global.setDeviceParam('bitrate_mode',0)
           }else{//4000选标准时延时，码率控制为CBR,AVBR
             this.OPTIONS_BITRATEMODE = this.$global.OPTIONS_BITRATEMODE;
             /*var options = this.$global.getDevParamRange(that.ActiveDevice.dev_sn, that.user.prefix, 'bitrate_mode');
@@ -633,21 +645,22 @@
       },
       changeEth0(){
         var that = this;
-        this.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'dev_push_enable', function(data) {
-          if (data.dev_push_enable == '1') {//推流
-            that.$toast({
-              message: '请先停止推流再进行ETH0 IP切换!',
-              position: 'middle',
-              duration: 2000
-            });
-            that.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'Eth0Type', function(data) {
-              that.options.Eth0Type = data.Eth0Type;
-            })
-            return;
-          }else{
-            that.setDeviceParam('Eth0Type', that.options['Eth0Type'])
-          }
-        });
+        /*this.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'dev_push_enable', function(data){
+          
+        });*/
+        if (this.options.dev_push_enable == '1') {//推流
+          that.$toast({
+            message: '请先停止推流再进行ETH0 IP切换!',
+            position: 'middle',
+            duration: 2000
+          });
+          that.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'Eth0Type', function(data) {
+            that.options.Eth0Type = data.Eth0Type;
+          })
+          return;
+        }else{
+          that.$global.setDeviceParam('Eth0Type', that.options['Eth0Type'])
+        }
       },
       changeMatchRcv(){
         var that = this;
@@ -853,7 +866,7 @@
       },
       changeBitrateMode(){
         if(this.curDevSeries == "4000"){
-          this.setDeviceParam('bitrate_mode',this.options.bitrate_mode)
+          this.$global.setDeviceParam('bitrate_mode',this.options.bitrate_mode)
         }else if(this.curDevSeries == "1080"){
           if(this.options.PushTsType == 1){//单卡推流
             //单卡推流不支持AVBR
@@ -866,7 +879,7 @@
               });
               return;
             }else{
-              this.setDeviceParam('bitrate_mode',this.options.bitrate_mode)
+              this.$global.setDeviceParam('bitrate_mode',this.options.bitrate_mode)
             }
           }
         }
@@ -895,6 +908,9 @@
       formatData(data){
         var that = this;
         that.options.curDevSn = this.ActiveDevice.dev_sn;
+        that.options.dev_push_enable = data["dev_push_enable"];
+        var devTypeArr = ["推流","拉流","互动"];
+        that.options.WorkMode = devTypeArr[data["WorkMode"]];
         //传输模式
         that.options.PushTsType = data['PushTsType'];
         /*------------------------传输控制------------------------*/
@@ -1007,30 +1023,34 @@
       },
       changeVideoInput(data){
         var that = this;
-        var video_encode_option =  that.$global.getDevParamRange(that.ActiveDevice.dev_sn,that.user.prefix,'video_encode');
-        if(that.options.video_input == '4'){//视频输入为HDMI 视频编码只支持H.264
-          that.OPTIONS_VIDEOENCODE = video_encode_option.filter(function(item){
-            return (item.value == '4');
-          })
-          if(that.OPTIONS_VIDEOENCODE.length == 0){
-            that.OPTIONS_VIDEOENCODE = [{value: "4",text: "H.264"}];
-          }
-          that.options.video_encode = '4';
-          that.audioEncShow = false;//HDMI隐藏音频编码
-          that.hdrShow = false;//HDMI隐藏HDR
-        }else{
-          that.OPTIONS_VIDEOENCODE = video_encode_option;
-          if(data["video_encode"]){
-            that.options.video_encode = data["video_encode"];
+        if(this.curDevSeries == "1080"){
+          this.$global.setDeviceParam('video_input', that.options.video_input);
+        }else if(this.curDevSeries == "4000"){
+          var video_encode_option =  that.$global.getDevParamRange(that.ActiveDevice.dev_sn,that.user.prefix,'video_encode');
+          if(that.options.video_input == '4'){//视频输入为HDMI 视频编码只支持H.264
+            that.OPTIONS_VIDEOENCODE = video_encode_option.filter(function(item){
+              return (item.value == '4');
+            })
+            if(that.OPTIONS_VIDEOENCODE.length == 0){
+              that.OPTIONS_VIDEOENCODE = [{value: "4",text: "H.264"}];
+            }
+            that.options.video_encode = '4';
+            that.audioEncShow = false;//HDMI隐藏音频编码
+            that.hdrShow = false;//HDMI隐藏HDR
           }else{
-            that.options.video_encode = 0;
+            that.OPTIONS_VIDEOENCODE = video_encode_option;
+            if(data["video_encode"]){
+              that.options.video_encode = data["video_encode"];
+            }else{
+              that.options.video_encode = 0;
+            }
+            that.audioEncShow = true;//非HDMI显示音频编码
+            that.hdrShow = true;//非HDMI显示HDR
           }
-          that.audioEncShow = true;//非HDMI显示音频编码
-          that.hdrShow = true;//非HDMI显示HDR
+          that.$global.setDeviceParam('video_input', that.options.video_input);
+          that.changeVideoEncode();
+          that.initLatency();
         }
-        that.$global.setDeviceParam('video_input', that.options.video_input);
-        that.changeVideoEncode();
-        that.initLatency();
       },
       initLatency(){
         var that = this;
@@ -1066,7 +1086,9 @@
         }else{
           that.formatVideoEncode265();
         }
-        that.$global.setDeviceParam('video_encode',that.options.video_encode);
+        that.$global.setDeviceParam('video_encode',that.options.video_encode,function(){
+          that.$global.getDeviceParam(that.formatData)
+        });
       },
       formatVideoEncode264(){
         var that = this;
@@ -1145,7 +1167,7 @@
           });
           return;
         }
-        that.setDeviceParam('DevAlias',that.options.DevAlias)
+        that.$global.setDeviceParam('DevAlias',that.options.DevAlias)
         that.setDevNameParam('dev_name', that.options.DevAlias);
       },
       changeDevParam(paramType){
@@ -1223,7 +1245,7 @@
           console.log(error)
         })
       },
-      setDeviceParam(key,val){
+      /*setDeviceParam(key,val){
         var that = this;
         var devParamCol = key;
         var value = val;
@@ -1250,7 +1272,7 @@
         .catch(function (error) {
           console.log(error)
         })
-      },
+      },*/
       saveMatch(){
         var that = this;
         var dev_sn = that.ActiveDevice.dev_sn;
@@ -1354,7 +1376,7 @@
                   that.ActiveDevice.rcv_sn = "";
                   that.ActiveDevice.rcv_name = "";
                   that.ActiveDevice.board_id = "";
-                  that.$global.getRcvList4000(that.formatRcvList);
+                  that.$global.getRcvList4000(that.formatRcvListData);
                   that.options.matchBoard = "";
                   that.options.matchRcv = "";
                   that.bindBtnShow = false;

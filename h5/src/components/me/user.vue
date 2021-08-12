@@ -1,7 +1,7 @@
 <template>
   <div class="UserMan">
     <div class="Group" style="height:100%">
-      <div class="GroupTitle popListTitle" @click="AccountShow=!AccountShow">
+      <div class="GroupTitle popListTitle" @click="changeAccountShow">
         用户信息
         <i class="titleIcon fa chevronStyle" :class="[AccountShow == true ? 'fa-chevron-left': 'fa-chevron-right']"></i>
       </div>
@@ -15,6 +15,7 @@
               </div>  
               <i class="titleIcon addBtn fa fa-refresh" @click.stop="getAccountList"></i>
               <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addUser" v-if="user.userGroup==ADMIN"></i>
+              <input type="text" v-model="searchUser" @click.stop="" @keyup.stop="searchUserByFilter" class="searchInput">
             </div>
           </div>
           <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
@@ -23,12 +24,12 @@
             </mt-cell>
           </div>
           <div class="popContentStyle">
-            <template v-for="(item,i) in accountList">
+            <template v-for="(item,i) in userShowList">
               <mt-cell-swipe
                 :right="[ 
                 {content: '设备权限',handler:() => showDevAuthority(item)},
                 {content: '编辑',handler:() => editUser(item)},
-                {content: '删除',style:{display:(user.id!=SUPER || item.id==SUPER)?'none':''}, handler:() => deleteUser(item)}
+                {content: '删除',style:{display:(user.userGroup!=ADMIN)?'none':''}, handler:() => deleteUser(item)}
                 ]">
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">用户ID</span>
@@ -99,14 +100,15 @@
           <div class="fGrp">
             <div class="tl">登录账号<span class="redText">*</span></div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="curUser.id" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()（）]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,()" :disabled="curUser.idDisable">
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()</p>
+              <input type="text" class="ItemInput" v-model="curUser.id" required :disabled="curUser.idDisable">
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1~15,仅支持字母,数字,+,_,@,()</p>
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">昵称<span class="redText">*</span></div>
             <div class="vl">
               <input type="text" class="ItemInput" v-model="curUser.name" required>
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,_,@,()</p>
             </div>
           </div>
           <div class="fGrp">
@@ -122,8 +124,8 @@
           <div class="fGrp" v-if="curUser.userEditType == 'add'">
             <div class="tl">登录密码<span class="redText">*</span></div>
             <div class="vl">
-              <input type="password" class="ItemInput" v-model="curUser.pwd" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母"/> 
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;"><!-- pattern="^[A-Za-z0-9_@]{6,16}$" -->
+              <input type="password" class="ItemInput" v-model="curUser.pwd" required/> 
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;"><!-- pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" -->
                 6~16位字母,数字,下划线和@组合
               </p>
             </div>
@@ -131,29 +133,7 @@
           <div class="fGrp" v-if="curUser.userEditType == 'add'">
             <div class="tl">确认密码<span class="redText">*</span></div>
             <div class="vl">
-              <input type="password" class="ItemInput" v-model="curUser.pwd2" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母" clearable autocomplete="off" />
-            </div>
-          </div>
-          <div class="fGrp" v-if="curUser.userEditType == 'edit'">
-            <div class="tl">重置密码</div>
-            <div class="vl">
-              <mt-checklist v-model="curUser.pwdReset" :options="[{label: ' ', value: '1'}]">
-              </mt-checklist>
-            </div>
-          </div>
-          <div class="fGrp" v-if="curUser.pwdReset == '1'">
-            <div class="tl">新密码<span class="redText">*</span></div>
-            <div class="vl">
-              <input type="password" class="ItemInput" v-model="curUser.newPwd" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母"/> 
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;"><!-- pattern="^[A-Za-z0-9_@]{6,16}$" -->
-                6~16位字母,数字,下划线和@组合
-              </p>
-            </div>
-          </div>
-          <div class="fGrp" v-if="curUser.pwdReset == '1'">
-            <div class="tl">确认密码<span class="redText">*</span></div>
-            <div class="vl">
-              <input type="password" class="ItemInput" v-model="curUser.newPwd2" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" title="6~16位字母,数字,下划线和@组合,至少包含一个数字一个字母" clearable autocomplete="off" />
+              <input type="password" class="ItemInput" v-model="curUser.pwd2" required clearable autocomplete="off" />
             </div>
           </div>
           <div class="fGrp">
@@ -169,7 +149,7 @@
           <div class="fGrp">
             <div class="tl">手机号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="curUser.mobilePhone" pattern="^1(?:3\d|4[4-9]|5[0-35-9]|6[67]|7[013-8]|8\d|9\d)\d{8}$" title="请输入正确手机号" >
+              <input type="text" class="ItemInput" v-model="curUser.mobilePhone">
             </div>
           </div>
           <div class="fGrp">
@@ -184,8 +164,30 @@
               <input type="text" class="ItemInput" v-model="curUser.remark">
             </div>
           </div>
+          <div class="fGrp" v-if="curUser.userEditType == 'edit'">
+            <div class="tl">重置密码</div>
+            <div class="vl">
+              <mt-checklist v-model="curUser.pwdReset" :options="[{label: ' ', value: '1'}]">
+              </mt-checklist>
+            </div>
+          </div>
+          <div class="fGrp" v-if="curUser.pwdReset == '1'">
+            <div class="tl">新密码<span class="redText">*</span></div>
+            <div class="vl">
+              <input type="password" class="ItemInput" v-model="curUser.newPwd" /> 
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
+                6~16位字母,数字,下划线和@组合
+              </p>
+            </div>
+          </div>
+          <div class="fGrp" v-if="curUser.pwdReset == '1'">
+            <div class="tl">确认密码<span class="redText">*</span></div>
+            <div class="vl">
+              <input type="password" class="ItemInput" v-model="curUser.newPwd2" clearable autocomplete="off" />
+            </div>
+          </div>
           <div class="fGrp" style="text-align: right">
-            <button @click="userConfigVisible = false" style="margin-right: .06rem;">取消</button>
+            <button type="button" @click="userConfigVisible = false" style="margin-right: .06rem;">取消</button>
             <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
         </form>
@@ -262,9 +264,11 @@
         ADVANCE : ADVANCE,
        	NORMAL : NORMAL,
         ADMIN : ADMIN,
+        searchUser:"",
         userGroups:[],//用户组
         AccountShow:false,
         accountList:[],
+        userShowList:[],
         userConfigVisible:false,
         deviceAuthourityName:"",
         curUser:{//用户编辑页面
@@ -332,6 +336,32 @@
       ...mapMutations({
           
       }),
+      changeAccountShow(){
+        this.AccountShow = !this.AccountShow;
+        this.initShowContent();
+      },
+      searchUserByFilter(){
+        var that = this;
+        var userList = that.accountList;
+        var filterUserList = [];
+        var filter = that.searchUser;
+        if(filter && filter != ""){
+          var len = userList.length;
+          for(var i=0; i<len; i++){
+            for(var key in userList[i]){
+              if(userList[i][key]){
+                if(userList[i][key].toString().indexOf(filter) != -1){
+                  filterUserList.push(userList[i]);
+                  break;
+                }
+              }
+            }
+          }
+          that.userShowList = filterUserList;
+        }else{
+          that.userShowList = userList;
+        }
+      },
       changeUserShowStatus(){
         if(this.AccountShow == true){
           $(".UserMan").css("height",'auto');
@@ -452,6 +482,7 @@
           }else{
             that.receiverList = [];
           }
+          that.searchUserByFilter()
         })
         .catch(function (error) {
           console.log(error)
@@ -486,8 +517,17 @@
       initPrefix(cb){
         var that = this;
         that.$global.getChildGrpArr(that.user.prefix,function(data) {
-          for(var i=0; i<data.length; i++){
-            that.curUser.prefixOptions.push({text:data[i].prefix_name, value:data[i].prefix});
+          if(that.user.userGroup == ADMIN){
+            for(var i=0; i<data.length; i++){
+              that.curUser.prefixOptions.push({text:data[i].prefix_name, value:data[i].prefix});
+            }
+          }else{
+            for(var i=0; i<data.length; i++){
+              if(data[i].prefix == that.user.prefix){
+                that.curUser.prefixOptions.push({text: data[i].prefix_name, value: data[i].prefix});
+                break;
+              }
+            }
           }
           if(cb){
             cb()
@@ -502,20 +542,85 @@
         var emailAddress = this.curUser.emailAddress;
         var remark = this.curUser.remark;
         var pwd = this.curUser.pwd;
+        var pwd2 = this.curUser.pwd2;
         var newPwd = this.curUser.newPwd;
+        var newPwd2 = this.curUser.newPwd2;
         var type = this.curUser.userEditType;
+        var data = this.accountList;
+        if(!this.$global.nameCheckType2(name)){
+          that.$toast({
+            message: "请按要求输入昵称",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
         if( type == "add"){
-          if (this.curUser.pwd != this.curUser.pwd2) {
+          if(!this.$global.nameCheckType3(id)){
+            that.$toast({
+              message: "请安要求输入登录账号",
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
+          //id重复
+          for (var i = 0; i < data.length; i++) {
+            if (data[i].id == id) {
+              that.$toast({
+                message: "该用户已添加",
+                position: 'middle',
+                duration: 2000
+              });
+              return;
+            }
+          }
+          if (!this.$global.pwdCheckType(pwd)) {
+            that.$toast({
+              message: "密码长6-16位，至少包含一个数字一个字母",
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
+          //pwd2
+          if (pwd2 == '') {
+            that.$toast({
+              message: "请输入确认密码!",
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
+          //pwd != pwd2
+          if (pwd2 != pwd) {
             that.$toast({
               message: "密码不一致!",
               position: 'middle',
               duration: 2000
             });
             return;
-          }  
+          }
         }else{
-          pwd = this.curUser.newPwd;
-          if (this.curUser.newPwd != this.curUser.newPwd2) {
+          //新密码
+          if (!this.$global.pwdCheckType(newPwd)) {
+            that.$toast({
+              message: "密码长6-16位，至少包含一个数字一个字母",
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
+          //pwd2
+          if (newPwd2 == '') {
+            that.$toast({
+              message: "请输入确认密码!",
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
+          if (newPwd != newPwd2) {
             that.$toast({
               message: "密码不一致!",
               position: 'middle',
@@ -524,18 +629,13 @@
             return;
           }
         }
-        
-        if (this.curUser.userEditType == "add") {
-          for (var i = 0; i < this.accountList.length; i++) {
-            if (this.accountList[i].id == name) {
-              that.$toast({
-                message: "该用户已添加!",
-                position: 'middle',
-                duration: 2000
-              });
-              return;
-            }
-          }
+        if (mobilePhone != "" && !this.$global.isValidPhone(mobilePhone)) {
+          that.$toast({
+            message: "请输入有效手机号!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
         }
         if (!this.$global.isValidMail(emailAddress)) {
           that.$toast({
@@ -625,6 +725,7 @@
       showDevAuthority(item){
         var that = this;
         this.devRightsList = [];
+        this.VirRcvRightsList = [];
         this.rcvRightsList = [];
         this.active = "1";
         this.deviceAuthourityVisible = true;
@@ -734,6 +835,7 @@
         this.curUser.mobilePhone = "";
         this.curUser.emailAddress = "";
         this.curUser.remark = "";
+        this.curUser.pwdReset = '';
       },
       editUser(item){
         var that = this;

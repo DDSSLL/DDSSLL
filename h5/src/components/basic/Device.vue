@@ -44,8 +44,8 @@
           <div class="lock" v-if="pageType=='rcv'">
             <i class="fa fa-2x fa-lock" id="rcvlockIcon" aria-hidden="true" @click.stop="changeRcvLockState"></i>
           </div>
-          <div class="lock" v-else-if="pageType=='dev'">
-            <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState" :disable="lockDisable"></i>
+          <div class="lock" v-else-if="pageType=='dev'" disabled="lockDisable">
+            <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState" :disabled="lockDisable"></i>
           </div>
           <div class="stateInfo" v-if="ActiveDevice.infoStatus == 'infoRed'">
             <i class="fa fa-2x fa-exclamation-circle" aria-hidden="true"></i>
@@ -60,7 +60,7 @@
         popup-transition="popup-fade">
         <div class="channelList">
           <div class="deviceTypeSelect">
-            <div class="back" @click="popupVisible=false" style="display:inline-block;width:10%">
+            <div class="back" @click="backToActivePage" style="display:inline-block;width:10%">
               <i class="fa fa-chevron-left size2" aria-hidden="true"></i>
             </div>
             <div style="padding:5px;text-align:right">
@@ -69,6 +69,7 @@
               <button @click="devicePrefixPop = true" class="TypeSelect White" v-if="user.userGroup==ADMIN">{{this.devicePrefixCurName}}</button><!-- 用户组 -->
             </div>
           </div>
+          <!-- <mt-loadmore :top-method="getDeviceList" ref="loadmore" class="deviceListDiv"> -->
           <div class="deviceListDiv">
             <template v-for="(item,i) in deviceListShow">
               <div class="listChannel" @click="changeActiveDevice(item)" :class="[!!ActiveDevice?(ActiveDevice.dev_name == item.dev_name ? 'activeChanel' : ''):'']">
@@ -113,6 +114,8 @@
               </div>
             </template>
           </div>
+            
+          <!-- </mt-loadmore> -->
         </div>
       </mt-popup>
       <mt-popup v-model="deviceTypePop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop">
@@ -225,7 +228,6 @@
         curDevSeries:"",
         SUPER:SUPER,
         ADMIN:ADMIN,
-        timer:null,
         popupVisible:false,
         popupTagsVisible:false,
         lockDisable:false,
@@ -234,7 +236,7 @@
         //当前选中设备的相关参数
         deviceListShow:[],
         //deviceType:"1",
-        pageType:this.page,
+        pageType:this.page?this.page:'dev',
         /*hasRcvRight:this.hasRcvRight,*/
         //用户组
         devicePrefixPop:false,
@@ -255,7 +257,7 @@
         deviceModeCurName:"",
         deviceModeOptions: [{label: '全部模式',value: 'allMode'},
                             {label: '推流模式',value: '0'},
-                            /*{label: '拉流模式',value: 'pullMode'},*/
+                            {label: '拉流模式',value: '1'},
                             {label: '互动模式',value: '2'}],
         status:{
           devSn_str:"",
@@ -291,10 +293,10 @@
     activated(){
       var that = this;
       that.initFilter();
-      if(this.timer){
-        clearInterval(this.timer);  
+      if(localStorage.deviceTimer){
+        clearInterval(localStorage.deviceTimer);  
       }
-      this.timer = setInterval(function(){
+      localStorage.deviceTimer = setInterval(function(){
         that.getDeviceList();
       },1000);
       that.deviceType = that.deviceTypeSelect;
@@ -313,6 +315,15 @@
         SET_PARAM_LOCK,
         SET_LOCK_USERID
       }),
+      backToActivePage(){
+        if(this.deviceListShow.length == 0){
+          this.$toast({
+            message: '请重新选择'
+          });
+        }else{
+          this.popupVisible=false;
+        }
+      },
       closeDevStatus(){
         this.popupTagsVisible=false
         clearInterval(this.interval.getParam);
@@ -700,7 +711,7 @@
                   devExist = true;
                 }
               }
-              if(!devExist){//ActiveDevice不在设备列表中
+              if(!devExist && that.deviceListShow.length!=0){//ActiveDevice不在设备列表中
                 that.SET_ACTIVE_DEVICE(that.deviceListShow[0]); 
               }
             }
@@ -755,7 +766,7 @@
           } else if(exBat == "---"){
             fExtBat.exBat = "nonexistent";
           } else {
-            fExtBat.exBat = fExtBat.exBat.split("%")[0];
+            fExtBat.exBat = exBat.split("%")[0];
           }
         }
         if(fExtBat.exBat == "nonexistent"){
@@ -818,19 +829,21 @@
       },
       //修改锁
       changeLockState(){
-        var that = this;
-        if (this.paramLockAck == "1") {//平台端已解锁
-          if(this.lockUserId != that.user.id){//当前设备为锁定标志
+        if(!this.lockDisable){
+          var that = this;
+          if (this.paramLockAck == "1") {//平台端已解锁
+            if(this.lockUserId != that.user.id){//当前设备为锁定标志
+              that.setDeviceParam('lock_userid',that.user.id);
+            }else{//当前设备为解锁标志
+              //已解锁，要加锁,背包不锁定
+              that.setDeviceParam('param_lock',2)
+              that.setDeviceParam('lock_userid',"");
+            }
+          } else {
+            //已加锁，要解锁,背包锁定
+            that.setDeviceParam('param_lock',1)
             that.setDeviceParam('lock_userid',that.user.id);
-          }else{//当前设备为解锁标志
-            //已解锁，要加锁,背包不锁定
-            that.setDeviceParam('param_lock',2)
-            that.setDeviceParam('lock_userid',"");
           }
-        } else {
-          //已加锁，要解锁,背包锁定
-          that.setDeviceParam('param_lock',1)
-          that.setDeviceParam('lock_userid',that.user.id);
         }
       },
       //status页面刷新图表
@@ -925,6 +938,11 @@
           case "0":
             that.deviceListShow = that.deviceListShow.filter(function(item){
               return (item.WorkMode == 0)
+            });
+            break;
+          case "1":
+            that.deviceListShow = that.deviceListShow.filter(function(item){
+              return (item.WorkMode == 1)
             });
             break;
           case "2":

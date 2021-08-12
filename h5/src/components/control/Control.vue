@@ -29,7 +29,7 @@
               <div class="GroupItemField">
                 <div class="GroupItemTitle">传输开关</div>
                 <div class="GroupItemValue">
-                  <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="dis.dev_push_enable"></mt-switch>
+                  <mt-switch v-model="common.dev_push_enableVal" @change="setDevPushEnable" :disabled="dis.dev_push_enable" style="width:30%"></mt-switch>
                         <span v-if="show.pushDisShow" style="color:red">{{transErrReason}}</span>
                 </div>
               </div>
@@ -50,7 +50,7 @@
                     <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{BITRATE_MIN}}</div>
                     <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{BITRATE_MAX}}</div>
                   </mt-range>
-                  <input type="text" class="ItemIpt" v-model.number="common.dev_srVal_input" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.dev_srVal_input">
+                  <input type="text" class="ItemIpt" v-model.number="common.dev_srVal_input" @blur="changeDevSrVal" :disabled="dis.dev_srVal_input">
                 </div>
               </div>
             </div>
@@ -592,6 +592,18 @@
           this.common.dev_delayVal_range = this.DELAY_MAX*10;
           this.setDeviceParam('dev_sr_input');
         }
+        var bindChart = this.ActiveDevice.dev_sn+"/"+this.ActiveDevice.rcv_sn+"/"+this.ActiveDevice.board_id;
+        this.$global.initChartSessionData(bindChart);
+      },
+      changeDevSrVal(){
+        if(this.common.dev_srVal_input>this.BITRATE_MAX){
+          this.common.dev_srVal_input = this.BITRATE_MAX;
+        }else if(this.common.dev_srVal_input < this.BITRATE_MIN){
+          this.common.dev_srVal_input = this.BITRATE_MIN;
+        }
+        this.setDeviceParam('dev_sr_input');
+        var bindChart = this.ActiveDevice.dev_sn+"/"+this.ActiveDevice.rcv_sn+"/"+this.ActiveDevice.board_id;
+        this.$global.initChartSessionData(bindChart);
       },
       setActAddr(){
         var devSN = this.ActiveDevice.dev_sn;
@@ -1099,7 +1111,7 @@
           }else{
             if (data['OffLinePushEnable'] == '1'){//文件回传中，输入编码下的参数不能编辑
               that.setEncodeParamDisabled(true);
-            } else if (data['dev_push_status'] == '1' || data['dev_push_enable'] == '1'){//传输中，传输模式和单卡不能编辑
+            } else if (data['dev_push_status'] == '1' || data['dev_push_enable'] == '1'){//传输中，传输模式不能编辑 单卡能编辑
               that.setTransParamDisabled(true);
             }
             return;
@@ -1140,7 +1152,7 @@
       setTransParamDisabled(disabled){
         var that = this;
         that.dis.PushTsType = disabled;//传输模式
-        that.dis.PushCard = disabled;//单卡选择
+        //that.dis.PushCard = disabled;//单卡选择
       },
       //更新插件数据
       updateParam(data){
@@ -1289,7 +1301,7 @@
         that.dis.dev_delayVal_input = dis;//延时input
         that.dis.PullTsOpen = dis;//拉流--传输开关
       },
-      
+
       changeWorkMode(){
         var that = this;
         if(this.common.WorkModeOri == 0 || this.common.WorkModeOri == 2){//推流or互动
@@ -1517,45 +1529,44 @@
               }
             }
             if (pushUrlSel == 0 && that.curDevSeries == "1080") {
-              info = "无勾选的推流地址！";
+              var info = "无勾选的推流地址！";
               that.disTransSwitch(info);
               return;
             }
-          })
-          
-          //回传中要询问
-          var text = '';
-          if ($('#work_str').text() == '文件离线回传中') {
-            text = '是否停止背包文件回传？';
-            //询问
-            layer.confirm(text, {
-              btn: ['确定', '取消'], //按钮
-              shade: [0.8, '#393D49'] //显示遮罩
-            }, function(index, layero) {
-              //停止文件回传
-              clickBackStopBtn();
-              $('#back_enable').bootstrapSwitch('state', false, true);
-              //setDevParam('dev_push_enable', 1, switchId);
-              $("#dev_push_enable").bootstrapSwitch('state', false, true);
-              layer.load(1, {
-                shade: [0.1, '#fff'],
-                time: 2000
+            //回传中要询问
+            var text = '';
+            if ($('#work_str').text() == '文件离线回传中') {
+              text = '是否停止背包文件回传？';
+              //询问
+              layer.confirm(text, {
+                btn: ['确定', '取消'], //按钮
+                shade: [0.8, '#393D49'] //显示遮罩
+              }, function(index, layero) {
+                //停止文件回传
+                clickBackStopBtn();
+                $('#back_enable').bootstrapSwitch('state', false, true);
+                //setDevParam('dev_push_enable', 1, switchId);
+                $("#dev_push_enable").bootstrapSwitch('state', false, true);
+                layer.load(1, {
+                  shade: [0.1, '#fff'],
+                  time: 2000
+                });
+                layer.close(index);
+              }, function() {
+                //取消
               });
-              layer.close(index);
-            }, function() {
-              //取消
-            });
-          } else {
-            //打开传输
-            if(that.curDevSeries == "1080"){
-              that.checkDevPushCondition(function(){
+            } else {
+              //打开传输
+              if(that.curDevSeries == "1080"){
+                that.checkDevPushCondition(function(){
+                  that.setDeviceParam('dev_push_enable');
+                })
+                that.common.dev_srt = true;//互动传输开关和推流传输开关状态切换保持  
+              }else if(that.curDevSeries == "4000"){
                 that.setDeviceParam('dev_push_enable');
-              })
-              that.common.dev_srt = true;//互动传输开关和推流传输开关状态切换保持  
-            }else if(that.curDevSeries == "4000"){
-              that.setDeviceParam('dev_push_enable');
+              }
             }
-          }
+          })
         } else {
           that.stopDevPushUrl(function(){
             that.setDeviceParam('dev_push_enable');

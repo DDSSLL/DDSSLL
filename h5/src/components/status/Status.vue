@@ -230,7 +230,9 @@ export default {
         },
         axisLabel: {
           textStyle: {color: '#BFBFBF',fontWeight: 'normal',fontSize: '14'},
-          formatter: '{value}'
+          formatter: function (value, index) {           
+            return value.toFixed(2);      
+          }
         }
       },
       commonOptionYAxis2 : {
@@ -437,6 +439,7 @@ export default {
       handler(val) {
         if(val){
           var that = this;
+          this.getChartConfUnit();
           this.curDevSeries = this.$global.getDevSeries(this.ActiveDevice.dev_sn);
           if(this.curDevSeries == "1080"){
             this.cardIdArr = this.$global.cardIdArr_1080;
@@ -1247,17 +1250,17 @@ export default {
           title += "/";
         }
       }
-      if(that.curDevSeries == "4000"){
+      /*if(that.curDevSeries == "4000"){
         //srt拉流
         if(that.showDevSrt){
           title += ["SRT拉流 : ", '{'+colorObj['SRT拉流']+'|' + dataAll['SRT拉流'][0] + '}Mbps  '].join("");
         }
-      }
+      }*/
       option.title[1].text = title;
 
 
       //文件回传且Y轴选自适应,图像的Y轴不设置yAxis，其他情况设置yAxis
-      if(!(chartAuto == "1" && false)){
+      if(!(chartAuto == "1" && true)){
         option.yAxis[0].min = minYaxis;
         option.yAxis[0].max = maxYaxis;
       }

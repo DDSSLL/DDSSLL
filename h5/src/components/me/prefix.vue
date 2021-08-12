@@ -1,7 +1,7 @@
 <template>
   <div class="PrefixMan">
     <div class="Group" style="height:100%">
-      <div class="GroupTitle popListTitle" @click="prefixListShow=!prefixListShow">
+      <div class="GroupTitle popListTitle" @click="changePrefixListShow">
         用户组信息
         <i class="titleIcon fa chevronStyle size2" :class="[prefixListShow == true ? 'fa-chevron-left': 'fa-chevron-right']"></i>
         <!--<i class="titleIcon addBtn fa fa-refresh" @click.stop="getPrefixList"></i>
@@ -15,13 +15,14 @@
               <div  @click="prefixListShow=false" class="popTitleBack">
                 <i class="fa fa-chevron-left chevronWidth chevronColor" aria-hidden="true"></i>
                 <span style="color:#fff">用户组信息</span>
-                <i class="titleIcon addBtn fa fa-refresh" @click.stop="getPrefixList"></i>
-                <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addPrefix"></i>
+                <i class="titleIcon addBtn fa fa-refresh" @click.stop="getPrefixList(formatPrefixData)"></i>
+                <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addPrefix" v-if="show.addPrefixBtn"></i>
+                <input type="text" v-model="searchPrefix" @click.stop="" @keyup.stop="searchPrefixByFilter" class="searchInput">
               </div>
             </div>
           </div>
           <div class="popContentStyle">
-            <template v-for="(item,i) in prefixList">
+            <template v-for="(item,i) in prefixShowList">
               <mt-cell-swipe
                 :right="[ 
                 {content: '编辑',handler:() => editPrefix(item)},
@@ -86,21 +87,21 @@
           <div class="fGrp">
             <div class="tl">用户组ID<span class="redText">*</span></div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.prefix" required pattern="[A-Za-z0-9]{1,20}" title="长度1-20，仅支持字母数字" :disabled="disable.prefix">
+              <input type="text" class="ItemInput" v-model="options.prefix" required :disabled="disable.prefix">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-20，仅支持字母数字</p>
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">用户组名称<span class="redText">*</span></div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.prefix_name" required pattern="[A-Za-z0-9\u4e00-\u9fa5@+_()]{1,20}" title="长度1~20，仅支持中文,字母,数字,+,_,@,()">
+              <input type="text" class="ItemInput" v-model="options.prefix_name" required>
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1~20，仅支持中文,字母,数字,+,_,@,()</p>
             </div>
           </div>
-          <div class="fGrp" v-if="show.parentPrefix">
+          <div class="fGrp">
             <div class="tl">父组<span class="redText">*</span></div>
             <div class="vl">
-              <select class="ItemSelect" v-model="options.parentPrefix">
+              <select class="ItemSelect" v-model="options.parentPrefix" :disabled="disable.parentPrefix">
                 <template v-for="item in options.parentGroupOptions">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
@@ -118,9 +119,9 @@
           <div class="fGrp">
             <div class="tl">管理员</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.level1_name" placeholder="用户名(长1-15)" pattern="[A-Za-z0-9@+_()]{1,15}" title="长度1~15,仅支持字母,数字,+,_,@,()" />
-              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level1_pwd" placeholder="密码(长6-16)" pattern="[A-Za-z0-9@_]{6,16}" title="6~16位字母,数字,下划线和@组合" />
-              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level1_pwd2" placeholder="密码(长6-16)" pattern="[A-Za-z0-9@_]{6,16}" title="6~16位字母,数字,下划线和@组合" />
+              <input type="text" class="ItemInput" v-model="options.level1_name" placeholder="用户名(长1-15)" />
+              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level1_pwd" placeholder="密码(长6-16)" />
+              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level1_pwd2" placeholder="密码(长6-16)" />
               <div class="addBtnStyle" @click.stop="addLevel(1)" v-if="show.addLevel1Btn"><span>+</span></div>
             </div>
           </div>
@@ -137,9 +138,9 @@
           <div class="fGrp">
             <div class="tl">高级用户</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.level2_name" placeholder="用户名(长1-15)" pattern="[A-Za-z0-9@+_()]{1,15}" title="长度1~15,仅支持字母,数字,+,_,@,()"/>
-              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level2_pwd" placeholder="密码(长6-16)" pattern="[A-Za-z0-9@_]{6,16}" title="6~16位字母,数字,下划线和@组合" />
-              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level2_pwd2" placeholder="密码(长6-16)" pattern="[A-Za-z0-9@_]{6,16}" title="6~16位字母,数字,下划线和@组合" />
+              <input type="text" class="ItemInput" v-model="options.level2_name" placeholder="用户名(长1-15)"/>
+              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level2_pwd" placeholder="密码(长6-16)" />
+              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level2_pwd2" placeholder="密码(长6-16)" />
               <div class="addBtnStyle" @click="addLevel(2)" v-if="show.addLevel2Btn">+</div>
             </div>
           </div>
@@ -156,9 +157,9 @@
           <div class="fGrp">
             <div class="tl">普通用户</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.level3_name" placeholder="用户名(长1-15)" pattern="[A-Za-z0-9@+_()]{1,15}" title="长度1~15,仅支持字母,数字,+,_,@,()"/>
-              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level3_pwd" placeholder="密码(长6-16)" pattern="[A-Za-z0-9@_]{6,16}" title="6~16位字母,数字,下划线和@组合" />
-              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level3_pwd2" placeholder="密码(长6-16)" pattern="[A-Za-z0-9@_]{6,16}" title="6~16位字母,数字,下划线和@组合" />
+              <input type="text" class="ItemInput" v-model="options.level3_name" placeholder="用户名(长1-15)" />
+              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level3_pwd" placeholder="密码(长6-16)" />
+              <input type="password" class="ItemInput pwdStyle" autocomplete="false" v-model="options.level3_pwd2" placeholder="密码(长6-16)" />
               <div class="addBtnStyle" @click="addLevel(3)" v-if="show.addLevel3Btn">+</div>
             </div>
           </div>
@@ -322,8 +323,12 @@
         ADVANCE : ADVANCE,
        	NORMAL : NORMAL,
         ADMIN : ADMIN,
+        PREFIX: PREFIX,
+        DEPTH_MAX: 4,
+        searchPrefix:"",
         prefixListShow:false,
         prefixList : [],
+        prefixShowList : [],
         delOptions:{
           prefix:"",
           prefix_name:"",
@@ -378,7 +383,8 @@
           level3List:[],
         },
         show:{
-          parentPrefix : true,
+          //parentPrefix : true,
+          addPrefixBtn:true,
           pGrpStr:false,
           addLevel1Btn:true,
           addLevel2Btn:true,
@@ -386,6 +392,7 @@
         },
         disable:{
           prefix : false,
+          parentPrefix:false,
         },
         prefixConfigVisible:false,
         prefixDelVisible:false
@@ -407,18 +414,82 @@
     created(){  //生命周期-页面创建后
       var that = this;
       this.getPrefixList(that.formatPrefixData);
-      //this.initShowContent();
+      this.initAddBtn();
     },
-    activated(){
-      console.log("devMan activated")
+    /*activated(){
+      console.log("prefix activated")
       var that = this;
       this.getPrefixList(that.formatPrefixData);
-      //this.initShowContent();
-    },
+      this.initAddBtn();
+    },*/
     methods:{
       ...mapMutations({
           
       }),
+      changePrefixListShow(){
+        console.log("changePrefixListShow");
+        var that = this;
+        this.prefixListShow = !this.prefixListShow;
+        if(this.prefixListShow){
+          this.getPrefixList(that.formatPrefixData);
+        }
+      },
+      initAddBtn(){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/userPrefix/userPrefix.php",
+          data:this.$qs.stringify({
+            getDepthByPrefix : true,
+            prefix: that.user.prefix,
+          }),
+          Api:"getDepthByPrefix",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var data = res.data;
+            if(data[0].depth == that.DEPTH_MAX){
+              that.show.addPrefixBtn = false;
+            }else{
+              that.show.addPrefixBtn = true;
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      searchPrefixByFilter(){
+        var that = this;
+        var prefixList = that.prefixList;
+        var filterPrefixList = [];
+        var filter = that.searchPrefix;
+        if(filter && filter != ""){
+          var len = prefixList.length;
+          for(var i=0; i<len; i++){
+            for(var key in prefixList[i]){
+              if(prefixList[i][key]){
+                if(prefixList[i][key].toString().indexOf(filter) != -1){
+                  filterPrefixList.push(prefixList[i]);
+                  break;
+                }
+              }
+            }
+          }
+          that.prefixShowList = filterPrefixList;
+        }else{
+          that.prefixShowList = prefixList;
+        }
+      },
       getPrefixList(cb){
         var that = this;
         this.$axios({
@@ -514,6 +585,7 @@
           userPrefixData[i] = data;
         }
         this.prefixList = userPrefixData;
+        this.searchPrefixByFilter();
       },
       addPrefix(){
         var that = this;
@@ -522,18 +594,20 @@
         this.disable.prefix = false;
         this.options.prefix = "";
         this.options.prefix_name = "";
-        this.show.parentPrefix = true;
+        //this.show.parentPrefix = true;
+        this.disable.parentPrefix = false;
         this.show.pGrpStr = false;
-        this.initParentPrefix(3);
+        //this.initParentPrefix(3);
         //可修改的父组范围
         this.initParentPrefix('','',function(data){
           that.options.parentGroupOptions = data;
-          for(var i=0; i<data.length; i++){
-            if(data[i].prefix == that.user.prefix);{
+          that.options.parentPrefix = data[0].value;
+          /*for(var i=0; i<data.length; i++){
+            if(data[i].prefix == that.user.prefix){
               that.options.parentPrefix = data[i].id;
               break;
             }
-          }
+          }*/
         });
         this.options.parentPrefix = "";
         this.options.showTitle = "HDXpress";
@@ -562,19 +636,22 @@
         that.disable.prefix = true;
         that.options.prefix = item.prefix;
         that.options.prefix_name = item.prefix_name;
+        that.show.pGrpStr = true;
         //001组、有子组：不显示父组 不支持父组修改
         that.$global.getChildGrpArr(item.prefix,function(data){
           if(item.prefix == PREFIX || data.length>1){
-            that.show.parentPrefix = false;
-            that.options.parentPrefix = item.parent;
+            //that.show.parentPrefix = false;
+            that.disable.parentPrefix = true;
+            //that.options.parentPrefix = item.parent;
           } else{
-            that.show.parentPrefix = true;
+            //that.show.parentPrefix = true;
             //可修改的父组范围
-            that.initParentPrefix(item.prefix,item.parent,function(data){
-              that.options.parentGroupOptions = data;
-              that.options.parentPrefix = item.parent;
-            });
+            that.disable.parentPrefix = false;
           }
+          that.initParentPrefix(item.prefix,item.parent,function(data){
+            that.options.parentGroupOptions = data;
+            that.options.parentPrefix = item.parent;
+          });
         });
         that.options.showTitle = item.showTitle;
         that.options.editPGrp = item.parent;
@@ -649,8 +726,6 @@
         })
       },
       addLevel(level){
-        console.log("addLevel")
-        console.log("options.prefixType:"+this.options.prefixType);
         var that = this;
         if(that.options["level"+level+"_name"] == "" 
           || that.options["level"+level+"_pwd"] == ""
@@ -723,100 +798,36 @@
           console.log(error)
         })
       },*/
-      //获取组深度
-      getGrpDepth(prefixId){
+      //获取父组深度
+      getGrpDepth(parentId, prefix, type,callback){
         var that = this;
-        var data = that.prefixList;
-        for(var i=0; i<data.length; i++){
-          if(data[i].id == prefixId){
-            return +data[i].depth;
+        if(prefix == PREFIX){
+          if(typeof(callback) == 'function'){
+            callback(0);
           }
+          return;
         }
-      },
-      savePrefixConfig(cb){
-        console.log("savePrefixConfig")
-        var that = this;
-        var type = that.options.prefixType;
-        console.log("type:"+type)
-        var id = that.options.prefix;
-        var name = that.options.prefix_name;
-        var showTitle = that.options.showTitle;
-        var parent = that.options.parentPrefix;
-        var depth = that.getGrpDepth(parent) +1;
-        if(type == "add"){
-          /*父组校验*/
-          if(!parent){
-            that.$toast({
-              message: '请选择父组!',
-              position: 'middle',
-              duration: 2000
-            });
-            return false;
-          }
-        }else{
-          parent = that.options.editPGrp;
-        }
-        
-        //prefix重复校验
-        var data = that.prefixList;
-        if (type == "add") {
-          for (var i = 0; i < data.length; i++) {
-            if (data[i].prefix == id) {
-              that.$toast({
-                message: '该用户组已添加!',
-                position: 'middle',
-                duration: 2000
-              });
-              return;
-            }
-            if (data[i].prefix_name == name) {
-              that.$toast({
-                message: '该用户组名已添加!',
-                position: 'middle',
-                duration: 2000
-              });
-              return;
-            }
-          }
-        } else {
-          for (var i = 0; i < data.length; i++) {
-            if ((data[i].prefix_name == name) && (data[i].prefix != id)) {
-              that.$toast({
-                message: '该用户组名已添加!',
-                position: 'middle',
-                duration: 2000
-              });
-              return;
-            }
-          }
-        }
-
         this.$axios({
           method: 'post',
           url:"/page/userPrefix/userPrefix.php",
           data:this.$qs.stringify({
-            type: type,
-            id: id,
-            name: name,
-            showTitle: showTitle,
-            parent: parent==-1?"":parent,
-            depth: depth,
+            getGrpDepthById: true,
+            grpid: parentId,
           }),
-          Api:"addUserPrefix",
+          Api:"getGrpDepthById",
           AppId:"android",
           UserId:that.user.id
         })
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.getPrefixList(that.formatPrefixData)
-            that.options.prefixType = "edit";
-            that.options.editPGrp = parent;
-            that.options.depth = depth;
-            that.show.parentPrefix = false;
-            //that.prefixConfigVisible = false;
-            if(cb){
-              cb();
+            var parentPrefix = res['data'][0].prefix;
+            var depth = +res['data'][0].depth;
+            if(prefix != parentPrefix){
+              depth = depth + 1;
+            }
+            if(typeof(callback) == 'function'){
+              callback(depth);
             }
           }else{
             that.$toast({
@@ -829,6 +840,140 @@
         .catch(function (error) {
           console.log(error)
         })
+      },
+      savePrefixConfig(cb){
+        var that = this;
+        var type = that.options.prefixType;
+        var id = that.options.prefix;
+        var name = that.options.prefix_name;
+        var showTitle = that.options.showTitle;
+        var parent = that.options.parentPrefix;
+        //var depth = that.getGrpDepth(parent) +1;
+        this.getGrpDepth(parent, id, type, function(depth){
+          if(type == "add"){
+            /*父组校验*/
+            if(!parent){
+              that.$toast({
+                message: '请选择父组!',
+                position: 'middle',
+                duration: 2000
+              });
+              return false;
+            }
+          }
+          //parent为null
+          if(parent == null){
+            parent = '';
+          }
+          /*用户组id和用户组名称校验*/
+          if(!that.checkName()){
+            return false;
+          }
+          /*显示标题校验*/
+          if(!that.$global.nameCheckType(showTitle,1,20,"number,en,zh")){
+            that.$toast({
+              message: '请按要求输入标题名称!',
+              position: 'middle',
+              duration: 2000
+            });
+            return false;
+          }
+          //prefix重复
+          var data = that.prefixList;
+          if (type == "add") {
+            for (var i = 0; i < data.length; i++) {
+              if (data[i].prefix == id) {
+                that.$toast({
+                  message: '该用户组已添加!',
+                  position: 'middle',
+                  duration: 2000
+                });
+                return;
+              }
+              if (data[i].prefix_name == name) {
+                that.$toast({
+                  message: '该用户组名已添加!',
+                  position: 'middle',
+                  duration: 2000
+                });
+                return;
+              }
+            }
+          } else {
+            for (var i = 0; i < data.length; i++) {
+              if ((data[i].prefix_name == name) && (data[i].prefix != id)) {
+                that.$toast({
+                  message: '该用户组名已添加!',
+                  position: 'middle',
+                  duration: 2000
+                });
+                return;
+              }
+            }
+          }
+          that.$axios({
+            method: 'post',
+            url:"/page/userPrefix/userPrefix.php",
+            data:that.$qs.stringify({
+              type: type,
+              id: id,
+              name: name,
+              showTitle: showTitle,
+              parent: parent==-1?"":parent,
+              depth: depth,
+            }),
+            Api:"addUserPrefix",
+            AppId:"android",
+            UserId:that.user.id
+          })
+          .then(function (response) {
+            let res = response.data;
+            if(res.res.success){
+              that.getPrefixList(that.formatPrefixData)
+              that.options.prefixType = "edit";
+              that.options.editPGrp = parent;
+              that.options.depth = depth;
+              //that.show.parentPrefix = false;
+              //that.disable.parentPrefix = true;
+              //that.prefixConfigVisible = false;
+              if(cb){
+                cb();
+              }
+            }else{
+              that.$toast({
+                message: res.res.reason,
+                position: 'middle',
+                duration: 2000
+              });
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+        })
+      },
+      checkName(){
+        var prefix = this.options.prefix;
+        var prefixName = this.options.prefix_name;
+        /*用户组id校验*/
+        if(!this.$global.nameCheckType(prefix,1,20,"number,en")){
+          this.$toast({
+            message: '请按要求输入用户组id',
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        /*用户组名称校验*/
+        if(!this.$global.nameCheckType(prefixName,1,20,"number,en,zh,@,+,_,(,),（,）")){
+          this.$toast({
+            message: '请按要求输入用户组名称',
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        return true;
       },
       submitPrefixConfig(cb){
         var that = this;
@@ -847,7 +992,7 @@
         var pwd2 = that.options["level"+group+"_pwd2"];
         if(!that.$global.nameCheckType2(name)){
           that.$toast({
-            message: '请按要求输入用户名!',
+            message: '请按要求输入昵称!',
             position: 'middle',
             duration: 2000
           });
@@ -865,7 +1010,7 @@
         //pwd
         if (!that.$global.pwdCheckType(pwd)) {
           that.$toast({
-            message: '6-16位，至少包含一个数字一个字母!',
+            message: '密码长6-16位，至少包含一个数字一个字母!',
             position: 'middle',
             duration: 2000
           });
@@ -1134,12 +1279,18 @@
       childDevGrpNewEvent(){
         var that = this;
         that.getUsersDevsByPrefix(that.delOptions.childDevGrpNew, function(data){
-          var arr = [];
-          for(var i=0; i<data.length; i++){
-            arr.push({"text":data[i]["id"],"value":data[i]["id"]})
+          if(data.length != 0){//组内有用户
+            var arr = [];
+            for(var i=0; i<data.length; i++){
+              arr.push({"text":data[i]["id"],"value":data[i]["id"]})
+            }
+            that.delOptions.childDevUserNewOptions = arr;
+            that.delOptions.childDevUserNew = arr[0]["value"];
+          }else{//组内无用户
+            that.delOptions.childDevUserNewOptions = [];
+            that.delOptions.childDevUserNew = "";
           }
-          that.delOptions.childDevUserNewOptions = arr;
-          that.delOptions.childDevUserNew = arr[0]["value"];
+          
         })
       },
       

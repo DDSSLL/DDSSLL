@@ -40,9 +40,10 @@ window.DEPTH_MAX = 4;
 window.MBPS_MAX = 8;
 window.MBPS_MAX2 = 80;
 window.MBPS_MIN = 0.5;
-window.DStreamer_BUILD = "http://www.uhdxpress.com/";//4000运营平台
+//window.DStreamer_BUILD = "http://www.uhdxpress.com/";//4000运营平台
 window.DStreamer_SERVE = "http://111.160.79.84:8088";//测试平台
 //window.DStreamer_BUILD = "http://4000.uhdxpress.com:8088/";//4000一级域名:117.131.178.104:8088
+window.DStreamer_BUILD = "http://117.131.178.104:8088/";//4000一级域名:117.131.178.104:8088
 //window.DStreamer_SERVE = "http://192.168.100.110:8088/";//4000二级域名
 window.HDXPRESS_BUILD = "http://www.hdxpress.cn";//1080一级域名  47.104.164.249
 window.HDXPRESS_SERVE = "http://1080.hdxpress.cn:8088/";//1080二级域名，对应地址：47.104.161.61
@@ -206,10 +207,12 @@ export default {
   //5000多路编码视频输入接口CH4
   OPTIONS_M_VIDEOINPUT_5000_CH4 : [{value: "3",text: "SDI4"}],
   OPTIONS_AUDIO_ENCODE_1080 : [{text: "AAC",value: "0"}],
-  OPTIONS_AUDIO_ENCODE_4000 : [{text: "AAC",value: "0"}, 
-                          {text: "LPCM",value: "1"}, 
-                          {text: "MPEG1L2",value: "2"}],
+  OPTIONS_AUDIO_ENCODE_4000 : [{text: "AAC",value: "0"}],
   OPTIONS_AUDIO_ENCODE2_4000 : [{text: "AAC",value: "0"}],
+  OPTIONS_AUDIO_ENCODE_5000 : [{text: "BYPASS",value: "0"}, 
+                              {text: "LPCM",value: "1"}, 
+                              {text: "AAC",value: "2"}, 
+                              {text: "MPEG1L2",value: "3"}],
   OPTIONS_AUDIOINPUT_1080 : [{value: "1",text: "2-CH"}],
   OPTIONS_AUDIOINPUT_4000 : [{value: "0",text: "0-CH"}, 
                         {value: "1",text: "2-CH"}, 
@@ -565,8 +568,6 @@ export default {
     })
     .then(function (response) {
       let res = response.data;
-      console.log("getDevPushStatus success")
-      console.log(res)
       if(res.res.success){
         var data = res.data;
         var result = [];
@@ -883,9 +884,9 @@ export default {
     .catch(function (error) {
       console.log(error)
     })
-  },
+  }, 
   //设置背包参数
-  setDeviceParam(key,val){
+  setDeviceParam(key,val,cb){
     var devParamCol = key;
     var value = val;
     var that = this;
@@ -904,6 +905,9 @@ export default {
     .then(function (response) {
       let res = response.data;
       if(res.res.success){
+        if(cb){
+          cb()
+        }
         /*Toast({
           message: '设置成功',
           position: 'middle',
@@ -1320,7 +1324,7 @@ export default {
           cb("success",group);
         }
       }else{
-        that.$toast({
+        Toast({
           message: res.res.reason,
           position: 'middle',
           duration: 2000
@@ -1352,7 +1356,7 @@ export default {
           callback(data);
         }
       }else{
-        that.$toast({
+        Toast({
           message: res.res.reason,
           position: 'middle',
           duration: 2000
@@ -1468,7 +1472,7 @@ export default {
           callback(res.data[0]);
         }
       }else{
-        that.$toast({
+        Toast({
           message: res.res.reason,
           position: 'middle',
           duration: 2000
@@ -1510,9 +1514,39 @@ export default {
       console.log(error)
     })
   },
+  //名称校验 支持中文/字母/数字/+/-/@/(/) /长度：15
+  nameCheckType(name, min, max, sc) {
+    var scArr = sc.split(",");
+    var reg = "";
+    for(var i=0; i<scArr.length; i++){
+        if(scArr[i] == "number"){
+            reg += "0-9";    
+        }else if(scArr[i] == "en"){
+            reg += "A-Za-z";    
+        }else if(scArr[i] == "zh"){
+            reg += "\\u4e00-\\u9fa5";
+        }else{
+            reg += "\\"+scArr[i];
+        }
+    }
+    var pattern =new RegExp("^["+reg+"]{"+min+","+max+"}$","gim"); 
+    return pattern.test(name);
+  },
+  nameCheckType1(name) {
+    var pattern = /^[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\(\)（）]{1,15}$/gi;
+    return pattern.test(name);
+  },
   //名称校验 支持中文/字母/数字/+/_/@/(/) /长度：15
   nameCheckType2(name) {
     var pattern = /^[A-Za-z0-9\u4e00-\u9fa5\@\+\_\(\)（）]{1,15}$/gi;
+    if(name == SUPER){
+        return true;
+    }
+    return pattern.test(name);
+  },
+  //名称校验 支持字母/数字/+/_/@/(/) /长度：15
+  nameCheckType3(name) {
+    var pattern = /^[A-Za-z0-9\@\+\_\(\)（）]{1,15}$/gi;
     if(name == SUPER){
         return true;
     }
@@ -1638,7 +1672,7 @@ export default {
           callback(res.data);
         }
       }else{
-        that.$toast({
+        Toast({
           message: res.res.reason,
           position: 'middle',
           duration: 2000
@@ -1733,5 +1767,30 @@ export default {
   nameCheckType4(name) {
     var pattern = /^[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\(\)（）]/;
     return pattern.test(name);
+  },
+  initChartSessionData(bindChart, editType) {
+    //先把相同devsn的数据删除掉，然后新增
+    var devSn = bindChart.split("/")[0];
+    var allData = JSON.parse(localStorage.getItem("allChartData"));
+    var keyArr = JSON.parse(localStorage.getItem("chartKey"));
+    for (var key in allData) {
+      if (key.indexOf(devSn) != -1) {
+        delete allData[key];
+        keyArr.splice(keyArr.indexOf(key), 1);
+        break;
+      }
+    }
+    if (editType == "del") {
+      localStorage.curChart = devSn + "//";
+    } else {
+      localStorage.curChart = bindChart;
+    }
+    localStorage.removeItem('allChartData');
+    localStorage.removeItem('chartKey');
+    localStorage.setItem('allChartData',JSON.stringify(allData)); 
+    localStorage.setItem('chartKey',JSON.stringify(keyArr)); 
+    localStorage.autoYaxis = "true";
+    localStorage.maxYaxis = "";
+    localStorage.intervalYaxis = "";
   }
 }

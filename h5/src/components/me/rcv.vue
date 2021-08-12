@@ -1,7 +1,7 @@
 <template>
   <div class="RcvMan">
     <div class="Group" style="height:100%">
-      <div class="GroupTitle popListTitle" @click="ReceiverShow=!ReceiverShow">
+      <div class="GroupTitle popListTitle" @click="changeRcvShow">
         实体接收机
         <i class="titleIcon fa chevronStyle" :class="[ReceiverShow == true ? 'fa-chevron-left': 'fa-chevron-right']"></i>
       </div>
@@ -19,7 +19,7 @@
             </div>
           </div>
           <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
-            <mt-cell :title="'用户组:'+selectPrefixName.join(',')">
+            <mt-cell :title="'用户组:'+selectPrefixName.join(',')" class="breakAll">
               <i class="fa fa-chevron-down" @click.stop="userPrefixPop = true" ></i>
             </mt-cell>
           </div>
@@ -28,7 +28,7 @@
               <mt-cell-swipe
                 :right="[ 
                 {content: '板卡',handler:() => showBoardInfo(item)},
-                {content: '编辑',handler:() => editReceiver(item)},
+                {content: '编辑',style:{display:user.userGroup!=NORMAL?'':'none'}, handler:() => editReceiver(item)},
                 {content: '删除',style:{display:rcvDelShow?'':'none'}, handler:() => deleteReceiver(item)}
                 ]">
                 <div class="cellItem">
@@ -46,6 +46,10 @@
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">上线时间</span>
                   <span class="cellName cellValue" style="float: right;">{{ item.datetime }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">用户组</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.prefix }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">用户ID</span>
@@ -852,13 +856,17 @@
       ...mapMutations({
           
       }),
-      changeRcvShowStatus(){
+      changeRcvShow(){
+        this.ReceiverShow = !this.ReceiverShow;
+        this.initShowContent();
+      },
+      /*changeRcvShowStatus(){
         if(this.ReceiverShow == true){
           $(".RcvMan").css("height",'auto');
         }else{
           $(".RcvMan").css("height",'100%');
         }
-      },
+      },*/
       showBoardInfo(item){
         var that = this;
         this.boardInfoVisible = true;
@@ -1803,6 +1811,14 @@
           });
           return;
         }
+        if(!this.options.rcvUser){
+          that.$toast({
+            message: "请选择实体接收机所属用户!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
         if(that.receiverConfigType == "add"){
           for(var i=0; i<this.receiverList.length; i++){
             if (this.receiverList[i].rcv_sn == rcvSn) {
@@ -1863,8 +1879,13 @@
       changePrefixFun(){
         var that = this;
         that.$global.getNewUserListByPrefix(that.options.prefix, function(userList){
-          that.receiverConfigUserOptions = userList;
-          that.options.rcvUser = userList[0]["value"];
+          if(userList.length != 0){
+            that.receiverConfigUserOptions = userList;
+            that.options.rcvUser = userList[0]["value"];
+          }else{
+            that.receiverConfigUserOptions = [];
+            that.options.rcvUser = "";
+          }
         })
       },
       getDevPrefixList(item){

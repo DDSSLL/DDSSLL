@@ -1,7 +1,7 @@
 <template>
   <div class="VirRcvMan">
     <div class="Group" style="height:100%">
-      <div class="GroupTitle popListTitle" @click="ReceiverShow = !ReceiverShow">
+      <div class="GroupTitle popListTitle" @click="changeVirRcvShow">
         虚拟服务器
         <i class="titleIcon fa chevronStyle" :class="[ReceiverShow == true ? 'fa-chevron-left': 'fa-chevron-right']"></i>
       </div>
@@ -19,7 +19,7 @@
             </div>
           </div>
           <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
-            <mt-cell :title="'用户组:'+selectPrefixName.join(',')">
+            <mt-cell :title="'用户组:'+selectPrefixName.join(',')" class="breakAll">
               <i class="fa fa-chevron-down" @click.stop="userPrefixPop = true" ></i>
             </mt-cell>
           </div>
@@ -28,7 +28,7 @@
               <mt-cell-swipe
                 :right="[ 
                 {content: '背包',handler:() => showDevice(item)},
-                {content: '编辑',handler:() => editReceiver(item)},
+                {content: '编辑',style:{display:user.userGroup!=NORMAL?'':'none'}, handler:() => editReceiver(item)},
                 {content: '删除',style:{display:rcvDelShow?'':'none'}, handler:() => deleteReceiver(item)}
                 ]">
                 <div class="cellItem">
@@ -48,6 +48,10 @@
                   <span class="cellName cellValue" style="float: right;">{{ item.datetime }}</span>
                 </div>
                 <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">用户组</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.prefix }}</span>
+                </div>
+                <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">用户ID</span>
                   <span class="cellName cellValue" style="float: right;">{{ item.user_id }}</span>
                 </div>
@@ -62,6 +66,10 @@
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">型号</span>
                   <span class="cellName cellValue" style="float: right;">{{ item.rcv_model }}</span>
+                </div>
+                <div class="cellItem">
+                  <span class="cellName cellLabel" style="float: left;">系统配置</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.infoStr }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">软件版本</span>
@@ -125,14 +133,14 @@
           <div class="fGrp">
             <div class="tl">名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.rcvName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格">
-              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()和空格</p>
+              <input type="text" class="ItemInput" v-model="options.rcvName" required>
+              <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">名称(长度1~15，仅支持中文,字母,数字,+,-,@,(),和空格)</p>
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">序列号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.rcvSn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="receiverConfigType == 'edit'"> 
+              <input type="text" class="ItemInput" v-model="options.rcvSn" required :disabled="receiverConfigType == 'edit'"> 
             </div>
           </div>
           <div class="fGrp">
@@ -158,7 +166,7 @@
           <div class="fGrp" v-if="receiverConfigType=='edit'">
             <div class="tl">系统配置</div>
             <div class="vl">
-               <mt-field type="textarea" rows="3" v-model="options.infoStr" readonly="readonly"></mt-field>
+               <mt-field type="textarea" rows="3" v-model="options.infoStr" readonly="readonly" style="    word-break: break-all;"></mt-field>
             </div>
           </div>
           <div class="fGrp">
@@ -184,7 +192,7 @@
             </div>
           </div>
           <div class="fGrp" style="text-align: right">
-            <button @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
+            <button type="button" @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
             <button type="submit">确定</button>
           </div>
         </form>
@@ -265,13 +273,17 @@
       ...mapMutations({
           
       }),
-      changeVirRcvShowStatus(){
+      changeVirRcvShow(){
+        this.ReceiverShow = !this.ReceiverShow;
+        this.initShowContent();
+      },
+      /*changeVirRcvShowStatus(){
         if(this.ReceiverShow == true){
           $(".VirRcvMan").css("height",'auto');
         }else{
           $(".VirRcvMan").css("height",'100%');
         }
-      },
+      },*/
       searchVirRcvByFilter(){
         var that = this;
         var receiverList = that.receiverList;
@@ -448,6 +460,7 @@
           rcvSn:item.rcv_sn,
           rcv_online:item.online,
           rcv_autoUpgrade:item.autoUpgrade,
+          infoStr:item.infoStr
         }
         //升级
         if (item['newestVer'] != ''){
@@ -527,12 +540,56 @@
       },
       submitReceiverConfig(){
         var that = this;
+        var rcvName = this.options.rcvName;
         var rcvSn = this.options.rcvSn;
+        var sub = rcvSn.substr(-4);
         var mode = this.$global.getRcvMode(rcvSn.substr(-4));
         var upgrade = 0;
+          //接收机名称校验
+        var len = this.$global.SubstrFitCn(rcvName, 0);//匹配中文，中文按一个字符处理
+        if(len > 15){
+          that.$toast({
+            message: "接收机名称长度不超过15!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if (!this.$global.nameCheckType4(rcvName)) {//未匹配中文长度(中文按一个字符处理)
+          that.$toast({
+            message: "请按要求输入接收机名称!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if(sub != "2999"){//1080只支持添加虚拟接收机(2999)
+          that.$toast({
+            message: "该序列号不支持添加!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if (!this.$global.isValidRcvSn(rcvSn)) {
+          that.$toast({
+            message: "请输入10位数字或字母的序列号!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
         if (!mode) {
           that.$toast({
             message: "接收机型号不支持!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if(!this.options.rcvUser){
+          that.$toast({
+            message: "请选择虚拟服务器所属用户!",
             position: 'middle',
             duration: 2000
           });
@@ -597,8 +654,13 @@
       changePrefixFun(){
         var that = this;
         that.$global.getNewUserListByPrefix(that.options.prefix, function(userList){
-          that.receiverConfigUserOptions = userList;
-          that.options.rcvUser = userList[0]["value"];
+          if(userList.length != 0){
+            that.receiverConfigUserOptions = userList;
+            that.options.rcvUser = userList[0]["value"];
+          }else{
+            that.receiverConfigUserOptions = [];
+            that.options.rcvUser = "";
+          }
         })
       },
       getDevPrefixList(item){
