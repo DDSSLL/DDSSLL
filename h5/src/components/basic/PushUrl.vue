@@ -12,7 +12,7 @@
       <div v-if="workMode=='推流'">
         <template v-for="(item,i) in address">
           <div class="address" :key="i">
-            <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);float:left" @change="changeUrlEnable4000(item)"></mt-switch>  
+            <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);float:left" @change="changeUrlEnableFun(item)"></mt-switch>  
             <div class="title widthPart">
               <p :class="[item.push_url?'addressTitleLineH':'',item.remarkColor]">{{ item.remark?item.remark : "推流地址"+(i+1) }}</p>
               <p :class="[item.push_url ? 'addressTitleLineH' : '', 
@@ -21,7 +21,7 @@
             <div class="buttons">
               <!-- <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);" @change="changeUrlEnable4000(item)"></mt-switch>   -->
               <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item,i)"></i>
-              <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="clickTrash(item)" :style="{display:lockState?'none':'inline-block'}"></i>
+              <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="clickTrash(item)" :style="{display:(lockState||dev_push_enable?'none':'inline-block')}"></i>
             </div>
           </div>
         </template>
@@ -189,9 +189,13 @@
     activated(){
       console.log("activated")
       var that = this;
+      clearInterval(localStorage.getPushUrl)
+      localStorage.removeItem('getPushUrl');
+      this.getURL();
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(localStorage.getPushUrl);
+      localStorage.removeItem('getPushUrl');
       clearInterval(this.getPushUrlInterval);
     },
     watch:{
@@ -287,7 +291,7 @@
         }else{
           localStorage.getPushUrl = setInterval(function(){
             that.$global.getPushUrls(that.formatPushUrls);  
-            //that.getPushParam();
+            that.getPushParam();
           },500)
         }
       },
@@ -371,7 +375,7 @@
         this.addressPull = data;
       },
       //获取推流开关参数
-      /*getPushParam(){
+      getPushParam(){
         console.log("getPushParam")
         var that = this;
         this.$axios({
@@ -402,8 +406,105 @@
         .catch(function (error) {
           console.log(error)
         })
-      },*/
+      },
       //URL地址nEnable
+      changeUrlEnableFun(item){
+        var that = this;
+        //锁定或推流中
+        if(this.curDevSeries == '1080'){
+          if(this.lockState || this.dev_push_enable){
+            this.$toast({
+              message: '请先解锁或停止推流！',
+              position: 'middle',
+              duration: 2000
+            });
+            //item.enable = false;
+            console.log(item)
+
+            that.$global.getPushUrls(that.formatPushUrls); 
+            return;
+          }
+        }
+        //地址为空
+        if (item.push_url == '') {
+          this.$toast({
+            message: '请先输入推流地址！',
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+
+        if(this.curDevSeries=="1080"){
+          //单卡推流
+          if(this.transMode == '1'){
+            var len = this.address.length;
+            for(var i=0; i<len; i++){
+              if(this.address[i].oneCardEnable == 1){
+                this.checkOneCardEnable(this.data[i].id,0);
+              }
+            }
+            this.checkOneCardEnable(item.id,1);
+          } else{
+            this.changeUrlEnable(item);
+          }
+        }else if(curDevSeries=="4000"){
+          //开启
+          var checked = '0';
+          if (item.push_sel == '0') {
+            checked = '1';
+          } else {
+            checked = '0';
+          }
+          //srt只能生效一个
+          var datas = this.address;
+          var srt = 0;
+          for (var i = 0; i < datas.length; i++) {
+            if (datas[i].id == item.id) {
+              continue;
+            }
+            if (datas[i].push_url.indexOf('srt://') != -1 && datas[i].push_sel == '1') {
+              srt++;
+            }
+          }
+          if (item.push_url.indexOf('srt://') != -1 && srt > 0) {
+            this.$toast({
+              message: 'srt只能生效一个！',
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
+          this.editUrl(item.id, 'push_sel', checked);//push_sel:1,nEnable:1
+          this.editUrl(item.id, 'nEnable', checked);//push_sel:1,nEnable:1
+          //刷新表格
+          item.push_sel = checked;
+          item.push_status = '';
+        }
+      },
+      //单卡推流地址使能
+      checkOneCardEnable(rowId, flag){
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            UrlOneCardEnable: true,
+            id : rowId,
+            nEnable : flag,
+          }),
+          Api:"UrlOneCardEnable",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
       changeUrlEnable4000(item){
         console.log("changeUrlEnable4000")
         console.log(item);

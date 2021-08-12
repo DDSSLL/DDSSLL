@@ -440,4 +440,7 @@
       float:right;
       margin-right:10px;
     }
+    .breakAll{
+      word-break: break-all;
+    }
 </style>

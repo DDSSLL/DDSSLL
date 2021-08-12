@@ -19,7 +19,7 @@
             </div>
           </div>
           <div class="userPrefix" v-if="userPrefixShow"><!-- 用户组 -->
-            <mt-cell :title="'用户组:'+selectPrefixName.join(',')">
+            <mt-cell :title="'用户组:'+selectPrefixName.join(',')" class="breakAll">
               <i class="fa fa-chevron-down" @click.stop="userPrefixPop = true" ></i>
             </mt-cell>
           </div>
@@ -76,7 +76,7 @@
                   <span class="cellName cellValue" style="float: right;padding-left:20px">{{ item.addr }}</span>
                 </div>
                 <div class="cellItem">
-                  <span class="cellName cellLabel" style="float: left;">绑定板卡</span>
+                  <span class="cellName cellLabel" style="float: left;">绑定汇聚</span>
                   <span class="cellName cellValue" style="float: right;">{{ item.match_board }}</span>
                 </div>
               </mt-cell-swipe>
@@ -156,8 +156,8 @@
           <div class="fGrp">
             <div class="tl">背包名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.devName" required pattern="[A-z0-9+-@() ]{1,15}" title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="deviceConfigType == 'edit'">
-              <p v-if="deviceConfigType=='add'" style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">仪器名(长度1-15,仅支持中文,字母,数字,+,-,@,()和空格)</p>
+              <input type="text" class="ItemInput" v-model="options.devName" required :disabled="deviceConfigType == 'edit'">
+              <p v-if="deviceConfigType=='add'" style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">仪器名(长度1~10，仅支持中文,字母,数字,+,-,@,(),和空格)</p>
               <p v-else style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">修改名称请前往参数->别名</p>
             </div>
           </div>
@@ -224,7 +224,7 @@
                 </select>
               </div>
             </div>
-            <div class="fGrp">
+            <div class="fGrp" v-if="user.userGroup != NORMAL">
               <div class="tl"></div>
               <div class="vl">
                 <button @click.prevent="saveMatch" style="border:1px solid #666;">保存绑定</button>
@@ -232,7 +232,7 @@
               </div>
             </div>
           </div>
-          <div class="fGrp" style="text-align: right">
+          <div class="fGrp" style="text-align: right" v-if="user.userGroup != NORMAL">
             <button class="modalBtn" type="button" @click="deviceConfigVisible = false" style="margin-right: .06rem;">取消</button>
             <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
@@ -251,6 +251,7 @@
       return{
         SUPER : SUPER,
         ADMIN : ADMIN,
+        NORMAL : NORMAL,
         userPrefixPop:false,
         DeviceShow:false,
         devAddShow:true,
@@ -337,18 +338,38 @@
           this.options.serveName = "实体接收机";
         }
       },
+      formatRcvList(list){
+        var arr = [];
+        if(list.length != 0){
+          for(var i=0; i<list.length; i++){
+            var rcvType = this.$global.getRcvSeries(list[i].rcv_sn);
+            //虚拟还是实体接收机
+            if(this.options.rcvType == '0' && rcvType==VIR_RCV){
+              //虚拟接收机
+              arr.push({
+                value: list[i].rcv_sn,
+                text: (list[i].color == "#2de505" ? "在线: ":"离线: ")+list[i].rcv_name
+              });
+            }else if(this.options.rcvType == '1' && rcvType==PRA_RCV){
+              //实体接收机
+              arr.push({
+                value: list[i].rcv_sn,
+                text: (list[i].color == "#2de505" ? "在线: ":"离线: ")+list[i].rcv_name,
+              });
+            }
+          }  
+        }
+        this.options.RcvList = arr;
+      },
       formatRcvListData(data){
-        console.log("formatRcvListData")
-        console.log(data)
         var that = this;
         //判断是否有当前配对的接收机的权限
         var bFind = false;
         var result = [];
         var curRcvSn = that.ActiveDevice.rcv_sn;
         var curRcvName = that.ActiveDevice.rcv_name;
-        console.log("curRcvSn:"+curRcvSn)
         if (data.length == 0) {
-          that.options.RcvList = [{value: curRcvSn,text:curRcvNamen}];
+          that.options.RcvList = [{value: curRcvSn,text:curRcvName}];
           that.options.matchRcv = curRcvSn;
         } else {
           for (var k = 0; k < data.length; k++) {
@@ -360,10 +381,9 @@
           if (!bFind) {
             result.push({
               value: curRcvSn?curRcvSn:"",
-              text: curRcvNamen?curRcvNamen:""
+              text: curRcvName?curRcvName:""
             });
           }
-          console.log("bFind:"+bFind)
           $.each(data, function(key, value) {
             var rcvType = that.$global.getRcvSeries(value.rcv_sn);
             //虚拟还是实体接收机
@@ -624,31 +644,14 @@
         var that = this;
         this.$global.getRcvList(function(data){
           that.formatRcvList(data);
+          var rcvList = true;
+          if(data.length == 0){
+            rcvList = false;
+          }
           if(cb) {
-            cb();
+            cb(rcvList);
           }
         });
-      },
-      formatRcvList(list){
-        var arr = [];
-        for(var i=0; i<list.length; i++){
-          var rcvType = this.$global.getRcvSeries(list[i].rcv_sn);
-          //虚拟还是实体接收机
-          if(this.options.rcvType == '0' && rcvType==VIR_RCV){
-            //虚拟接收机
-            arr.push({
-              value: list[i].rcv_sn,
-              text: (list[i].color == "#2de505" ? "在线: ":"离线: ")+list[i].rcv_name
-            });
-          }else if(this.options.rcvType == '1' && rcvType==PRA_RCV){
-            //实体接收机
-            arr.push({
-              value: list[i].rcv_sn,
-              text: (list[i].color == "#2de505" ? "在线: ":"离线: ")+list[i].rcv_name,
-            });
-          }
-        }
-        this.options.RcvList = arr;
       },
       deleteDevice(item){
         var that = this;
@@ -878,7 +881,10 @@
         this.getDevPrefixList(item);
         //虚拟、实体接收机
         this.initDevMatch(item.rcv_sn);
-        this.getRcvSelectAndVal(function(){
+        this.getRcvSelectAndVal(function(flag){
+          if(!flag){
+            that.options.RcvList = [{"value":item.rcv_sn,"text":item.rcv_name}]
+          }
           that.options.matchRcv = item.rcv_sn;
           that.options.matchRcvBak = item.rcv_sn;
           that.$global.getUnusedBoard(item.rcv_sn,item.board_id,function(rcvSn,curBoard,data){
@@ -889,6 +895,7 @@
         });
         this.options.devName = item.dev_name;
         this.options.devSn = item.dev_sn;
+        this.options.rcvName = item.rcv_name;
       }, 
       formatUnusedBoard(rcvSn,curBoard,data){
         var that = this;
@@ -963,8 +970,13 @@
       changePrefixFun(){
         var that = this;
         that.$global.getNewUserListByPrefix(that.options.prefix, function(userList){
-          that.deviceConfigUserOptions = userList;
-          that.options.devUser = userList[0]["value"];
+          if(userList.length != 0){
+            that.deviceConfigUserOptions = userList;
+            that.options.devUser = userList[0]["value"];
+          }else{
+            that.deviceConfigUserOptions = [];
+            that.options.devUser = "";
+          }
         })
       },
       getDevPrefixList(item){
@@ -994,17 +1006,55 @@
         this.options.server = "";
       },
       submitDeviceConfig(){
+        var that = this;
+        var name = this.options.devName;
+        var sn = this.options.devSn;
+        var mode = this.$global.getDevMode(sn.substr(-4));
+        //背包名称校验
+        if (!this.$global.nameCheckType1(name) || name.length > 10) {
+          that.$toast({
+            message: "请按要求输入背包名称!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        //背包sn校验
+        if (!this.$global.isValidSn(sn)) {
+          that.$toast({
+            message: "请输入10位数字序列号!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if (!mode) {
+          that.$toast({
+            message: "背包型号不支持!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if(!this.options.devUser){
+          that.$toast({
+            message: "请选择背包所属用户!",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
         if(this.deviceConfigType == "add"){
-          var that = this;
-          var devSn = this.options.devSn;
-          var mode = this.$global.getDevMode(devSn.substr(-4));
-          if (!mode) {
-            that.$toast({
-              message: "背包型号不支持!",
-              position: 'middle',
-              duration: 2000
-            });
-            return;
+          var data = this.deviceList;
+          for (var i = 0; i < data.length; i++) {
+            if (data[i].dev_sn == sn) {
+              that.$toast({
+                message: "该背包已添加!",
+                position: 'middle',
+                duration: 2000
+              });
+              return;
+            }
           }
           this.$axios({
             method: 'post',
@@ -1190,6 +1240,7 @@
                   that.getRcvSelectAndVal();
                   that.options.matchBoard = "";
                   that.options.matchRcv = "";
+                  that.getDeviceList();
                 }else{
                   that.$toast({
                     message: res.res.reason,

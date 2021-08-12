@@ -568,26 +568,10 @@
           if(showCard[j]["key"].indexOf("LTE") != -1 || showCard[j]["key"].indexOf("NR5G") != -1){
             that.ChartConf.showCard[j]["value"] = that.chartCardView[showCard[j]["name"].toLowerCase()].split(",");
           }else{
-            that.ChartConf.showCard[j]["value"] = that.chartCardView[showCard[j]["name"].toLowerCase()].split(",");
+            that.$set(that.ChartConf.showCard[j], 'value', that.chartCardView[showCard[j]["name"].toLowerCase()].split(","))
           }
         }
         that.initChartConfCard();
-        
-        function formatUnit(item){
-          item.eth0Val = item.eth0.split(",");
-          item.sim1Val = item.sim1.split(",");
-          item.sim2Val = item.sim2.split(",");
-          item.sim3Val = item.sim3.split(",");
-          item.sim4Val = item.sim4.split(",");
-          item.sim5Val = item.sim5.split(",");
-          item.sim6Val = item.sim6.split(",");
-          item.wifiVal = item.wifi.split(",");
-          item.usb_5g1Val = item.usb_5g1.split(",");
-          item.usb_5g2Val = item.usb_5g2.split(",");
-          item.usb_lanVal = item.usb_lan.split(",");
-          item.usb_lan2Val = item.usb_lan2.split(",");
-          return item;
-        }
       },
       initChartConfCard(){
         var that = this;

@@ -31,12 +31,12 @@
           <i class="fa fa-exclamation-circle fa-lg fail tips" v-if="show.failName"></i>
         </div>
         <div class="form-item">
-          <input type="text" autocomplete="false" class="rigisterIpt" v-model="register.pwd" placeholder="请输入密码" @blur="judgePwd">
+          <input type="password" autocomplete="false" class="rigisterIpt" v-model="register.pwd" placeholder="请输入密码" @blur="judgePwd">
           <i class="fa fa-check fa-lg pass tips" id="_pass" v-if="show.passPwd"></i>
           <i class="fa fa-exclamation-circle fa-lg fail tips" v-if="show.failPwd"></i>
         </div>
         <div class="form-item">
-          <input type="text" autocomplete="false" class="rigisterIpt" v-model="register.pwd2" placeholder="请再次输入密码" @blur="judgePwd2">
+          <input type="password" autocomplete="false" class="rigisterIpt" v-model="register.pwd2" placeholder="请再次输入密码" @blur="judgePwd2">
           <i class="fa fa-check fa-lg pass tips" v-if="show.passPwd2"></i>
           <i class="fa fa-exclamation-circle fa-lg fail tips" v-if="show.failPwd2"></i>
         </div>
@@ -67,7 +67,7 @@
 <script>
   import LoginSetBtn from './LoginSetBtn';
   import appVersion from '../common/appVersion';
-  import md5 from 'md5'
+  import md5 from 'md5';
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE,SET_ACTIVE_DEVICE_TYPE } from '../../store/mutation-types';
   export default {
@@ -147,6 +147,9 @@
         }
       }
     },
+    created(){
+      this.deviceEvent();
+    },
     mounted(){
       this.SET_ACTIVE_DEVICE_TYPE("DV1080")
       this.$axios.defaults.baseURL = this.DStreamer_BUILD;//一级域名
@@ -174,9 +177,21 @@
         SET_ACTIVE_DEVICE,
         SET_ACTIVE_DEVICE_TYPE
       }),
+      deviceEvent(){
+        console.log("deviceEvent")
+        window.addEventListener('deviceReady',(event)=>{
+          console.log("deviceReady")
+          console.log(cordova)  
+        })
+      },
       registerNew(){
         this.show.loginPageShow = false;
         this.show.registerPageShow = true;
+        this.register.userName = "";
+        this.register.pwd = "";
+        this.register.pwd2 = "";
+        this.register.devSn = "";
+        this.register.devCode = "";
       },
       changeToLogin(){
         this.show.loginPageShow = true;
