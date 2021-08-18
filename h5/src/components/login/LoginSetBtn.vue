@@ -20,6 +20,7 @@
       <h1 class="debugSettingTitle">{{ this.title }}</h1>
       <h1 class="debugSettingTitle" style="padding-top:0.2rem">请输入开发者密码</h1>
       <div class="form-item debugSettingInput">
+        <input type="hidden" name="" />
         <input type="text" class="" v-model="debugSettingPwd">
       </div>
       <div class="form-item debugSettingBtn">

@@ -21,7 +21,7 @@
             <div class="buttons">
               <!-- <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);" @change="changeUrlEnable4000(item)"></mt-switch>   -->
               <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item,i)"></i>
-              <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="clickTrash(item)" :style="{display:(lockState||dev_push_enable?'none':'inline-block')}"></i>
+              <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="clickTrash(item)" :style="{display:(show.delShow?'inline-block':'none')}"></i>
             </div>
           </div>
         </template>
@@ -116,7 +116,7 @@
                 </div>
               </div>
             </div>
-            <div class="formItem" style="text-align: right;margin-bottom: 0;" v-if="!lockState && !dev_push_enable">
+            <div class="formItem" style="text-align: right;margin-bottom: 0;" v-if="show.showSubmitBtn">
               <button class="modalBtn" @click="hideEditUrls">取消</button>
               <button class="modalBtn" @click="saveEditUrls" style="background-color: #3d81f1;color:#fff;">确定</button>
             </div>
@@ -165,6 +165,8 @@
           rtmp_url:true,
           srt_url:false,
           showAddUrl:true,
+          delShow:true,
+          showSubmitBtn:true,
         },
         /*common:{
           WorkMode:"",
@@ -187,7 +189,6 @@
       var that = this;
     },
     activated(){
-      console.log("activated")
       var that = this;
       clearInterval(localStorage.getPushUrl)
       localStorage.removeItem('getPushUrl');
@@ -207,7 +208,6 @@
           localStorage.removeItem('getPushUrl');
           this.curDevSeries = this.$global.getDevSeries(that.ActiveDevice.dev_sn);
           this.getURL();
-          console.log("lockState:"+this.lockState);
         }
       }
     },
@@ -216,6 +216,7 @@
         SET_ACTIVE_DEVICE
       }),
       clickAddUrl(){
+        this.show.showAddUrl = false;
         this.getRcvParam();
       },
       //获取接收机相关数据
@@ -269,6 +270,7 @@
           let res = response.data;
           if(res.res.success){
             
+            that.show.showAddUrl = true;
           }
         })
         .catch(function (error) {
@@ -296,7 +298,6 @@
         }
       },
       formatPushUrls(data){
-        console.log("formatPushUrls")
         var that = this;
         for(let i=0; i<data.length; i++){
           data[i].remarkColor = 'grayColor';
@@ -376,7 +377,6 @@
       },
       //获取推流开关参数
       getPushParam(){
-        console.log("getPushParam")
         var that = this;
         this.$axios({
           method: 'post',
@@ -401,6 +401,22 @@
               that.dev_push_enable = false;
             }
             that.$emit('childFn',{"dev_push_enable":that.dev_push_enable})
+            if(that.curDevSeries == "1080"){
+              if(that.lockState || that.dev_push_enable){
+                that.show.delShow = false;
+              } else{
+                that.show.delShow = true;
+                that.showSubmitBtn = true;
+              } 
+            }else if(that.curDevSeries == "4000"){
+              if(that.lockState){
+                that.show.delShow = false;
+                that.showSubmitBtn = false;
+              }else{
+                that.show.delShow = true;
+                that.showSubmitBtn = true;
+              }
+            }
           }
         })
         .catch(function (error) {
@@ -418,9 +434,16 @@
               position: 'middle',
               duration: 2000
             });
-            //item.enable = false;
-            console.log(item)
-
+            that.$global.getPushUrls(that.formatPushUrls); 
+            return;
+          }
+        }else if(this.curDevSeries == "4000"){
+          if(this.lockState){
+            this.$toast({
+              message: '请先解锁！',
+              position: 'middle',
+              duration: 2000
+            });
             that.$global.getPushUrls(that.formatPushUrls); 
             return;
           }
@@ -448,7 +471,7 @@
           } else{
             this.changeUrlEnable(item);
           }
-        }else if(curDevSeries=="4000"){
+        }else if(this.curDevSeries=="4000"){
           //开启
           var checked = '0';
           if (item.push_sel == '0') {
@@ -506,8 +529,6 @@
         })
       },
       changeUrlEnable4000(item){
-        console.log("changeUrlEnable4000")
-        console.log(item);
         if( this.lockState || this.dev_push_enable){
           this.$toast({
             message: '请先解锁或停止推流！',
@@ -660,11 +681,11 @@
             .then(function (response) {
               let res = response.data;
               if(res.res.success){
-                that.$toast({
+                /*that.$toast({
                   message: '删除成功！',
                   position: 'middle',
                   duration: 2000
-                });
+                });*/
                 //that.getPushUrl();
               }else{
                 that.$toast({
@@ -1109,9 +1130,9 @@
     font-weight: 300;
   }
   .address .buttons{
-    float: left;
+    float: right;
     width: 17%;
-    padding-right: 2%;
+    padding-right: 0;
     text-align: right;
   }
   .iconBtn{

@@ -482,6 +482,7 @@
         handler(val) {
           this.controlShow();
           this.getDevList();
+          this.initDeviceParam();
           this.getDeviceControlParam(true);
         }
       }

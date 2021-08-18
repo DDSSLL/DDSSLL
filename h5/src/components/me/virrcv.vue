@@ -52,8 +52,8 @@
                   <span class="cellName cellValue" style="float: right;">{{ item.prefix }}</span>
                 </div>
                 <div class="cellItem">
-                  <span class="cellName cellLabel" style="float: left;">用户ID</span>
-                  <span class="cellName cellValue" style="float: right;">{{ item.user_id }}</span>
+                  <span class="cellName cellLabel" style="float: left;">用户昵称</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.user_name }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">映射IP</span>
@@ -111,7 +111,7 @@
         <template v-for="(item,i) in devicePopupList">
           <div class="deviceItem">
             <div class="cellItem">
-              <span class="cellName cellLabel" style="float: left;">背包名</span>
+              <span class="cellName cellLabel" style="float: left;">背包序列号</span>
               <span class="cellName cellValue" style="float: right;">{{ item.board_id }}</span>
             </div>
             <div class="cellItem">
@@ -154,7 +154,7 @@
             </div>
           </div>
           <div class="fGrp">
-            <div class="tl">用户</div>
+            <div class="tl">用户昵称</div>
             <div class="vl">
               <select class="ItemSelect" v-model="options.rcvUser">
                 <template v-for="(item,i) in receiverConfigUserOptions">

@@ -15,7 +15,7 @@
       <div class="GroupTitle" @click="transConfigShow=!transConfigShow">
         传输控制
         <i class="titleIcon fa" :class="[transConfigShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
-        <span style="float:right" v-if="dev1080Show">
+        <span style="float:right">
           序列号:
           <span>{{ options.curDevSn }}</span>
         </span>
@@ -837,7 +837,19 @@
           that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;//码率控制
           that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT_1080;//编码分辨率
         }else if(this.curDevSeries == "4000"){
-          that.OPTIONS_VIDEOINPUT = that.$global.getDevParamRange(dev_sn,userPrefix,'video_input');//视频输入
+          //视频输入 判断是否是PCIE版本
+          that.$global.getDevListOneParam('hardVer',function(data){
+            if(data.hardVer != '' && data.hardVer != null){
+              var hardVer = parseFloat(data.hardVer.split("-")[0]);
+              if(hardVer >= 1.3){//PCIE
+                that.OPTIONS_VIDEOINPUT = that.$global.OPTIONS_VIDEOINPUT_PCIE_4000;
+              }else{
+                that.OPTIONS_VIDEOINPUT = that.$global.OPTIONS_VIDEOINPUT_4000;
+              }
+            }else{
+              that.OPTIONS_VIDEOINPUT = that.$global.OPTIONS_VIDEOINPUT_4000;
+            }
+          })
           that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT_4000;//音频输入
           that.OPTIONS_VIDEOENCODE = that.$global.OPTIONS_VIDEOENCODE_4000;//视频编码
           that.OPTIONS_AUDIO_ENCODE = that.$global.OPTIONS_AUDIO_ENCODE_4000;//音频编码
@@ -952,6 +964,9 @@
           that.options.hdr = data['hdr'];
           //时延模式
           that.options.latency = data['latency'];
+          if(that.options.latency == 1){//超低时延，无AVBR
+            that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE2;
+          }
           if(that.options.video_encode == '4'){
             //视频输入
             that.options_old_264.audio_input = data['audio_input'];
@@ -1086,9 +1101,9 @@
         }else{
           that.formatVideoEncode265();
         }
-        that.$global.setDeviceParam('video_encode',that.options.video_encode,function(){
+        that.$global.setDeviceParam('video_encode',that.options.video_encode/*,function(){
           that.$global.getDeviceParam(that.formatData)
-        });
+        }*/);
       },
       formatVideoEncode264(){
         var that = this;
@@ -1099,7 +1114,8 @@
         that.options.latency = 0;
         //编码分辨率 显示全部选项
         that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT_4000
-
+        //HDR
+        that.OPTIONS_HDR = that.$global.OPTIONS_HDR_1080;//h.264只显示SDR
         //赋值上次对应参数
         //视频输入
         that.options.audio_input = that.options_old_264.audio_input;
@@ -1127,7 +1143,7 @@
         that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT_4000.filter(function(item){
           return (item.value == 0)
         });
-
+        that.OPTIONS_HDR = that.$global.getDevParamRange(that.ActiveDevice.dev_sn,that.user.prefix,"hdr");//HDR设置
         //赋值上次对应参数
         //视频输入
         that.options.audio_input = that.options_old_265.audio_input;
@@ -1301,7 +1317,7 @@
         var text = '是否切换配对关系？';
         that.$global.getPushAndPrefixMatch(dev_sn,rcv,function(data){//判断背包和虚拟接收机是否跨组配对以及背包推流开关
           if (data == 'norcv_push_samePrefix') {//无配对，背包、接收机在同一个组
-            that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name,function(){
+            that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name, -1, -1, function(){
               that.unbindBtnShow = true;
               that.latencyChange(DV4000RV);
             });
@@ -1309,7 +1325,7 @@
             text = '是否进行背包和接收机跨组配对？';
             that.$messagebox.confirm(text).then(
               action => {
-                that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name,function(){
+                that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name, -1, -1, function(){
                   that.unbindBtnShow = true;
                   that.latencyChange(DV4000RV);
                 });
@@ -1325,7 +1341,7 @@
             }
             that.$messagebox.confirm(text).then(
               action => {
-                that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name,function(){
+                that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name, -1, -1, function(){
                   that.unbindBtnShow = true;
                   that.latencyChange(DV4000RV);
                 });

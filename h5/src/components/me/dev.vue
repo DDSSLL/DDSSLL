@@ -52,8 +52,8 @@
                   <span class="cellName cellValue" style="float: right;">{{ item.prefix }}</span>
                 </div>
                 <div class="cellItem">
-                  <span class="cellName cellLabel" style="float: left;">用户ID</span>
-                  <span class="cellName cellValue" style="float: right;">{{ item.user_id }}</span>
+                  <span class="cellName cellLabel" style="float: left;">用户昵称</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.user_name }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">型号</span>
@@ -178,7 +178,7 @@
             </div>
           </div>
           <div class="fGrp">
-            <div class="tl">用户</div>
+            <div class="tl">用户昵称</div>
             <div class="vl">
               <select class="ItemSelect" v-model="options.devUser" :disabled="deviceConfigType == 'edit' && user.userGroup != ADMIN">
                 <template v-for="(item,i) in deviceConfigUserOptions">
@@ -927,6 +927,12 @@
             }
           }
         } else {
+          if(that.options.matchRcvBak == rcvSn && curBoard!=""){
+            result.push({
+              value: curBoard,
+              text: '板卡' + curBoard
+            });
+          }
           $.each(data, function(key, value) {
             result.push({
               value: value,
@@ -1143,6 +1149,8 @@
         var rcv = that.options.matchRcv;
         var board = that.options.matchBoard;
         var sub = rcv.substr(-4);
+        var prefix = that.options.prefix?that.options.prefix:-1;
+        var user_id = that.options.devUser?that.options.devUser:-1;
         //未修改
         if(that.options.matchRcvBak == that.options.matchRcv 
           && that.options.matchBoardBak == that.options.matchBoard){
@@ -1165,14 +1173,14 @@
         var text = '是否切换配对关系？';
         that.$global.getPushAndPrefixMatch(dev_sn,rcv,function(data){//判断背包和虚拟接收机是否跨组配对以及背包推流开关
           if (data == 'norcv_push_samePrefix') {//无配对，背包、接收机在同一个组
-            that.$global.editMatch(rcv,board,that.options.devSn, that.options.devName,function(){
+            that.$global.editMatch(rcv,board,that.options.devSn, that.options.devName, prefix, user_id, function(){
              
             });
           }else if(data == 'norcv_push_difPrefix'){//无配对，背包、接收机要跨组配对
             text = '是否进行背包和接收机跨组配对？';
             that.$messagebox.confirm(text).then(
               action => {
-                that.$global.editMatch(rcv,board,that.options.devSn, that.options.devName,function(){
+                that.$global.editMatch(rcv,board,that.options.devSn, that.options.devName,prefix, user_id, function(){
              
                 });
               } 
@@ -1187,7 +1195,7 @@
             }
             that.$messagebox.confirm(text).then(
               action => {
-                that.$global.editMatch(rcv,board,that.options.devSn, that.options.devName,function(){
+                that.$global.editMatch(rcv,board,that.options.devSn, that.options.devName,prefix, user_id, function(){
                   
                 });
               } 
@@ -1240,6 +1248,7 @@
                   that.getRcvSelectAndVal();
                   that.options.matchBoard = "";
                   that.options.matchRcv = "";
+                  that.options.boardList = [];
                   that.getDeviceList();
                 }else{
                   that.$toast({

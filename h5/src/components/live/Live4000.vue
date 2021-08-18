@@ -22,7 +22,7 @@
           <div class="GroupItem" v-show="show.source2">
             <div class="GroupItemField">
               <div class="GroupItemTitle">源2
-                <a id="urlParam2Edit" style="color:#3d81f1;" @click="showUrlSourceWin">
+                <a id="urlParam2Edit" style="color:#3d81f1;" @click="showUrlSourceWin" v-if="!rcvParamLock">
                   <i class="fa fa-pencil-square-o fa-lg"></i>
                 </a>
               </div>
@@ -777,8 +777,8 @@
           that.disable.sel_resolution = true;//分辨率
           that.disable.url_add = true;//添加推流地址
           that.disable.url_all = true;//推流地址一键
-          /*that.disable.SDI_resolution = true;//SDI分辨率
-          that.disable.SDI_framerate = true;//SDI帧率*/
+          that.disable.SDI_resolution = true;//SDI分辨率
+          that.disable.SDI_framerate = true;//SDI帧率
           that.disable.encodeReset = true;//复位
           that.disable.encodeStop = true;//停止
           that.disable.HDMI_througu = true;//HDMI输出透传
@@ -793,8 +793,8 @@
           that.disable.sel_resolution = false;//分辨率
           that.disable.url_add = false;//添加推流地址
           that.disable.url_all = false;//推流地址一键
-          /*that.disable.SDI_resolution = false;//SDI分辨率
-          that.disable.SDI_framerate = false;//SDI帧率*/
+          that.disable.SDI_resolution = false;//SDI分辨率
+          that.disable.SDI_framerate = false;//SDI帧率
           that.disable.encodeReset = false;//复位
           that.disable.encodeStop = false;//停止
           that.disable.HDMI_througu = false;//HDMI输出透传
@@ -986,6 +986,8 @@
               }
             }
             that.OPTIONS_FRAMERATE_HDMI = newOption;
+          }else{
+            that.OPTIONS_FRAMERATE_HDMI = that.$global.OPTIONS_FRAMERATE_6;
           }
           that.options.HDMI_framerate = res.data[0].value8
         }

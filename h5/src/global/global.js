@@ -26,6 +26,8 @@ var RCV_MODE = [{sn: 2141,name: 'DV4000R'},
                 {sn: 2154,name: 'DV1080R'}, 
                 {sn: 2156,name: 'DV1080R+'}];
 window.xSplit = 300;
+
+window.DEBUG_USER = 'debug';//debug用户
 window.ADMIN = '1'; //管理员用户组
 window.ADVANCE = '2'; //高级用户组
 window.NORMAL = '3'; //普通用户组
@@ -587,7 +589,7 @@ export default {
     })  
   },
   //切换绑定
-  editMatch(rcv, board, dev_sn, dev_name, cb) {
+  editMatch(rcv, board, dev_sn, dev_name, prefix, user_id, cb) {
     var that = this;
     axios({
       method: 'post',
@@ -598,8 +600,8 @@ export default {
         devName: dev_name,
         new_rcv_sn: rcv,
         new_board_id: board,
-        prefix : store.state.user.prefix,
-        user_id : store.state.user.id,
+        prefix : prefix,
+        user_id : user_id,
       }),
       Api:"editMatchByDevSn",
       AppId:"android",
@@ -885,6 +887,39 @@ export default {
       console.log(error)
     })
   }, 
+  //获取dev_list某个参数
+  getDevListOneParam(param, callback) {
+    var devSN = store.state.ActiveDevice.dev_sn;
+    if (!devSN || !this.isValidSn(devSN)) {
+      if (typeof(callback) == 'function') {
+        callback([]);
+      }
+      return;
+    }
+    axios({
+      method: 'post',
+      url:"/page/index/indexData.php",
+      data:qs.stringify({
+        getDevListOneParam:devSN,
+        devParamCol: param
+      }),
+      Api:"getDevListOneParam",
+      AppId:"android",
+      UserId:store.state.user.id
+    })
+    .then(function (response) {
+      let res = response.data;
+      if(res.res.success){
+        if (typeof(callback) == 'function') {
+          callback(res.data[0]);
+        }
+      }else{
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
+  },
   //设置背包参数
   setDeviceParam(key,val,cb){
     var devParamCol = key;

@@ -52,8 +52,8 @@
                   <span class="cellName cellValue" style="float: right;">{{ item.prefix }}</span>
                 </div>
                 <div class="cellItem">
-                  <span class="cellName cellLabel" style="float: left;">用户ID</span>
-                  <span class="cellName cellValue" style="float: right;">{{ item.user_id }}</span>
+                  <span class="cellName cellLabel" style="float: left;">用户昵称</span>
+                  <span class="cellName cellValue" style="float: right;">{{ item.user_name }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">映射IP</span>
@@ -422,7 +422,7 @@
             </div>
           </div>
           <div class="fGrp">
-            <div class="tl">用户</div>
+            <div class="tl">用户昵称</div>
             <div class="vl">
               <select class="ItemSelect" v-model="options.rcvUser">
                 <template v-for="(item,i) in receiverConfigUserOptions">
@@ -432,7 +432,7 @@
             </div>
           </div>
           <div class="fGrp" v-if="ipConfigShow">
-            <div class="tl linkTitle" @click="ipSettingShow = !ipSettingShow">IP设置</div>
+            <div class="tl linkTitle" @click="changeIpSettingShow">IP设置</div>
             <div class="vl">
             </div>
           </div>
@@ -440,73 +440,75 @@
             <div class="fGrp">
               <div class="tl">DHCP</div>
               <div class="vl">
-                <mt-switch v-model="ipSetting.enableDhcpState" @change=""></mt-switch>
+                <mt-switch v-model="ipSetting.enableDhcpState" @change="" :disabled="ipConfigDis"></mt-switch>
               </div>
             </div>
             <div class="fGrp">
               <div class="tl">本地IP</div>
               <div class="vl">
-                <input type="text" class="ItemInput" v-model="ipSetting.localIp" placeholder="本地IP">
+                <input type="text" class="ItemInput" v-model="ipSetting.localIp" placeholder="本地IP" :disabled="ipConfigDis">
               </div>
             </div>
             <div class="fGrp">
               <div class="tl">映射IP</div>
               <div class="vl">
-                <input type="text" class="ItemInput" v-model="ipSetting.mapIp" placeholder="映射IP">
+                <input type="text" class="ItemInput" v-model="ipSetting.mapIp" placeholder="映射IP" :disabled="ipConfigDis">
               </div>
             </div>
             <div class="fGrp">
               <div class="tl">子网掩码</div>
               <div class="vl">
-                <input type="text" class="ItemInput" v-model="ipSetting.netmask" placeholder="子网掩码">
+                <input type="text" class="ItemInput" v-model="ipSetting.netmask" placeholder="子网掩码" :disabled="ipConfigDis">
               </div>
             </div>
             <div class="fGrp">
               <div class="tl">网关</div>
               <div class="vl">
-                <input type="text" class="ItemInput" v-model="ipSetting.gateway" placeholder="网关">
+                <input type="text" class="ItemInput" v-model="ipSetting.gateway" placeholder="网关" :disabled="ipConfigDis">
               </div>
             </div>
             <div class="fGrp">
               <div class="tl">DNS</div>
               <div class="vl">
-                <input type="text" class="ItemInput" v-model="ipSetting.dns" placeholder="DNS">
+                <input type="text" class="ItemInput" v-model="ipSetting.dns" placeholder="DNS" :disabled="ipConfigDis">
               </div>
             </div>
             <div class="fGrp">
               <div class="tl">代理</div>
               <div class="vl">
-                <mt-switch v-model="ipSetting.enableVpnState" @change=""></mt-switch>
+                <mt-switch v-model="ipSetting.enableVpnState" @change="" :disabled="ipConfigDis"></mt-switch>
               </div>
             </div>
-            <div class="fGrp">
-              <div class="tl linkTitle" @click="proxySettingShow = !proxySettingShow">Proxy设置</div>
-              <div class="vl">
-              </div>
-            </div>
-            <div v-if="proxySettingShow">
+            <div v-if="user.id == SUPER || user.id == DEBUG_USER">
               <div class="fGrp">
-                <div class="tl">TunNet</div>
+                <div class="tl linkTitle" @click="proxySettingShow = !proxySettingShow">Proxy设置</div>
                 <div class="vl">
-                  <input type="text" class="ItemInput" v-model="ipSetting.tun_net" placeholder="TunNet">
                 </div>
               </div>
-              <div class="fGrp">
-                <div class="tl">VPNServer</div>
-                <div class="vl">
-                  <input type="text" class="ItemInput" v-model="ipSetting.vpn_server" placeholder="VPNServer">
+              <div v-if="proxySettingShow">
+                <div class="fGrp">
+                  <div class="tl">TunNet</div>
+                  <div class="vl">
+                    <input type="text" class="ItemInput" v-model="ipSetting.tun_net" placeholder="TunNet" :disabled="ipConfigDis">
+                  </div>
                 </div>
-              </div>
-              <div class="fGrp">
-                <div class="tl">VPNPort</div>
-                <div class="vl">
-                  <input type="text" class="ItemInput" v-model="ipSetting.vpn_port" placeholder="VPNPort">
+                <div class="fGrp">
+                  <div class="tl">VPNServer</div>
+                  <div class="vl">
+                    <input type="text" class="ItemInput" v-model="ipSetting.vpn_server" placeholder="VPNServer" :disabled="ipConfigDis">
+                  </div>
                 </div>
-              </div>
-              <div class="fGrp">
-                <div class="tl">VPNDns</div>
-                <div class="vl">
-                  <input type="text" class="ItemInput" v-model="ipSetting.vpn_dns" placeholder="VPNDns">
+                <div class="fGrp">
+                  <div class="tl">VPNPort</div>
+                  <div class="vl">
+                    <input type="text" class="ItemInput" v-model="ipSetting.vpn_port" placeholder="VPNPort" :disabled="ipConfigDis">
+                  </div>
+                </div>
+                <div class="fGrp">
+                  <div class="tl">VPNDns</div>
+                  <div class="vl">
+                    <input type="text" class="ItemInput" v-model="ipSetting.vpn_dns" placeholder="VPNDns" :disabled="ipConfigDis">
+                  </div>
                 </div>
               </div>
             </div>
@@ -520,15 +522,15 @@
                   <div class="fGrp">
                     <div class="tl">板卡1 TCP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput " v-model="ipSetting.TcpPort0">
+                      <input type="text" class="ItemInput " v-model="ipSetting.TcpPort0" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">UDP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart0">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart0" :disabled="ipConfigDis">
                       -
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop0">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop0" :disabled="ipConfigDis">
                     </div>
                   </div>
                 </div>
@@ -536,15 +538,15 @@
                   <div class="fGrp">
                     <div class="tl">板卡2 TCP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort1">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort1" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">UDP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart1">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart1" :disabled="ipConfigDis">
                       -
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop1">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop1" :disabled="ipConfigDis">
                     </div>
                   </div>
                 </div>
@@ -552,15 +554,15 @@
                   <div class="fGrp">
                     <div class="tl">板卡3 TCP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort2">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort2" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">UDP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart2">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart2" :disabled="ipConfigDis">
                       -
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop2">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop2" :disabled="ipConfigDis">
                     </div>
                   </div>
                 </div>
@@ -568,15 +570,15 @@
                   <div class="fGrp">
                     <div class="tl">板卡4 TCP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort3">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort3" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">UDP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart3">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart3" :disabled="ipConfigDis">
                       -
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop3">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop3" :disabled="ipConfigDis">
                     </div>
                   </div>
                 </div>
@@ -584,15 +586,15 @@
                   <div class="fGrp">
                     <div class="tl">板卡5 TCP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort4">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort4" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">UDP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart4">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart4" :disabled="ipConfigDis">
                       -
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop4">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop4" :disabled="ipConfigDis">
                     </div>
                   </div>
                 </div>
@@ -600,15 +602,15 @@
                   <div class="fGrp">
                     <div class="tl">板卡6 TCP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort5">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort5" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">UDP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart5">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart5" :disabled="ipConfigDis">
                       -
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop5">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop5" :disabled="ipConfigDis">
                     </div>
                   </div>
                 </div>
@@ -616,15 +618,15 @@
                   <div class="fGrp">
                     <div class="tl">板卡7 TCP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort6">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort6" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">UDP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart6">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart6" :disabled="ipConfigDis">
                       -
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop6">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop6" :disabled="ipConfigDis">
                     </div>
                   </div>
                 </div>
@@ -632,15 +634,15 @@
                   <div class="fGrp">
                     <div class="tl">板卡8 TCP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort7">
+                      <input type="text" class="ItemInput" v-model="ipSetting.TcpPort7" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">UDP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart7">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStart7" :disabled="ipConfigDis">
                       -
-                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop7">
+                      <input type="text" class="ItemInput" v-model="ipSetting.UdpPortStop7" :disabled="ipConfigDis">
                     </div>
                   </div>
                 </div>
@@ -656,27 +658,27 @@
                   <div class="fGrp">
                     <div class="tl">板卡 SRT</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput " v-model="ipSetting.encSrtPort">
+                      <input type="text" class="ItemInput " v-model="ipSetting.encSrtPort" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">TCP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput " v-model="ipSetting.encTcpPort">
+                      <input type="text" class="ItemInput " v-model="ipSetting.encTcpPort" :disabled="ipConfigDis">
                     </div>
                   </div>
                   <div class="fGrp">
                     <div class="tl">UDP</div>
                     <div class="vl leftvl">
-                      <input type="text" class="ItemInput" v-model="ipSetting.EncUdpPortStart">
+                      <input type="text" class="ItemInput" v-model="ipSetting.EncUdpPortStart" :disabled="ipConfigDis">
                       -
-                      <input type="text" class="ItemInput" v-model="ipSetting.EncUdpPortStop">
+                      <input type="text" class="ItemInput" v-model="ipSetting.EncUdpPortStop" :disabled="ipConfigDis">
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="fGrp">
+            <div class="fGrp" v-if="ipConfigBtnShow">
               <div class="tl" style="color: #ffb37f;">修改IP参数请点击<i class="fa fa-hand-o-right" aria-hidden="true"></i></div>
               <div class="vl">
                 <button type="button" @click="rcvIpEffect" :disable="ipEffectDis">{{ipEffectText}}</button>
@@ -703,6 +705,7 @@
     data(){
       return{
         selected: '1',
+        DEBUG_USER: DEBUG_USER,
         SUPER : SUPER,
         ADVANCE : ADVANCE,
         NORMAL : NORMAL,
@@ -769,6 +772,9 @@
           transDelay:"",//延时
         },
         ipConfigShow:false,//IP设置
+        ipConfigSetDis:false,//IP设置标题
+        ipConfigBtnShow:false,//IP设置确认按钮
+        ipConfigDis:false,//IP设置disable
         ipSettingShow:false,//IP设置
         proxySettingShow:false,//代理
         decodeContentShow:false,
@@ -1145,6 +1151,11 @@
           console.log(error)
         })
       },
+      changeIpSettingShow(){
+        if(this.ipConfigSetDis){
+          this.ipSettingShow = !this.ipSettingShow;
+        }
+      },
       editReceiver(item){
         var that = this;
         this.receiverConfigVisible = true;
@@ -1157,65 +1168,47 @@
           rcv_online:item.online,
           rcv_autoUpgrade:item.autoUpgrade,
         }
-        if(item.online == "在线"){//在线才可以进行IP设置
-          this.ipConfigShow = true;
-          this.rcvIpData(item.rcv_sn, function(data){
-            var vpnData = data;
-            if(vpnData['vpnEnable'] == 1){
-              that.ipSetting.enableVpnState = true;
-            }else if(vpnData['vpnEnable'] == 0){
-              that.ipSetting.enableVpnState = false;
-            }
-            if(vpnData['dhcp'] == 1){
-              that.ipSetting.enableDhcpState = true;
-            }else if(vpnData['dhcp'] == 0){
-              that.ipSetting.enableDhcpState = false;
-            }
-            that.ipSetting.startDate = vpnData['vpnStartTime'];
-            that.ipSetting.endDate = vpnData['vpnEndTime'];
-            that.ipSetting.tun_net = vpnData['tunNet'];
-            that.ipSetting.vpn_server = vpnData['vpsIp'];
-            that.ipSetting.vpn_port = vpnData['vpsPort'];
-            that.ipSetting.vpn_dns = vpnData['vpnDns'];
-            that.ipSetting.localIp = vpnData['localIp'];
-            that.ipSetting.mapIp = vpnData['mapIp'];
-            that.ipSetting.netmask = vpnData['netmask'];
-            that.ipSetting.gateway = vpnData['gateway'];
-            that.ipSetting.dns = vpnData['dns'];
-            /*getRcvEditData(row,"entity");
-            $("#rcvManDiv").modal('show');*/
-            that.showDecBoard(vpnData);
-            that.showEncBoard(vpnData);
-          })
-        }else{
-          this.ipConfigShow = false;
-        }
-        //升级
-        /*if (item['newestVer'] != ''){
-          this.noNewVer = false;
-          //已是最新版本
-          if(item['newestVer'] == item['softVer']){
-            this.rollbackDiv = true;
-            this.upgradeDiv = false;
-            //回退按钮是否显示
-            if(item['oldVer'] != ''){
-              this.rollbackBtnDiv = true;
-              this.oldVerStr = item['oldVer'];
-            } else {
-              this.rollbackBtnDiv = false;
-            }
-          } else {
-            //有新版本
-            this.upgradeDiv = true;
-            this.rollbackDiv = false;
-            this.newVerStr = item['newestVer'];
+        this.ipConfigShow = true;
+        this.rcvIpData(item.rcv_sn, function(data){
+          var vpnData = data;
+          if(vpnData['vpnEnable'] == 1){
+            that.ipSetting.enableVpnState = true;
+          }else if(vpnData['vpnEnable'] == 0){
+            that.ipSetting.enableVpnState = false;
           }
-        } else {
-          //无可用升级包
-          this.upgradeDiv = false;
-          this.rollbackDiv = false;
-          this.noNewVer = true;
-        }*/
+          if(vpnData['dhcp'] == 1){
+            that.ipSetting.enableDhcpState = true;
+          }else if(vpnData['dhcp'] == 0){
+            that.ipSetting.enableDhcpState = false;
+          }
+          that.ipSetting.startDate = vpnData['vpnStartTime'];
+          that.ipSetting.endDate = vpnData['vpnEndTime'];
+          that.ipSetting.tun_net = vpnData['tunNet'];
+          that.ipSetting.vpn_server = vpnData['vpsIp'];
+          that.ipSetting.vpn_port = vpnData['vpsPort'];
+          that.ipSetting.vpn_dns = vpnData['vpnDns'];
+          that.ipSetting.localIp = vpnData['localIp'];
+          that.ipSetting.mapIp = vpnData['mapIp'];
+          that.ipSetting.netmask = vpnData['netmask'];
+          that.ipSetting.gateway = vpnData['gateway'];
+          that.ipSetting.dns = vpnData['dns'];
+          /*getRcvEditData(row,"entity");
+          $("#rcvManDiv").modal('show');*/
+          that.showDecBoard(vpnData);
+          that.showEncBoard(vpnData);
+        })
+        if(item.online == "在线"){//在线才可以进行IP设置
+          this.ipConfigSetDis = true;
+          this.ipConfigDis = false;
+          this.ipConfigBtnShow = true;
+        }else if(item.online == "直播"){//ip设置参数不能修改
+          this.ipConfigSetDis = true;
+          this.ipConfigDis = true;
+          this.ipConfigBtnShow = false;
+        }else{//离线 ip设置标题可见不可点
+          this.ipConfigSetDis = false;
+          this.ipSettingShow = false;
+        }
       },
       //查询实体接收机对应的VPN参数
       rcvIpData(rcv_sn,callback){
@@ -1274,6 +1267,7 @@
               that.decodeContentShow = true;//解码卡设置show
               var jArr = [1,2,3,4,5,6,7,8];
               var difArr = [];
+              that.ipSetting.boardDecIdArr = [];
               for (var i = 0; i < boardDatas.length; i++) {
                 var board_id = boardDatas[i]["board_id"];
                 that.ipSetting.boardDecIdArr.push(board_id);
