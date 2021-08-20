@@ -75,6 +75,7 @@
     name: "Login",
     data(){
       return {
+        DStreamer_BUILD:DStreamer_BUILD,
         //title : "HDXpress",
         appVersion:"",//"1.02.02",
         lastestVersion:"",
@@ -236,7 +237,7 @@
         function onDeviceReady() {
           window.requestFileSystem(LocalFileSystem.PERSISTENT, 10*1024*1024,
             function (fs) {
-              let url = 'http://139.129.91.106/data/app/DStreamer.apk';
+              let url = that.DStreamer_BUILD+'/data/app/DStreamer.apk';
               fs.root.getFile('DStreamer.apk', { create: true, exclusive: false }, 
                 function(fileEntry) {
                   download(fileEntry, url)
