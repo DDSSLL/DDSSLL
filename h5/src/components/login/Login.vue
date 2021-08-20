@@ -14,7 +14,8 @@
           <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
         </div>
         <div class="form-item" style="overflow: hidden;">
-          <mt-button class="loginBtn" size="large" @click.native="login">{{ $t( 'basic.login' ) }}</mt-button>
+          <mt-button class="loginBtn" size="large" @click.native="login" v-if="loginBtnShow">{{ $t( 'basic.login' ) }}</mt-button>
+          <mt-button class="loginBtn" size="large" @click="downloadAppNew" v-if="updateBtnShow">{{updateText}}</mt-button>
         </div>
         <div class="form-item">
           <!-- <span class="forgetPwd">忘记密码了?</span>
@@ -66,7 +67,7 @@
 
 <script>
   import LoginSetBtn from './LoginSetBtn';
-  import appVersion from '../common/appVersion';
+  /*import appVersion from '../common/appVersion';*/
   import md5 from 'md5';
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE,SET_ACTIVE_DEVICE_TYPE } from '../../store/mutation-types';
@@ -75,6 +76,11 @@
     data(){
       return {
         //title : "HDXpress",
+        appVersion:"",//"1.02.02",
+        lastestVersion:"",
+        loginBtnShow:true,
+        updateBtnShow:false,
+        updateText:"请下载最新软件",
         title : "DStreamer",
         user:{
           login_name:'',
@@ -115,7 +121,7 @@
     ...mapState(['navHide','activedevicetype'])
     },
     components: {
-      LoginSetBtn,appVersion
+      LoginSetBtn/*,appVersion*/
     },
     watch:{   //监听当前设备类型变化
       '$store.state.activedevicetype': {
@@ -148,9 +154,9 @@
       }
     },
     created(){
-      this.deviceEvent();
     },
     mounted(){
+      var that = this;
       this.SET_ACTIVE_DEVICE_TYPE("DV1080")
       this.$axios.defaults.baseURL = this.DStreamer_BUILD;//一级域名
       this.user.saveMe_1080 = localStorage.getItem("SAVEME_1080")=="true"?true:false;
@@ -169,6 +175,21 @@
           this.hidshow = this.docmHeight > showHeight ? false : true;
         })();
       };
+      this.getLastestVersion(function(){
+        document.addEventListener("deviceready", onDeviceReady1, false);
+        function onDeviceReady1(){
+          cordova.getAppVersion.getVersionNumber().then(function(version){
+            that.appVersion = version;
+            if(that.appVersion == that.lastestVersion){
+              that.loginBtnShow = true;
+              that.updateBtnShow = false;
+            }else{
+              that.loginBtnShow = false;
+              that.updateBtnShow = true;
+            }
+          })
+        }
+      });
     },
     methods:{
       ...mapMutations({
@@ -177,12 +198,103 @@
         SET_ACTIVE_DEVICE,
         SET_ACTIVE_DEVICE_TYPE
       }),
-      deviceEvent(){
-        console.log("deviceEvent")
-        window.addEventListener('deviceReady',(event)=>{
-          console.log("deviceReady")
-          console.log(cordova)  
+      getLastestVersion(cb){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/login/login.php",
+          data:{
+            getLastestVersion: "true",
+          },
+          Api:"getLastestVersion",
+          AppId:"android",
+          UserId:that.user.login_name
         })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.lastestVersion = res.res.data['app_ver'];
+            if(typeof(cb) == 'function'){
+              cb()
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 3000
+            })
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      downloadAppNew(){
+        var that = this;
+        this.updateText = "正在下载,请稍后...";
+        document.addEventListener("deviceready", onDeviceReady, false);
+        function onDeviceReady() {
+          window.requestFileSystem(LocalFileSystem.PERSISTENT, 10*1024*1024,
+            function (fs) {
+              let url = 'http://139.129.91.106/data/app/DStreamer.apk';
+              fs.root.getFile('DStreamer.apk', { create: true, exclusive: false }, 
+                function(fileEntry) {
+                  download(fileEntry, url)
+                },
+                function(){
+                  console.log("onErrorCreateFile")
+                }
+              )
+            },
+            function(){
+              console.log("onErrorLoadFs")
+            }
+          )
+        };
+        function download(fileEntry, uri, readBinaryData) {
+          var fileTransfer = new FileTransfer();
+          var fileURL = fileEntry.toURL();
+          /*fileTransfer.onprogress = function(progressEvent){
+            if(progressEvent.lengthComputable){
+              var downloadProgress = (progressEvent.loaded / progressEvent.total);
+              if(Math.floor(downloadProgress) == 100){
+                that.$toast({
+                  message: '下载完成后会自动弹出安装',
+                  position: 'middle',
+                  duration: 3000
+                })
+              }else{
+                that.$toast({
+                  message: '已下载'+Math.floor(downloadProgress),
+                  position: 'middle',
+                  duration: 3000
+                })
+              }
+            }
+          }*/
+          fileTransfer.download(
+            uri, 
+            fileURL,//window.cordova.file.externalRootDirectory + 'test.apk',//
+            function (entry) {
+              window.cordova.plugins.fileOpener2.open(entry.toURL(), 'application/vnd.android.package-archive', {
+                error() {},
+                success: function() {}
+              })
+            },
+            function (error) {
+              console.log("download error source " + error.source);
+              console.log("download error target " + error.target);
+              console.log("download error code" + error.code);
+              console.log(error)
+            },
+            null, // or, pass false
+            {
+              //headers: {
+              //    "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+              //}
+            }
+          );
+        }
       },
       registerNew(){
         this.show.loginPageShow = false;
@@ -469,7 +581,7 @@
           console.log(error)
         })
       },
-      register(){},
+      /*register(){},*/
       connectWifi(){
         this.$router.push("/wifi");
       },
