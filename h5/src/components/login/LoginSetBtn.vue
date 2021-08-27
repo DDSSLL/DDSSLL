@@ -231,6 +231,7 @@
           //that.$axios.defaults.baseURL = that.domain;
           that.debugSetting = false;
           that.showConfig = false;
+          that.$emit("msgToParent",that.$axios.defaults.baseURL);
         }else{
           this.$toast({
             message: "密码错误",

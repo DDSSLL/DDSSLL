@@ -75,3 +75,7 @@ select:disabled,input:disabled{
    float:right;
    width: 30%;
 }
+.mint-radio-input:checked[disabled]+.mint-radio-core{
+  background-color:#2f518c;
+  border-color: #2f518c;
+}

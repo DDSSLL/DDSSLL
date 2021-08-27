@@ -1,7 +1,9 @@
 <template>
   <div class="page">
     <div id="body">
-      <h1 class="title"><LoginSetBtn v-if="hidShow" v-bind:content="title"></LoginSetBtn></h1>
+      <h1 class="title">
+        <LoginSetBtn v-if="hidShow" v-bind:content="title" v-on:msgToParent="msgToParent"></LoginSetBtn>
+      </h1>
       <div v-if="show.loginPageShow">
         <div class="form-item">
           <input type="text" autocomplete="false" class="loginIpt" v-model="user.login_name" placeholder="登录账号">
@@ -75,7 +77,7 @@
     name: "Login",
     data(){
       return {
-        DStreamer_BUILD:DStreamer_BUILD,
+        baseURL:"",
         //title : "HDXpress",
         appVersion:"",//"1.02.02",
         lastestVersion:"",
@@ -176,21 +178,7 @@
           this.hidshow = this.docmHeight > showHeight ? false : true;
         })();
       };
-      this.getLastestVersion(function(){
-        document.addEventListener("deviceready", onDeviceReady1, false);
-        function onDeviceReady1(){
-          cordova.getAppVersion.getVersionNumber().then(function(version){
-            that.appVersion = version;
-            if(that.appVersion == that.lastestVersion){
-              that.loginBtnShow = true;
-              that.updateBtnShow = false;
-            }else{
-              that.loginBtnShow = false;
-              that.updateBtnShow = true;
-            }
-          })
-        }
-      });
+      this.checkUpdate();
     },
     methods:{
       ...mapMutations({
@@ -199,6 +187,30 @@
         SET_ACTIVE_DEVICE,
         SET_ACTIVE_DEVICE_TYPE
       }),
+      msgToParent(data){
+        console.log("msgToParent")
+        console.log(data)
+        this.baseURL = data;
+        this.checkUpdate();
+      },
+      checkUpdate(){
+        var that = this;
+        this.getLastestVersion(function(){
+          document.addEventListener("deviceready", onDeviceReady1, false);
+          function onDeviceReady1(){
+            cordova.getAppVersion.getVersionNumber().then(function(version){
+              that.appVersion = version;
+              if(that.appVersion == that.lastestVersion){
+                that.loginBtnShow = true;
+                that.updateBtnShow = false;
+              }else{
+                that.loginBtnShow = false;
+                that.updateBtnShow = true;
+              }
+            })
+          }
+        });
+      },
       getLastestVersion(cb){
         var that = this;
         this.$axios({
@@ -237,7 +249,9 @@
         function onDeviceReady() {
           window.requestFileSystem(LocalFileSystem.PERSISTENT, 10*1024*1024,
             function (fs) {
-              let url = that.DStreamer_BUILD+'/data/app/DStreamer.apk';
+              //let url = that.$axios.defaults.baseURL+'/data/app/DStreamer.apk';
+              let url = 'http://www.uhdxpress.com/data/app/DStreamer.apk';
+              
               fs.root.getFile('DStreamer.apk', { create: true, exclusive: false }, 
                 function(fileEntry) {
                   download(fileEntry, url)

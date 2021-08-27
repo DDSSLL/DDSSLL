@@ -23,6 +23,7 @@
 
     <!-- 系统设置 -->
     <systemConf></systemConf>
+    
     <!-- 路测 -->
     <!-- <RoadTest></RoadTest> -->
     
@@ -112,6 +113,7 @@
           that.$router.replace("/login");
           localStorage.removeItem('LOGIN');
           clearInterval(localStorage.loginTimer);
+          clearInterval(localStorage.deviceTimer);
         }, 1000);
       }
     }

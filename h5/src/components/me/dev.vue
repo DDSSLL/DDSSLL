@@ -142,7 +142,6 @@
             </div>
           </template>
         </div>
-        
       </div>
     </mt-popup>
     <!-- 背包配置 -->
