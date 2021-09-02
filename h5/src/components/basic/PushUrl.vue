@@ -464,7 +464,7 @@
             var len = this.address.length;
             for(var i=0; i<len; i++){
               if(this.address[i].oneCardEnable == 1){
-                this.checkOneCardEnable(this.data[i].id,0);
+                this.checkOneCardEnable(that.address[i].id,0);
               }
             }
             this.checkOneCardEnable(item.id,1);
@@ -507,6 +507,7 @@
       },
       //单卡推流地址使能
       checkOneCardEnable(rowId, flag){
+        var that = this;
         this.$axios({
           method: 'post',
           url:"/page/index/indexData.php",

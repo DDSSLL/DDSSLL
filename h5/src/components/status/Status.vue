@@ -1,6 +1,6 @@
 <template>
   <div class="main mainPage">
-    <Device page='status'></Device><!--  @refreshChart='refreshChart' -->
+    <Device page='status'></Device>
     <div class="refreshIcon" @click.stop="refreshChart">
       <i class="fa fa-refresh" aria-hidden="true"></i>
     </div>

@@ -1,4 +1,5 @@
 import * as types from './mutation-types'
+import Vue from 'vue'
 
 // 改变state数据
 export default {
@@ -13,7 +14,13 @@ export default {
     },
     // 设置当前设备
     [types.SET_ACTIVE_DEVICE]: (state, datas) => {
-        state.ActiveDevice = datas
+        if(datas){
+            state.ActiveDevice = datas;    
+            Vue.set(state.ActiveDevice,'dev_sn', datas.dev_sn);
+            Vue.set(state.ActiveDevice,'dev_name', datas.dev_name);
+            Vue.set(state.ActiveDevice,'rcv_sn', datas.rcv_sn);
+            Vue.set(state.ActiveDevice,'board_id', datas.board_id);
+        }
     },
     // 设置设备定时器
     /*[types.SET_DEVICE_TIMER]: (state, datas) => {

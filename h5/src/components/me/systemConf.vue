@@ -120,7 +120,7 @@
       return{
         SUPER:SUPER,
         systemConfShow:false,
-        app_ver:"1.02.02",
+        app_ver:"1.02.03",
         server_ver:"",
         mysqlVer:"",
         ftp_ip:"",
@@ -179,6 +179,7 @@
             var data = res.data;
             that.server_ver = data[0]['server_ver'];
             that.mysqlVer = data[0]['mysqlVer'];
+            that.app_ver = data[0]['app_ver'];
           }else{
             that.$toast({
               message: res.res.reason,

@@ -242,7 +242,7 @@
             </div>
           </div>
         </div>
-        <div class="GroupItem">
+        <!-- <div class="GroupItem">
           <div class="GroupItemField">
             <div class="GroupItemTitle">HDMI输出</div>
             <div class="GroupItemValue">
@@ -253,7 +253,7 @@
               </select>
             </div>
           </div>
-        </div>
+        </div> -->
         <div class="GroupItem">
           <div class="GroupItemField">
             <div class="GroupItemTitle">传输通道</div>
@@ -339,6 +339,7 @@
     name: "Control",
     data(){
       return{
+        R1080_RCV:R1080_RCV,
         curDevSeries:"",
         cardConfigShow:true,
         commonSettingShow:true,
@@ -351,7 +352,7 @@
         delayMax : 0,
         speedMin : 0,
         speedMax : 0,
-        ActiveDevice:null,
+        //ActiveDevice:null,
         OPTIONS_5G_MODE: [{text: "AUTO",value: "0"},
                           {text: "NSA",value: "1"}, 
                           {text: "SA",value: "2"}, 
@@ -462,7 +463,7 @@
       }
     },
     computed: {
-      ...mapState(['user','paramLockAck','lockUserId'])//"ActiveDeviceType",
+      ...mapState(['user','paramLockAck','lockUserId','ActiveDevice'])//"ActiveDeviceType",
     },
     components: {
       Device
@@ -1344,11 +1345,11 @@
       },
       changeWorkModePage(){
         switch(this.common.WorkMode){
-          case "0":
+          case 0:
             this.common.WorkModePush = true;
             this.common.WorkModeAct = false;
             break;
-          case "2":
+          case 2:
             this.common.WorkModePush = false;
             this.common.WorkModeAct = true;
         }
@@ -1524,11 +1525,7 @@
           }
           this.$global.getPushUrls(function(data){
             var pushUrlSel = 0;
-            for(var i=0; i<data.length; i++){
-              if(data[i]["nEnable"] == "1"){
-                pushUrlSel += 1;
-              }
-            }
+            pushUrlSel = that.getUsedPushUrlCount(data);//获取勾选的推流地址个数
             if (pushUrlSel == 0 && that.curDevSeries == "1080") {
               var info = "无勾选的推流地址！";
               that.disTransSwitch(info);
@@ -1575,6 +1572,31 @@
           that.show.pushDisShow = false;
           that.common.dev_srt = false;//互动传输开关和推流传输开关状态切换保持
         }
+      },
+      //获取勾选的推流地址个数
+      getUsedPushUrlCount(data){
+        var that = this;
+        var res = 0;
+        //1080配对1080R时，不支持推流功能
+        if(this.$global.getRcvSeries(that.ActiveDevice.rcv_sn) === this.R1080_RCV){
+          res = -1;
+        }else{
+          if(this.common.PushTsType == 1){//单卡
+            for(var i=0; i<data.length; i++){
+              if(data[i]["oneCardEnable"] == "1"){
+                res += 1;
+                break;
+              }
+            }
+          }else{//汇聚
+            for(var i=0; i<data.length; i++){
+              if(data[i]["nEnable"] == "1"){
+                res += 1;
+              }
+            }
+          }
+        }
+        return res;
       },
       //互动传输开关
       changeDevSrt(){
@@ -1628,11 +1650,11 @@
           this.common.dev_push_enableVal = true;//互动传输开关和推流传输开关状态切换保持
         } else {
           //互动关
-          this.common.actModeClose(switchId,actDev);
+          this.actModeClose(actDev);
         }
       },
       //互动模式关闭
-      actModeClose(switchId,actDev){//互动关
+      actModeClose(actDev){//互动关
         this.$global.setDevParamList(['dev_push_enable'],[0]);
         this.$global.setDevParamList(['param_lock','dev_push_enable'],[1,0],actDev);
         this.common.dev_push_enableVal = false;//互动传输开关和推流传输开关状态切换保持

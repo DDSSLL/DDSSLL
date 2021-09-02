@@ -54,6 +54,8 @@ window.UHDXPRESS_BUILD = "http://4000.uhdxpress.com";//4000一级域名
 window.UHDXPRESS_SERVE = "http://139.129.91.106/";//4000二级域名
 window.VIR_RCV = '2999'; //虚拟接收机
 window.PRA_RCV = '2141'; //实体接收机
+window.R1080_RCV = '2154'; //1080R
+
 window.colorGV = {
     '发送速率':'#FFFF00',
     '接收速率': '#22aadd',
@@ -163,7 +165,9 @@ export default {
                               {value: "1",text: "H.265 Main(4:2:0/10bit)"},
                               {value: "4",text: "H.264"}],                 
   OPTIONS_BITRATEMODE : [{value: "0",text: "CBR"}, 
-                              {value: "1",text: "AVBR"}],
+                          {value: "1",text: "AVBR"}],
+  OPTIONS_BITRATEMODE_1080 : [{value: "0",text: "固定码率"}, 
+                              {value: "1",text: "可变码率"}],
   OPTIONS_BITRATEMODE2 : [{value: "0",text: "CBR"}],
   OPTIONS_HDR_4000 : [{text: "SDR",value: "0"}, 
                 {text: "HLG",value: "1"}],
@@ -231,16 +235,19 @@ export default {
                               {text: "1280x720p50",value: "8"}, 
                               {text: "720x576p50",value: "11"}, 
                               {text: "720x480p59.94",value: "12"}],
-  OPTIONS_HDMI_FORMAT_1080 :[{text: "1920x1080p30",value: "1"},
+
+  OPTIONS_HDMI_FORMAT_1080 : [{text: "1920x1080p30",value: "1"},
                               {text: "1920x1080p60",value: "2"}, 
                               {text: "1920x1080p50",value: "3"}, 
                               {text: "1920x1080p25",value: "4"}, 
+                              {text: "1920x1080i60",value: "5"}, 
+                              {text: "1920x1080i50",value: "6"}, 
                               {text: "1280x720p60",value: "7"}, 
                               {text: "1280x720p50",value: "8"}, 
                               {text: "1280x720p30",value: "9"}, 
                               {text: "1280x720p25",value: "10"}, 
                               {text: "720x576p50",value: "11"}, 
-                              {text: "720x480p60",value: "12"}],
+                              {text: "720x480p60",value: "12"}],                              
   OPTIONS_AUDIO_BR : [{text: "256kbps",value: "256"}, 
                       {text: "128kbps",value: "128"},
                       {text: "64kbps",value: "64"}],
@@ -725,7 +732,8 @@ export default {
       data:qs.stringify({
         getBoardUrl:true,
         rcvSn: store.state.ActiveDevice.rcv_sn,
-        boardId: boardId
+        boardId: boardId,
+        devSN: store.state.ActiveDevice.dev_sn
       }),
       Api:"getBoardUrl",
       AppId:"android",
@@ -797,7 +805,11 @@ export default {
       }
     }
     else if (param === 'bitrate_mode') {
-      res = that.OPTIONS_BITRATEMODE;
+      if(devSeries === "1080"){
+        res = that.OPTIONS_BITRATEMODE_1080;  
+      }else{
+        res = that.OPTIONS_BITRATEMODE;
+      }
     }
     else if (param == 'hdr') {
       if (devMode == 'DV3000T') {
@@ -1667,9 +1679,13 @@ export default {
     if(sn_4 === 2999){
       return VIR_RCV;
     }
+    else if(sn_4 === 2154 || sn_4 === 2156){
+      return R1080_RCV;
+    }
     else {
       return PRA_RCV;
     }
+
   },
   //判断URL合法性
   checkUrl(url) {

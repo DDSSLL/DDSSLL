@@ -222,7 +222,9 @@
   import $ from 'jquery';
   export default {
     name: "Device",
-    props:['page'],
+    props:{
+    	page:String
+    },
     data(){
       return{
         curDevSeries:"",
@@ -628,7 +630,7 @@
       },
       //更新当前设备参数
       refreshCurDevParam(datas){
-        this.SET_ACTIVE_DEVICE(datas);
+      	this.SET_ACTIVE_DEVICE(datas);
         this.getDevLockStatus();
       },
       getDeviceList(){

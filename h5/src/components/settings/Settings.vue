@@ -834,7 +834,7 @@
           that.OPTIONS_VIDEOENCODE = that.$global.OPTIONS_VIDEOENCODE_1080;//视频编码
           that.OPTIONS_AUDIO_ENCODE = that.$global.OPTIONS_AUDIO_ENCODE_1080;//音频编码
           that.OPTIONS_AUDIO_BR = that.$global.OPTIONS_AUDIO_BR;//音频比特率
-          that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;//码率控制
+          that.OPTIONS_BITRATEMODE = that.$global.getDevParamRange(dev_sn, userPrefix, 'bitrate_mode');//码率控制that.$global.OPTIONS_BITRATEMODE;
           that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT_1080;//编码分辨率
         }else if(this.curDevSeries == "4000"){
           //视频输入 判断是否是PCIE版本
@@ -855,7 +855,7 @@
           that.OPTIONS_AUDIO_ENCODE = that.$global.OPTIONS_AUDIO_ENCODE_4000;//音频编码
           that.OPTIONS_AUDIO_ENCODE_ORI = that.$global.getDevParamRange(dev_sn,userPrefix,'audio_encode');
           that.OPTIONS_AUDIO_BR = that.$global.OPTIONS_AUDIO_BR;//音频比特率
-          that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;//码率控制
+          that.OPTIONS_BITRATEMODE = that.$global.getDevParamRange(dev_sn, userPrefix, 'bitrate_mode');//that.$global.OPTIONS_BITRATEMODE;//码率控制
           that.OPTIONS_AUDIO_BR = that.$global.OPTIONS_AUDIO_BR;//音频比特率
           that.OPTIONS_HDR = that.$global.getDevParamRange(dev_sn,userPrefix,"hdr");//HDR设置
           //that.OPTIONS_HDR_ORI = that.$global.getDevParamRange(dev_sn,userPrefix,"hdr");//HDR设置
