@@ -194,11 +194,14 @@
         this.checkUpdate();
       },
       checkUpdate(){
+        console.log("checkUpdate")
         var that = this;
         this.getLastestVersion(function(){
+          console.log("lastestVersion:"+that.lastestVersion)
           document.addEventListener("deviceready", onDeviceReady1, false);
           function onDeviceReady1(){
             cordova.getAppVersion.getVersionNumber().then(function(version){
+              console.log("current appVersion:"+that.appVersion)
               that.appVersion = version;
               if(that.appVersion == that.lastestVersion){
                 that.loginBtnShow = true;
@@ -251,7 +254,7 @@
             function (fs) {
               
               //let url = 'http://www.uhdxpress.com/data/app/DStreamer.apk';
-              let url = 'http://139.129.91.106:8088/upload/APP/DStreamer.apk';
+              let url = 'http://139.129.91.106/upload/APP/DStreamer.apk';
               fs.root.getFile('DStreamer.apk', { create: true, exclusive: false }, 
                 function(fileEntry) {
                   download(fileEntry, url)
