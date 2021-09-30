@@ -4,6 +4,9 @@
     <div class="refreshIcon" @click.stop="refreshChart">
       <i class="fa fa-refresh" aria-hidden="true"></i>
     </div>
+    <div class="refreshIcon" style="right:60px" @click.stop="historyChart">
+      <i class="fa fa-file-text-o" aria-hidden="true"></i>
+    </div>
     <div class="chartArea">
       <div class="mainChart" id="mainChart">
         <div id="totalChart" class="totalChart"></div>
@@ -118,6 +121,33 @@
         </div>
       </div>
     </mt-popup> 
+    <mt-popup v-model="hisChartShow" position="right">
+      <div id="hisChartDiv">
+        <div class="hisChartTitle">
+          <div class="back" @click="closeHisChart">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+            <span>历史数据</span>
+          </div>  
+        </div>
+        <div class="hisChartContent">
+          <div class="">
+            <select class="ItemSelect" v-model="selectHisData" @change="changeChartFile" style="height:28px;width:100%">
+              <template v-for="item in hisFileData">
+                <option :value="item.value">{{ item.text}}</option>
+              </template>
+            </select>
+            <select class="ItemSelect" v-model="selectHisType" @change="changeChartType" style="height:28px;margin-top:10px;width:100%">
+              <template v-for="item in OPTIONS_HIS_CHART_TYPE">
+                <option :value="item.value">{{item.text}}</option>
+              </template>
+            </select>
+          </div>
+          <span style="color:red;text-align:center;display:inline-block;width:100%;margin-top:10px;">{{progress}}</span>
+          <div id="hisDataShow" style="height:50%;margin-top:10px;"></div>
+          
+        </div>
+      </div>
+    </mt-popup> 
   </div>
 </template>
 
@@ -133,10 +163,11 @@ export default {
   name: 'Status',
   data(){
     return{
+      progress:"",
       curDevSeries:"",
       cardIdArr:[],
       showDevSrt:false,
-      ActiveDevice:null,
+      //ActiveDevice:null,
       timer:null,
       myChartTotal:null,
       lteChart : null,
@@ -154,7 +185,14 @@ export default {
       usb5g2Show:false,
       wifiShow:false,
       bigChartShow:false,
+      hisChartShow:false,
+      hisChart:"",
+      hisFileData:[],
+      OPTIONS_HIS_CHART_TYPE:[],
+      selectHisData:"",
+      selectHisType:"",
       chartStyle:"",
+      hisChartData:"",
       myChartCards: {},
       marginTitleLeft:100,
       gridTop:110,
@@ -163,6 +201,7 @@ export default {
       xData : [],
       colorGV: {},
       avbrFlag:true,
+      chartCardView:{},
       chartLegendArr : ["Total"],
       chartGeneralView : {
         "up":["Total"],
@@ -405,7 +444,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['user','ActiveDevice','cardLineStyle','chartCardView'])
+    ...mapState(['user','ActiveDevice','cardLineStyle'/*,'chartCardView'*/])
   },
   components: {
     Device
@@ -460,7 +499,7 @@ export default {
     var that = this;
     this.initColorGV(this.cardLineStyle);
     this.getChartConfUnit();
-    if(this.ActiveDevice.dev_sn){
+    if(this.ActiveDevice && this.ActiveDevice.dev_sn){
       this.$global.getDeviceParam(function(data){
         that.ChartConf.unit.speedInput = data.dev_sr/1000;
         that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
@@ -505,9 +544,11 @@ export default {
         let res = response.data;
         if(res.res.success){
           var data = res.data[0];
-          that.ChartConf.unit.chartAuto = data.chartAuto;
-          that.ChartConf.unit.chartInterval = data.chartInterval;
-          that.ChartConf.unit.chartMax = data.chartMax;
+          if(data && data.length != 0){
+            that.ChartConf.unit.chartAuto = data.chartAuto;
+            that.ChartConf.unit.chartInterval = data.chartInterval;
+            that.ChartConf.unit.chartMax = data.chartMax;
+          }
         }
       })
       .catch(function (error) {
@@ -587,6 +628,947 @@ export default {
       allChartData[curChart] = null;
       allChartData[curChart] = cardData;
       localStorage.allChartData = JSON.stringify(allChartData);
+    },
+    historyChart(){
+      this.hisChartShow = true;
+      this.getDataFile();
+      this.initChartType();
+    },
+    closeHisChart(){
+      this.hisChartShow = false;
+    },
+    //获取文件列表
+    getDataFile() {
+      console.log("getDataFile")
+      var that = this;
+      var devSN = this.ActiveDevice.dev_sn;
+      if (!devSN || !this.$global.isValidSn(devSN)) {
+        return;
+      }
+      this.$axios({
+        method: 'post',
+        url:"/page/index/indexData.php",
+        data:this.$qs.stringify({
+          getDevDataFiles:devSN,
+        }),
+        Api:"getDevDataFiles",
+        AppId:"android",
+        UserId:that.user.id
+      })
+      .then(function (response) {
+        let res = response.data;
+        if(res.res.success){
+          //that.hisFileData = res.data;
+          var data = res.data;
+          var obj = {};
+          var arr = [];
+          for(var i=0; i<data.length; i++){
+            obj = {};
+            obj.value = that.ActiveDevice.dev_sn+"/"+data[i]["fileName"];
+            obj.text = data[i]["fileName"] +" / "+ data[i]["fileSize"];
+            arr.push(obj);
+          }
+          that.hisFileData = arr;
+          that.selectHisData = arr[0]["value"];
+          that.changeChartFile();
+        }else{
+          console.log(error)
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
+    },
+    initChartType(){
+      //网卡选择
+      var that = this;
+      if(this.curDevSeries == '4000'){
+        this.OPTIONS_HIS_CHART_TYPE = this.$global.OPTIONS_HIS_CHART_4000;
+      } else{
+        this.OPTIONS_HIS_CHART_TYPE = this.$global.OPTIONS_HIS_CHART_1080;
+      }
+      this.selectHisType = this.OPTIONS_HIS_CHART_TYPE[0]["value"];
+      this.changeChartType();
+    },
+    changeChartFile(){
+      var that = this;
+      this.progress = "正在获取数据,请稍后...";
+      this.getCsvData(that.selectHisData, function(data) {
+        that.hisChartData = data;
+        that.changeChartType();
+      });
+    },
+    //获取某个csv文件里的数据
+    getCsvData(filePath, callback) {
+      var that = this;
+      document.addEventListener("deviceready", onDeviceReady, false);
+      function onDeviceReady() {
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
+          function (fs) {
+            //that.DStreamer_BUILD = "D:/SYNCOR/Web/1080_4000";
+            let url = that.$axios.defaults.baseURL+'/data/'+that.selectHisData;
+            console.log(url)
+            fs.root.getFile('data.csv', { create: true, exclusive: false },
+              function(fileEntry) {
+                download(fileEntry, url)
+              },
+              function(){
+                console.log("onErrorCreateFile")
+              }
+            )
+          },
+          function(){
+            console.log("onErrorLoadFs")
+          }
+        )
+      }
+      function download(fileEntry, uri) {
+        //console.log("download")
+        var fileTransfer = new FileTransfer();
+        var fileURL = fileEntry.toURL();
+        fileTransfer.download(
+          uri, 
+          fileURL,//window.cordova.file.externalRootDirectory + 'test.apk',//
+          function (fileEntry) {
+            fileEntry.file(function (file) {
+              var reader = new FileReader();
+              reader.onloadend = function() {
+                var fileStr = this.result;
+                that.downloadData = fileStr.split("\r\n");
+                var dataArr = [];
+                var dataObj = {};
+                for(var i=1; i<that.downloadData.length; i++){
+                  dataObj = {};
+                  var arr = that.downloadData[i].split(",");
+                  if(arr.length == 1 && arr[0] == ""){
+                    continue;
+                  }
+                  var timeArr = arr[0].split("-");
+                  dataObj['time'] = timeArr[0]+' '+timeArr[1]; //日期和时间之间用空格
+                  dataObj['send'] = arr[1];
+                  dataObj['rcv'] = arr[2];
+                  dataObj['lost2'] = arr[3];
+                  dataObj['lost'] = arr[4];
+                  if(arr.length > 5){
+                    if(arr[5] == "NO INPUT\r\n" || arr[5] == "\r\n" || arr[5] == "NO INPUT" || arr[5] == ""){
+                      dataObj['VInput'] = 100;
+                    } else{
+                      dataObj['VInput'] = 0;
+                    }
+                  }
+                  if(arr.length > 6){
+                    dataObj['srt'] = arr[6];
+                  }
+                  if(arr.length > 7){
+                    dataObj['avbr'] = arr[7];
+                  } else {
+                    dataObj['avbr'] = 0;
+                  }
+                  if(arr.length > 8){
+                    dataObj['lte1-send'] = arr[8];
+                    dataObj['lte1-recv'] = arr[9];
+                    dataObj['lte1-rtt'] = arr[10];
+                    dataObj['lte1-mode'] = arr[11];
+                    dataObj['lte2-send'] = arr[12];
+                    dataObj['lte2-recv'] = arr[13];
+                    dataObj['lte2-rtt'] = arr[14];
+                    dataObj['lte2-mode'] = arr[15];
+                    dataObj['lte3-send'] = arr[16];
+                    dataObj['lte3-recv'] = arr[17];
+                    dataObj['lte3-rtt'] = arr[18];
+                    dataObj['lte3-mode'] = arr[19];
+                    dataObj['lte4-send'] = arr[20];
+                    dataObj['lte4-recv'] = arr[21];
+                    dataObj['lte4-rtt'] = arr[22];
+                    dataObj['lte4-mode'] = arr[23];
+                    dataObj['lte5-send'] = arr[24];
+                    dataObj['lte5-recv'] = arr[25];
+                    dataObj['lte5-rtt'] = arr[26];
+                    dataObj['lte5-mode'] = arr[27];
+                    dataObj['lte6-send'] = arr[28];
+                    dataObj['lte6-recv'] = arr[29];
+                    dataObj['lte6-rtt'] = arr[30];
+                    dataObj['lte6-mode'] = arr[31];
+                  }else{
+                    dataObj['lte1-send'] = 0;
+                    dataObj['lte1-recv'] = 0;
+                    dataObj['lte1-rtt'] = 0;
+                    dataObj['lte1-mode'] = 0;
+                    dataObj['lte2-send'] = 0;
+                    dataObj['lte2-recv'] = 0;
+                    dataObj['lte2-rtt'] = 0;
+                    dataObj['lte2-mode'] = 0;
+                    dataObj['lte3-send'] = 0;
+                    dataObj['lte3-recv'] = 0;
+                    dataObj['lte3-rtt'] = 0;
+                    dataObj['lte3-mode'] = 0;
+                    dataObj['lte4-send'] = 0;
+                    dataObj['lte4-recv'] = 0;
+                    dataObj['lte4-rtt'] = 0;
+                    dataObj['lte4-mode'] = 0;
+                    dataObj['lte5-send'] = 0;
+                    dataObj['lte5-recv'] = 0;
+                    dataObj['lte5-rtt'] = 0;
+                    dataObj['lte5-mode'] = 0;
+                    dataObj['lte6-send'] = 0;
+                    dataObj['lte6-recv'] = 0;
+                    dataObj['lte6-rtt'] = 0;
+                    dataObj['lte6-mode'] = 0;
+                  }
+                  if(dataObj['send'] != null){
+                    dataArr.push(dataObj) 
+                  }     
+                }
+                if (typeof(callback) == 'function') {
+                  callback(dataArr);
+                }
+              };
+              reader.readAsText(file);
+            }, function (error) {
+              console.log(error)
+            });
+          },
+          function (error) {
+            console.log("download error source " + error.source);
+            console.log("download error target " + error.target);
+            console.log("download error code" + error.code);
+            console.log(error)
+          },
+          null, // or, pass false
+          {
+            //headers: {
+            //    "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+            //}
+          }
+        );
+      }
+      
+      /*this.$axios({
+        method: 'post',
+        url:"/page/index/indexData.php",
+        data:this.$qs.stringify({
+          getCsvData:filePath,
+        }),
+        Api:"getCsvData",
+        AppId:"android",
+        UserId:that.user.id
+      })
+      .then(function (response) {
+        let res = response.data;
+        if(res.res.success){
+          if (typeof(callback) == 'function') {
+            callback(res.data);
+          }
+        }else{
+          console.log(error)
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+      })*/
+    },
+    changeChartType(){
+      var hisData = this.hisChartData;
+      if(!hisData){
+        return;
+      }
+      if (!this.hisChart) {
+        this.hisChart = echarts.init(document.getElementById('hisDataShow'));
+      }
+      this.progress = "";
+      if(this.selectHisType == "total"){
+        this.initHisDataChartTotal(hisData);
+      }else{
+        this.initHisDataChartCard(hisData);
+      }
+    },
+    initHisDataChartTotal(hisData){
+      var data = [];
+      var that = this;
+      var xLabelInterval = 0;
+      var lostArr=[], lost2Arr=[], rcvArr=[], sendArr=[] ,timeArr=[],vInputArr = [],srtArr = [],avbrArr = [];
+      if(!hisData || hisData.length == 0){
+        data = [{lost: "0", lost2: "0", rcv: "0", send: "0", time: ""}]
+      }else{
+        data = hisData;
+        xLabelInterval = data.length-2;
+      }
+      for(var i=0; i<data.length; i++){
+        lostArr.push(data[i].lost);
+        lost2Arr.push(data[i].lost2);
+        rcvArr.push(data[i].rcv);
+        sendArr.push(data[i].send);
+        timeArr.push(data[i].time);
+        vInputArr.push(data[i].VInput);
+        srtArr.push(data[i].srt);
+        avbrArr.push(data[i].avbr);
+      }
+      //4000背包是否显示SRT拉流曲线
+      var showDevSrt = false;
+      if(this.$global.getRcvMode(that.ActiveDevice.rcv_sn.substr(-4)) == 'DV4004R'){
+        showDevSrt = true;
+      }
+      var series = [];
+      series.push({
+        name: "", //信号输入
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 1,
+        itemStyle: {
+          normal: {
+            color: colorGV['信号输入'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['信号输入'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        areaStyle: {
+          normal: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+              offset: 0,
+              color: colorGV['信号输入']
+            }, {
+              offset: 0.8,
+              color: colorGV['信号输入']
+            }], false),
+            shadowBlur: 10,
+            opacity: 0.3
+          }
+        },
+        data: vInputArr
+      }, {
+        name: 'SRT拉流',
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 2,
+        itemStyle: {
+          normal: {
+            color: colorGV['SRT拉流'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['SRT拉流'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        data: srtArr
+      }, {
+        name: "发送速率",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 0,
+        itemStyle: {
+          normal: {
+            color: colorGV['发送速率'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['发送速率'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        data: sendArr
+      }, {
+        name: "接收速率",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 0,
+        areaStyle: {
+          normal: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+              offset: 0,
+              color: colorGV['接收速率']
+            }, {
+              offset: 0.8,
+              color: 'rgba(255,255,255,0)'
+            }], false),
+            shadowBlur: 10,
+            opacity: 0.3
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: colorGV['接收速率'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['接收速率'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        data: rcvArr
+      }, {
+        name: "可变码率",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 0,
+        itemStyle: {
+          normal: {
+            color: colorGV['可变码率'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['可变码率'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        data: avbrArr
+      }, {
+        name: "传输丢包",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 1,
+        itemStyle: {
+          normal: {
+            color: colorGV['传输丢包'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['传输丢包'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        data: lostArr
+      }, {
+        name: "业务丢包",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 1,
+        itemStyle: {
+          normal: {
+            color: colorGV['业务丢包'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['业务丢包'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        data: lost2Arr
+      });
+      var option = {
+        title: { show:false },
+        legend: {
+          show:true,
+          textStyle: {
+            color: '#ddd',
+            fontSize: '10'
+          },
+          itemGap:-10,
+          left:'center',
+          padding:[5,0],
+          //icon:'circle',
+          /*tooltip: {
+            show: true
+          },*/
+          //data: ['发送速率','接收速率','传输丢包','业务丢包','可变码率'],
+          data:[{
+            name: '发送速率',
+            icon: 'none',
+            textStyle: {color: '#FFFF00'}
+          },{
+            name: '接收速率',
+            icon: 'none',
+            textStyle: {color: '#22aadd'}
+          },{
+            name: '传输丢包',
+            icon: 'none',
+            textStyle: {color: '#f1a1ff'}
+          },{
+            name: '业务丢包',
+            icon: 'none',
+            textStyle: {color: '#f5222d'}
+          },{
+            name: '可变码率',
+            icon: 'none',
+            textStyle: {color: '#73d13d'}
+          }],
+          selected:{'发送速率':true,'接收速率':true,'传输丢包':false,'业务丢包':true,'可变码率':true}
+        },
+        grid: {
+          containLabel: true,
+          borderWidth: 0,
+          top: 70,
+          bottom: 40,
+          left: 10,
+          right: 10,
+          textStyle: { color: "#fff" }
+        },
+        tooltip: {
+          trigger: "axis",
+          formatter: function(params) {
+            var str = '';
+            str += '<div>'+ params[0].name +'</div>'; //显示日期的函数
+            for(var i=0; i<params.length; i++) {
+              if(params[i].seriesName == '发送速率'){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
+              }else if(params[i].seriesName == '接收速率'){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
+              }else if(params[i].seriesName == '传输丢包'){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'%' : '暂无') +'</br>';
+              }else if(params[i].seriesName == '业务丢包'){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'%' : '暂无') +'</br>';
+              }else if(params[i].seriesName == '可变码率'){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
+              }
+              if(showDevSrt && params[i].seriesName == 'SRT拉流'){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
+              }
+            }
+            return str;
+          },
+          axisPointer: { // 坐标轴指示器，坐标轴触发有效
+            type: 'line', // 默认为直线，可选为：'line' | 'shadow'
+            lineStyle: {
+              color: '#57617B'
+            }
+          },
+          backgroundColor: 'rgba(0,0,0,0.7)', // 背景
+          padding: [8, 10], //内边距
+          extraCssText: 'box-shadow: 0 0 3px rgba(255, 255, 255, 0.4);' //添加阴影
+        },
+        dataZoom:[{        //用于添加滚轮缩放
+          type: 'inside',
+          show: true,
+          xAxisIndex: [0],
+        },{
+          type:'slider' ,         //用于添加滑动条缩放，
+          height: 25,
+          bottom: 10,
+          textStyle:{
+            color: '#fff'
+          }
+        }],
+        xAxis: [{
+          type: "category",
+          axisLine: {
+            lineStyle: {
+              color: '#32346c'
+            }
+          },
+          axisTick: {
+            show: true,
+            inside:true,
+            length:5,
+            lineStyle:{
+              color:'#fff',
+              type:'solid',
+              width:1
+            }
+          },
+          axisLabel: {
+            show: true,
+            //interval:xLabelInterval,
+            inside: false,
+            textStyle: {
+              color: '#bac0c0',
+              fontWeight: 'normal',
+              fontSize: '12'
+            }
+          },
+          splitLine: {
+            show: false,
+            lineStyle: {
+              color: '#32346c'
+            }
+          },
+          splitArea: {
+            show: false
+          },
+          boundaryGap: false , //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样
+          data: timeArr
+        }],
+        yAxis: [{
+          type: 'value',
+          name: '速率(Mbps)',
+          nameTextStyle: { color: '#ddd' },
+          axisTick: { show: false },
+          axisLine: {
+            show: true,
+            lineStyle: { color: '#32346c' }
+          },
+          splitLine: {
+            show: true,
+            lineStyle: { color: '#1c1c45' }
+          },
+          axisLabel: {
+            textStyle: {
+              color: '#bac0c0',
+              fontWeight: 'normal',
+              fontSize: '12'
+            },
+            formatter: '{value}'
+          }
+        }, {
+          type: 'value',
+          name: '丢包率(%)',
+          nameTextStyle: { color: '#ddd' },
+          axisTick: { show: false },
+          axisLine: {
+            show: true,
+            lineStyle: { color: '#32346c' }
+          },
+          splitLine: {
+            show: false,
+            lineStyle: { color: '#32346c ' }
+          },
+          axisLabel: {
+            textStyle: {
+              color: '#bac0c0',
+              fontWeight: 'normal',
+              fontSize: '12'
+            },
+            formatter: '{value}'
+          }
+        },that.commonOptionYAxis3],
+        series: series,
+        animation: false
+      };
+      //速率最大值超过150，Y轴上限只显示到150
+      for(var i=0; i<data.length; i++){
+        if(data[i].send > 150){
+          option.yAxis[0].max = 150;
+        }
+      }
+      this.hisChart.setOption(option, true);
+    },
+    initHisDataChartCard(hisData){
+      var that = this;
+      var cardId = that.selectHisType;
+      var data = [];  
+      var xLabelInterval = 0;
+      var rcvArr=[], sendArr=[] ,timeArr=[],rttArr=[],simModeArr=[];
+      if(!hisData || hisData.length == 0){
+        data = [{rcv: "0", send: "0", time: ""}]
+      }else{
+        data = hisData
+        xLabelInterval = data.length-2;
+      }
+      for(var i=0; i<data.length; i++){
+        rcvArr.push(data[i][cardId+"-recv"]);
+        sendArr.push(data[i][cardId+"-send"]);
+        timeArr.push(data[i].time);
+        rttArr.push(data[i][cardId+"-rtt"]);
+        simModeArr.push(data[i][cardId+"-mode"]);
+      }
+      var series = [];
+      series.push({
+        name: "RTT",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 1,
+        lineStyle: {
+            width: 0, // 线宽是0
+            color: 'rgba(0, 0, 0, 0)' // 线的颜色是透明的
+        },
+        emphasis:{
+          itemStyle:{
+            opacity:0
+          }
+        },
+        data: rttArr
+      }, {
+        name: "SIM MODE",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 1,
+        areaStyle: {
+          normal: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+              offset: 0,
+              color: colorGV['接收速率']
+            }, {
+              offset: 0.8,
+              color: 'rgba(255,255,255,0)'
+            }], false),
+            shadowBlur: 10,
+            opacity: 0.3
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: colorGV['接收速率'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['接收速率'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        data: simModeArr
+      }, {
+        name: "发送速率",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 0,
+        itemStyle: {
+          normal: {
+            color: colorGV['发送速率'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['发送速率'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        data: sendArr
+      }, {
+        name: "接收速率",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 0,
+        areaStyle: {
+          normal: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+              offset: 0,
+              color: colorGV['接收速率']
+            }, {
+              offset: 0.8,
+              color: 'rgba(255,255,255,0)'
+            }], false),
+            shadowBlur: 10,
+            opacity: 0.3
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: colorGV['接收速率'],
+            lineStyle: that.lineStyle,
+            borderColor: colorGV['接收速率'], //图形的描边颜色。支持的格式同 color
+            borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+            barBorderRadius: 0,
+            label: {
+              show: false
+            },
+            opacity: 0.5
+          }
+        },
+        data: rcvArr
+      });
+      var option = {
+        title: { show:false },
+        legend: {
+          show:true,
+          itemGap:-10,
+          left:'center',
+          padding:[5,0],
+          textStyle: {
+            color: '#ddd',
+            fontSize: '10'
+          },
+          data: [{
+            name: '发送速率',
+            icon: 'none',
+            textStyle: {color: '#FFFF00'}
+          },{
+            name: '接收速率',
+            icon: 'none',
+            textStyle: {color: '#22aadd'}
+          }],
+          selected:{'发送速率':true,'接收速率':true}
+        },
+        grid: {
+          containLabel: true,
+          borderWidth: 0,
+          top: 70,
+          bottom: 40,
+          left: 10,
+          right: 10,
+          textStyle: { color: "#fff" }
+        },
+        tooltip: {
+          trigger: "axis",
+          formatter: function(params) {
+            var str = '';
+            str += '<div>'+ params[0].name +'</div>'; //显示日期的函数
+            for(var i=0; i<params.length; i++) {
+              if(params[i].seriesName == 'RTT'){
+                str += params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data : '暂无') +'</br>';
+              }else if(params[i].seriesName == 'SIM MODE'){
+                str += params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data : '暂无') +'</br>';
+              }else if(params[i].seriesName == '发送速率'){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
+              }else if(params[i].seriesName == '接收速率'){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
+              }
+            }
+            return str;
+          },
+          axisPointer: { // 坐标轴指示器，坐标轴触发有效
+            type: 'line', // 默认为直线，可选为：'line' | 'shadow'
+            lineStyle: {
+              color: '#57617B'
+            }
+          },
+          backgroundColor: 'rgba(0,0,0,0.7)', // 背景
+          padding: [8, 10], //内边距
+          extraCssText: 'box-shadow: 0 0 3px rgba(255, 255, 255, 0.4);' //添加阴影
+        },
+        dataZoom:[
+          {type: 'inside'},        //用于添加滚轮缩放
+          {type:'slider' ,         //用于添加滑动条缩放，
+            height: 25,
+            bottom: 10,
+            textStyle:{
+              color: '#fff'
+            }
+          }
+        ],
+        xAxis: [{
+          type: "category",
+          axisLine: {
+            lineStyle: {
+              color: '#32346c'
+            }
+          },
+          axisTick: {
+            show: true,
+            inside:true,
+            length:5,
+            lineStyle:{
+              color:'#fff',
+              type:'solid',
+              width:1
+            }
+          },
+          axisLabel: {
+            show: true,
+            //interval:xLabelInterval,
+            inside: false,
+            textStyle: {
+              color: '#bac0c0',
+              fontWeight: 'normal',
+              fontSize: '12'
+            }
+          },
+          splitLine: {
+            show: false,
+            lineStyle: {
+              color: '#32346c'
+            }
+          },
+          splitArea: {
+            show: false
+          },
+          boundaryGap: false , //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样
+          data: timeArr
+        }],
+        yAxis: [{
+          type: 'value',
+          name: '速率(Mbps)',
+          nameTextStyle: { color: '#ddd' },
+          axisTick: { show: false },
+          axisLine: {
+            show: true,
+            lineStyle: { color: '#32346c' }
+          },
+          splitLine: {
+            show: true,
+            lineStyle: { color: '#1c1c45' }
+          },
+          axisLabel: {
+            textStyle: {
+              color: '#bac0c0',
+              fontWeight: 'normal',
+              fontSize: '12'
+            },
+            formatter: '{value}'
+          }
+        }, {
+          type: 'value',
+          name: '',
+          nameTextStyle: { color: '#ddd' },
+          axisTick: { show: false },
+          axisLine: {
+            show: false,
+            lineStyle: { color: '#32346c' }
+          },
+          splitLine: {
+            show: false,
+            lineStyle: { color: '#32346c ' }
+          },
+          axisLabel: {
+            show:false,
+            textStyle: {
+              color: '#bac0c0',
+              fontWeight: 'normal',
+              fontSize: '12'
+            },
+            formatter: '{value}'
+          }
+        }/*,commonOptionYAxis3*/],
+        series: series,
+        animation: false
+      };
+      //速率最大值超过150，Y轴上限只显示到150
+      for(var i=0; i<data.length; i++){
+        if(data[i].send > 150){
+          option.yAxis[0].max = 150;
+        }
+      }
+      this.hisChart.setOption(option, true);
     },
     /*testMint(){
       this.$toast({
@@ -1699,7 +2681,7 @@ export default {
         let res = response.data;
         if(res.res.success){
           var data = res.data[0];
-          var chartCardView = {};
+          //var chartCardView = {};
           for(var key in data){
             if(key == "dev_sn" || key=="id"){
               continue;
@@ -1707,13 +2689,13 @@ export default {
             var newKey = "";
             if(key.indexOf("_") != -1){
               newKey = key.replace(/_/,'-');
-              chartCardView[newKey] = data[key];
+              that.chartCardView[newKey] = data[key];
             }else{
-              chartCardView[key] = data[key];
+              that.chartCardView[key] = data[key];
             }
             //that.chartCardView[key.replace(/_/,"-")] = data[key];
           }
-          that.SET_CHART_CARD_VIEW(chartCardView);
+          //that.SET_CHART_CARD_VIEW(chartCardView);
           that.initChartTotal(cardData);
           that.initChartCards(cardData);
         }else{
@@ -2111,7 +3093,7 @@ export default {
     width:100%;
     height:25%;
   }
-  #bigChartDiv{
+  #bigChartDiv, #hisChartDiv{
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -2121,7 +3103,12 @@ export default {
     height:calc( 100% - 40px);
     overflow:scroll;
   }
-  .bigChartTitle{
+  .hisChartContent{
+    height:calc( 100% - 40px);
+    overflow:scroll; 
+    padding:10px;
+  }
+  .bigChartTitle,.hisChartTitle{
     color: #fff;
     border-top: 1px solid #222;
     border-bottom: 1px solid #222;

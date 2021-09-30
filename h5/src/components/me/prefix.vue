@@ -4,10 +4,7 @@
       <div class="GroupTitle popListTitle" @click="changePrefixListShow">
         用户组信息
         <i class="titleIcon fa chevronStyle size2" :class="[prefixListShow == true ? 'fa-chevron-left': 'fa-chevron-right']"></i>
-        <!--<i class="titleIcon addBtn fa fa-refresh" @click.stop="getPrefixList"></i>
-        <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addPrefix"></i>-->
       </div>
-      <!-- <transition name="slide-fade"> -->
       <mt-popup v-model="prefixListShow" position="right" popup-transition="popup-fade" class="rightPop">
         <div class="GroupItem" v-if="prefixListShow" style="height:100%">
           <div class="popTitle">
@@ -21,7 +18,7 @@
               </div>
             </div>
           </div>
-          <div class="popContentStyle">
+          <div class="popContentStyle" v-if="temp">
             <template v-for="(item,i) in prefixShowList">
               <mt-cell-swipe
                 :right="[ 
@@ -395,8 +392,8 @@
           parentPrefix:false,
         },
         prefixConfigVisible:false,
-        prefixDelVisible:false
-
+        prefixDelVisible:false,
+        temp:false,
       }
     },
     computed: {
@@ -489,6 +486,10 @@
         }else{
           that.prefixShowList = prefixList;
         }
+        this.temp = false;
+        this.$nextTick(function(){
+          this.temp = true;
+        })
       },
       getPrefixList(cb){
         var that = this;
@@ -542,7 +543,7 @@
             data["parent_name"] = "";
           }
           
-          /*管理员*/
+          //管理员
           data["level1"] = $.map(userListDataOri, function(item, i){
             if(item["prefix"] == data["prefix"] && item["userGroup"] == 1){
               return item["id"];
@@ -550,7 +551,7 @@
               return ""
             }
           }).filter(function(item){if(item)return true;}).join(", ");
-          /*高级用户*/
+          //高级用户
           data["level2"] = $.map(userListDataOri, function(item, i){
             if(item["prefix"] == data["prefix"] && item["userGroup"] == 2){
               return item["id"];
@@ -558,7 +559,7 @@
               return ""
             }
           }).filter(function(item){if(item)return true;}).join(", ");
-          /*普通用户*/
+          //普通用户
           data["level3"] = $.map(userListDataOri, function(item, i){
             if(item["prefix"] == data["prefix"] && item["userGroup"] == 3){
               return item["id"];
@@ -566,7 +567,7 @@
               return ""
             }
           }).filter(function(item){if(item)return true;}).join(", ");
-          /*背包*/
+          //背包
           data["dev"] = $.map(devListDataOri, function(item, i){
             if(item["prefix"] == data["prefix"]){
               return item["dev_name"];
@@ -574,7 +575,7 @@
               return ""
             }
           }).filter(function(item){if(item)return true;}).join(", ");
-          /*接收机*/
+          //接收机
           data["rcv"] = $.map(rcvListDataOri, function(item, i){
             if(item["prefix"] == data["prefix"]){
               return item["rcv_name"];
@@ -848,69 +849,69 @@
         var name = that.options.prefix_name;
         var showTitle = that.options.showTitle;
         var parent = that.options.parentPrefix;
-        //var depth = that.getGrpDepth(parent) +1;
-        this.getGrpDepth(parent, id, type, function(depth){
-          if(type == "add"){
-            /*父组校验*/
-            if(!parent){
-              that.$toast({
-                message: '请选择父组!',
-                position: 'middle',
-                duration: 2000
-              });
-              return false;
-            }
-          }
-          //parent为null
-          if(parent == null){
-            parent = '';
-          }
-          /*用户组id和用户组名称校验*/
-          if(!that.checkName()){
-            return false;
-          }
-          /*显示标题校验*/
-          if(!that.$global.nameCheckType(showTitle,1,20,"number,en,zh")){
+        if(type == "add"){
+          /*父组校验*/
+          if(!parent){
             that.$toast({
-              message: '请按要求输入标题名称!',
+              message: '请选择父组!',
               position: 'middle',
               duration: 2000
             });
             return false;
           }
-          //prefix重复
-          var data = that.prefixList;
-          if (type == "add") {
-            for (var i = 0; i < data.length; i++) {
-              if (data[i].prefix == id) {
-                that.$toast({
-                  message: '该用户组已添加!',
-                  position: 'middle',
-                  duration: 2000
-                });
-                return;
-              }
-              if (data[i].prefix_name == name) {
-                that.$toast({
-                  message: '该用户组名已添加!',
-                  position: 'middle',
-                  duration: 2000
-                });
-                return;
-              }
+        }
+        //parent为null
+        if(parent == null){
+          parent = '';
+        }
+        /*用户组id和用户组名称校验*/
+        if(!that.checkName()){
+          return false;
+        }
+        /*显示标题校验*/
+        if(!that.$global.nameCheckType(showTitle,1,20,"number,en,zh")){
+          that.$toast({
+            message: '请按要求输入标题名称!',
+            position: 'middle',
+            duration: 2000
+          });
+          return false;
+        }
+        //prefix重复
+        var data = that.prefixList;
+        if (type == "add") {
+          for (var i = 0; i < data.length; i++) {
+            if (data[i].prefix == id) {
+              that.$toast({
+                message: '该用户组已添加!',
+                position: 'middle',
+                duration: 2000
+              });
+              return;
             }
-          } else {
-            for (var i = 0; i < data.length; i++) {
-              if ((data[i].prefix_name == name) && (data[i].prefix != id)) {
-                that.$toast({
-                  message: '该用户组名已添加!',
-                  position: 'middle',
-                  duration: 2000
-                });
-                return;
-              }
+            if (data[i].prefix_name == name) {
+              that.$toast({
+                message: '该用户组名已添加!',
+                position: 'middle',
+                duration: 2000
+              });
+              return;
             }
           }
+        } else {
+          for (var i = 0; i < data.length; i++) {
+            if ((data[i].prefix_name == name) && (data[i].prefix != id)) {
+              that.$toast({
+                message: '该用户组名已添加!',
+                position: 'middle',
+                duration: 2000
+              });
+              return;
+            }
+          }
+        }
+        //var depth = that.getGrpDepth(parent) +1;
+        this.getGrpDepth(parent, id, type, function(depth){
           that.$axios({
             method: 'post',
             url:"/page/userPrefix/userPrefix.php",
@@ -929,10 +930,10 @@
           .then(function (response) {
             let res = response.data;
             if(res.res.success){
-              that.getPrefixList(that.formatPrefixData)
               that.options.prefixType = "edit";
               that.options.editPGrp = parent;
               that.options.depth = depth;
+              that.getPrefixList(that.formatPrefixData)
               //that.show.parentPrefix = false;
               //that.disable.parentPrefix = true;
               //that.prefixConfigVisible = false;

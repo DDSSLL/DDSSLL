@@ -149,7 +149,7 @@ html,body{
   color: #000000;
   font-size: .14rem;
   height: 100%;
-  background-color: #FFFFFF;
+  background-color: #000;
 }
 .tab{
   display: block;

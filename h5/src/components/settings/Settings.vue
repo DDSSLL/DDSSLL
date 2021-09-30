@@ -298,7 +298,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem"><!-- 按钮 -->
+          <div class="GroupItem" v-if="user.userGroup == ADMIN"><!-- 按钮 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle"></div>
               <div class="GroupItemValue" style="float:right">
@@ -366,6 +366,7 @@
     name: "Settings",
     data(){
       return{
+        ADMIN:ADMIN,
         workMode:"推流",
         curDevSeries:"",
         curRcvSeries:"",
@@ -695,7 +696,9 @@
               break;
             }
           }
-          if (!bFind) {
+          if (!bFind && 
+            ((that.$global.getRcvSeries(curRcvSn) == VIR_RCV && that.options.rcvType == "0")
+           || (that.$global.getRcvSeries(curRcvSn) == PRA_RCV && that.options.rcvType == "1"))) {
             result.push({
               value: curRcvSn?curRcvSn:"",
               text: curRcvName?curRcvName:""
@@ -867,13 +870,17 @@
       //判断设备类型显示不同内容1080 or 4000
       selectShow(){
         var that = this;
-        this.curDevSeries = this.$global.getDevSeries(that.ActiveDevice.dev_sn);
+
+        this.curDevSeries = this.$global.getDevSeries(that.ActiveDevice?that.ActiveDevice.dev_sn:"");
         if(this.curDevSeries == "1080"){
           this.dev1080Show = true;
           this.dev4000Show = false;
         }else if(this.curDevSeries == "4000"){
           this.dev1080Show = false;
           this.dev4000Show = true;
+        }else{
+          this.dev1080Show = false;
+          this.dev4000Show = false;
         }
       },
       changeBitrateMode(){
@@ -893,6 +900,8 @@
             }else{
               this.$global.setDeviceParam('bitrate_mode',this.options.bitrate_mode)
             }
+          }else{
+            this.$global.setDeviceParam('bitrate_mode',this.options.bitrate_mode)
           }
         }
       },
@@ -1129,7 +1138,14 @@
         that.options.hdr = that.options_old_264.hdr;
         //编码分辨率
         that.options.HdmiTransFormat = that.options_old_264.HdmiTransFormat;
-        
+        //码率控制
+        //DV4000的背包  是所有的SDI入(包括12G-SDI 3G-SDI 4*3-2SI 4*3 SQ)这四个的H.264  都不支持AVBR
+        if(that.options.video_input == "4"){//HDMI h.264
+          that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;
+        }else{
+          that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE2;
+        }
+        that.options.bitrate_mode = 0;
       },
       formatVideoEncode265(){
         var that = this;
@@ -1144,6 +1160,8 @@
           return (item.value == 0)
         });
         that.OPTIONS_HDR = that.$global.getDevParamRange(that.ActiveDevice.dev_sn,that.user.prefix,"hdr");//HDR设置
+        //码率控制
+        that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;
         //赋值上次对应参数
         //视频输入
         that.options.audio_input = that.options_old_265.audio_input;

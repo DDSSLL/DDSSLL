@@ -1,191 +1,285 @@
 <template>
   <div class="roadTest">
-    <div class="Group">
-      <div class="GroupTitle" @click="RoadTestShow=!RoadTestShow;">
+    <div class="Group" style="height:100%">
+      <div class="GroupTitle popListTitle" @click="changeRoadTestShow">
         路测
-        <i class="titleIcon fa" :class="[RoadTestShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+        <i class="titleIcon fa chevronStyle" :class="[RoadTestShow == true ? 'fa-chevron-left': 'fa-chevron-right']"></i>
       </div>
-      <mt-button size="small" type="primary" @click="showRoadTestParam" style="margin: 5px  auto;display: inherit;">设置路测参数</mt-button>
-      <!-- <transition name="slide-fade">
-        <div class="GroupItem" v-if="RoadTestShow">
-          <mt-navbar v-model="active">
-            <mt-tab-item id="1">实时路测</mt-tab-item>
-            <mt-tab-item id="2">导入路测</mt-tab-item>
-          </mt-navbar>
-          <mt-tab-container v-model="active" style="padding:2px 5px;">
-            <mt-tab-container-item id="1">
-              <div class="Group">
-                <div class="GroupItem">
-                  <mt-button size="small" type="primary" @click="testFileTransfer">下载</mt-button>
-                  <div class="roadTestDevShow">
-                    <mt-cell :title="'背包:'+roadTestDev.join(',')">
-                      <i class="fa fa-chevron-down" @click.stop="testing?'':(roadTestPop = true)"></i>
-                    </mt-cell>
-                    <mt-button size="small" type="primary" @click="fileDownLoad">downLoad</mt-button>
-                    <mt-cell style="width:35%;display:inline-block" v-if="roadTestDev.length != 0">
-                      <mt-button size="small" type="primary" :disable="dis.startTestDis" @click="startRoadTest" v-if="!testing">开始路测</mt-button>
-                      <mt-button size="small" type="primary" :disable="dis.startTestDis" @click="roadTestMapVisible = true" v-if="testing">查看路测</mt-button>
-                    </mt-cell>
-                  </div>
-                </div>
+      <mt-popup v-model="RoadTestShow" position="right" popup-transition="popup-fade" class="rightPop">
+        <div class="GroupItem" v-if="RoadTestShow"  style="height:100%;background-color:#000;padding: 0px;border: 0px;">
+          <div class="popTitle">
+            <div class="back">
+              <div @click="RoadTestShow=false" class="popTitleBack">
+                <i class="fa fa-chevron-left chevronWidth chevronColor" aria-hidden="true"></i>
+                <span style="color:#fff">设置路测参数</span>
               </div>
-            </mt-tab-container-item>
-            <mt-tab-container-item id="2">
-              <div class="Group">
+            </div>
+          </div>
+          <div class="Group roadTestConfig">
+            <transition name="slide-fade">
+              <div class="GroupItem" v-show="RoadTestShow" style="border:none">
                 <div class="GroupItem">
                   <div class="GroupItemField">
-                    <div class="GroupItemTitle" style="width:65%">
-                      <input type="file" name="myfiles[]" id="testCsv" multiple="multiple" size="100" accept=".csv" class="form-control textStyle" style="width:95%;text-indent:0px;">
+                    <div class="GroupItemTitle width30">类型</div>
+                    <div class="GroupItemValue width70">
+                      <mt-radio
+                        title=""
+                        v-model="roadTestType"
+                        :options="ROAD_TEST_TYPE"
+                        @change="changeRroadTestType">
+                      </mt-radio>
                     </div>
-                    <div class="GroupItemValue" style="width:35%" v-if="!testing">
-                      <button style="font-size:.14rem" @click="importRoadTest" :disabled="dis.importTest">导入路测信息</button>
+                  </div>
+                </div>
+                <div class="GroupItem" v-if="show.devName">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle width30">背包名称</div>
+                    <div class="GroupItemValue width70">
+                      <span style="color:#fff">{{ roadTestDevText }}</span>
+                      <span style="float:right;color:#fff">
+                        <i class="fa fa-chevron-down" @click.stop="roadTestDevList = true" ></i>
+                      </span>
+                      <!-- <select class="ItemSelect" v-model="roadTestDev" @change="changeDev">
+                        <template v-for="(item,i) in roadTestDevOptions">
+                          <option :value="item.value">{{ item.text }}</option>
+                        </template>
+                      </select> -->
+                    </div>
+                  </div>
+                </div>
+                <div class="GroupItem" v-if="show.importDate">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle width30">选择路测日期</div>
+                    <div class="GroupItemValue width70">
+                      <select class="ItemSelect" v-model="importTestDate" @change="changeImportDate">
+                        <template v-for="(item,i) in importTestDateOptions">
+                          <option :value="item.value">{{ item.text }}</option>
+                        </template>
+                      </select>
+                    </div>
+                  </div> 
+                </div>
+                <div class="GroupItem" v-if="show.importFile">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle width30">选择路测文件</div>
+                    <div class="GroupItemValue width70">
+                      <select class="ItemSelect" v-model="importTestFile" @change="changeImportTestFile">
+                        <template v-for="(item,i) in importTestFileOptions">
+                          <option :value="item.value">{{ item.text }}</option>
+                        </template>
+                      </select>
+                    </div>
+                  </div> 
+                </div>
+                <div class="GroupItem" v-if="show.importBtn">
+                  <div class="GroupItemField">
+                    <div class="GroupItemValue width70" style="margin-left:30%">
+                      <button @click="importTestData">导入路测文件</button>
+                    </div>
+                  </div> 
+                </div>
+                <div class="GroupItem" v-if="show.dataType">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle width30">数据类型</div>
+                    <div class="GroupItemValue width70">
+                      <select class="ItemSelect" v-model="dataType" @change="changeDataType">
+                        <template v-for="(item,i) in dateTypeOptions">
+                          <option :value="item.value" v-if="item.value==1||item.value==2||((item.value==3||item.value==4)&&roadTestType == 1)">{{ item.text }}</option>
+                        </template>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="GroupItem" v-if="show.bitRateRange">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle width30">码率范围</div>
+                    <div class="GroupItemValue width70" style="color:#fff">
+                      <span class="dot dot1"></span>
+                      <span class="level_show">0</span>
+                      <span> ~</span>&nbsp;
+                      <input type="text" class="levelInput" v-model="bitRange.bit_level1"> 
+                      <br />
+                      <span class="dot dot2"></span>
+                      <span class="level_show">{{ bitRange.bit_level1 }}</span>
+                      <span> ~</span>&nbsp;
+                      <input type="text" class="levelInput" v-model="bitRange.bit_level2"> 
+                      <br />                      
+                      <span class="dot dot3"></span>
+                      <span class="level_show">{{ bitRange.bit_level2 }}</span>
+                      <span> ~</span>&nbsp;
+                      <input type="text" class="levelInput" v-model="bitRange.bit_level3"> 
+                      <br />
+                      <span class="dot dot4"></span>
+                      <span class="level_show">{{ bitRange.bit_level3 }}</span>
+                      <span> ~</span>&nbsp;
+                      <input type="text" class="levelInput" v-model="bitRange.bit_level4"> 
+                      <br />
+                      <span class="dot dot5"></span>
+                      <span class="level_show">{{ bitRange.bit_level4 }}</span>
+                      <span> ~</span>&nbsp;
+                      <span>{{ bitRange.bit_level5 }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="GroupItem" v-if="show.speedRateRange">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle width30">速率范围</div>
+                    <div class="GroupItemValue width70" style="color:#fff">
+                      <span class="dot dot1"></span>
+                      <span class="level_show">0%</span>
+                      <span> ~</span>&nbsp;
+                      <input type="text" class="levelInput" v-model="speedRange.speed_level1">%
+                      <br />
+                      <span class="dot dot2"></span>
+                      <span class="level_show">{{ speedRange.speed_level1 }}%</span>
+                      <span> ~</span>&nbsp;
+                      <input type="text" class="levelInput" v-model="speedRange.speed_level2">% 
+                      <br />                      
+                      <span class="dot dot3"></span>
+                      <span class="level_show">{{ speedRange.speed_level2 }}%</span>
+                      <span> ~</span>&nbsp;
+                      <input type="text" class="levelInput" v-model="speedRange.speed_level3">%
+                      <br />                    
+                      <span class="dot dot4"></span>
+                      <span class="level_show">{{ speedRange.speed_level3 }}%</span>
+                      <span> ~</span>&nbsp;
+                      <span>100%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="GroupItem" v-if="show.card5G">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle width30">5G覆盖网卡</div>
+                    <div class="GroupItemValue width70">
+                      <span style="color:#fff">{{ card5GText }}</span>
+                      <span style="float:right;color:#fff">
+                        <i class="fa fa-chevron-down" @click.stop="card5GList = true" ></i>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="GroupItem" v-if="show.dotsCount">
+                  <div class="GroupItemField">
+                    <div class="GroupItemTitle width30">显示点数</div>
+                    <div class="GroupItemValue width70">
+                      <select class="ItemSelect" v-model="showPoint">
+                        <template v-for="(item,i) in showPointOptions">
+                          <option :value="item.value">{{ item.text }}</option>
+                        </template>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="GroupItem" v-if="show.mapShowBtn">
+                  <div class="GroupItemField">
+                    <div class="GroupItemValue width70" style="margin-left:30%">
+                      <mt-button size="small" type="primary" :disable="dis.startTestDis" @click="startRoadTest" v-if="roadTestType == 0 && !testing">开始路测</mt-button>
+                      <mt-button size="small" type="primary" :disable="dis.startTestDis" @click="roadTestMapVisible = true" v-if="roadTestType == 0 && testing">查看路测</mt-button>
+                      <mt-button size="small" type="primary" :disable="dis.startTestDis" @click="importRoadTest" v-if="roadTestType == 1">查看导入路测信息</mt-button>
                     </div>
                   </div>
                 </div>
               </div>
-            </mt-tab-container-item>
-          </mt-tab-container>
+            </transition>
+          </div>
         </div>
-      </transition> -->
+      </mt-popup>
     </div>
-    <!-- 路测参数设置 -->
-    <mt-popup v-model="roadTestParamVisible" popup-transition="popup-fade" class="roadTestParamPopup">
-      <div class="popupContainer">
-        <div class="popupTitle">
-          路测参数设置
-          <i class="popupCloseBtn fa fa-times" @click="roadTestParamVisible = false"></i>
-        </div>
-        <form action="" @submit.prevent="submitDeviceConfig">
-          <div class="fGrp">
-            <div class="tl">类型</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="roadTestType" @change="changeRroadTestType">
-                <template v-for="(item,i) in ROAD_TEST_TYPE">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-          <div class="fGrp" v-if="roadTestType == 0">
-            <div class="tl">背包</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="roadTestDev" @change="">
-                <template v-for="(item,i) in roadTestDevOptions">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-          <div class="fGrp" v-if="roadTestType == 0">
-            <div class="tl">数据类型</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="roadTestDev" @change="">
-                <template v-for="(item,i) in dateTypeOptions">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-          <div class="fGrp" v-if="roadTestType == 0">
-            <div class="tl">显示点数</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="roadTestDev" @change="">
-                <template v-for="(item,i) in roadTestDevOptions">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-          <!-- <div class="fGrp">
-            <div class="tl">序列号</div>
-            <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.devSn" required pattern="[0-9]{10}" title="10位数字序列号" :disabled="deviceConfigType == 'edit'"> 
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">用户组</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="options.prefix" :disabled="deviceConfigType == 'edit' && user.userGroup != ADMIN" @change="changePrefixFun">
-                <template v-for="(item,i) in deviceConfigPrefixOptions">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-          <div class="fGrp">
-            <div class="tl">用户</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="options.devUser" :disabled="deviceConfigType == 'edit' && user.userGroup != ADMIN">
-                <template v-for="(item,i) in deviceConfigUserOptions">
-                  <option :value="item.value">{{ item.text }}</option>
-                </template>
-              </select>
-            </div>
-          </div>
-          <div class="fGrp" v-if="deviceConfigType == 'edit'">
-            <div class="tl">汇聚服务器</div>
-            <div class="vl">
-              <select class="ItemSelect" v-model="options.server" style="margin-bottom: 5px;" @change="editMatchChange = true">
-                <template v-for="(item,i) in deviceConfigServerOptions">
-                  <option :value="item.value" :style="'color:'+item.color+''">{{ item.text }}</option>
-                </template>
-              </select>
-              <button @click.prevent="editMatchRow" style="border:1px solid #666;">保存绑定</button>
-              <button @click.prevent="deleteMatchRow" style="border:1px solid #666;">解除绑定</button>
-            </div>
-          </div>
-          <div class="fGrp" style="text-align: right">
-            <button class="modalBtn" @click="deviceConfigVisible = false" style="margin-right: .06rem;">取消</button>
-            <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
-          </div> -->
-        </form>
-      </div>
+    <!-- 5G网卡 -->
+    <mt-popup v-model="card5GList" position="bottom" popup-transition="popup-slide" class="userPrefixPop">
+      <span class="chevronDown"  @click.stop="card5GList=false">
+        <i class="fa fa-chevron-down"></i>
+      </span>
+      <mt-checklist
+        v-model="card5GArr"
+        :options="OPTION_CARD_5G"
+        @change="changeCard5G">
+      </mt-checklist>
     </mt-popup>
     <!-- 路测地图 -->
-    <mt-popup v-model="roadTestMapVisible" position="right" popup-transition="popup-slide" class="wholePagePop devAuthority">
+    <mt-popup v-model="roadTestMapVisible" position="right" popup-transition="popup-slide" class="wholePagePop devAuthority" style="height:100%">
       <div class="page-navbar">
-        <div class="page-title">
+        <div class="page-title" :style="{height:titleHeight-20}"><!-- style="height:70px" --> 
           <i class="fa fa-arrow-left" aria-hidden="true" @click="roadTestMapVisible = false" style="position:absolute"></i>
           <div style="display:block">
             <div class="markIfo">
-              <i class="fa fa-circle" aria-hidden="true" style="color:#00FF00"></i><span>正常</span>
-              <i class="fa fa-circle" aria-hidden="true" style="color:#C5C5C5"></i><span>离线</span>
-              <i class="fa fa-circle" aria-hidden="true" style="color:#FFA900"></i><span>停止推流</span>
-              <i class="fa fa-circle" aria-hidden="true" style="color:#FF0000"></i><span>丢包</span>
+              <span style="display:inline-block;text-align:right;width:100%">
+                <span v-if="dataType == 1"><!-- 丢包率 -->
+                  <span style="color:#00ff00">无丢包 </span>
+                  <!-- <i class="fa fa-circle" aria-hidden="true" style="color:#00ff00"></i> -->
+                </span>
+                <span style="color:#C5C5C5">离线 </span>
+                <!-- <i class="fa fa-circle" aria-hidden="true" style="color:#C5C5C5"></i> -->
+                <span style="color:#FFA900">停止推流 </span>
+                <!-- <i class="fa fa-circle" aria-hidden="true" style="color:#FFA900"></i> -->
+                <span style="color:#FF0000">丢包</span>
+                <!-- <i class="fa fa-circle" aria-hidden="true" style="color:#FF0000"></i> -->
+              </span>
+              <span style="display:inline-block;text-align:right;width:100%;margin-top:5px">
+                <span v-if="dataType == 2" style="display:inline-block;float:right"><!-- 丢包率+可变码率 -->
+                  <span class="green1Point">0~{{bitRange.bit_level1}}</span>&nbsp;&nbsp;/&nbsp;&nbsp;
+                  <!-- <i class="fa fa-circle green1Point" aria-hidden="true"></i> -->
+                  <span class="green2Point">{{bitRange.bit_level1}}~{{bitRange.bit_level2}}</span>&nbsp;&nbsp;/&nbsp;&nbsp;
+                  <!-- <i class="fa fa-circle green2Point" aria-hidden="true"></i> -->
+                  <span class="green3Point">{{bitRange.bit_level2}}~{{bitRange.bit_level3}}</span>&nbsp;&nbsp;/&nbsp;&nbsp;
+                  <!-- <i class="fa fa-circle green3Point" aria-hidden="true"></i> -->
+                  <span class="green4Point">{{bitRange.bit_level3}}~{{bitRange.bit_level4}}</span>&nbsp;&nbsp;/&nbsp;&nbsp;
+                  <!-- <i class="fa fa-circle green4Point" aria-hidden="true"></i> -->
+                  <span class="green5Point">{{bitRange.bit_level4}}~{{bitRange.bit_level5}}</span>
+                  <!-- <i class="fa fa-circle green5Point" aria-hidden="true"></i> -->
+                </span>
+                <span v-else-if="dataType == 3" style="display:inline-block;float:right"><!-- 上传速率 -->
+                  <span class="redPoint">0%~{{speedRange.speed_level1}}%</span>&nbsp;&nbsp;/&nbsp;&nbsp;
+                  <!-- <i class="fa fa-circle redPoint" aria-hidden="true"></i> -->
+                  <span class="orangePoint">{{speedRange.speed_level1}}%~{{speedRange.speed_level2}}%</span>&nbsp;&nbsp;/&nbsp;&nbsp;
+                  <!-- <i class="fa fa-circle orangePoint" aria-hidden="true"></i> -->
+                  <span class="yellowPoint">{{speedRange.speed_level2}}%~{{speedRange.speed_level3}}%</span>&nbsp;&nbsp;/&nbsp;&nbsp;
+                  <!-- <i class="fa fa-circle yellowPoint" aria-hidden="true"></i> -->
+                  <span class="greenPoint">{{speedRange.speed_level3}}%~100%</span>
+                  <!-- <i class="fa fa-circle greenPoint" aria-hidden="true"></i> -->
+                </span>
+                <span v-else-if="dataType == 4" style="display:inline-block;float:right"><!-- 5G覆盖 -->
+                  <span class="redPoint">全不覆盖</span>&nbsp;&nbsp;/&nbsp;&nbsp;
+                  <!-- <i class="fa fa-circle redPoint" aria-hidden="true"></i> -->
+                  <span class="yellowPoint">覆盖卡数小于{{card5GArr.length}}</span>&nbsp;&nbsp;/&nbsp;&nbsp;
+                  <!-- <i class="fa fa-circle yellowPoint" aria-hidden="true"></i> -->
+                  <span class="greenPoint">全覆盖</span>
+                  <!-- <i class="fa fa-circle greenPoint" aria-hidden="true"></i> -->
+                </span>
+              </span>
             </div>
-            <button @click="stopRoadTest" style="float: right;margin-top: -4px;" v-if="active==1">停止路測</button>  
           </div>
-          
-          <div style="position: absolute;top: 35px;z-index: 100;width: 100%;" v-if="active==1">
-            <select class="ItemSelect2" v-model="followDev" style="width:35%;display:inline-block" @change="followDevChange">
+          <div style="display:inline-block;margin-top: 5px;width: 100%;text-align:right" v-if="roadTestType==0 && active==1">
+            <select class="ItemSelectBlack" v-model="followDev" style="width:35%;display:inline-block" @change="followDevChange">
               <template v-for="(item,i) in followDevOptions">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
             </select>
-            <select class="ItemSelect2" v-model="zoomDev" style="width:35%;display:inline-block;margin-left:10px;" @change="zoomDevChange">
+            <select class="ItemSelectBlack" v-model="zoomDev" style="width:35%;display:inline-block;margin-left:10px;" @change="zoomDevChange">
               <template v-for="(item,i) in zoomDevOptions">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
             </select>
+            <button @click="stopRoadTest" v-if="active==1" style="margin-left:10px;">停止路測</button>  
           </div>
         </div>
-        <div style="position: relative;"> 
-          <div style="width: 100%; min-height:400px;" id="test_map"  :style="{'height': mapHeight - 35 + 'px'}"></div>
-          <div class="gpsInfo" id="gpsInfo">
+        <div style="position: relative;" :style="{height:baiduMapHeight}"><!-- style="height:clac(100% - 90)" --> <!--   -->
+          <div style="width: 100%; min-height:400px;" id="test_map"  :style="{'height': baiduMapHeight + 'px','margin-top':marginTop+'px'}"></div>
+          <div class="gpsInfo" v-if="show.gpsInfo">{{gpsInfo}}
           </div>
         </div>
       </div>
     </mt-popup>
 
      <!-- 设备列表 -->
-    <mt-popup v-model="roadTestPop" position="bottom" popup-transition="popup-slide" class="roadTestPop">
-      <span class="chevronDown">
-        <i class="fa fa-chevron-down" @click.stop="roadTestPop=false"></i>
+    <mt-popup v-model="roadTestDevList" position="bottom" popup-transition="popup-slide" class="roadTestPop">
+      <span class="chevronDown"  @click.stop="roadTestDevList=false">
+        <i class="fa fa-chevron-down"></i>
       </span>
       <mt-checklist
-        v-model="roadTestDev"
+        v-model="roadTestDevSel"
         :options="roadTestDevOptions"
-        @change="changeRoadTestDev">
+        @change="changeDev">
       </mt-checklist>
     </mt-popup>
   </div>
@@ -200,6 +294,11 @@
     name: "DevMan",
     data(){
       return{
+        titleHeight:90,
+        marginTop:0,
+        devSeries:"",
+        DStreamer_BUILD:DStreamer_BUILD,
+        card5GList:false,
         testing:false,//正在路测的标记位
         roadTestInterval:null,
         workerRoadTest:null,
@@ -211,14 +310,21 @@
         importEvent:false,
         testEvent:false,
         RoadTestShow:false,
-        roadTestPop:false,
+        roadTestDevList:false,
         roadTestMapVisible:false,//路测地图
         roadTestParamVisible:false,//路测参数设置页面
         active:"1",
         testMap:"",
         startTestDrawFlg:true,
         roadTestDev:[],
+        roadTestDevSel:[],
+        roadTestDevText:"",
         roadTestDevOptions:[],
+        importTestDate:"",
+        importTestDateOptions:[],
+        importTestFile:"",
+        importTestFileOptions:[],
+        //importTestData:[],
         followDev:[],
         followDevOptions:[],
         zoomDev:[],
@@ -227,14 +333,31 @@
         devFocusOptions:[],
         devZoom:"",
         devZoomOptions:[],
+        showPoint:200,
+        dataType:1,
+        show:{
+          devName:false,
+          importDate:false,
+          importFile:false,
+          importBtn:false,
+          dataType:false,
+          bitRateRange:false,
+          speedRateRange:false,
+          dotsCount:false,
+          mapShowBtn:false,
+          gpsInfo:false,
+        },
         dis:{
           roadTestDevDis:false,
           startTestDis:false,
           deleteTest:false,//删除路测
           importTest:false,
         },
-        ROAD_TEST_TYPE:[{text:"实时路测",value:"0"},{text:"导入路测文件",value:"1"}],
-        dateTypeOptions:[{text:"丢包率",value:"0"},{text:"丢包率+可变码率",value:"1"}],
+        ROAD_TEST_TYPE:[{label:"实时路测",value:"0"},{label:"导入路测文件",value:"1"}],
+        dateTypeOptions:[{text:"丢包率",value:"1"},
+                        {text:"丢包率+可变码率",value:"2"},
+                        {text:"上传速率",value:"3"},
+                        {text:"5G覆盖",value:"4"}],
         showPointOptions:[{text:"200",value:"200"},
                           {text:"400",value:"400"},
                           {text:"600",value:"600"},
@@ -242,6 +365,30 @@
         roadTestType:0,
         mapHeight:"",
         ISReload:false,
+        bitRange:{
+          bit_level1:" ",
+          bit_level2:" ",
+          bit_level3:" ",
+          bit_level4:" ",
+          bit_level5:" ",
+        },
+        speedRange:{
+          speed_level1:" ",
+          speed_level2:" ",
+          speed_level3:" ",
+        },
+        OPTION_CARD_5G:"",
+        card5GArr:[],
+        card5GText:"",
+        card5GTextArr:[],
+        card5G: [{label: "SIM1",value: "1"},
+                  {label: "SIM2",value: "2"},
+                  {label: "SIM3",value: "3"},
+                  {label: "SIM4",value: "4"},
+                  {label: "SIM5",value: "5"},
+                  {label: "SIM6",value: "6"}],
+        downloadData:"",
+        mapHeight:"",
       }
     },
     computed: {
@@ -259,115 +406,456 @@
     created(){  //生命周期-页面创建后
       console.log("roadTest created");
       var that = this;
-      this.initOnlineDev(that.formatDevSelect);
-      //this.initRoadTestMap();
-
-      document.addEventListener("deviceready", function(){
-        console.log("document click")
-      });
+      this.initRoadTestMap();
+      //this.initOnlineDev(that.formatDevSelect);
+      //this.initImportDate();
+      this.roadTestType = 0;
+      this.initConfigParamShow();
     },
     activated(){
       console.log("roadTest activated");
-      var that = this;
-      this.initOnlineDev(that.formatDevSelect);
-      //this.initRoadTestMap();
-
     },
-    mounted(){
-      console.log("roadTestDev mounted")
-      //this.testFileTransfer();
-      var that = this;
-      document.addEventListener('deviceready', that.testFileTransfer, false);
-       //延时100毫秒后进行重加载
-      setTimeout(function() {
-        if (!that.ISReload) {
-            that.testFileTransfer();//重加载
-        }
-      },100)
+    mounted(){ 
+      console.log("roadTest mounted");
     },
     methods:{
       ...mapMutations({
           
       }),
-      changeRroadTestType(){
-
-      },
-      showRoadTestParam(){
-        this.roadTestParamVisible = true;
-
-      },
-      testFileTransfer(){
-        console.log("testFileTransfer")
-        this.ISReload = true;
-          console.log(FileTransfer)
-          var file = new FileTransfer();
-          console.log(file)
-
-      },
-      /*fileDownLoad(){
+      changeRoadTestShow(){//显示路测参数页面
+        console.log("changeRoadTestShow")
         var that = this;
-        window.webkitRequestFileSystem(window.PERSISTENT, 0, function (fs) {
-          alert('打开的文件系统: ' + fs.name);
-          var url = 'http://www.hangge.com/blog/images/logo.png';
-          fs.root.getFile('hangge.png', { create: true, exclusive: false },
+        this.RoadTestShow = !this.RoadTestShow;
+        this.roadTestType = 0;//默认选择实时路测
+        this.downloadData = "";//待解析的导入数据
+        this.changeRroadTestType();
+        //this.initOnlineDev(that.formatDevSelect);
+        //this.initImportDate();
+      },
+      changeRroadTestType(){//修改类型 实时路测or导入路测
+        console.log("changeRroadTestType")
+        this.initConfigParamShow(); 
+      },
+      initConfigParamShow(){
+        var that = this;
+        if(this.roadTestType == 0){//实时路测
+          this.initOnlineDev(that.formatDevSelect);//请求路测背包
+          this.show.devName = true;//背包名称
+          //this.roadTestDev = "";
+          this.show.dataType = false;
+          this.show.importDate = false;//选择路测日期
+          this.show.importFile = false;//选择路测文件
+          this.show.importBtn = false;//导入路测文件
+          this.changeDev();
+          this.titleHeight = 70;
+          this.marginTop = 0;
+        }else{  //导入路测
+          this.show.devName = false;//背包名称
+          this.initImportDate();//请求路测文件日期
+          this.show.importDate = true;//选择路测日期
+          this.show.importFile = true;//选择路测文件
+          this.show.importBtn = true;//导入路测文件
+          this.titleHeight = 70;
+          this.marginTop = 50;
+        }     
+      },
+      changeDev(){//实时路测 修改背包名称
+        var that = this;
+        this.roadTestDevText = this.roadTestDevOptions.filter(function(item){
+          if(that.roadTestDevSel.indexOf(item.value) != -1){
+            console.log(item.label)
+            return item;
+          }
+        }).map(function(item){
+          return item.label;
+        }).join(",")
+        if(this.roadTestDevText){
+          this.show.dataType = true;//数据类型
+          this.show.bitRateRange = false;//码率范围
+          this.show.speedRateRange = false;//速率范围
+          this.show.dotsCount = true;//显示点数
+          this.show.mapShowBtn = true;//btn
+          this.getBitRateRange(that.roadTestDevSel[0]);
+        }else{
+          this.show.dataType = false;
+          this.show.bitRateRange = false;//码率范围
+          this.show.speedRateRange = false;//速率范围
+          this.show.dotsCount = false;
+          this.show.mapShowBtn = false;
+        }
+        this.changeStartDisable()
+      },
+      getBitRateRange(roadTestDev){
+        var that = this;
+        this.$global.getDevOneParam(roadTestDev, 'dev_sr', function(data){
+          var maxSr = (data["dev_sr"]/1000).toFixed(1);
+          that.bitRange.bit_level5 = maxSr;
+          var intervalSr = parseFloat(maxSr/5);
+          that.bitRange.bit_level1 = intervalSr.toFixed(1);
+          that.bitRange.bit_level2 = (intervalSr*2).toFixed(1);
+          that.bitRange.bit_level3 = (intervalSr*3).toFixed(1);
+          that.bitRange.bit_level4 = (intervalSr*4).toFixed(1);
+        }) 
+      },
+      initImportDate(){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/roadTest.php",
+          data:this.$qs.stringify({
+            getImportFolder: true,
+          }),
+          Api:"getImportFolder",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            console.log(res.data)
+            var data = res.data;
+            for(var i=0; i<data.length; i++){
+              that.importTestDateOptions.push({text:data[i],value:data[i]})
+            }
+            if(data.length != 0){
+              that.importTestDate = data[0]; 
+              that.changeImportDate();
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            }); 
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      changeImportDate(){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/roadTest.php",
+          data:this.$qs.stringify({
+            getImportFileName: true,
+            importFolderName:that.importTestDate
+          }),
+          Api:"getImportFileName",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            console.log(res.data)
+            var data = res.data;
+            that.importTestFileOptions = [];
+            for(var i=0; i<data.length; i++){
+              that.importTestFileOptions.push({text:data[i],value:data[i]})
+            }
+            if(data.length != 0){
+              that.importTestFile = data[0];
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            }); 
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      changeImportTestFile(){
+        if(this.importTestFile){
+          that.show.importBtn = true;//导入路测文件
+        }else{
+          that.show.importBtn = false;//导入路测文件
+          that.show.dataType = false;//数据类型
+          that.show.bitRateRange = false;//码率范围
+          that.show.speedRateRange = false;//速率范围
+          that.show.dotsCount = false;//显示点数
+          that.show.mapShowBtn = false;//btn
+        }
+      },
+      //改变数据类型
+      changeDataType(){
+        if(this.dataType == 2){
+          this.show.bitRateRange = true;
+          this.show.speedRateRange = false;
+          this.show.card5G = false;
+        }else if(this.dataType == 3){
+          this.show.bitRateRange = false;
+          this.show.speedRateRange = true;
+          this.show.card5G = false;
+        }else if(this.dataType == 4){
+          this.show.bitRateRange = false;
+          this.show.speedRateRange = false;
+          this.show.card5G = true;
+        }else{
+          this.show.bitRateRange = false;
+          this.show.speedRateRange = false;
+          this.show.card5G = false;
+        }
+      },
+      //5G网卡选择
+      changeCard5G(){
+        var that = this;
+        this.card5GTextArr = this.card5G.filter(function(item){
+          return (that.card5GArr.indexOf(item.value) != -1)
+        }).map(function(item){
+          return item.label;
+        })
+        this.card5GText = this.card5GTextArr.join(",");
+        return;
+      },
+      //导入路测文件  按钮
+      importTestData(){
+        this.importTestDataTest();
+        console.log("importTestData")
+        return;
+        var that = this;
+        document.addEventListener("deviceready", onDeviceReady, false);
+        function onDeviceReady() {
+          //console.log("onDeviceReady")
+          window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
+            function (fs) {
+              //that.DStreamer_BUILD = "D:/SYNCOR/Web/1080_4000";
+              let url = that.$axios.defaults.baseURL+'/data/driveTest/'+that.importTestDate+"/"+that.importTestFile;
+              //console.log(url)
+              fs.root.getFile('roadTest.csv', { create: true, exclusive: false },
+                function(fileEntry) {
+                  download(fileEntry, url)
+                },
+                function(){
+                  console.log("onErrorCreateFile")
+                }
+              )
+            },
+            function(){
+              console.log("onErrorLoadFs")
+            }
+          )
+        }
+        function download(fileEntry, uri) {
+          //console.log("download")
+          var fileTransfer = new FileTransfer();
+          var fileURL = fileEntry.toURL();
+          fileTransfer.download(
+            uri, 
+            fileURL,//window.cordova.file.externalRootDirectory + 'test.apk',//
             function (fileEntry) {
-            that.download(fileEntry, url);
-          }, that.onErrorCreateFile);
-        }, that.onErrorLoadFs);
+              fileEntry.file(function (file) {
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                  //console.log("Successful file read: " + this.result);
+                  var fileStr = this.result;
+                  that.downloadData = fileStr.split("\r\n");
+                  if(that.downloadData){
+                    that.show.dataType = true;//数据类型
+                    that.dataType = 1;
+                    that.show.bitRateRange = false;//码率范围
+                    that.show.speedRateRange = false;//速率范围
+                    that.show.dotsCount = true;//显示点数
+                    that.show.mapShowBtn = true;//btn
+                  }else{
+                    that.show.importBtn = false;//导入路测文件
+                    that.show.dataType = false;//数据类型
+                    that.show.bitRateRange = false;//码率范围
+                    that.show.speedRateRange = false;//速率范围
+                    that.show.dotsCount = false;//显示点数
+                    that.show.mapShowBtn = false;//btn
+                  }
+                  var formatData = that.formatImportData(that.downloadData);
+                  that.initImportRangeParam(formatData)
+                };
+                reader.readAsText(file);
+              }, function (error) {
+                console.log(error)
+              });
+            },
+            function (error) {
+              console.log("download error source " + error.source);
+              console.log("download error target " + error.target);
+              console.log("download error code" + error.code);
+              console.log(error)
+            },
+            null, // or, pass false
+            {
+              //headers: {
+              //    "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+              //}
+            }
+          );
+        }
       },
-      //下载文件
-      download(fileEntry, uri) {
-        var fileTransfer = new FileTransfer();
-        var fileURL = fileEntry.toURL();
-        fileTransfer.download(
-          uri,
-          fileURL,
-          function (entry) {
-            alert("下载成功！");
-            alert("文件保存位置: " + entry.toURL());
-          },
-          function (error) {
-            alert("下载失败！");
-            alert("error source " + error.source);
-            alert("error target " + error.target);
-            alert("error code" + error.code);
-          },
-          null
-        );
+      importTestDataTest(){
+        var that = this;
+
+        that.downloadData = ["DevSn,1002012140,,,,",
+                            "DevName,西安,,,,",
+                            "RcvSn,1001282141,,,,",
+                            "Board,板卡板卡1,",
+                            "No., Time, GPS Status(0：失锁 1：正在搜索：2：已连接), Longitude, Latitude, BD Longitude, BD Latitude, Loss Rate(%), Push BR(Mbps), AVBRGPS(Mbps), bitrate mode(1:AVBR 0:CBR), GPS Speed(km/h), video bitrate(Mbps), delay, SIM1, SIM2, SIM3, SIM4, SIM5, SIM6, Online, Push Enable",
+                            "1,13:36:48,2,108.089688,34.256267,108.101087,34.261079,0,5653/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -59dBm,电信 | NSA | -57dBm,移动 | SA | -81dBm,联通 | NSA | -55dBm,1,1,",
+                            "2,13:36:49,2,108.089788,34.256267,108.101187,34.261179,0,5723/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -59dBm,电信 | NSA | -57dBm,移动 | SA | -84dBm,联通 | NSA | -55dBm,1,1,",
+                            "3,13:36:50,2,108.089888,34.256267,108.101287,34.261279,0,5723/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -59dBm,电信 | NSA | -57dBm,移动 | SA | -84dBm,联通 | NSA | -55dBm,1,1,",
+                            "4,13:36:51,2,108.089988,34.256267,108.101387,34.261379,0,6336/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -84dBm,联通 | NSA | -55dBm,1,1,",
+                            "5,13:36:52,2,108.089188,34.256267,108.101487,34.261479,0,5669/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -84dBm,联通 | NSA | -55dBm,1,1,",
+                            "6,13:36:53,2,108.089288,34.256267,108.101587,34.261579,0,5669/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -84dBm,联通 | NSA | -55dBm,1,1,",
+                            "7,13:36:54,2,108.089388,34.256267,108.101687,34.261679,0,5617/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -74dBm,联通 | NSA | -55dBm,1,1,",
+                            "8,13:36:55,2,108.089488,34.256267,108.101787,34.261779,0,5572/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -63dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -83dBm,联通 | NSA | -55dBm,1,1,",
+                            "9,13:36:56,2,108.089588,34.256267,108.101887,34.261879,0,5572/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -63dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -83dBm,联通 | NSA | -55dBm,1,1,",
+                            "10,13:36:57,2,108.086688,34.256267,108.101987,34.261979,0,5415/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -63dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -83dBm,联通 | NSA | -55dBm,1,1,",
+                            "11,13:36:58,2,108.089688,34.256267,108.101087,34.261079,0,5627/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -63dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -78dBm,联通 | NSA | -55dBm,1,1,",
+                            "12,13:36:59,2,108.089688,34.256267,108.101087,34.261079,0,5627/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -63dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -78dBm,联通 | NSA | -55dBm,1,1,",
+                            "13,13:37:00,2,108.089688,34.256267,108.101087,34.261079,0,5686/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -63dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -78dBm,联通 | NSA | -55dBm,1,1,",
+                            "14,13:37:01,2,108.089688,34.256267,108.101087,34.261079,0,5612/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -82dBm,联通 | NSA | -55dBm,1,1,",
+                            "15,13:37:02,2,108.089688,34.256267,108.101087,34.261079,0,5658/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -82dBm,联通 | NSA | -55dBm,1,1,",
+                            "16,13:37:03,2,108.089688,34.256267,108.101087,34.261079,0,5658/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -82dBm,联通 | NSA | -55dBm,1,1,",
+                            "17,13:37:04,2,108.089688,34.256267,108.101087,34.261079,0,6307/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -82dBm,联通 | NSA | -55dBm,1,1,",
+                            "18,13:37:05,2,108.089688,34.256267,108.101087,34.261079,0,5691/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -83dBm,联通 | NSA | -55dBm,1,1,",
+                            "19,13:37:06,2,108.089688,34.256267,108.101087,34.261079,0,5691/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -83dBm,联通 | NSA | -55dBm,1,1,",
+                            "20,13:37:07,2,108.089688,34.256267,108.101087,34.261079,0,5654/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -65dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -81dBm,联通 | NSA | -55dBm,1,1,",
+                            "21,13:37:08,2,108.089688,34.256267,108.101087,34.261079,0,5613/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -61dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -81dBm,联通 | NSA | -55dBm,1,1,",
+                            "22,13:37:09,2,108.089688,34.256267,108.101087,34.261079,0,5613/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -61dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -81dBm,联通 | NSA | -55dBm,1,1,",
+                            "23,13:37:10,2,108.089688,34.256267,108.101087,34.261079,0,5663/100%,5000/100%,1,0.000,5000,2000,电信 | LTE | -57dBm,移动 | LTE | -61dBm,联通 | LTE | -61dBm,电信 | NSA | -57dBm,移动 | SA | -82dBm,联通 | NSA | -55dBm,1,1,"];
+        if(that.downloadData){
+          that.show.dataType = true;//数据类型
+          that.changeDataType();
+          that.show.dotsCount = true;//显示点数
+          that.show.mapShowBtn = true;//btn
+        }else{
+          that.show.importBtn = false;//导入路测文件
+          that.show.dataType = false;//数据类型
+          that.show.bitRateRange = false;//码率范围
+          that.show.speedRateRange = false;//速率范围
+          that.show.dotsCount = false;//显示点数
+          that.show.mapShowBtn = false;//btn
+        }
+        var formatData = that.formatImportData(that.downloadData);
+        that.initImportRangeParam(formatData)
       },
-      onErrorCreateFile(error){
-        console.log("文件创建失败！")
-        var msg = 'An error occured: ';
-        console.log(error)
-        switch (error.code) {
-          case FileError.NOT_FOUND_ERR:
-            msg += 'File or directory not found';
-            break;
-
-          case FileError.NOT_READABLE_ERR:
-            msg += 'File or directory not readable';
-            break;
-
-          case FileError.PATH_EXISTS_ERR:
-            msg += 'File or directory already exists';
-            break;
-
-          case FileError.TYPE_MISMATCH_ERR:
-            msg += 'Invalid filetype';
-            break;
-
-          default:
-            msg += 'Unknown Error';
-            break;
-        };
-
-        alert(msg);
+      initImportRangeParam(formatData){
+        /*console.log("formatData")
+        console.log(formatData)*/
+        var list = formatData.list;
+        /*var devSn = formatData.roadTestDev;   
+        var devSeries = this.$global.getDevSeries(devSn[0]);*/
+        /*5G网卡 -- start*/
+        var newCard = [];
+        if(this.devSeries == "4000"){
+          this.OPTION_CARD_5G = this.card5G;
+        }else if(this.devSeries == "1080"){
+          for(var i=0; i<card5G.length; i++){
+            if(i<3){
+              newCard.push(card5G[i]);
+            }
+          }
+          this.OPTION_CARD_5G = newCard;
+        }
+        /*5G网卡 -- end*/
+        var maxDevSr = 0;
+        for(var key in list){
+          var devSrArr = list[key]["dev_sr"];
+          for(var i=0; i<devSrArr.length; i++){
+            var speed = devSrArr[i].split("/")[0] ;
+            maxDevSr = speed>maxDevSr?speed:maxDevSr;
+          }
+        }
+        var maxSr = (maxDevSr/1000).toFixed(1);
+        var intervalSr = parseFloat(maxSr/5);
+        this.bitRange.bit_level5 = maxSr;
+        this.bitRange.bit_level1 = intervalSr.toFixed(1);
+        this.bitRange.bit_level2 = (intervalSr*2).toFixed(1);
+        this.bitRange.bit_level3 = (intervalSr*3).toFixed(1);
+        this.bitRange.bit_level4 = (intervalSr*4).toFixed(1);
+        this.speedRange.speed_level1 = 25;
+        this.speedRange.speed_level2 = 50;
+        this.speedRange.speed_level3 = 75;
       },
-      onErrorLoadFs(error){
-        alert("文件系统加载失败！")
-      },*/
+      checkImportParam(){
+        if(this.show.bitRateRange){
+          if(this.bitRange.bit_level1*1 > 0 
+            && this.bitRange.bit_level1*1 < this.bitRange.bit_level2*1
+            && this.bitRange.bit_level2*1 < this.bitRange.bit_level3*1
+            && this.bitRange.bit_level3*1 < this.bitRange.bit_level4*1
+            && this.bitRange.bit_level4*1 < this.bitRange.bit_level5*1){
+            return true;
+          }else{
+            return false;
+          }
+        }else if(this.show.speedRateRange){
+          if(this.speedRange.speed_level1*1 <this.speedRange.speed_level2*1
+            && this.speedRange.speed_level2*1 < this.speedRange.speed_level3*1){
+            return true;
+          }else{
+            return false;
+          }
+        }else if(this.show.card5G){
+          if(this.card5GText != ""){
+            return true;
+          }else{
+            return false;
+          }
+        }else{
+          return true;
+        }
+      },
+      //导入路测信息
+      importTestMap(){
+        var that = this;
+        if(!this.checkImportParam()){
+          this.$toast({
+            message: "请检查参数",
+            position: 'middle',
+            duration: 2000
+          });
+          return ;
+        }
+        that.dis.deleteTest = false;
+        that.roadTestMapVisible = true;
+        setTimeout(function(){
+          that.initRoadTestMap();
+          that.testMap.clearOverlays();//清空覆盖物
+          //将导入的描点数据格式化
+          var formatData = that.formatImportData(that.downloadData);
+          var list = formatData.list;
+          var roadTestDev = formatData.roadTestDev;        
+          //console.log(formatData)
+          that.initAllDevRange(roadTestDev);//sessionStorage.allDevRange记录所有设备的整体经纬度范围
+          var newList = that.hinoutList(list);//按各个设备总点数的比例抽取进行显示的点
+          var viewPort = that.initMapZoom(newList);//导入记录，获取显示所有点的合适的mapzoom和center
+          var mapZoom = viewPort.zoom;
+          var mapCenter = viewPort.center;
+          //console.log("mapZoom:"+mapZoom)
+          //console.log(mapCenter)
+          localStorage.mapZoom = mapZoom;
+          localStorage.mapCenter = JSON.stringify(mapCenter);
+          that.startTestDrawFlg = true; 
+          that.drawAllData(newList);
+          
+          that.importEvent = true;
+          that.testEvent = false;
+          that.testMap.addEventListener("zoomend", function(evt){
+            if(that.importEvent){
+              that.refreshMapList(list);
+            }
+          });
+          that.testMap.addEventListener("dragend", function(){
+            if(that.importEvent){
+              that.refreshMapList(list);
+            }
+          });
+        },500)
+        
+      },
       getRoadTestCSV(){
-        console.log("getRoadTestCSV")
+        //console.log("getRoadTestCSV")
         var _this = this;
         _this.downLoadImg();
         /*window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
@@ -387,8 +875,8 @@
       downLoadImg: function(fileURL) {
         var _this = this;
         // 初始化FileTransfer对象
-        console.log("downloadImage")
-        console.log(window);
+        /*console.log("downloadImage")
+        console.log(window);*/
         var fileTransfer = new FileTransfer();
         // 服务器下载地址
         var uri = encodeURI("http://avatar.csdn.net/7/E/0/1_michael_ouyang.jpg");
@@ -415,9 +903,9 @@
         that.testEvent = false;
         clearInterval(that.roadTestInterval);
         that.roadTestDev = [];
-        //clickStopBtnState();
+        //app路测结束后文件从服务器获取，不存到本地
         var roadTest = JSON.parse(localStorage.roadTest);
-        for(var key in roadTest){
+        /*for(var key in roadTest){
           var fileName = roadTest[key]['fileName'];
           var startTime = roadTest[key]['startTime'];
           var date = startTime.substr(0, 8);
@@ -431,59 +919,8 @@
           aLink.href = filePath+"/"+fileName;
           document.body.appendChild(aLink);
           aLink.click();
-          document.body.removeChild(aLink);
-          //that.$cordovaPlugins.downloadFileHH(filePath, fileName) ;
-
-          /*window.requestFileSystem(window.TEMPORARY, 5 * 1024 * 1024, function (fs) {
-            console.log('file system open: ' + fs.name); 
-            // Make sure you add the domain name to the Content-Security-Policy <meta> element.
-            var url = 'http://cordova.apache.org/static/img/cordova_bot.png';
-            // Parameters passed to getFile create a new file or return the file if it already exists.
-            fs.root.getFile('downloaded-image.png', { create: true, exclusive: false }, function (fileEntry) {
-                download(fileEntry, url, true);
-         
-            }, onErrorCreateFile);
-         
-          }, onErrorLoadFs);
-
-
-          var fileTransfer = new FileTransfer();
-          var uri = encodeURI(filePath+fileName);
-          fileTransfer.download(
-            uri,
-            fileURL,
-            function(entry) {
-                console.log("download complete: " + entry.toURL());
-            },
-            function(error) {
-                console.log("download error source " + error.source);
-                console.log("download error target " + error.target);
-                console.log("download error code" + error.code);
-            },
-            false,
-            {
-                headers: {
-                    "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
-                }
-            }
-        );*/
-            // 此处写需要做的文件操作
-            /*window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-              console.log('打开的文件系统: ' + fs.name);
-              fs.root.getFile("hangge.txt", { create: true, exclusive: false },
-              function (fileEntry) {
-                console.log("是否是个文件？" + fileEntry.isFile.toString());
-                //文件内容
-                var dataObj = new Blob(['欢迎访问hangge.com'], { type: 'text/plain' });
-                //写入文件
-                that.writeFile(fileEntry, null);
-              }, that.onErrorCreateFile);
-            }, that.onErrorLoadFs);*/
-          
-
-
-          
-        }
+          document.body.removeChild(aLink);          
+        }*/
         localStorage.removeItem("roadTest");
         localStorage.removeItem("roadTestDev");
         localStorage.removeItem("followPoint");
@@ -494,6 +931,7 @@
       startRoadTest(){
         this.roadTestMapVisible = true;
         this.mapHeight = window.innerHeight;
+        this.baiduMapHeight = this.mapHeight - 90;
         this.startTest();
         this.testing = true;
         //this.initRoadTestMap();
@@ -501,66 +939,78 @@
       startTest(){
         console.log("startTest")
         var that = this;
+        if(!this.checkImportParam()){
+          this.$toast({
+            message: "请检查参数",
+            position: 'middle',
+            duration: 2000
+          });
+          return ;
+        }
         that.importEvent = false;
         that.testEvent = true;
         localStorage.mapCenter = "";
         that.getAllDev();//获取所有要测试的设备：sessionStorage中存的值和下拉列表新选择的值
         //if(localStorage.btnState != "start"){//上一个动作是导入，删除，或停止
-        if(that.testMap){
-          that.testMap.clearOverlays();//清空覆盖物
-        }
-        //}
-        that.lastPonit = {};
-        //路测过程中修改路测设备后对路测设备进行重新记录
-        if(!that.formatTestDev()){
-          return ;
-        }
-        //初始化地图描点经纬度的最大最小值
-        var roadTest = JSON.parse(localStorage.roadTest);
-        var roadTestDev = Object.keys(roadTest);
-        that.initAllDevRange(roadTestDev);//sessionStorage.allDevRange初始化所有设备的整体经纬度范围
-        that.initMapSize(roadTestDev);//sessionStorage.mapSize记录每个设备的经纬度范围
-        
-        that.startTestDrawFlg = true;//第一次画图
-        var testInfoArr = [], testInfo = "";
-        for(var key in roadTest){
-          testInfoArr.push(roadTest[key]["fileName"]+"/"+roadTest[key]["startTime"]);
-        }
-        testInfo = testInfoArr.join(",");
-        that.createRoadTestFile(testInfo);//创建路测文件
+        setTimeout(function(){
+          if(that.testMap){
+            that.testMap.clearOverlays();//清空覆盖物
+            that.show.gpsInfo = false;
+            that.gpsInfo = "";
+          }
+          //}
+          that.lastPonit = {};
+          //路测过程中修改路测设备后对路测设备进行重新记录
+          if(!that.formatTestDev()){
+            return ;
+          }
+          //初始化地图描点经纬度的最大最小值
+          var roadTest = JSON.parse(localStorage.roadTest);
+          var roadTestDev = Object.keys(roadTest);
+          that.initAllDevRange(roadTestDev);//sessionStorage.allDevRange初始化所有设备的整体经纬度范围
+          that.initMapSize(roadTestDev);//sessionStorage.mapSize记录每个设备的经纬度范围
+          
+          that.startTestDrawFlg = true;//第一次画图
+          var testInfoArr = [], testInfo = "";
+          for(var key in roadTest){
+            testInfoArr.push(roadTest[key]["fileName"]+"/"+roadTest[key]["startTime"]);
+          }
+          testInfo = testInfoArr.join(",");
+          that.createRoadTestFile(testInfo);//创建路测文件
 
-        //单独线程，请求路测数据并绘图
-        /*if(that.workerRoadTest){
-          that.workerRoadTest.terminate();  
-        }
-        var workerUrl = require('./roadTestWorker.js');
-        that.workerRoadTest = new Worker(workerUrl);
-        that.workerRoadTestInit(testInfo);*/
-        that.getRoadTestData(testInfo);
-        that.roadTestInterval = setInterval(function(){
+          //单独线程，请求路测数据并绘图
+          /*if(that.workerRoadTest){
+            that.workerRoadTest.terminate();  
+          }
+          var workerUrl = require('./roadTestWorker.js');
+          that.workerRoadTest = new Worker(workerUrl);
+          that.workerRoadTestInit(testInfo);*/
           that.getRoadTestData(testInfo);
-        },1000)
-        //修改点击路侧后，各按键的状态
-        that.roadTestDev = JSON.parse(localStorage.roadTestDev)
-        /*setTimeout(function(){
-          clickStartBtnState();
-        },500)*/ 
-        that.formatDevFocus();////初始化设备追踪下拉列表,显示的内容为正在进行路测的设备
-        localStorage.mapZoom = localStorage.mapZoom?localStorage.mapZoom:15;
+          that.roadTestInterval = setInterval(function(){
+            that.getRoadTestData(testInfo);
+          },1000)
+          //修改点击路侧后，各按键的状态
+          that.roadTestDev = JSON.parse(localStorage.roadTestDev)
+          /*setTimeout(function(){
+            clickStartBtnState();
+          },500)*/ 
+          that.formatDevFocus();////初始化设备追踪下拉列表,显示的内容为正在进行路测的设备
+          localStorage.mapZoom = localStorage.mapZoom?localStorage.mapZoom:15;
 
-        that.testMap.addEventListener("zoomend", function(evt){
-          if(that.testEvent){
-            that.refreshTestMapList();
-          }
-        });
-        that.testMap.addEventListener("dragend", function(){
-          if(that.testEvent){
-            that.refreshTestMapList();
-          }
-        });
+          that.testMap.addEventListener("zoomend", function(evt){
+            if(that.testEvent){
+              that.refreshTestMapList();
+            }
+          });
+          that.testMap.addEventListener("dragend", function(){
+            if(that.testEvent){
+              that.refreshTestMapList();
+            }
+          });
+        },500)
       },
       getRoadTestData(testInfo){
-        console.log("getRoadTestData")
+        //console.log("getRoadTestData")
         var that = this;
         that.$axios({
           method: 'post',
@@ -575,28 +1025,25 @@
           UserId:that.user.id
         })
         .then(function (response) {
+          console.log("getRoadTestData")
           var data = response.data.data;
+          console.log(data);
           var vData = [];
-          var validDev = true;
-          $("#gpsInfo").empty();
+          that.gpsInfo = "";
           for(var i=0; i<data.length; i++){
             //0是没有设备，1是锁定中，2是锁定
             if (data[i]["GpsStates"] == 0 ) {//背包失锁
-              $("#gpsInfo").append("<p>"+"背包"+data[i]["dev_name"]+' GPS失锁'+"</p>");
-            }
-            if (data[i]["GpsStates"] == 1 ) {//背包失锁
-              $("#gpsInfo").append("<p>"+"背包"+data[i]["dev_name"]+' 的GPS模块正在搜索'+"</p>");
+              that.show.gpsInfo = true;
+              that.gpsInfo = "背包"+data[i]["dev_name"]+' GPS失锁';
+            }else if (data[i]["GpsStates"] == 1 ) {//背包失锁
+              that.show.gpsInfo = true;
+              that.gpsInfo = "背包"+data[i]["dev_name"]+' 的GPS模块正在搜索';
+            }else{
+              that.show.gpsInfo = false;
             }
             vData.push(data[i]);
           }
-          if($("#gpsInfo p").length > 0){
-            $("#gpsInfo").css({"padding":'10px','border':"2px solid red"});
-          }else{
-            $("#gpsInfo").css({"padding":'0px','border':"none"});
-          }
-          if(validDev){
-            that.saveTestData(vData);//所有请求数据均画图
-          }
+          that.saveTestData(vData);//所有请求数据均画图
         })
         .catch(function (error) {
            console.log(error);
@@ -616,7 +1063,7 @@
               newLen += showList[key]["RealLongitude"].length;
             }
             if(newLen > that.SHOWPOINT){//显示范围内的点数超过百度地图显示点的承受范围
-              newList = that.getHalfList(showList,SHOWPOINT/2);//从所有点中抽 SHOWPOINT/2 进行显示
+              newList = that.getHalfList(showList,that.SHOWPOINT/2);//从所有点中抽 SHOWPOINT/2 进行显示
             }else{
               newList = showList;
             }
@@ -694,20 +1141,33 @@
           GPSCurrentObj[data[i]["dev_sn"]]["gpsSpeed"].push(data[i]["GpsSpeed"]?data[i]["GpsSpeed"]:0);
           GPSCurrentObj[data[i]["dev_sn"]]["dev_sr"] = [];
           GPSCurrentObj[data[i]["dev_sn"]]["dev_sr"].push(data[i]["dev_sr"]?data[i]["dev_sr"]:0);
+          GPSCurrentObj[data[i]["dev_sn"]]["dev_push_br"] = [];
+          GPSCurrentObj[data[i]["dev_sn"]]["dev_push_br"].push(data[i]["dev_push_br"]?data[i]["dev_push_br"]:0);
+          GPSCurrentObj[data[i]["dev_sn"]]["dev_push_br_percent"] = [];
+          GPSCurrentObj[data[i]["dev_sn"]]["dev_push_br_percent"].push(data[i]["dev_push_br"]?((data[i]["dev_push_br"]*100/data[i]["dev_sr"])>100?100:parseInt(data[i]["dev_push_br"]*100/data[i]["dev_sr"])):0);
+          GPSCurrentObj[data[i]["dev_sn"]]["AvbrKbps"] = [];
+          GPSCurrentObj[data[i]["dev_sn"]]["AvbrKbps"].push(data[i]["AvbrKbps"]?data[i]["AvbrKbps"]:0);
+          GPSCurrentObj[data[i]["dev_sn"]]["AvbrPercent"] = [];
+          GPSCurrentObj[data[i]["dev_sn"]]["AvbrPercent"].push(data[i]["AvbrKbps"]?((data[i]["AvbrKbps"]*100/data[i]["dev_sr"])>100?100:parseInt(data[i]["AvbrKbps"]*100/data[i]["dev_sr"])):0);
+
           GPSCurrentObj[data[i]["dev_sn"]]["dev_delay"] = [];
           GPSCurrentObj[data[i]["dev_sn"]]["dev_delay"].push(data[i]["dev_delay"]?data[i]["dev_delay"]:0);
+          GPSCurrentObj[data[i]["dev_sn"]]["bitrate_mode"] = [];//编码模式
+          GPSCurrentObj[data[i]["dev_sn"]]["bitrate_mode"].push(data[i]["bitrate_mode"]?data[i]["bitrate_mode"]:0);
           GPSCurrentObj[data[i]["dev_sn"]]["SIM1"] = [];
           GPSCurrentObj[data[i]["dev_sn"]]["SIM1"].push(data[i]["SIM1"]?data[i]["SIM1"]:0);
           GPSCurrentObj[data[i]["dev_sn"]]["SIM2"] = [];
           GPSCurrentObj[data[i]["dev_sn"]]["SIM2"].push(data[i]["SIM2"]?data[i]["SIM2"]:0);
           GPSCurrentObj[data[i]["dev_sn"]]["SIM3"] = [];
           GPSCurrentObj[data[i]["dev_sn"]]["SIM3"].push(data[i]["SIM3"]?data[i]["SIM3"]:0);
-          GPSCurrentObj[data[i]["dev_sn"]]["SIM4"] = [];
-          GPSCurrentObj[data[i]["dev_sn"]]["SIM4"].push(data[i]["SIM4"]?data[i]["SIM4"]:0);
-          GPSCurrentObj[data[i]["dev_sn"]]["SIM5"] = [];
-          GPSCurrentObj[data[i]["dev_sn"]]["SIM5"].push(data[i]["SIM5"]?data[i]["SIM5"]:0);
-          GPSCurrentObj[data[i]["dev_sn"]]["SIM6"] = [];
-          GPSCurrentObj[data[i]["dev_sn"]]["SIM6"].push(data[i]["SIM6"]?data[i]["SIM6"]:0);
+          if(this.devSeries == "4000"){
+            GPSCurrentObj[data[i]["dev_sn"]]["SIM4"] = [];
+            GPSCurrentObj[data[i]["dev_sn"]]["SIM4"].push(data[i]["SIM4"]?data[i]["SIM4"]:0);
+            GPSCurrentObj[data[i]["dev_sn"]]["SIM5"] = [];
+            GPSCurrentObj[data[i]["dev_sn"]]["SIM5"].push(data[i]["SIM5"]?data[i]["SIM5"]:0);
+            GPSCurrentObj[data[i]["dev_sn"]]["SIM6"] = [];
+            GPSCurrentObj[data[i]["dev_sn"]]["SIM6"].push(data[i]["SIM6"]?data[i]["SIM6"]:0);  
+          }
         }
         if(Object.keys(GPSCurrentObj).length != 0){
           if(localStorage.roadTestDotSum){
@@ -763,7 +1223,9 @@
           testData[objSn] = {};
           testData[objSn]["dev_name"] = datas[1][1];
           var timeArr = [], gpsStatusArr=[], bdLongitudeArr = [], bdLatitudeArr = [], longitudeArr = [], latitudeArr = [], 
-              onlineArr = [], devPushStatusArr = [], lossArr = [], gpsSpeedArr = [], devSrArr = [], devDelayArr = [],
+              onlineArr = [], devPushStatusArr = [], lossArr = [], bitrateModeArr = [],
+              devPushBrArr = [],avbrKbpsArr = [],devPushBrPercentArr = [],avbrPercentArr = [], 
+              gpsSpeedArr = [], devSrArr = [], devDelayArr = [],
               sim1Arr = [], sim2Arr = [], sim3Arr = [], sim4Arr = [], sim5Arr = [], sim6Arr = [];
           for(var j=5; j<datas.length-1; j++){
             timeArr.push(datas[j][1]);
@@ -773,17 +1235,27 @@
             bdLongitudeArr.push(datas[j][5]);
             bdLatitudeArr.push(datas[j][6]);
             lossArr.push(datas[j][7]);
-            gpsSpeedArr.push(datas[j][8]);
-            devSrArr.push(datas[j][9]);
-            devDelayArr.push(datas[j][10]);
-            sim1Arr.push(datas[j][11]);
-            sim2Arr.push(datas[j][12]);
-            sim3Arr.push(datas[j][13]);
-            sim4Arr.push(datas[j][14]);
-            sim5Arr.push(datas[j][15]);
-            sim6Arr.push(datas[j][16]);
-            onlineArr.push(datas[j][17]);
-            devPushStatusArr.push(datas[j][18]);
+            devPushBrArr.push(datas[j][8].split("/")[0]);
+            devPushBrPercentArr.push(datas[j][8].split("/")[1].split("%")[0]);
+            avbrKbpsArr.push(datas[j][9].split("/")[0]);
+            avbrPercentArr.push(datas[j][9].split("/")[1].split("%")[0]);
+            bitrateModeArr.push(datas[j][10]);
+            gpsSpeedArr.push(datas[j][11]);
+            devSrArr.push(datas[j][12]);
+            devDelayArr.push(datas[j][13]);
+            sim1Arr.push(datas[j][14]);
+            sim2Arr.push(datas[j][15]);
+            sim3Arr.push(datas[j][16]);
+            if(this.devSeries == "1080"){
+              onlineArr.push(datas[j][17]);
+              devPushStatusArr.push(datas[j][18]);
+            }else if(this.devSeries == "4000"){
+              sim4Arr.push(datas[j][17]);
+              sim5Arr.push(datas[j][18]);
+              sim6Arr.push(datas[j][19]);
+              onlineArr.push(datas[j][20]);
+              devPushStatusArr.push(datas[j][21]);
+            }
           }
           testData[objSn]["RealLongitude-old"] = longitudeArr;
           testData[objSn]["RealLatitude-old"] = latitudeArr;
@@ -796,13 +1268,20 @@
           testData[objSn]["gpsState"] = gpsStatusArr;
           testData[objSn]["gpsSpeed"] = gpsSpeedArr;
           testData[objSn]["dev_sr"] = devSrArr;
+          testData[objSn]["dev_push_br"] = devPushBrArr;
+          testData[objSn]["dev_push_br_percent"] = devPushBrPercentArr;
+          testData[objSn]["AvbrKbps"] = avbrKbpsArr;
+          testData[objSn]["AvbrPercent"] = avbrPercentArr;
+          testData[objSn]["bitrate_mode"] = bitrateModeArr;
           testData[objSn]["dev_delay"] = devDelayArr;
           testData[objSn]["SIM1"] = sim1Arr;
           testData[objSn]["SIM2"] = sim2Arr;
           testData[objSn]["SIM3"] = sim3Arr;
-          testData[objSn]["SIM4"] = sim4Arr;
-          testData[objSn]["SIM5"] = sim5Arr;
-          testData[objSn]["SIM6"] = sim6Arr;
+          if(this.devSeries == "4000"){
+            testData[objSn]["SIM4"] = sim4Arr;
+            testData[objSn]["SIM5"] = sim5Arr;
+            testData[objSn]["SIM6"] = sim6Arr;
+          }
         }
         if(cb){
           cb(testData)
@@ -883,7 +1362,7 @@
       formatTestDev(){
         console.log("formatTestDev")
         var that = this;
-        var newDev = that.roadTestDev;
+        var newDev = that.roadTestDevSel;
         var newDevNum = newDev?newDev.length:0;
         var addDev = [];//本次测试新增加的设备
         var oldDev = [];//正在测试的设备
@@ -926,7 +1405,7 @@
           return item.value;
         });
         console.log("arr")
-        console.log(arr);
+        console.log(arr)
         console.log("addDev")
         console.log(addDev)
         for(let m=0; m<addDev.length; m++){
@@ -968,23 +1447,32 @@
       //获取所有要测试的设备：sessionStorage中存的值和下拉列表新选择的值
       getAllDev(){
         var that = this;
+        console.log("getAllDev")
+        console.log(localStorage.roadTestDev)
         if(localStorage.roadTestDev){
-          var oldDev = JSON.parse(localStorage.roadTestDev)
+          var oldDev = JSON.parse(localStorage.roadTestDev);
+          console.log("oldDev")
+          console.log(oldDev)
           var newSel = that.roadTestDev;
-          for(var i=0; i<newSel.length; i++){
+          console.log(newSel)
+          if(oldDev.indexOf(newSel) == -1){
+            oldDev += ","+newSel;
+          }
+          /*for(var i=0; i<newSel.length; i++){
             if($.inArray(newSel[i],oldDev) == -1){
+              oldDev = oldDev.split(",");
               oldDev.push(newSel[i]);
             }
-          }
+          }*/
           localStorage.roadTestDev = JSON.stringify(oldDev);
         }else{
           localStorage.roadTestDev = JSON.stringify(that.roadTestDev);  
         }
       },
       importRoadTest(){
-        console.log("importRoadTest")
         this.mapHeight = window.innerHeight;
-        this.importTest();
+        this.baiduMapHeight = this.mapHeight - 70;
+        this.importTestMap();
         return;
       },
       //将内容数据写入到文件中
@@ -1006,30 +1494,39 @@
       
       //请求在线设备
       initOnlineDev(cb){
+        //console.log("initOnlineDev")
         var that = this;
         that.$axios({
           method: 'post',
-          url:"/page/index/roadTest.php",
+          url:"/page/dev/devData.php",
           data:that.$qs.stringify({
-            getOnlineDev: true,
-            logUser: that.user.id,
+            getDevices: true,
+            userId: that.user.id,
+            userGroup:that.user.userGroup,
+            selectByPrefix:"all",
+            logPrefix:that.user.prefix,
           }),
-          Api:"getOnlineDev",
+          Api:"getDevices",
           AppId:"android",
           UserId:that.user.id
         })
         .then(function (response) {
-          console.log("initOnlineDev")
-          console.log("success")
+          //console.log("initOnlineDev")
           let res = response.data;
           if(res.res.success){
-            var newArr = that.$global.copy(res.data).map(function(item){
-              return {
-                text: item.dev_name,
-                value: item.dev_sn
+            //console.log(res.data)
+            var newArr = [];
+            var data = res.data;
+            var len = data.length;
+            for(var i=0; i<len; i++){
+              if(data[i]["online"] != "离线"){
+                newArr.push({
+                  label: data[i].dev_name,
+                  value: data[i].dev_sn
+                })
               }
-            });
-            console.log(newArr)
+            }
+            //console.log(newArr)
             if(cb){
               cb(newArr)
             }
@@ -1054,10 +1551,10 @@
           that.changeStartDisable();
         })*/
       },
-      changeRoadTestDev(){
+      /*changeRoadTestDev(){
         var that = this;
         that.changeStartDisable();
-      },
+      },*/
       //设备下拉列表赋初值
       initDevSelect(val_old){
         var selectDev = "";
@@ -1110,7 +1607,7 @@
       },
       //重新设置地图缩放
       setMapNewZoom(){
-        console.log("setMapNewZoom");
+        //console.log("setMapNewZoom");
         var that = this;
         //var showDev = that.zoomDev;
         var showDev = [];
@@ -1118,7 +1615,7 @@
         if(!showDev || (showDev.length == 1 && showDev[0]=="")){
           return;
         }
-        console.log(showDev)
+        //console.log(showDev)
         showDev = showDev.filter(function(item){
           return item!="";
         })
@@ -1157,7 +1654,7 @@
       },
       //初始化地图
       initRoadTestMap(){
-        console.log("initRoadTestMap")
+        //console.log("initRoadTestMap")
         if (navigator.onLine) {
           this.LoadBaiduMapScript();
           return true;
@@ -1205,7 +1702,7 @@
       },
       //初始化地图控件
       initTestMap() {
-        console.log("initTestMap")
+        //console.log("initTestMap")
         var that = this;
         var testMap = that.testMap;
         if (typeof(BMap) == 'object') {
@@ -1222,12 +1719,12 @@
             localStorage.mapZoom = testMap.getZoom();
           });
           //地图脚本加载完成后，执行刷新页面的操作
-          var bmaplibInterval = setInterval(function(){
+          /*var bmaplibInterval = setInterval(function(){
             if(BMapLib){
               //checkRefreshPage();//刷新页面//zanzhu
               clearInterval(bmaplibInterval);
             }
-          },200)
+          },200)*/
 
           //定义一个控件类(地圖縮放)
           function ZoomControl() {
@@ -1333,61 +1830,80 @@
       },
       //格式化导入的路测文件数据
       formatImportData(data){
+        //console.log("formatImportData")
+        var devSn = data[0].split(",")[1];
+        var devName = data[1].split(",")[1];
+        var rcvSn = data[2].split(",")[1];
+        var board = data[3].split(",")[1];
+        this.devSeries = this.$global.getDevSeries(devSn);
+        var recordStartLine = 5;
+        var allLine = data.length;
         var list = {};
         var roadTestDev = [];
-        for(var i=0; i<data.length; i++){
-          var allInfo = data[i];
-          var infoRowArr = allInfo.split("\n");
-          var devSn = infoRowArr[0].split(",")[1];
-          var devName = infoRowArr[1].split(",")[1];
-          var rcvSn = infoRowArr[2].split(",")[1];
-          var board = infoRowArr[3].split(",")[1];
-          var recordStartLine = 5;
-          var allLine = infoRowArr.length;
-          if(!list[devSn]){
-            list[devSn] = {};
-            list[devSn]["dev_name"] = devName;
-            list[devSn]["time"] = [];
-            list[devSn]["gpsState"] = [];
-            list[devSn]["gpsSpeed"] = [];
-            list[devSn]["dev_sr"] = [];
-            list[devSn]["dev_delay"] = [];
-            list[devSn]["RealLongitude-old"] = [];
-            list[devSn]["RealLatitude-old"] = [];
-            list[devSn]["RealLongitude"] = [];
-            list[devSn]["RealLatitude"] = [];
-            list[devSn]["TotalLossRate"] = [];
-            list[devSn]["SIM1"] = [];
-            list[devSn]["SIM2"] = [];
-            list[devSn]["SIM3"] = [];
+        var allLine = data.length;
+        if(!list[devSn]){
+          list[devSn] = {};
+          list[devSn]["dev_name"] = devName;
+          list[devSn]["time"] = [];
+          list[devSn]["gpsState"] = [];
+          list[devSn]["gpsSpeed"] = [];
+          list[devSn]["dev_sr"] = [];
+          list[devSn]["dev_push_br"] = [];
+          list[devSn]["AvbrKbps"] = [];
+          list[devSn]["dev_push_br_percent"] = [];
+          list[devSn]["AvbrPercent"] = [];
+          list[devSn]["bitrate_mode"] = [];
+          list[devSn]["dev_delay"] = [];
+          list[devSn]["RealLongitude-old"] = [];
+          list[devSn]["RealLatitude-old"] = [];
+          list[devSn]["RealLongitude"] = [];
+          list[devSn]["RealLatitude"] = [];
+          list[devSn]["TotalLossRate"] = [];
+          list[devSn]["SIM1"] = [];
+          list[devSn]["SIM2"] = [];
+          list[devSn]["SIM3"] = [];
+          if(this.devSeries == "4000"){
             list[devSn]["SIM4"] = [];
             list[devSn]["SIM5"] = [];
             list[devSn]["SIM6"] = [];
-            list[devSn]["online"] = [];
-            list[devSn]["devPushStatus"] = [];
-            roadTestDev.push(devSn);
           }
-          for(var j=recordStartLine; j<allLine-1; j++){
-            var recordRow = infoRowArr[j].split(",");
-            list[devSn]["time"].push(recordRow[1]);
-            list[devSn]["gpsState"].push(recordRow[2]);
-            list[devSn]["RealLongitude-old"].push(recordRow[3]);
-            list[devSn]["RealLatitude-old"].push(recordRow[4]);
-            list[devSn]["RealLongitude"].push(recordRow[5]);
-            list[devSn]["RealLatitude"].push(recordRow[6]);
-            list[devSn]["TotalLossRate"].push(recordRow[7]*10);
-            list[devSn]["gpsSpeed"].push(recordRow[8]);
-            list[devSn]["dev_sr"].push(recordRow[9]);
-            list[devSn]["dev_delay"].push(recordRow[10]);
-            list[devSn]["SIM1"].push(recordRow[11]);
-            list[devSn]["SIM2"].push(recordRow[12]);
-            list[devSn]["SIM3"].push(recordRow[13]);
-            list[devSn]["SIM4"].push(recordRow[14]);
-            list[devSn]["SIM5"].push(recordRow[15]);
-            list[devSn]["SIM6"].push(recordRow[16]);
+          list[devSn]["online"] = [];
+          list[devSn]["devPushStatus"] = [];
+          roadTestDev.push(devSn);
+        }
+        for(var j=recordStartLine; j<allLine-1; j++){
+          var recordRow = data[j].split(",");
+          /*console.log("recordRow:"+j)
+          console.log(recordRow)*/
+          list[devSn]["time"].push(recordRow[1]);
+          list[devSn]["gpsState"].push(recordRow[2]);
+          list[devSn]["RealLongitude-old"].push(recordRow[3]);
+          list[devSn]["RealLatitude-old"].push(recordRow[4]);
+          list[devSn]["RealLongitude"].push(recordRow[5]);
+          list[devSn]["RealLatitude"].push(recordRow[6]);
+          list[devSn]["TotalLossRate"].push(recordRow[7]);
+          list[devSn]["dev_push_br"].push(recordRow[8].split("/")[0]);
+          list[devSn]["AvbrKbps"].push(recordRow[9].split("/")[0]);
+          list[devSn]["dev_push_br_percent"].push(recordRow[8].split("/")[1].split("%")[0]);
+          list[devSn]["AvbrPercent"].push(recordRow[9].split("/")[1].split("%")[0]);
+          list[devSn]["bitrate_mode"].push(recordRow[10]);
+          list[devSn]["gpsSpeed"].push(recordRow[11]);
+          list[devSn]["dev_sr"].push(recordRow[12]);
+          list[devSn]["dev_delay"].push(recordRow[13]);
+          list[devSn]["SIM1"].push(recordRow[14]);
+          list[devSn]["SIM2"].push(recordRow[15]);
+          list[devSn]["SIM3"].push(recordRow[16]);
+          if(this.devSeries == "4000"){
+            list[devSn]["SIM4"].push(recordRow[17]);
+            list[devSn]["SIM5"].push(recordRow[18]);
+            list[devSn]["SIM6"].push(recordRow[19]);
+            list[devSn]["online"].push(recordRow[20]);
+            list[devSn]["devPushStatus"].push(recordRow[21]); 
+          }else if(this.devSeries == "1080"){
             list[devSn]["online"].push(recordRow[17]);
-            list[devSn]["devPushStatus"].push(recordRow[18]); 
+            list[devSn]["devPushStatus"].push(recordRow[18]);   
           }
+          
         }
         return {"list":list, "roadTestDev":roadTestDev}
       },
@@ -1428,20 +1944,26 @@
           }
           that.initListData(list, newList, key1);
           //抽取点
-          for(var i=0; i<count; i++){
-            if(list[key1]["online"][i] == 0 //gray
-              || list[key1]["devPushStatus"][i] == 0 //orange
-              || list[key1]["TotalLossRate"][i] != 0){ //red
-              that.setNewListData(list, newList, key1, i);
-              continue;
-            }
-            if(i%(parseInt(count/devPoint[key1])) == 0){
-              that.setNewListData(list, newList, key1, i);
+          that.filterDataByType(list, key1, count, newList, devPoint[key1]);
+        }
+        return newList;
+      },
+      //根据显示数据的类型和抽点的规则过滤数据
+      filterDataByType(list, key1, count, newList, devShowPoint){
+        var data = "";
+        for(var i=0; i<count; i++){
+          if(list[key1]["online"][i] == 0 //离线
+            || list[key1]["devPushStatus"][i] == 0//停止推流
+            || list[key1]["TotalLossRate"][i] != 0){//有丢包的点不抽点
+            this.setNewListData(list, newList, key1, i);
+            continue;
+          }else{
+            if(i%(parseInt(count/devShowPoint)) == 0){
+              this.setNewListData(list, newList, key1, i);
               continue; 
             }
           }
         }
-        return newList;
       },
       //初始化过滤成200点后的新数组
       initListData(list, newList, key){
@@ -1461,6 +1983,11 @@
         newList[key]["dev_delay"] = [];
         newList[key]["dev_name"] = list[key]["dev_name"];
         newList[key]["dev_sr"] = [];
+        newList[key]["dev_push_br"] = [];
+        newList[key]["AvbrKbps"] = [];
+        newList[key]["dev_push_br_percent"] = [];
+        newList[key]["AvbrPercent"] = [];
+        newList[key]["bitrate_mode"] = [];
         newList[key]["gpsSpeed"] = [];
         newList[key]["gpsState"] = [];
         newList[key]["online"] = [];
@@ -1476,13 +2003,20 @@
         newList[key]["SIM1"].push(data["SIM1"][i]);
         newList[key]["SIM2"].push(data["SIM2"][i]);
         newList[key]["SIM3"].push(data["SIM3"][i]);
-        newList[key]["SIM4"].push(data["SIM4"][i]);
-        newList[key]["SIM5"].push(data["SIM5"][i]);
-        newList[key]["SIM6"].push(data["SIM6"][i]);
+        if(data["SIM4"]){
+          newList[key]["SIM4"].push(data["SIM4"][i]);
+          newList[key]["SIM5"].push(data["SIM5"][i]);
+          newList[key]["SIM6"].push(data["SIM6"][i]);
+        }
         newList[key]["TotalLossRate"].push(data["TotalLossRate"][i]);
         newList[key]["devPushStatus"].push(data["devPushStatus"][i]);
         newList[key]["dev_delay"].push(data["dev_delay"][i]);
         newList[key]["dev_sr"].push(data["dev_sr"][i]);
+        newList[key]["dev_push_br"].push(data["dev_push_br"][i]);
+        newList[key]["dev_push_br_percent"].push(data["dev_push_br_percent"][i]);
+        newList[key]["AvbrKbps"].push(data["AvbrKbps"][i]);
+        newList[key]["AvbrPercent"].push(data["AvbrPercent"][i]);
+        newList[key]["bitrate_mode"].push(data["bitrate_mode"][i]);
         newList[key]["gpsSpeed"].push(data["gpsSpeed"][i]);
         newList[key]["gpsState"].push(data["gpsState"][i]);
         newList[key]["online"].push(data["online"][i]);
@@ -1490,6 +2024,7 @@
       },
       //导入记录，获取显示所有点的合适的mapzoom
       initMapZoom(list){
+        //console.log("initMapZoom")
         var that = this;
         var lngMax = "", lngMin = "";
         var latMax = "", latMin = "";
@@ -1516,7 +2051,6 @@
 
         var pointArray = new Array(sm,lg)
         var viewPort = that.testMap.getViewport(pointArray);
-        //testMap.centerAndZoom(viewPort.center, viewPort.zoom);
         return viewPort;
       },
       getMapBorder(testMap,noMapBorder){
@@ -1566,6 +2100,7 @@
       },
       //画背包图片
       drawImg(point){
+        console.log("drawImg")
         //背包图片
         var that = this;
         var testMap = this.testMap;
@@ -1581,13 +2116,28 @@
       },
       //画所有的点
       drawDotts(GPSListObj, key){
+        //console.log("drawDotts")
         var that = this;
         var data = GPSListObj[key];
+        //console.log(data)
+        data["card5G"] = [];
         var RealLongitude = data["RealLongitude"];
         var RealLatitude = data["RealLatitude"];
         var total = RealLongitude.length;
+        var selectCard = this.card5GText.split(",");
+        //console.log("this.card5GText")
+        //console.log(this.card5GText)
         var lastPonit = that.lastPonit;
         for(var i=0; i<total; i++){
+          var number5G = 0;
+          if(this.dataType == 4){
+            for(var j=0; j<selectCard.length; j++){
+              if(data[selectCard[j]][i].indexOf("LTE") == -1){
+                number5G++;
+              }
+            }
+          }
+          data["card5G"][i] = number5G;
           if(!lastPonit[key]){//第一次描点，将当前点记录为上个点
             lastPonit[key] = {};        
             lastPonit[key]["long"] = data["RealLongitude"][i];
@@ -1595,6 +2145,9 @@
             lastPonit[key]["online"] = data["online"][i];
             lastPonit[key]["devPushStatus"] = data["devPushStatus"][i];
             lastPonit[key]["TotalLossRate"] = data["TotalLossRate"][i];
+            lastPonit[key]["devPushBr"] = data["dev_push_br"][i];
+            lastPonit[key]["AvbrKbps"] = data["AvbrKbps"][i];
+            lastPonit[key]["card5G"] = data["card5G"][i];
             lastPonit[key]["noPoint"] = true;
           }
           var point = new BMap.Point(data["RealLongitude"][i], data["RealLatitude"][i]);
@@ -1603,16 +2156,20 @@
           if(lastPonit[key]["long"] == data["RealLongitude"][i]
             && lastPonit[key]["lat"] == data["RealLatitude"][i]){//当前点和上一个点位置相同
             
-            if(data["online"][i] != 0//在线
-              && data["devPushStatus"][i]!=0//推流中
-              && data["TotalLossRate"][i] == 0//没有丢包
-              && lastPonit[key]["noPoint"] == false){//不是第一次描点
+            if( lastPonit[key]["noPoint"] == false){//不是第一次描点
+              if(this.dataType == 1 || this.dataType == 2){
+                if(data["AvbrKbps"][i] > lastPonit[key]["AvbrKbps"]){//显示上传速率小的
                   continue;
-            }
-
-            if(data["TotalLossRate"][i] != 0//有丢包
-              && data["TotalLossRate"][i]<lastPonit[key]["TotalLossRate"]){//丢包率小于上一秒的丢包率，则不画点
-              continue;
+                }
+              }else if(this.dataType == 3){//上传速率
+                if(data["dev_push_br"][i] > lastPonit[key]["devPushBr"]){//显示上传速率小的
+                  continue;
+                }
+              }else if(this.dataType == 4){//5G覆盖
+                if(data["card5G"][i] > lastPonit[key]["card5G"]){//显示覆盖率低的
+                  continue;
+                }
+              }
             }
           }
           
@@ -1625,36 +2182,94 @@
           lastPonit[key]["online"] = data["online"][i];
           lastPonit[key]["devPushStatus"] = data["devPushStatus"][i];
           lastPonit[key]["TotalLossRate"] = data["TotalLossRate"][i];
+          lastPonit[key]["devPushBr"] = data["dev_push_br"][i];
+          lastPonit[key]["AvbrKbps"] = data["AvbrKbps"][i];
+          lastPonit[key]["card5G"] = data["card5G"][i];
           lastPonit[key]["noPoint"] = false;
         }  
         that.lastPonit = lastPonit;
       },
       //画背包圆点
       drawDott(GPSListObj, key, i, point){
+        var that = this;
         var img = "";
-        var IMGSIZE = 0;
+        var IMGSIZE = 10;
         var data = GPSListObj[key];
         var testMap = this.testMap;
+        /*console.log('data["online"][i]:'+data["online"][i])
+        console.log('data["devPushStatus"][i]:'+data["devPushStatus"][i])
+        console.log('data["bitrate_mode"][i]:'+data["bitrate_mode"][i])
+        console.log('data["TotalLossRate"][i]:'+data["TotalLossRate"][i])
+        console.log('this.dataType:'+this.dataType)*/
         if(data["online"][i]==0){
           img = require("../../assets/img/gray10.png");
         }else if(data["devPushStatus"][i]==0){
-          img = require("../../assets/img/orange10.png");
-        }else if(data["TotalLossRate"][i] != 0){
-          img = require("../../assets/img/red10.png");
+          img = require("../../assets/img/blue10.png");
         }else{
-          img = require("../../assets/img/green10.png");
+          if(data["bitrate_mode"][i] == 1){//VBR
+            var totalLossRate = parseInt(data["TotalLossRate"][i]);
+            if(totalLossRate != 0){
+              img = require("../../assets/img/red10.png");
+            }else{
+              if(this.dataType == 1){//按丢包率显示
+                img = require("../../assets/img/green10.png");
+              }else if(this.dataType == 2){//按丢包率+可变码率显示
+                var datai = data["AvbrKbps"][i]/1000;
+                if(datai <= this.bitRange.bit_level1*1){
+                  img = require("../../assets/img/green110.png");
+                }else if(datai <= this.bitRange.bit_level2*1){
+                  img = require("../../assets/img/green210.png");
+                }else if(datai <= this.bitRange.bit_level3*1){
+                  img = require("../../assets/img/green310.png");
+                }else if(datai <= this.bitRange.bit_level4*1){
+                  img = require("../../assets/img/green410.png");
+                }else{
+                  img = require("../../assets/img/green510.png");
+                }
+              }else if(this.dataType == 3){//上传速率
+                var datai = data["dev_push_br_percent"][i];
+                if(datai <= this.speedRange.speed_level1*1){
+                  img = require("../../assets/img/red10.png");
+                }else if(datai <= this.speedRange.speed_level2*1){
+                  img = require("../../assets/img/orange10.png");
+                }else if(datai <= this.speedRange.speed_level3*1){
+                  img = require("../../assets/img/yellow10.png");
+                }else{
+                  img = require("../../assets/img/green10.png");
+                }
+              }else if(this.dataType == 4){//5G覆盖
+                var num5g = this.card5GTextArr.length;
+                var datai = data["card5G"][i];
+                if(datai == num5g){
+                  img = require("../../assets/img/green10.png");
+                }else if(datai == 0){
+                  img = require("../../assets/img/red10.png");
+                }else{
+                  img = require("../../assets/img/yellow10.png");
+                }
+              }
+            }
+          }else if(data["bitrate_mode"][i] == 0){//CBR
+            var totalLossRate = parseInt(data["TotalLossRate"][i]);
+            if(totalLossRate != 0){
+              img = require("../../assets/img/red10.png");//有丢包显示红的
+            }else{
+              img = require("../../assets/img/green210.png");//无丢包显示绿的
+            }
+          }
         }
-        if (img.substr(img.length-6) == "10.png") {
+
+        /*if (img.substr(img.length-6) == "10.png") {
           IMGSIZE = 10;
         }else{
           IMGSIZE = 15;
-        }
+        }*/
         var myIconA = new BMap.Icon(img, new BMap.Size(IMGSIZE,IMGSIZE));
         var markerA = new BMap.Marker(point,{
           icon: myIconA, 
           offset: new BMap.Size(10, 10) //设置文本偏移量
         });  // 创建标注
-        testMap.addOverlay(markerA);
+        this.testMap.addOverlay(markerA);
         //标注的点击事件
         markerA.addEventListener("click", function(e){   
           var p = e.target;
@@ -1664,50 +2279,90 @@
             var datas = GPSListObj[key];
             var realLong= datas["RealLongitude"];
             var realLat= datas["RealLatitude"];
+            var infoHeight = 220;
+            if(that.devSeries == "4000"){
+              infoHeight = 280;
+            }
             var opts = {
               width : 200,     // 信息窗口宽度
-              height: 250,     // 信息窗口高度
+              height: infoHeight,     // 信息窗口高度
               title : "背包:"+datas["dev_name"],//"故宫博物院" , // 信息窗口标题
               offset: new BMap.Size(10, 10)//, //设置文本偏移量
               //message:"序列号:"+key+"<br/>业务丢包:"+GPSListObj[key]["TotalLossRate"]
             }
             for(var j=realLong.length-1; j>=0; j--){
               if(realLong[j] == lng && realLat[j] == lat){
-                var TotalLossRate = datas["TotalLossRate"][j];
-                var showData = j;
-                for(var k=j-1; k>=0; k--){
-                  if(realLong[k] == lng && realLat[k] == lat){
-                    if(datas["TotalLossRate"][k]!=TotalLossRate){
-                      if((datas["TotalLossRate"][k]=="--"?0:datas["TotalLossRate"][k]) > (TotalLossRate=='--'?0:TotalLossRate)){
-                        showData = k;
+                if(that.dataType == 1 || that.dataType==2){//丟包率
+                  var TotalLossRate = datas["TotalLossRate"][j];
+                  var showData = j;
+                  for(var k=j-1; k>=0; k--){
+                    if(realLong[k] == lng && realLat[k] == lat){
+                      if(datas["TotalLossRate"][k]!=TotalLossRate){
+                        if((datas["TotalLossRate"][k]=="--"?0:datas["TotalLossRate"][k]) > (TotalLossRate=='--'?0:TotalLossRate)){
+                          showData = k;
+                        }
+                      }else{
+                        continue;
                       }
                     }else{
-                      continue;
+                      break;
                     }
-                  }else{
-                    break;
+                  }
+                }else if(that.dataType == 3){
+                  var pushBr = datas["dev_push_br"][j];
+                  var showData = j;
+                  for(var k=j-1; k>=0; k--){
+                    if(realLong[k] == lng && realLat[k] == lat){
+                      if(datas["dev_push_br"][k] < pushBr){
+                        showData = k;
+                      }else{
+                        continue;
+                      }
+                    }else{
+                      break;
+                    }
+                  }
+                }else if(that.dataType == 4){
+                  var card5GNum = datas["card5G"][j];
+                  var showData = j;
+                  for(var k=j-1; k>=0; k--){
+                    if(realLong[k] == lng && realLat[k] == lat){
+                      if(datas["card5G"][k] < card5GNum){
+                        showData = k;
+                      }else{
+                        continue;
+                      }
+                    }else{
+                      break;
+                    }
                   }
                 }
 
                 var point = new BMap.Point(lng, lat);
-                var loss = datas["TotalLossRate"][showData]=="--"?datas["TotalLossRate"][showData]:datas["TotalLossRate"][showData]/10+"%";
+                var loss = datas["TotalLossRate"][showData]=="--"?datas["TotalLossRate"][showData]:datas["TotalLossRate"][showData]+"%";
                 var speed = datas["gpsSpeed"][showData]=="--"?datas["gpsSpeed"][showData]:datas["gpsSpeed"][showData]+"km/h";
                 var delay= datas["dev_delay"][showData]=="--"?datas["dev_delay"][showData]:datas["dev_delay"][showData]/1000+"s";
                 var dev_sr= datas["dev_sr"][showData]=="--"?datas["dev_sr"][showData]:datas["dev_sr"][showData]/1000+"Mbps";
-                var infoWindow = new BMap.InfoWindow(
-                  "序列号&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+key+"<br/>"+
-                  "时间&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+ datas["time"][showData]+"<br/>"+
-                  "业务丢包&nbsp;&nbsp;&nbsp;&nbsp;: "+loss+"<br/>"+
-                  "车速&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+speed+"<br/>"+
-                  "视频比特率&nbsp;&nbsp;:"+dev_sr+"<br/>"+
-                  "延时&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+delay+"<br/>"+
-                  "SIM1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM1"][showData]+"<br/>"+
-                  "SIM2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM2"][showData]+"<br/>"+
-                  "SIM3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM3"][showData]+"<br/>"+
-                  "SIM4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM4"][showData]+"<br/>"+
-                  "SIM5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM5"][showData]+"<br/>"+
-                  "SIM6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM6"][showData]+"<br/>"
-                  , opts);  // 创建信息窗口对象 
+                var dev_push_br= datas["dev_push_br"][showData]=="--"?datas["dev_push_br"][showData]:datas["dev_push_br"][showData]/1000+"Mbps";
+                var avbr= datas["AvbrKbps"][showData]=="--"?datas["AvbrKbps"][showData]:datas["AvbrKbps"][showData]/1000+"Mbps";
+                var infoStrCom = "序列号&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+key+"<br/>"+
+                                "时间&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+ datas["time"][showData]+"<br/>"+
+                                "业务丢包&nbsp;&nbsp;&nbsp;&nbsp;: "+loss+"<br/>"+
+                                "视频比特率&nbsp;&nbsp;:"+dev_sr+"<br/>"+
+                                "上传速率&nbsp;&nbsp;&nbsp;&nbsp;: "+dev_push_br+"<br/>"+
+                                "AVBR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+avbr+"<br/>"+
+                                "车速&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+speed+"<br/>"+
+                                "延时&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+delay+"<br/>"+
+                                "SIM1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM1"][showData]+"<br/>"+
+                                "SIM2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM2"][showData]+"<br/>"+
+                                "SIM3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM3"][showData]+"<br/>";
+                var infoStr = infoStrCom;
+                if(that.devSeries == "4000"){
+                  infoStr += "SIM4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM4"][showData]+"<br/>"+
+                            "SIM5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM5"][showData]+"<br/>"+
+                            "SIM6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM6"][showData]+"<br/>";
+                }
+                var infoWindow = new BMap.InfoWindow(infoStr, opts);  // 创建信息窗口对象 
                 testMap.openInfoWindow(infoWindow, point); //开启信息窗口
                 break;
               }
@@ -1717,6 +2372,8 @@
       },
       //画所有的点
       drawAllData(GPSListObj, noImgFlg, noLabelFlg){
+        console.log("drawAllData")
+        console.log(GPSListObj)
         var that = this;
         var testMap = this.testMap;
         if (testMap == undefined) {
@@ -1725,8 +2382,10 @@
         testMap.clearOverlays();//清空覆盖物
         var mapZoom = localStorage.mapZoom;
         var center = JSON.parse(localStorage.mapCenter);
+        console.log("mapZoom:"+mapZoom)
+        console.log(center)
         point = new BMap.Point(center.lng, center.lat);
-        testMap.centerAndZoom(point, mapZoom);
+        this.testMap.centerAndZoom(point, mapZoom);
         that.getMapBorder(testMap, false);//获取当前显示地图的边界经纬度
         //清除数组的数据
         for(var key in GPSListObj){
@@ -1871,81 +2530,7 @@
           localStorage.allDevRange = JSON.stringify(allDevRange);
         }
       },
-      //导入路测信息
-      importTest(){
-        console.log("importTest")
-        var that = this;
-        that.dis.deleteTest = false;
-        /*var formData = new FormData();
-        if($('#testCsv')[0].files.length == 0){
-          that.$toast({
-            message: "请先导入路测文件",
-            position: 'middle',
-            duration: 2000
-          });
-          return;
-        }else if ($('#testCsv')[0].files.length > that.IMPORTMAX) {
-          that.$toast({
-            message: "最多导入"+that.IMPORTMAX+"条记录",
-            position: 'middle',
-            duration: 2000
-          });
-          return;
-        }*/
-        /*for(var i=0; i<$('#testCsv')[0].files.length;i++){
-          formData.append('file[]', $('#testCsv')[0].files[i]);
-        }*/
-        /*if ($('#testCsv')[0].files.length == 0) {
-          return;
-        }*/
-        that.roadTestMapVisible = true;
-        that.testMap.clearOverlays();//清空覆盖物
-        that.$axios({
-          method: 'post',
-          url:"/page/index/roadTest.php",
-          data:formData,
-          async: true, //异步
-          type: 'post', //post方式
-          datatype: "json",
-          processData: false, //不处理数据流 !important,用于对data参数进行序列化处理 这里必须false
-          contentType: false, //不设置http头 !important
-        })
-        .then(function (msg) {
-          console.log("success");
-          var data = msg.data.data;
-          //将导入的描点数据格式化
-          var formatData = that.formatImportData(data);
-          var list = formatData.list;
-          var roadTestDev = formatData.roadTestDev;        
-          that.initAllDevRange(roadTestDev);//sessionStorage.allDevRange记录所有设备的整体经纬度范围
-          var newList = that.hinoutList(list);//按各个设备总点数的比例抽取进行显示的点
-          var viewPort = that.initMapZoom(newList);//导入记录，获取显示所有点的合适的mapzoom和center
-          var mapZoom = viewPort.zoom;
-          var mapCenter = viewPort.center;
-          localStorage.mapZoom = mapZoom;
-          localStorage.mapCenter = JSON.stringify(mapCenter);
-          that.startTestDrawFlg = true; 
-          that.drawAllData(newList);
-          document.getElementById('testCsv').value = '';
-          that.importEvent = true;
-          that.testEvent = false;
-          that.testMap.addEventListener("zoomend", function(evt){
-            if(that.importEvent){
-              that.refreshMapList(list);
-            }
-          });
-          that.testMap.addEventListener("dragend", function(){
-            if(that.importEvent){
-              that.refreshMapList(list);
-            }
-          });
-        })
-        .catch(function (error) {
-          console.log("error")
-          console.log(error)
-        })
-        //that.clickImportBtnState();
-      },
+     
       //导入地图：过滤拖拽或缩放后在页面显示范围内的200个点
       refreshMapList(list){
         var that = this;
@@ -2020,6 +2605,12 @@
     width: 65%;
     float: left;
     text-align: left;
+  }
+  .width30{
+    width:30%;
+  }
+  .width70{
+    width:70%;
   }
   .ItemSelect{
     width:100%;
@@ -2387,8 +2978,11 @@
     background-color: white;
     color:red;
     position: absolute;
-    bottom: 10px;
     left: 10px;
+    position: absolute;
+    top: 0px;
+    padding: 10px;
+    border: 2px solid red;
   }
   .mint-popup.roadTestParamPopup{
     border-radius: 6px;
@@ -2397,7 +2991,89 @@
     overflow-y: auto;
     border-radius: 4px;
   }
-  /*.mint-toast{
-    z-index:2010 !important;
-  }*/
+  .roadTestConfig .GroupItemValue{
+    line-height:.3rem;
+  }
+  .roadTestConfig .mint-cell{
+    background-color:transparent !important;
+    vertical-align:text-bottom;
+  }
+  .roadTestConfig .mint-cell-value{
+    width:auto !important;
+  }
+  .roadTestConfig .ItemSelect{
+    font-size: .12rem;
+    background: #2b2e33;
+    border: 1px solid #4b5056;
+    color: #fff;
+    text-indent: 10px;
+  }
+  .roadTestConfig .select:disabled {
+    border: 1px solid #333!important;
+  }
+  .levelInput{
+    width: 30%;
+    text-align: left;
+    text-indent: 0px !important;
+  }
+  .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-right:10px;
+  }
+  .dot1{
+      background-color: #afffa3;
+  }
+  .dot2{
+      background-color: #88ff7a;
+  }
+  .dot3{
+      background-color: #5dff52;
+  }
+  .dot4{
+      background-color: #00ff00;
+  }
+  .dot5{
+      background-color: #00d907;
+  }
+  .level_show{
+    width: 20%;
+    display: inline-block;
+    text-align: right;
+  }
+  .greyPoint{
+    color: #C5C5C5;
+  }
+  .redPoint{
+    color: #ff0000;
+  }
+  .orangePoint{
+    color: #fa8c16;
+  }
+  .greenPoint{
+    color: #00ff00;
+  }
+  .green5Point{
+    color: #00d907;   
+  }
+  .green4Point{
+    color: #00ff00;   
+  }
+  .green3Point{
+    color: #5dff52;   
+  }
+  .green2Point{
+    color: #88ff7a;   
+  }
+  .green1Point{
+    color: #afffa3;   
+  }
+  .yellowPoint{
+    color: #fadb14;
+  }
+  .bluePoint{
+    color: #1890ff;
+  }
 </style>

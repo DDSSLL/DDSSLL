@@ -120,7 +120,7 @@
       return{
         SUPER:SUPER,
         systemConfShow:false,
-        app_ver:"1.02.03",
+        app_ver:"",
         server_ver:"",
         mysqlVer:"",
         ftp_ip:"",

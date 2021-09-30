@@ -70,7 +70,7 @@
                     <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{DELAY_MIN}}</div>
                     <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{DELAY_MAX}}</div>
                   </mt-range>
-                  <input type="text" class="ItemIpt" v-model.number="common.dev_delayVal_input" @blur="setDeviceParam('dev_delay_input')" :disabled="dis.dev_delayVal_input">
+                  <input type="text" class="ItemIpt" v-model.number="common.dev_delayVal_input" @blur="changeDelayInput" :disabled="dis.dev_delayVal_input">
                 </div>
               </div>
             </div>
@@ -481,18 +481,30 @@
       '$store.state.ActiveDevice.dev_sn': {
         immediate: true,
         handler(val) {
+          var that = this;
           this.controlShow();
+          this.getNetBoard(function(data){
+            that.netBoard = that.formatNetBoard(data); 
+          });//获取网卡数据
           this.getDevList();
           this.initDeviceParam();
           this.getDeviceControlParam(true);
+          clearInterval(localStorage.getControlParam);
+          localStorage.getControlParam = setInterval(function(){
+            that.getNetBoard(function(data){
+              that.netBoard = that.formatNetBoard(data); 
+            });
+            var initParam = false;
+            that.getDeviceControlParam(initParam)
+            //that.$global.getPushUrls(that, that.formatPushUrlState);
+          },500)
         }
       }
     },
     activated(){  //生命周期-缓存页面激活
       var that = this;
-      var initParam = true;
-      this.controlShow();
-      //this.userFunction();
+      //var initParam = true;
+      /*this.controlShow();
       this.getNetBoard(function(data){
         that.netBoard = that.formatNetBoard(data); 
       });//获取网卡数据
@@ -506,8 +518,7 @@
         });
         initParam = false;
         that.getDeviceControlParam(initParam)
-        //that.$global.getPushUrls(that, that.formatPushUrlState);
-      },500)
+      },500)*/
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(localStorage.getControlParam);
@@ -517,7 +528,7 @@
         SET_DEVICE_MODE_SELECT,
       }),
       controlShow(){
-        this.curDevSeries = this.$global.getDevSeries(this.ActiveDevice.dev_sn);
+        this.curDevSeries = this.$global.getDevSeries(this.ActiveDevice?this.ActiveDevice.dev_sn:"");
         if(this.curDevSeries == "4000"){
           this.show.devMod = false;
           this.common.WorkModePush = true;//4000显示网卡设置
@@ -538,24 +549,26 @@
       initDeviceParam(){
         var that = this;
         //工作模式
-        this.$global.getDevOptions(that.ActiveDevice.dev_sn,function(data){
-          var options_workmode = [];
-          for(var i=0;i<data.length;i++){
-            options_workmode[i] = {};
-            //options_workmode[i]['value']=data[i];
-            if(data[i] == 'push'){
-              options_workmode[i]['text']='推流';
-              options_workmode[i]['value']=0;
-            }else if(data[i] == 'pull'){
-              options_workmode[i]['text']='拉流';
-              options_workmode[i]['value']=1;
-            }else if(data[i] == 'act'){
-              options_workmode[i]['text']='互动';
-              options_workmode[i]['value']=2;
+        if(that.ActiveDevice){
+          this.$global.getDevOptions(that.ActiveDevice.dev_sn,function(data){
+            var options_workmode = [];
+            for(var i=0;i<data.length;i++){
+              options_workmode[i] = {};
+              //options_workmode[i]['value']=data[i];
+              if(data[i] == 'push'){
+                options_workmode[i]['text']='推流';
+                options_workmode[i]['value']=0;
+              }else if(data[i] == 'pull'){
+                options_workmode[i]['text']='拉流';
+                options_workmode[i]['value']=1;
+              }else if(data[i] == 'act'){
+                options_workmode[i]['text']='互动';
+                options_workmode[i]['value']=2;
+              }
             }
-          }
-          that.OPTIONS_WORK_MODE = options_workmode;
-        });
+            that.OPTIONS_WORK_MODE = options_workmode;
+          });
+        }
         this.OPTIONS_TRANS_SRT = this.OPTIONS_CARD;
         //互动推拉流地址延时 默认125ms
         this.common.actPushLatency = 125;
@@ -602,10 +615,20 @@
           this.common.dev_srVal_input = this.BITRATE_MAX;
         }else if(this.common.dev_srVal_input < this.BITRATE_MIN){
           this.common.dev_srVal_input = this.BITRATE_MIN;
+        }else{
+          this.common.dev_srVal_input = (this.common.dev_srVal_input*1).toFixed(1);
         }
         this.setDeviceParam('dev_sr_input');
         var bindChart = this.ActiveDevice.dev_sn+"/"+this.ActiveDevice.rcv_sn+"/"+this.ActiveDevice.board_id;
         this.$global.initChartSessionData(bindChart);
+      },
+      changeDelayInput(){
+        if(this.common.dev_delayVal_input>this.DELAY_MAX){
+          this.common.dev_delayVal_input = this.DELAY_MAX;
+        }else if(this.common.dev_delayVal_input < this.DELAY_MIN){
+          this.common.dev_delayVal_input = this.DELAY_MIN;
+        }
+        this.setDeviceParam('dev_delay_input')
       },
       setActAddr(){
         var devSN = this.ActiveDevice.dev_sn;
@@ -892,7 +915,7 @@
           url:"/page/index/indexData.php",
           data:this.$qs.stringify({
             getDevCardParam:true, 
-            devSN: that.ActiveDevice.dev_sn
+            devSN: that.ActiveDevice?that.ActiveDevice.dev_sn:""
           }),
           Api:"getDevCardParam",
           AppId:"android",

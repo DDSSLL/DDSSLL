@@ -305,7 +305,7 @@
       that.deviceMode = that.deviceModeSelect;
     },
     deactivated(){   //生命周期-缓存页面失活
-      clearInterval(this.timer);
+      clearInterval(localStorage.deviceTimer);
     },
     methods:{
       ...mapMutations({

@@ -31,6 +31,6 @@ export default {
     activedevicetype:'DV1080',
     //图表样式
     cardLineStyle:'old',
-    chartCardView : {
-    },
+    /*chartCardView : {
+    },*/
 }

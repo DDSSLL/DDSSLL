@@ -22,7 +22,7 @@
                 <PushUrl  v-bind:lockState="pageLock" v-bind:workMode="common.WorkMode"></PushUrl>  
               </div>
               <div v-else>
-                <PushUrl  v-bind:lockState="pageLock" v-bind:workMode="common.WorkMode" v-bind:transMode="common.transMode"></PushUrl>
+                <PushUrl v-bind:lockState="pageLock" v-bind:workMode="common.WorkMode" v-bind:transMode="common.transMode"></PushUrl>
               </div>
             </div>      
           </div>
@@ -54,7 +54,7 @@
                 <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265</p>
               </div>
             </div>
-            <div class="formItem" style="text-align: right;margin-bottom: 0;" v-if="!rcvParamLock">
+            <div class="formItem" style="text-align: right;margin-bottom: 0;" v-if="!pageLock">
               <button class="modalBtn" @click="hideEditUrls">取消</button>
               <button class="modalBtn" @click="saveEditUrls" style="background-color: #3d81f1;color:#fff;">确定</button>
             </div>
@@ -76,7 +76,6 @@
         curDevSeries:"",
         pageLock:false,
         liveUrlShow1080:true,
-        //pageLock:false,
         devTypeArr : ["推流","拉流","互动"],
         OPTIONS_CARD : [{text: "ETH0",value: "eth0"}, 
                         {text: "LTE1",value: "lte1"}, 

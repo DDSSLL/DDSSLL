@@ -274,6 +274,7 @@
           searchDev:"",
           matchRcv:"",
           matchRcvBak:"",
+          matchRcvName:"",
           RcvList:"",
           matchBoard:"",
           matchBoardBak:"",
@@ -338,8 +339,22 @@
         }
       },
       formatRcvList(list){
+        var that = this;
+        var bFind = false;
         var arr = [];
         if(list.length != 0){
+          for (var k = 0; k < list.length; k++) {
+            if (list[k].rcv_sn == that.options.matchRcv) {
+              bFind = true;
+              break;
+            }
+          }
+          if (!bFind) {
+            arr.push({
+              value: that.options.matchRcv?that.options.matchRcv:"",
+              text: that.options.matchRcvName?that.options.matchRcvName:""
+            });
+          }
           for(var i=0; i<list.length; i++){
             var rcvType = this.$global.getRcvSeries(list[i].rcv_sn);
             //虚拟还是实体接收机
@@ -365,8 +380,8 @@
         //判断是否有当前配对的接收机的权限
         var bFind = false;
         var result = [];
-        var curRcvSn = that.ActiveDevice.rcv_sn;
-        var curRcvName = that.ActiveDevice.rcv_name;
+        var curRcvSn = that.options.matchRcv;
+        var curRcvName = that.options.matchRcvName;
         if (data.length == 0) {
           that.options.RcvList = [{value: curRcvSn,text:curRcvName}];
           that.options.matchRcv = curRcvSn;
@@ -377,7 +392,9 @@
               break;
             }
           }
-          if (!bFind) {
+          if (!bFind && 
+            ((that.$global.getRcvSeries(curRcvSn) == VIR_RCV && that.options.rcvType == "0")
+           || (that.$global.getRcvSeries(curRcvSn) == PRA_RCV && that.options.rcvType == "1"))) {
             result.push({
               value: curRcvSn?curRcvSn:"",
               text: curRcvName?curRcvName:""
@@ -880,6 +897,9 @@
         this.getDevPrefixList(item);
         //虚拟、实体接收机
         this.initDevMatch(item.rcv_sn);
+        that.options.matchRcv = item.rcv_sn;
+        that.options.matchRcvName = item.rcv_name;
+        that.options.matchRcvBak = item.rcv_sn;
         this.getRcvSelectAndVal(function(flag){
           if(!flag){
             that.options.RcvList = [{"value":item.rcv_sn,"text":item.rcv_name}]
@@ -888,8 +908,10 @@
           that.options.matchRcvBak = item.rcv_sn;
           that.$global.getUnusedBoard(item.rcv_sn,item.board_id,function(rcvSn,curBoard,data){
             that.formatUnusedBoard(rcvSn,curBoard,data);
-            that.options.matchBoard = curBoard?curBoard:data[0]["value"];
-            that.options.matchBoardBak = curBoard?curBoard:data[0]["value"];
+            if(data.length != 0){
+              that.options.matchBoard = curBoard?curBoard:data[0]["value"];
+              that.options.matchBoardBak = curBoard?curBoard:data[0]["value"];
+            }
           });
         });
         this.options.devName = item.dev_name;

@@ -28,7 +28,7 @@
               <mt-cell-swipe
                 :right="[ 
                 {content: '背包',handler:() => showDevice(item)},
-                {content: '编辑',style:{display:user.userGroup!=NORMAL?'':'none'}, handler:() => editReceiver(item)},
+                {content: '编辑',style:{display:user.userGroup==ADMIN?'':'none'}, handler:() => editReceiver(item)},
                 {content: '删除',style:{display:rcvDelShow?'':'none'}, handler:() => deleteReceiver(item)}
                 ]">
                 <div class="cellItem">
@@ -323,6 +323,7 @@
         }else{
           that.rcvAddShow = false;
           that.rcvDelShow = false;
+          that.userPrefixShow = false;
           that.getReceiverList();
         }
       },

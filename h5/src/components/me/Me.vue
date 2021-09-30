@@ -25,7 +25,7 @@
     <systemConf></systemConf>
     
     <!-- 路测 -->
-    <!-- <RoadTest></RoadTest> -->
+    <RoadTest></RoadTest>
     
     <div class="Group">
       <!-- <div class="GroupTitle" @click="SystemShow=!SystemShow">

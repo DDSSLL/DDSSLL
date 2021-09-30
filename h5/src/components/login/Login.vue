@@ -249,9 +249,9 @@
         function onDeviceReady() {
           window.requestFileSystem(LocalFileSystem.PERSISTENT, 10*1024*1024,
             function (fs) {
-              //let url = that.$axios.defaults.baseURL+'/data/app/DStreamer.apk';
-              let url = 'http://www.uhdxpress.com/data/app/DStreamer.apk';
               
+              //let url = 'http://www.uhdxpress.com/data/app/DStreamer.apk';
+              let url = 'http://139.129.91.106:8088/upload/APP/DStreamer.apk';
               fs.root.getFile('DStreamer.apk', { create: true, exclusive: false }, 
                 function(fileEntry) {
                   download(fileEntry, url)
@@ -475,8 +475,43 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            that.show.loginPageShow = true;
-            that.show.registerPageShow = false;
+            //添加背包
+            var devSn = res['data']['devSn'];
+            var devName = res['data']['devName'];
+            var devModel = that.$global.getDevMode(devSn.substr(-4));
+            var userId = res['data']['userId'];
+            that.$axios({
+              method: 'post',
+              url:"/page/dev/devData.php",
+              data:{
+                addDev : "true",
+                devName : devName,
+                devSn : devSn,
+                devModel : devModel,
+                prefix : userId,
+                logUser : userId,
+                user_id : userId,
+              },
+              Api:"addDev",
+              AppId:"android",
+              UserId:""
+            })
+            .then(function (response) {
+              let res = response.data;
+              if(res.res.success){
+                that.show.loginPageShow = true;
+                that.show.registerPageShow = false;
+              }else{
+                that.$toast({
+                  message: res.res.reason,
+                  position: 'middle',
+                  duration: 3000
+                })
+              }
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
           }else{
             that.$toast({
               message: res.res.reason,

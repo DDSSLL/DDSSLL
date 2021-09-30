@@ -144,7 +144,6 @@
         addressPull:[],
         rcv_board_param:"",
         dev_push_enable:"",
-        showSubmitBtn:false,
         activePushObj:{
           urlId:"",
           rcvSn:"",
@@ -252,12 +251,13 @@
         var boardListId = (that.rcv_board_param?that.rcv_board_param.split("_")[2]:-1);
         var rcvSn = (that.rcv_board_param?that.rcv_board_param.split("_")[0]:-1);
         var boardId = (that.rcv_board_param?that.rcv_board_param.split("_")[1]:that.ActiveDevice.dev_sn)
+        var devSn = that.ActiveDevice.dev_sn;
         var pushUrl = "";
         that.$axios({
           method: 'post',
           url:"/page/index/indexData.php",
           data:this.$qs.stringify({
-            addUrl: boardListId,
+            addUrl: devSn,
             rcvSn : rcvSn,
             boardId : boardId,
             url : pushUrl,
@@ -270,7 +270,7 @@
           let res = response.data;
           if(res.res.success){
             
-            that.show.showAddUrl = true;
+            /*that.show.showAddUrl = true;*/
           }
         })
         .catch(function (error) {
@@ -301,13 +301,15 @@
         var that = this;
         for(let i=0; i<data.length; i++){
           data[i].remarkColor = 'grayColor';
-          if(data[i]['push_status'] == 'running'){
-            data[i].remarkColor = 'greenColor';
-          }else if(data[i].push_status == ''){
-            data[i].remarkColor = 'grayColor';
-          }else{
-            data[i].push_url += ('(' + data[i].push_status + ')');
-            data[i].remarkColor = 'redColor';
+          if(this.dev_push_enable){
+            if(data[i]['push_status'] == 'running'){
+              data[i].remarkColor = 'greenColor';
+            }else if(data[i].push_status == ''){
+              data[i].remarkColor = 'grayColor';
+            }else{
+              data[i].push_url += ('(' + data[i].push_status + ')');
+              data[i].remarkColor = 'redColor';
+            }  
           }
           var disFlag = false;
           if(that.curDevSeries=="1080"){
@@ -406,15 +408,15 @@
                 that.show.delShow = false;
               } else{
                 that.show.delShow = true;
-                that.showSubmitBtn = true;
+                that.show.showSubmitBtn = true;
               } 
             }else if(that.curDevSeries == "4000"){
               if(that.lockState){
                 that.show.delShow = false;
-                that.showSubmitBtn = false;
+                that.show.showSubmitBtn = false;
               }else{
                 that.show.delShow = true;
-                that.showSubmitBtn = true;
+                that.show.showSubmitBtn = true;
               }
             }
           }
@@ -745,9 +747,9 @@
             this.activePushObj.push_url = obj.push_url;
           }
           if(!this.lockState && !this.dev_push_enable){
-            this.showSubmitBtn = true;
+            this.show.showSubmitBtn = true;
           }else{
-            this.showSubmitBtn = false;
+            this.show.showSubmitBtn = false;
           }
         }
         else if(this.workMode=="拉流"){
@@ -767,9 +769,9 @@
             this.activePushObj.push_url = obj.input_url;
           }
           if(!this.lockState){
-            this.showSubmitBtn = true;
+            this.show.showSubmitBtn = true;
           }else{
-            this.showSubmitBtn = false;
+            this.show.showSubmitBtn = false;
           }
         }
         this.activePushObj.addressType = obj.url_type?obj.url_type:0;

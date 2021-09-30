@@ -14,6 +14,6 @@ export const SET_PARAM_LOCK = 'SET_PARAM_LOCK'
 export const SET_LOCK_USERID = 'SET_LOCK_USERID'
 export const SET_DEV_PARAM = 'SET_DEV_PARAM'
 export const SET_RCV_PARAM = 'SET_RCV_PARAM'
-export const SET_CHART_CARD_VIEW = 'SET_CHART_CARD_VIEW'
+/*export const SET_CHART_CARD_VIEW = 'SET_CHART_CARD_VIEW'*/
 
 

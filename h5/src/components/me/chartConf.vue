@@ -265,7 +265,7 @@
       }
     },
     computed: {
-      ...mapState(['user','navHide','ChartTimer','cardLineStyle','chartCardView','deviceTypeSelect','devicePrefixSelect'])
+      ...mapState(['user','navHide','ChartTimer','cardLineStyle',/*'chartCardView',*/'deviceTypeSelect','devicePrefixSelect','ActiveDevice'])
     },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {
@@ -281,15 +281,17 @@
     },
     mounted(){
       var that = this;
-      this.$global.getDeviceParam(function(data){
-        that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
-        that.avbrShowFlg = that.avbrFlag;
-      });
-      this.getChartConfUnit();
-      this.initChartSelect();
-      this.getChartConfTotal();
-      this.initCardChartSelect();
-      this.getChartConfCard();
+      if(this.ActiveDevice){
+        this.$global.getDeviceParam(function(data){
+          that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
+          that.avbrShowFlg = that.avbrFlag;
+        });
+        this.getChartConfUnit();
+        this.initChartSelect();
+        this.getChartConfTotal();
+        this.initCardChartSelect();
+        this.getChartConfCard();
+      }
     },
     activated(){  //生命周期-缓存页面激活
       var that = this;
@@ -316,6 +318,49 @@
           SET_DEVICE_TYPE_SELECT,
           SET_DEVICE_PREFIX_SELECT
       }),
+      getCardChartShowContent(devSn,cardData){
+      var that = this;
+      var devSn = JSON.parse(localStorage.curChart).split("/")[0];
+      that.$axios({
+        method: 'post',
+        url:"/page/index/chartData.php",
+        data:that.$qs.stringify({
+          getCardChartShowContent:true,
+          devSn: devSn
+        }),
+        Api:"getCardChartShowContent",
+        AppId:"android",
+        UserId:that.user.id
+      })
+      .then(function (response) {
+        let res = response.data;
+        if(res.res.success){
+          var data = res.data[0];
+          //var chartCardView = {};
+          for(var key in data){
+            if(key == "dev_sn" || key=="id"){
+              continue;
+            }
+            var newKey = "";
+            if(key.indexOf("_") != -1){
+              newKey = key.replace(/_/,'-');
+              that.chartCardView[newKey] = data[key];
+            }else{
+              that.chartCardView[key] = data[key];
+            }
+            //that.chartCardView[key.replace(/_/,"-")] = data[key];
+          }
+          //that.SET_CHART_CARD_VIEW(chartCardView);
+          that.initChartTotal(cardData);
+          that.initChartCards(cardData);
+        }else{
+          console.log(res)
+        }
+      })
+      .catch(function (res) {
+        console.log(res)
+      })
+    }, 
       getChartConfUnit(){
         var that = this;
         this.$axios({
@@ -563,7 +608,51 @@
       },
       getChartConfCard(){
         var that = this;
-        var showCard = that.ChartConf.showCard;
+        that.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:that.$qs.stringify({
+            getCardChartShowContent:true,
+            devSn: that.ActiveDevice.dev_sn
+          }),
+          Api:"getCardChartShowContent",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var data = res.data[0];
+            for(var key in data){
+              var order = ["up", "down", "lossDev"];
+              var len = that.ChartConf.showCard.length;
+              for(var i=0; i<len; i++){
+                if(that.ChartConf.showCard[i]["name"].toLowerCase() == key){
+                  that.$set(that.ChartConf.showCard[i], 'value', data[key].split(",").filter(function(item){
+                    return !!item;
+                  }).sort(function(a,b){
+                    return order.indexOf(a) - order.indexOf(b);
+                  }))
+                  /*that.ChartConf.showCard[i]["value"] = data[key].split(",").filter(function(item){
+                    return !!item;
+                  }).sort(function(a,b){
+                    return order.indexOf(a) - order.indexOf(b);
+                  });*/
+                }
+              }
+            }
+            console.log(that.ChartConf.showCard);
+          }else{
+            console.log(res)
+          }
+        })
+        .catch(function (res) {
+          console.log(res)
+        })
+        /*var showCard = that.ChartConf.showCard;
+        console.log(showCard)
+        console.log("that.chartCardView")
+        console.log(that.chartCardView)
         for(var j=0; j<showCard.length; j++){
           if(showCard[j]["key"].indexOf("LTE") != -1 || showCard[j]["key"].indexOf("NR5G") != -1){
             that.ChartConf.showCard[j]["value"] = that.chartCardView[showCard[j]["name"].toLowerCase()].split(",");
@@ -571,7 +660,7 @@
             that.$set(that.ChartConf.showCard[j], 'value', that.chartCardView[showCard[j]["name"].toLowerCase()].split(","))
           }
         }
-        that.initChartConfCard();
+        that.initChartConfCard();*/
       },
       initChartConfCard(){
         var that = this;
@@ -675,7 +764,7 @@
             that.$toast({
               message: '操作成功'
             });
-            that.getChartConfCard();
+            //that.getChartConfCard();
           }else{
             that.getChartConfCard();
           }

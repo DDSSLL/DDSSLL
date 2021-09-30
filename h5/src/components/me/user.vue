@@ -149,7 +149,7 @@
           <div class="fGrp">
             <div class="tl">手机号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="curUser.mobilePhone">
+              <input type="text" class="ItemInput" v-model="curUser.mobilePhone" clearable autocomplete="off">
             </div>
           </div>
           <div class="fGrp">
@@ -164,7 +164,7 @@
               <input type="text" class="ItemInput" v-model="curUser.remark">
             </div>
           </div>
-          <div class="fGrp" v-if="curUser.userEditType == 'edit'">
+          <div class="fGrp" v-if="curUser.resetPwd">
             <div class="tl">重置密码</div>
             <div class="vl">
               <mt-checklist v-model="curUser.pwdReset" :options="[{label: ' ', value: '1'}]">
@@ -297,6 +297,7 @@
           mobilePhone:"",
           emailAddress:"",
           remark:"",
+          resetPwd:false,
         },
 
         deviceAuthourityVisible:false,
@@ -517,6 +518,7 @@
       initPrefix(cb){
         var that = this;
         that.$global.getChildGrpArr(that.user.prefix,function(data) {
+          that.curUser.prefixOptions = [];
           if(that.user.userGroup == ADMIN){
             for(var i=0; i<data.length; i++){
               that.curUser.prefixOptions.push({text:data[i].prefix_name, value:data[i].prefix});
@@ -602,34 +604,37 @@
             return;
           }
         }else{
-          //新密码
-          if (!this.$global.pwdCheckType(newPwd)) {
-            that.$toast({
-              message: "密码长6-16位，至少包含一个数字一个字母",
-              position: 'middle',
-              duration: 2000
-            });
-            return;
-          }
-          //pwd2
-          if (newPwd2 == '') {
-            that.$toast({
-              message: "请输入确认密码!",
-              position: 'middle',
-              duration: 2000
-            });
-            return;
-          }
-          if (newPwd != newPwd2) {
-            that.$toast({
-              message: "密码不一致!",
-              position: 'middle',
-              duration: 2000
-            });
-            return;
+          if(this.curUser.pwdReset == '1'){
+            //新密码
+            if (!this.$global.pwdCheckType(newPwd)) {
+              that.$toast({
+                message: "密码长6-16位，至少包含一个数字一个字母",
+                position: 'middle',
+                duration: 2000
+              });
+              return;
+            }
+            //pwd2
+            if (newPwd2 == '') {
+              that.$toast({
+                message: "请输入确认密码!",
+                position: 'middle',
+                duration: 2000
+              });
+              return;
+            }
+            if (newPwd != newPwd2) {
+              that.$toast({
+                message: "密码不一致!",
+                position: 'middle',
+                duration: 2000
+              });
+              return;
+            }
+            pwd = newPwd;
           }
         }
-        if (mobilePhone != "" && !this.$global.isValidPhone(mobilePhone)) {
+        if (mobilePhone && mobilePhone != "" && !this.$global.isValidPhone(mobilePhone)) {
           that.$toast({
             message: "请输入有效手机号!",
             position: 'middle',
@@ -829,6 +834,7 @@
       clearUserPopup(){
         this.curUser.id = "";
         this.curUser.idDisable = false;
+        this.curUser.prefixDisable = false;//用户组
         this.curUser.name = "";
         this.curUser.pwd = "";
         this.curUser.pwd2 = "";
@@ -854,6 +860,7 @@
             }
           }else if(userGroup == ADVANCE || userGroup == NORMAL){//高级用户或普通用户
             that.curUser.userGroupDisable = true;
+            that.curUser.prefixDisable = true;
           }
         });
         that.initPrefix(function(){
@@ -869,7 +876,14 @@
         that.curUser.newPwd2 = '';
         that.curUser.mobilePhone = item.mobilePhone;
         that.curUser.emailAddress = item.emailAddress;
-        that.curUser.remark = item.remark; 
+        that.curUser.remark = item.remark;
+        //显示重置密码
+        if ((item.id == that.user.id) || (that.user.id == SUPER) 
+          || (that.user.userGroup == ADMIN && item.userGroup != ADMIN)) {
+          that.curUser.resetPwd = true;
+        } else {
+          that.curUser.resetPwd = false;
+        } 
       },
       deleteUser(item){
         var that = this;
