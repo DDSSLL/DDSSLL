@@ -615,9 +615,9 @@
       },
       //导入路测文件  按钮
       importTestData(){
-        this.importTestDataTest();
+        /*this.importTestDataTest();
         console.log("importTestData")
-        return;
+        return;*/
         var that = this;
         document.addEventListener("deviceready", onDeviceReady, false);
         function onDeviceReady() {
