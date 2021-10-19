@@ -200,7 +200,9 @@
           console.log("lastestVersion:"+that.lastestVersion)
           document.addEventListener("deviceready", onDeviceReady1, false);
           function onDeviceReady1(){
-            cordova.getAppVersion.getVersionNumber().then(function(version){
+            console.log(device.platform);
+            if(device.platform == "Android"){
+              cordova.getAppVersion.getVersionNumber().then(function(version){
               console.log("current appVersion:"+that.appVersion)
               that.appVersion = version;
               if(that.appVersion == that.lastestVersion){
@@ -210,7 +212,8 @@
                 that.loginBtnShow = false;
                 that.updateBtnShow = true;
               }
-            })
+            })  
+           }
           }
         });
       },
