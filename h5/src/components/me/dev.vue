@@ -232,7 +232,7 @@
             </div>
           </div>
           <div class="fGrp" style="text-align: right" v-if="user.userGroup != NORMAL">
-            <button class="modalBtn" type="button" @click="deviceConfigVisible = false" style="margin-right: .06rem;">取消</button>
+            <button class="modalBtn" type="button" @click="cancelSave" style="margin-right: .06rem;">取消</button>
             <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
           </div>
         </form>
@@ -350,9 +350,13 @@
             }
           }
           if (!bFind) {
-            arr.push({
+            /*arr.push({
               value: that.options.matchRcv?that.options.matchRcv:"",
               text: that.options.matchRcvName?that.options.matchRcvName:""
+            });*/
+            arr.push({
+              value: "",
+              text: ""
             });
           }
           for(var i=0; i<list.length; i++){
@@ -364,7 +368,7 @@
                 value: list[i].rcv_sn,
                 text: (list[i].color == "#2de505" ? "在线: ":"离线: ")+list[i].rcv_name
               });
-            }else if(this.options.rcvType == '1' && rcvType==PRA_RCV){
+            }else if(this.options.rcvType == '1' && (rcvType === PRA_RCV||rcvType === R1080_RCV)){
               //实体接收机
               arr.push({
                 value: list[i].rcv_sn,
@@ -380,7 +384,8 @@
         //判断是否有当前配对的接收机的权限
         var bFind = false;
         var result = [];
-        var curRcvSn = that.options.matchRcv;
+        var curRcvSn = that.options.matchRcvBak;
+        var bindBoard = that.options.matchBoardBak;
         var curRcvName = that.options.matchRcvName;
         if (data.length == 0) {
           that.options.RcvList = [{value: curRcvSn,text:curRcvName}];
@@ -409,7 +414,7 @@
                 value: value.rcv_sn,
                 text: (value.color == "#2de505" ? "在线: ":"离线: ")+value.rcv_name
               });
-            }else if(that.options.rcvType == '1' && rcvType == PRA_RCV){
+            }else if(that.options.rcvType == '1' && (rcvType == PRA_RCV || rcvType == R1080_RCV)){
               //实体接收机
               result.push({
                 value: value.rcv_sn,
@@ -419,34 +424,46 @@
           });
           that.options.RcvList = result;
         }
-
-        //获取当前所选的接收机的板卡
-        bFind = false;
-        for (var i = 0; i < result.length; i++) {
-          if (result[i]['value'] == curRcvSn) {
-            that.options.matchRcv = result[i]['value'];
-            //that.options.matchRcvBak = result[i]['value'];
-            //$('#edit_rcv_sel').selectpicker('val', result[i]['value']);
-            //$('#edit_rcv_sel').attr("oVal", result[i]['value']);
-            that.$global.getUnusedBoard(result[i]['value'],"",that.formatUnusedBoard);
-            bFind = true;
-            break;
-          }
-        }
-        if (!bFind && result.length != 0) {
-          that.$global.getUnusedBoard(result[0]['value'],"",that.formatUnusedBoard);
-        }
-        if(that.options.matchRcv != ""){
-          that.unbindBtnShow = true;
+        that.options.matchRcv = that.options.matchRcvBak;
+        if(!curRcvSn){//没有选中的接收机
+          var result = [{
+            value: "",
+            text: ""
+          }];
+          that.options.boardList = result;
+          that.options.matchBoard = "";
         }else{
-          that.unbindBtnShow = false;
+          //获取当前所选的接收机的板卡
+          bFind = false;
+          for (var i = 0; i < result.length; i++) {
+            if (result[i]['value'] == curRcvSn) {
+              that.options.matchRcv = result[i]['value'];
+              console.log("that.options.matchRcv:"+that.options.matchRcv)
+              //that.options.matchRcvBak = result[i]['value'];
+              //$('#edit_rcv_sel').selectpicker('val', result[i]['value']);
+              //$('#edit_rcv_sel').attr("oVal", result[i]['value']);
+              that.$global.getUnusedBoard(result[i]['value'],bindBoard,that.formatUnusedBoard);
+              bFind = true;
+              break;
+            }
+          }
+          if (!bFind && result.length != 0) {
+            that.$global.getUnusedBoard(result[0]['value'],"",that.formatUnusedBoard);
+          }
+          if(that.options.matchRcv != ""){
+            that.unbindBtnShow = true;
+          }else{
+            that.unbindBtnShow = false;
+          }
         }
       },
       changeMatchRcv(){
         var that = this;
         var rcvSn = that.options.matchRcv;
+        var bindBoard = that.options.matchBoardBak;
         if(rcvSn){
-          if (that.$global.getRcvSeries(rcvSn) == PRA_RCV) {
+          var rcvType = that.$global.getRcvSeries(rcvSn);
+          if (rcvType == PRA_RCV || rcvType == R1080_RCV) {
             that.$global.getUnusedBoard(rcvSn,"", that.formatUnusedBoard);
           }  
         }
@@ -559,10 +576,18 @@
           let res = response.data;
           if(res.res.success){
             var data = res.data;
-            var mapArr = {"直播":1,"在线":2,"离线":3}
+            for(var i=0; i<data.length; i++){
+              if(data[i]["dev_sn"] == '3002392142' 
+                || data[i]["dev_sn"] == '3002402142' 
+                || data[i]["dev_sn"] == '3002412142'){
+                data[i]["dev_model"] == 'DV4000T';
+              }
+            }
+            var mapArr = {"直播":1,"在线":2,"离线":3};
             that.deviceList = data.sort(function(a, b){
               return (mapArr[a.online] - mapArr[b.online])
             });
+
             that.searchDevByFilter();
           }else{
             that.deviceList = [];
@@ -899,25 +924,32 @@
         this.initDevMatch(item.rcv_sn);
         that.options.matchRcv = item.rcv_sn;
         that.options.matchRcvName = item.rcv_name;
+        //记录原始配置接收机和板卡信息
         that.options.matchRcvBak = item.rcv_sn;
+        that.options.matchBoardBak = item.board_id?(item.board_id-1):"";
+
         this.getRcvSelectAndVal(function(flag){
           if(!flag){
             that.options.RcvList = [{"value":item.rcv_sn,"text":item.rcv_name}]
           }
           that.options.matchRcv = item.rcv_sn;
-          that.options.matchRcvBak = item.rcv_sn;
-          that.$global.getUnusedBoard(item.rcv_sn,item.board_id,function(rcvSn,curBoard,data){
+          //that.options.matchRcvBak = item.rcv_sn;
+          that.$global.getUnusedBoard(item.rcv_sn,item.board_id-1,function(rcvSn,curBoard,data){
             that.formatUnusedBoard(rcvSn,curBoard,data);
-            if(data.length != 0){
+            /*if(data.length != 0){
               that.options.matchBoard = curBoard?curBoard:data[0]["value"];
-              that.options.matchBoardBak = curBoard?curBoard:data[0]["value"];
-            }
+              console.log("222")
+              console.log("that.options.matchBoard:"+that.options.matchBoard)
+              //that.options.matchBoardBak = curBoard?curBoard:data[0]["value"];
+            }*/
           });
         });
         this.options.devName = item.dev_name;
         this.options.devSn = item.dev_sn;
         this.options.rcvName = item.rcv_name;
       }, 
+      /*rcvSn:当前选中的接收机
+        curBoard:原来配置的接收机的板卡*/
       formatUnusedBoard(rcvSn,curBoard,data){
         var that = this;
         var result = [ ];
@@ -930,15 +962,15 @@
               text: '无可用板卡'
             });
           } else {
-              if (rcvSn == that.options.matchRcvBak) {
+            if (rcvSn == that.options.matchRcvBak) {//当前选中的接收机为原来配对的接收机--显示猿类配对的接收机的板卡信息
               result.push({
                 value: curBoard==""?that.options.matchBoardBak:curBoard,
-                text: '板卡' + (curBoard==""?that.options.matchBoardBak:curBoard)
+                text: '板卡' + ((curBoard==""?that.options.matchBoardBak:curBoard)*1+1)
               });
-            } else if (that.options.matchRcvBak == "" && showBoardId != "" && selectBshowBoardIdoardId != undefined) {
+            } else if (that.options.matchRcvBak == "" && curBoard != "" && selectBshowBoardIdoardId != undefined) {
               result.push({
-                value: showBoardId,
-                text: '板卡' + showBoardId
+                value: curBoard,
+                text: '板卡' + curBoard
               });
             } else {
               result.push({
@@ -947,11 +979,12 @@
               });
             }
           }
-        } else {
-          if(that.options.matchRcvBak == rcvSn && curBoard!=""){
+        } else {//有可用板卡
+          if(that.options.matchRcvBak == rcvSn && that.options.matchBoardBak!==""){
+            //当前选中接收机为原配对接收机 且 原配对板卡不为空
             result.push({
-              value: curBoard,
-              text: '板卡' + curBoard
+              value: that.options.matchBoardBak,
+              text: '板卡' + (parseInt(that.options.matchBoardBak)+1)
             });
           }
           $.each(data, function(key, value) {
@@ -1032,6 +1065,11 @@
         this.options.devUser = "";
         this.options.server = "";
       },
+      cancelSave(){
+        this.deviceConfigVisible = false;
+        this.getDeviceList();
+      },
+      
       submitDeviceConfig(){
         var that = this;
         var name = this.options.devName;
@@ -1195,15 +1233,17 @@
         that.$global.getPushAndPrefixMatch(dev_sn,rcv,function(data){//判断背包和虚拟接收机是否跨组配对以及背包推流开关
           if (data == 'norcv_push_samePrefix') {//无配对，背包、接收机在同一个组
             that.$global.editMatch(rcv,board,that.options.devSn, that.options.devName, prefix, user_id, function(){
-             
-            });
+                  that.changeRcvBoardBak(rcv,board);
+                }
+              );
           }else if(data == 'norcv_push_difPrefix'){//无配对，背包、接收机要跨组配对
             text = '是否进行背包和接收机跨组配对？';
             that.$messagebox.confirm(text).then(
               action => {
                 that.$global.editMatch(rcv,board,that.options.devSn, that.options.devName,prefix, user_id, function(){
-             
-                });
+                    that.changeRcvBoardBak(rcv,board);
+                  }
+                );
               } 
             );
           } else {
@@ -1217,12 +1257,22 @@
             that.$messagebox.confirm(text).then(
               action => {
                 that.$global.editMatch(rcv,board,that.options.devSn, that.options.devName,prefix, user_id, function(){
-                  
-                });
+                    that.changeRcvBoardBak(rcv,board);
+                  }
+                );
               } 
             );
           }
         });
+      },
+      changeRcvBoardBak(rcvSn,boardId){
+        if(this.options.rcvType == 0){//虚拟接收机
+          this.options.matchRcvBak = rcvSn;
+          this.options.matchBoardBak = "";
+        }else{//实体接收机
+          this.options.matchRcvBak = rcvSn;
+          this.options.matchBoardBak = boardId;
+        }
       },
       unbindMatch(){
         var that = this;
@@ -1266,11 +1316,13 @@
                   /*that.ActiveDevice.rcv_sn = "";
                   that.ActiveDevice.rcv_name = "";
                   that.ActiveDevice.board_id = "";*/
+                  that.options.matchRcv = "";
                   that.getRcvSelectAndVal();
                   that.options.matchBoard = "";
-                  that.options.matchRcv = "";
+                  
                   that.options.boardList = [];
                   that.getDeviceList();
+                  that.changeRcvBoardBak("","");
                 }else{
                   that.$toast({
                     message: res.res.reason,

@@ -22,7 +22,9 @@ module.exports = {
         "live4000":"接收机",
         "settings":"参数",
         "me":"我的",
-        "login":"登录"
+        "login":"登录",
+        "monitor":"监控",
+
     },
     tip:{
         "authSuccess":"登录成功"

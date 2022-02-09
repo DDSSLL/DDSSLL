@@ -8,7 +8,7 @@
         <div class="GroupItemField">
           <div class="GroupItemTitle">背包模式</div>
           <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="common.WorkMode" @change="changeWorkMode"  :disabled="!pageLock?false:true">
+            <select class="ItemSelect" v-model="common.WorkMode" @change="changeWorkMode"  :disabled="dis.WorkMode">
               <template v-for="item in OPTIONS_WORK_MODE">
                 <option :value="item.value">{{ item.text }}</option>
               </template>
@@ -54,7 +54,7 @@
                 </div>
               </div>
             </div>
-            <div class="GroupItem">
+            <div class="GroupItem" v-if="show.delayShow">
               <div class="GroupItemField">
                 <div class="GroupItemTitle">延时(s)</div>
                 <div class="GroupItemValue">
@@ -102,7 +102,7 @@
                   <div class="GroupItemTitle">网卡选择</div>
                   <div class="GroupItemValue">
                     <select class="ItemSelect" v-model="common.PushCard" @change="changeCard"  :disabled="dis.PushCard">
-                      <template v-for="item in OPTIONS_TRANS_PULL_CARD">
+                      <template v-for="item in OPTIONS_TRANS_PUSH_CARD">
                         <option :value="item.value">{{ item.text }}</option>
                       </template>
                     </select>
@@ -150,34 +150,37 @@
         </transition>
       </div>
     </div>
-    <!-- <div v-else-if="common.WorkMode == '1'">
+    <div v-if="common.WorkModePull">
       <div class="Group">
         <div class="GroupItem">
           <div class="GroupItemField">
-            <div class="GroupItemTitle">传输开关</div>
+            <div class="GroupItemTitle">HDMI输出</div>
             <div class="GroupItemValue">
-              <mt-switch v-model="common.PullTsOpen" @change="setDevPushEnable" :disabled="dis.dev_push_enable"></mt-switch>
-            </div>
-          </div>
-        </div>
-        <div class="GroupTitle">传输设置</div>
-        <div class="GroupItem">
-          <div class="GroupItemField">
-            <div class="GroupItemTitle">传输模式</div>
-            <div class="GroupItemValue">
-              <select class="ItemSelect" v-model="common.PushTsType" @change="changeTransMode"  :disabled="dis.PushTsType">
-                <template v-for="item in OPTIONS_TRANS_MODE">
+              <select class="ItemSelect" v-model="common.PullMHdmiOut" @change="changePullMHdmiOut"  :disabled="dis.PullMHdmiOut">
+                <template v-for="item in OPTIONS_PULL_MHDMIOUT_1080">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
               </select>
             </div>
           </div>
         </div>
-        <div class="GroupItem" v-if="common.cardSelShow">
+        <div class="GroupItem">
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">HDMI音频输出</div>
+            <div class="GroupItemValue">
+              <select class="ItemSelect" v-model="common.PullMHdmiAS" @change="changePullMHdmiAS"  :disabled="dis.PullMHdmiAS">
+                <template v-for="item in OPTIONS_PULL_HDMIOUT_1080">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="GroupItem">
           <div class="GroupItemField">
             <div class="GroupItemTitle">网卡选择</div>
             <div class="GroupItemValue">
-              <select class="ItemSelect" v-model="common.PullTsNet" @change="changeCard"  :disabled="dis.PushCard">
+              <select class="ItemSelect" v-model="common.PullTsNet" @change="changePullCard"  :disabled="dis.PullTsNet">
                 <template v-for="item in OPTIONS_TRANS_PULL_CARD">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
@@ -185,8 +188,32 @@
             </div>
           </div>
         </div>
+        <div class="GroupItem">
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">传输开关</div>
+            <div class="GroupItemValue">
+              <mt-switch v-model="common.PullTsOpen" @change="changePullOpen" :disabled="dis.PullTsOpen"></mt-switch>
+            </div>
+          </div>
+        </div>
       </div>
-    </div> -->
+      <!-- 拉流地址 -->
+      <!-- <div class="Group">
+        <div class="GroupTitle" @click="pullAddressShow=!pullAddressShow">
+          拉流地址
+          <i class="titleIcon fa" :class="[pullAddressShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+        </div>
+        <transition name="slide-fade">
+          <div v-show="pullAddressShow">
+            <div class="addressGroup" style="padding:0">
+              <div>
+                <PushUrl v-bind:lockState="pageLock" v-bind:workMode="devTypeArr[common.WorkMode]" v-bind:transMode="common.transMode"></PushUrl>
+              </div>
+            </div> 
+          </div>      
+        </transition>
+      </div> -->
+    </div>
     <div v-if="common.WorkModeAct">  
       <div class="Group">
         <div class="GroupTitle">常用设置</div>
@@ -202,7 +229,7 @@
           <div class="GroupItemField">
             <div class="GroupItemTitle">互动背包</div>
             <div class="GroupItemValue">
-              <select class="ItemSelect" v-model="common.ActDev" @change="changeAct"  :disabled="!pageLock?false:true">
+              <select class="ItemSelect" v-model="common.ActDev" @change="changeAct"  :disabled="dis.ActDev">
                 <template v-for="item in OPTIONS_ACTDEVSN">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
@@ -215,18 +242,18 @@
             <div class="GroupItemTitle">视频比特率(Mbps)</div>
             <div class="GroupItemValue">
               <mt-range
-                v-model="common.dev_srVal_range_act"
+                v-model="common.dev_srVal_range"
                 class="ItemRange byteRange"
                 :min="BITRATE_MIN*10"
                 :max="BITRATE_MAX*10"
                 :step="1"
                 :bar-height="5"
-                :disabled="dis.dev_srVal_range_act"
-                @change="setDeviceParam('dev_sr_range')">
+                :disabled="dis.dev_srVal_range"
+                @change="changeVideoBitrate"><!-- setDeviceParam('dev_sr_range') -->
                 <div style="color: #EEEEEE;padding: .01rem;" slot="start">{{BITRATE_MIN}}</div>
                 <div style="color: #EEEEEE;padding: .01rem;" slot="end">{{BITRATE_MAX}}</div>
               </mt-range>
-              <input type="text" class="ItemIpt" v-model.number="common.dev_srVal_input_act" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.dev_srVal_input_act">
+              <input type="text" class="ItemIpt" v-model.number="common.dev_srVal_input" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.dev_srVal_input">
             </div>
           </div>
         </div>
@@ -234,32 +261,44 @@
           <div class="GroupItemField">
             <div class="GroupItemTitle">切换显示</div>
             <div class="GroupItemValue">
-              <select class="ItemSelect" v-model="common.ActDisplay" @change="setDeviceParam('ActDisplay', common.ActDisplay);"  :disabled="!pageLock?false:true">
-                <template v-for="item in OPTIONS_ACT_DISPLAY">
+              <select class="ItemSelect" v-model="common.ActDisplay" @change="setDeviceParam('ActDisplay', common.ActDisplay);"  :disabled="dis.ActDisplay">
+                <template v-for="item in OPTIONS_ACT_DISPLAY_1080">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
               </select>
             </div>
           </div>
         </div>
-        <!-- <div class="GroupItem">
+        <div class="GroupItem">
           <div class="GroupItemField">
             <div class="GroupItemTitle">HDMI输出</div>
             <div class="GroupItemValue">
-              <select class="ItemSelect" v-model="common.ActHdmiOut" @change="setDeviceParam('ActHdmiOut', common.ActHdmiOut);"  :disabled="!pageLock?false:true">
-                <template v-for="item in OPTIONS_ACT_HDMIOUT">
+              <select class="ItemSelect" v-model="common.ActHdmiOut" @change="setDeviceParam('ActHdmiOut', common.ActHdmiOut);"  :disabled="dis.ActHdmiOut">
+                <template v-for="item in OPTIONS_ACT_HDMIOUT_1080">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
               </select>
             </div>
           </div>
-        </div> -->
+        </div>
         <div class="GroupItem">
           <div class="GroupItemField">
             <div class="GroupItemTitle">传输通道</div>
             <div class="GroupItemValue">
-              <select class="ItemSelect" v-model="common.SrtTransIf" @change="setDeviceParam('SrtTransIf', $global.cardId2Enum(common.SrtTransIf));"  :disabled="!pageLock?false:true">
+              <select class="ItemSelect" v-model="common.SrtTransIf" @change="changeSrtTransIf"  :disabled="dis.SrtTransIf">
                 <template v-for="item in OPTIONS_TRANS_SRT">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="GroupItem" v-if="show.netWorkMode">
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">网络模式</div>
+            <div class="GroupItemValue">
+              <select class="ItemSelect" v-model="common.netWorkMode" @change="changeNetWorkMode"  :disabled="dis.netWorkMode">
+                <template v-for="item in OPTIONS_NET_WORKMODE">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
               </select>
@@ -270,7 +309,7 @@
           <div class="GroupItemField">
             <div class="GroupItemTitle">流媒体服务器IP</div>
             <div class="GroupItemValue">
-              <input type="text" class="ItemIpt" v-model="common.actAddrIp" @blur="setDeviceParam('dev_sr_input')" :disabled="!pageLock?false:true">
+              <input type="text" class="ItemIpt" v-model="common.actAddrIp" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.actAddrIp">
             </div>
           </div>
         </div>
@@ -278,7 +317,7 @@
           <div class="GroupItemField">
             <div class="GroupItemTitle">端口</div>
             <div class="GroupItemValue">
-              <input type="text" class="ItemIpt" v-model="common.actAddrPort" @blur="setDeviceParam('dev_sr_input')" :disabled="!pageLock?false:true">
+              <input type="text" class="ItemIpt" v-model="common.actAddrPort" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.actAddrPort">
             </div>
           </div>
         </div>
@@ -286,7 +325,7 @@
           <div class="GroupItemField">
             <div class="GroupItemTitle">推流延时</div>
             <div class="GroupItemValue">
-              <input type="text" class="ItemIpt" v-model="common.actPushLatency" @blur="setDeviceParam('dev_sr_input')" :disabled="!pageLock?false:true"><span style="color:#fff">ms</span>
+              <input type="text" class="ItemIpt" v-model="common.actPushLatency" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.actPushLatency"><span style="color:#fff">ms</span>
             </div>
           </div>
         </div>
@@ -294,7 +333,7 @@
           <div class="GroupItemField">
             <div class="GroupItemTitle">拉流延时</div>
             <div class="GroupItemValue">
-              <input type="text" class="ItemIpt" v-model="common.actPullLatency" @blur="setDeviceParam('dev_sr_input')" :disabled="!pageLock?false:true"><span style="color:#fff">ms</span>
+              <input type="text" class="ItemIpt" v-model="common.actPullLatency" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.actPullLatency"><span style="color:#fff">ms</span>
             </div>
           </div>
         </div>
@@ -311,7 +350,7 @@
             <div class="GroupItemTitle">推流地址</div>
             <div class="GroupItemValue">
               <input type="text" class="ItemIpt" v-model="common.ActPushAddr" :disabled="!pageLock?false:true">
-              <mt-button class="ItemBtn" type="primary" @click="setDeviceParam('ActPushAddr', common.ActPushAddr);" :disabled="!pageLock?false:true">确定</mt-button>
+              <mt-button class="ItemBtn" type="primary" @click="setDeviceParam('ActPushAddr', common.ActPushAddr);" :disabled="dis.ActPushAddr">确定</mt-button>
             </div>
           </div>
         </div>
@@ -320,7 +359,7 @@
             <div class="GroupItemTitle">拉流地址</div>
             <div class="GroupItemValue">
               <input type="text" class="ItemIpt" v-model="common.ActPullAddr" :disabled="!pageLock?false:true">
-              <mt-button class="ItemBtn" type="primary" @click="setDeviceParam('ActPullAddr', common.ActPullAddr);" :disabled="!pageLock?false:true">确定</mt-button>
+              <mt-button class="ItemBtn" type="primary" @click="setDeviceParam('ActPullAddr', common.ActPullAddr);" :disabled="dis.ActPullAddr">确定</mt-button>
             </div>
           </div>
         </div>
@@ -331,6 +370,7 @@
 
 <script>
   import Device from '../basic/Device';
+  import PushUrl from '../basic/PushUrl';
   import { MessageBox } from 'mint-ui';
   import { mapState, mapMutations } from 'vuex';
   import { SET_DEVICE_MODE_SELECT } from '../../store/mutation-types';
@@ -339,10 +379,12 @@
     name: "Control",
     data(){
       return{
+        developVer:false,
         R1080_RCV:R1080_RCV,
         curDevSeries:"",
         cardConfigShow:true,
         commonSettingShow:true,
+        pullAddressShow:false,
         pageLock:false,
         BITRATE_MIN : 0.5, //Mbps   数据库里的dev_sr
         BITRATE_MAX : 100,
@@ -352,12 +394,23 @@
         delayMax : 0,
         speedMin : 0,
         speedMax : 0,
+        devTypeArr : ["推流","拉流","互动"],
         //ActiveDevice:null,
         OPTIONS_5G_MODE: [{text: "AUTO",value: "0"},
                           {text: "NSA",value: "1"}, 
                           {text: "SA",value: "2"}, 
                           {text: "LTE",value: "3"}],
         OPTIONS_LTE_MODE: [{text: "LTE",value: "3"}],
+        OPTIONS_NET_WORKMODE:[],//互动 - 网络模式
+        //拉流 -- HDMI音频输出
+        OPTIONS_PULL_HDMIOUT_1080: [{text: "开",value: "1"}, 
+                                    {text: "关",value: "0"}],
+        //HDMI输出
+        OPTIONS_PULL_MHDMIOUT_1080: [{text: "1080I50",value: "0"}, 
+                                    {text: "1080P25",value: "1"}, 
+                                    {text: "1080P30",value: "2"}, 
+                                    {text: "1080P50",value: "3"}, 
+                                    {text: "1080P60",value: "4"}],
         transErrReason:"",
         common:{
           dev_push_enable:"0",
@@ -374,6 +427,7 @@
           WorkMode:0,//工作模式
           WorkModePush:true,//推流模式
           WorkModeAct:false,//互动模式
+          WorkModePull:false,//拉流模式
           WorkModeOri:0,//记录原始工作模式
           PushTsType:0,//传输模式
           PushCard:"",//单卡选择
@@ -384,12 +438,16 @@
           ActDisplay:"",//互动显示
           ActHdmiOut:"",//HDMI输出
           SrtTransIf:"",//传输通道
+          netWorkMode:"",//网络模式
           actAddrIp:"",//流媒体服务器IP
           actAddrPort:"",//端口
           actPushLatency:"",//推流延时
           actPullLatency:"",//拉流延时
           ActPullAddr:"",//拉流地址
           ActPushAddr:"",//推流地址
+          //拉流
+          PullMHdmiAS:0,//HDMI音频输出
+          PullMHdmiOut:0,//HDMI视频输出
         },
         show:{
           pushDisShow:false,//推流 传输开关错误原因
@@ -398,8 +456,11 @@
           ActPushAddr:false,//推流地址
           transModeShow:false,//模式切换
           cardSelShow:true,//推流网卡选择
+          netWorkMode:false,//互动--网络模式
+          delayShow:true,//延时
         },
         dis:{
+          WorkMode:false,//背包模式
           dev_push_enable:false,//传输开关
           dev_srt:false,//互动传输开关
           PushTsType:false,//传输模式
@@ -411,6 +472,21 @@
           dev_delayVal_range:false,//延时range
           dev_delayVal_input:false,//延时input
           PullTsOpen:false,//拉流-传输开关
+          //互动
+          ActDev:false,//互动背包
+          ActHdmiOut:false,//HDMI输出
+          actAddrIp:false,//流媒体服务器IP
+          actAddrPort:false,//流媒体服务器端口
+          actPushLatency:false,//推流延时
+          actPullLatency:false,//拉流延时
+          ActPushAddr:false,//推流地址
+          ActPullAddr:false,//拉流地址
+          //拉流
+          PullMHdmiAS:false,//HDMI音频输出
+          PullMHdmiOut:false,//HDMI视频输出
+          PullTsNet:false,//网卡选择
+          PullTsOpen:false,//传输开关
+          
         },
         modeArr: ['_push','_act'], //不同模式下的视频比特率
         modeArr_4000:['_push'],
@@ -446,10 +522,13 @@
         OPTIONS_TRANS_PUSH_CARD:[],
         OPTIONS_TRANS_PULL_CARD:[],
         OPTIONS_ACTDEVSN:[],
-        OPTIONS_ACT_DISPLAY:[{text: "本地",value: "0"}, 
-                            {text: "远端",value: "1"}],
-        OPTIONS_ACT_HDMIOUT: [{text: "720P",value: "0"}, 
-                              {text: "1080I",value: "1"}],
+        OPTIONS_ACT_DISPLAY_1080:[{text: "本地",value: "0"}, 
+                            {text: "远端",value: "1"},
+                            {text: "画中画",value: "2"}],
+        /*OPTIONS_ACT_HDMIOUT: [{text: "720P",value: "0"}, 
+                              {text: "1080I",value: "1"}],*/
+        OPTIONS_ACT_HDMIOUT_1080: [{text: "1080I50",value: "0"}, 
+                                  {text: "1080P50",value: "1"}],
         OPTIONS_CARD: [{text: "ETH0",value: "eth0"}, 
                       {text: "LTE1",value: "lte1"}, 
                       {text: "LTE2",value: "lte2"},
@@ -466,7 +545,7 @@
       ...mapState(['user','paramLockAck','lockUserId','ActiveDevice'])//"ActiveDeviceType",
     },
     components: {
-      Device
+      Device,PushUrl
     },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {
@@ -486,7 +565,8 @@
           this.getNetBoard(function(data){
             that.netBoard = that.formatNetBoard(data); 
           });//获取网卡数据
-          this.getDevList();
+          //this.getDevList();
+          this.getDevListforAct();
           this.initDeviceParam();
           this.getDeviceControlParam(true);
           clearInterval(localStorage.getControlParam);
@@ -503,25 +583,29 @@
     },
     activated(){  //生命周期-缓存页面激活
       var that = this;
-      //var initParam = true;
-      /*this.controlShow();
+      //页面激活的时候先获取一遍数据，防止其他页面参数修改对该页面参数的影响
+      this.controlShow();
       this.getNetBoard(function(data){
         that.netBoard = that.formatNetBoard(data); 
       });//获取网卡数据
-      this.getDevList();
+      //this.getDevList();
+      this.getDevListforAct();
       this.initDeviceParam();
-      this.getDeviceControlParam(initParam);
-      
-      localStorage.getControlParam = setInterval(function(){
-        that.getNetBoard(function(data){
-          that.netBoard = that.formatNetBoard(data); 
-        });
-        initParam = false;
-        that.getDeviceControlParam(initParam)
-      },500)*/
+      this.getDeviceControlParam(true);
+      if(localStorage.getControlParam == "undefined"){
+        localStorage.getControlParam = setInterval(function(){
+          that.getNetBoard(function(data){
+            that.netBoard = that.formatNetBoard(data); 
+          });
+          var initParam = false;
+          that.getDeviceControlParam(initParam)
+          //that.$global.getPushUrls(that, that.formatPushUrlState);
+        },500)
+      }
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(localStorage.getControlParam);
+      localStorage.getControlParam = undefined;
     },
     methods:{
       ...mapMutations({
@@ -532,6 +616,7 @@
         if(this.curDevSeries == "4000"){
           this.show.devMod = false;
           this.common.WorkModePush = true;//4000显示网卡设置
+          this.common.WorkModePull = false;//拉流模式下的参数
           this.common.WorkModeAct = false;//互动模式下的参数
           this.show.transModeShow = false;//模式切换
         }else if(this.curDevSeries == "1080"){
@@ -539,9 +624,15 @@
           this.show.transModeShow = true;//模式切换
           if(this.common.WorkMode == "0"){
             this.common.WorkModePush = true;//推流模式下显示网卡设置
+            this.common.WorkModePull = false;//拉流模式下的参数
+            this.common.WorkModeAct = false;//互动模式下的参数
+          }else if(this.common.WorkMode == "1"){
+            this.common.WorkModePush = false;//互动模式下不显示网卡设置
+            this.common.WorkModePull = true;//拉流模式下的参数
             this.common.WorkModeAct = false;//互动模式下的参数
           }else{
             this.common.WorkModePush = false;//互动模式下不显示网卡设置
+            this.common.WorkModePull = false;//拉流模式下的参数
             this.common.WorkModeAct = true;//互动模式下的参数
           }
         }
@@ -569,7 +660,7 @@
             that.OPTIONS_WORK_MODE = options_workmode;
           });
         }
-        this.OPTIONS_TRANS_SRT = this.OPTIONS_CARD;
+        //this.OPTIONS_TRANS_SRT = this.OPTIONS_CARD;
         //互动推拉流地址延时 默认125ms
         this.common.actPushLatency = 125;
         this.common.actPullLatency = 125;
@@ -627,6 +718,8 @@
           this.common.dev_delayVal_input = this.DELAY_MAX;
         }else if(this.common.dev_delayVal_input < this.DELAY_MIN){
           this.common.dev_delayVal_input = this.DELAY_MIN;
+        }else{
+          this.common.dev_delayVal_input = (this.common.dev_delayVal_input*1).toFixed(1);
         }
         this.setDeviceParam('dev_delay_input')
       },
@@ -726,6 +819,7 @@
                 position: 'middle',
                 duration: 2000
               });
+              that.common.ActDev = that.ActiveDevice.ActDev;
               return;
             }else{
               if(res.data['cur_dev'][0].ActDev == that.common.ActDev){
@@ -780,7 +874,7 @@
         this.$global.setDevParamList(['param_lock','dev_push_enable','ActDev'],[1,0,"''"],cur_act_sn);
         this.$global.setDevParamList(['param_lock','dev_push_enable','ActDev'],[1,0,"''"],act_act_sn);
       },
-      getDevList(){
+      /*getDevList(){
         var that = this;
         this.$axios({
           method: 'post',
@@ -829,6 +923,54 @@
         .catch(function (error) {
           console.log(error)
         })
+      },*/
+      getDevListforAct(){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevListforAct:true, 
+            actGrpId: "-1",
+            /*userId: that.user.id*/
+          }),
+          Api:"getDevListforAct",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if(res.data.length != 0){
+              that.OPTIONS_ACTDEVSN = [];
+              for (var i = 0; i < res.data.length; i++) {
+                var state = "";
+                //当前登录用户有权限且在线背包list(过滤掉跟自己重名的设备)
+                if((res.data[i]['online'] == '1') && (res.data[i]['dev_sn'] != that.ActiveDevice.dev_sn)){
+                  if(res.data[i]['dev_push_status'] != '0'){
+                    state = "推流:";
+                  }else{
+                    state = "在线:";
+                  }
+                  var option = {
+                    text: state+res.data[i]['dev_name'],
+                    value: res.data[i]['dev_sn'],
+                  }
+                  that.OPTIONS_ACTDEVSN.push(option);
+                }
+              }
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       getaAtDevList(){
         var that = this;
@@ -844,7 +986,7 @@
       /*formatNet(data){
         var that = this;
         that.netBoard = that.formatSwitch(data);
-        that.updateCardSelOptioins(data);//更新单卡选择select
+        that.updateCardSelOptions(data);//更新单卡选择select
       },*/
       userFunction(){
         if (this.user.id == SUPER) {
@@ -863,8 +1005,6 @@
           this.show.ActPullAddr = true;//control 互动 拉流地址
           this.show.devMod = true;//control 设置 背包模式
           $('#devMode_drop').show();
-          
-
         } else {
           this.show.SEI = false;//setting
           this.show.ArmSenderLogLevel = false;//setting
@@ -874,10 +1014,10 @@
           this.show.dev_push_ip = false;//setting
           this.show.ActPushAddr = false;//control 互动 推流地址
           this.show.ActPullAddr = false;//control 互动 拉流地址
-        $('#devMode_drop').show();
+          $('#devMode_drop').show();
           this.show.devMod = false;//control 设置 背包模式
         }
-        this.show.devMod = true;//调试暂时放开
+        //this.show.devMod = true;//调试暂时放开
       },
       changeSimMode(cardId){
         var that = this;
@@ -927,7 +1067,7 @@
             if(cb){
               cb(res.data[0])
             }
-            that.updateCardSelOptioins(res.data[0]);//更新单卡选择select
+            that.updateCardSelOptions(res.data[0]);//更新单卡选择select
           }else{
             that.netBoard = [];
           }
@@ -942,7 +1082,7 @@
         var netBoardArr = [];
         var netBoardObj = {};
         //更新单卡选择的下拉列表
-        //updateCardSelOptioins(data);/////live页面网卡选择调用
+        //updateCardSelOptions(data);/////live页面网卡选择调用
         //网卡设置
         for (var i = 0; i < data.length; i++) {
           netBoardObj = {};
@@ -1060,7 +1200,7 @@
         }
         return operator;
       },
-      updateCardSelOptioins(data){
+      updateCardSelOptions(data){
         var that = this;
         var onlineArr = [];
         for (var i = 0; i < data.length; i++) {
@@ -1094,26 +1234,6 @@
           that.OPTIONS_TRANS_PULL_CARD = onlineArr;
           that.OPTIONS_TRANS_SRT = onlineArr;
         }
-        /*function updateSelOptions(id,new_options){
-          //当前选中项
-          var $select = $('#'+id);
-          var oldSel = $select.val();
-          //更新选中项标志
-          var oldSelFind = false;
-          //更新选中项
-          for ( k = 0; k < new_options.length; k++){
-            if(oldSel == new_options[k]["value"]){
-              oldSelFind = true;
-              break;
-            }
-          }
-          if(!oldSelFind){
-            oldSel = new_options[0]["value"];
-          }
-          //更新选项
-          addSelOptions(id, new_options);
-          $select.selectpicker('val', oldSel);
-        }*/
       },
       //定时获取背包参数
       getDeviceControlParam(initFlag){
@@ -1130,21 +1250,27 @@
             && (that.lockUserId == that.user.id || that.lockUserId == "") //web解锁用户为当前用户
             && hasRights && isOnline){//解锁，在线且有权限
           that.pageLock = false;//锁显示：unlock
-          that.setBtnDisabled(false);//插件enable
+          
           if(initFlag){//初始化参数
             that.updateParam(data);
+            that.setBtnDisabled(false);//插件enable
           }else{
             if (data['OffLinePushEnable'] == '1'){//文件回传中，输入编码下的参数不能编辑
               that.setEncodeParamDisabled(true);
-            } else if (data['dev_push_status'] == '1' || data['dev_push_enable'] == '1'){//传输中，传输模式不能编辑 单卡能编辑
-              that.setTransParamDisabled(true);
-            }
+            }else{
+              that.setEncodeParamDisabled(false);
+              if (data['dev_push_status'] == '1' || data['dev_push_enable'] == '1'){//传输中，传输模式不能编辑 单卡能编辑
+                that.setTransParamDisabled(true);
+              }
+            } 
+            that.setBtnDisabled(false);//插件enable
             return;
           }
         }else{//解锁，在线，有权限有一个不满足--显示lock
           that.pageLock = true;//锁显示：lock
-          that.setBtnDisabled(true);//插件disable
+          
           that.updateParam(data);
+          that.setBtnDisabled(true);//插件disable
         }
       },
       //输入编码下的参数按钮置disabled
@@ -1186,20 +1312,27 @@
         that.common.WorkMode = data["WorkMode"];
         if(that.common.WorkMode == '0'){
           that.common.WorkModePush = true;
+          that.common.WorkModePull = false;
+          that.common.WorkModeAct = false;
+        }else if(that.common.WorkMode == '1'){
+          that.common.WorkModePush = false;
+          that.common.WorkModePull = true;
           that.common.WorkModeAct = false;
         }else{
           that.common.WorkModePush = false;
+          that.common.WorkModePull = false;
           that.common.WorkModeAct = true;
         }
         that.common.WorkModeOri = data["WorkMode"];
-        //this.changeWorkMode();
         //推流-传输开关
         if(data.dev_push_enable == '0'){  //推流开关
           that.common.dev_push_enableVal = false;
+          that.common.dev_push_enable = false;//拉流开关
           that.common.dev_srt = false;
           that.pushDisShow = false;
         }else if(data.dev_push_enable == '1'){
           that.common.dev_push_enableVal = true;
+          that.common.dev_push_enable = true;//拉流开关
           that.common.dev_srt = true;
           that.$global.getPushUrls(that.formatPushUrlState);
         }
@@ -1208,16 +1341,24 @@
           that.common.PushTsType = data["PushTsType"];
           if(data["PushTsType"] == "1"){
             that.show.cardSelShow = true;//显示网卡选择
+            that.show.delayShow = false;//单卡隐藏延时
           }else{
             that.show.cardSelShow = false;//隐藏网卡选择
+            that.show.delayShow = true;//汇聚显示延时
           }
           //单卡选择
           that.common.PushCard = that.$global.cardEnum2Id(data['PushTsNet']);
+        }else if(this.curDevSeries == "4000"){
+          that.show.delayShow = true;//4000显示延时
         }
+        //拉流-HDMI输出
+        that.common.PullMHdmiOut = data['PullMHdmiOut'];
+        //拉流-HDMI音频输出
+        that.common.PullMHdmiAS = data['PullMHdmiAS'];
         //拉流-网卡选择
-        that.common.PullTsNet = data['PullTsNet'];
+        that.common.PullTsNet = that.$global.cardEnum2Id(data['PullTransIf']);
         //拉流-传输开关
-        that.common.PullTsOpen = data['PullTsOpen'];
+        that.common.PullTsOpen = data['dev_push_enable']==1?true:false;
         //视频比特率范围
         if(data["video_encode"] == "4"){
           that.BITRATE_MAX = that.$global.BITRATE_MAX3_4000;
@@ -1263,11 +1404,76 @@
         that.common.ActHdmiOut = data['ActHdmiOut'];
         //传输通道
         that.common.SrtTransIf = that.$global.cardEnum2Id(data['SrtTransIf']);
+        //网络模式
+        var cardId = that.common.SrtTransIf;
+        if(cardId.indexOf("lte") != -1){
+          this.show.netWorkMode = true;//显示网络模式
+          this.getActNetModeParam(cardId);//获取网络模式
+        }else{
+          this.show.netWorkMode = false;//隐藏网络模式
+        }
+        for(var i=0; i<that.OPTIONS_TRANS_SRT.length; i++){
+          if(that.common.SrtTransIf == that.OPTIONS_TRANS_SRT[i]["value"]
+            && that.OPTIONS_TRANS_SRT[i]["text"].indexOf("在线") == -1){
+            that.dis.dev_srt = true;//互动的传输开关
+          }
+        }
+
         //互动拉流地址
         that.getActAddr(data['ActPushAddr'],data['ActPullAddr']);
         that.common.ActPullAddr = data['ActPullAddr'];
         //互动推流地址
         that.common.ActPushAddr = data['ActPushAddr'];
+      },
+      //1080互动-网络模式
+      getActNetModeParam(cardId){
+        var that = this;
+        var devSN = this.ActiveDevice.dev_sn;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:that.$qs.stringify({
+            getDevCardParam: "true",
+            devSN: devSN
+          }),
+          Api:"getDevCardParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var pushEnable = false;
+            var data = res.data[0];
+            //网卡设置
+            for (var i = 0; i < data.length; i++) {
+              if(data[i]["card_id"] == cardId){
+                //5G模式
+                if (cardId.indexOf("lte") != -1) {
+                  if(data[i]["SimModule"] == "1"){
+                    that.OPTIONS_NET_WORKMODE = that.OPTIONS_5G_MODE;
+                    that.common.netWorkMode = data[i]["SetSimMode"];
+                  } else {
+                    that.OPTIONS_NET_WORKMODE = that.OPTIONS_LTE_MODE
+                    that.common.netWorkMode = 3;
+                  }
+                }
+              }
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       //根据互动地址 提取参数
       getActAddr(pushurl,pullurl){
@@ -1314,23 +1520,90 @@
       //更新插件disable状态
       setBtnDisabled(dis){
         var that = this;
-        that.dis.dev_push_enable = dis;//传输开关
-        that.dis.dev_srt = dis;//传输开关
-        that.dis.PushTsType = dis;//传输模式
-        that.dis.PushCard = dis;//网卡选择
-        that.dis.dev_srVal_range = dis;//视频比特率range
-        that.dis.dev_srVal_input = dis;//视频比特率input
-        that.dis.dev_srVal_range_act = dis;//视频比特率range 互动
-        that.dis.dev_srVal_input_act = dis;//视频比特率range 互动
-        that.dis.dev_delayVal_range = dis;//延时range
-        that.dis.dev_delayVal_input = dis;//延时input
-        that.dis.PullTsOpen = dis;//拉流--传输开关
+        if(this.curDevSeries == "1080"){
+          this.dis.WorkMode = dis;
+          if(this.common.dev_push_enableVal){//推流
+            //推流 
+            this.dis.PushTsType = true;//传输模式
+            this.dis.PushCard = true;//网卡选择
+          }else{
+            //推流 
+            this.dis.PushTsType = dis;//传输模式
+            this.dis.PushCard = dis;//网卡选择
+          }
+          if(this.common.dev_push_enable){//拉流
+            /*//推流 
+            this.dis.PushTsType = true;//传输模式
+            this.dis.PushCard = true;//网卡选择*/
+            //拉流
+            this.dis.PullMHdmiAS = true;//HDMI音频输出
+            this.dis.PullMHdmiOut = true;//HDMI视频输出
+            this.dis.PullTsNet = true;//网卡选择
+          }else{
+            /*//推流 
+            this.dis.PushTsType = dis;//传输模式
+            this.dis.PushCard = dis;//网卡选择*/
+            //拉流
+            this.dis.PullMHdmiAS = dis;//HDMI音频输出
+            this.dis.PullMHdmiOut = dis;//HDMI视频输出
+            this.dis.PullTsNet = dis;//网卡选择
+          }
+          //互动
+          this.dis.dev_srt = dis;//互动的传输开关
+          this.dis.ActDev = dis; //互动背包
+          this.dis.ActDisplay = dis; //切换显示
+          this.dis.ActHdmiOut = dis; //HDMI输出
+          if(this.common.dev_srt){//互动的传输开关打开
+            this.dis.SrtTransIf = true; //传输通道  
+            this.dis.netWorkMode = true; //网络模式  
+            this.dis.actAddrIp = true;//互动 流媒体服务器IP
+            this.dis.actAddrPort = true;//互动 端口
+            this.dis.actPushLatency = true;//互动 推流延时
+            this.dis.actPullLatency = true;//互动 拉流延时
+          }else{
+            this.dis.SrtTransIf = dis; //传输通道  
+            this.dis.netWorkMode = dis; //网络模式  
+            this.dis.actAddrIp = dis;//互动 流媒体服务器IP
+            this.dis.actAddrPort = dis;//互动 端口
+            this.dis.actPushLatency = dis;//互动 推流延时
+            this.dis.actPullLatency = dis;//互动 拉流延时
+          }
+          this.dis.ActPushAddr = dis;//互动 推流地址
+          this.dis.ActPullAddr = dis;//互动 拉流地址
+          //通用
+          this.dis.dev_push_enable = dis;//传输开关
+          this.dis.dev_delayVal_range = dis;//延时range
+          this.dis.dev_delayVal_input = dis;//延时input
+          this.dis.dev_srVal_range = dis;//视频比特率range
+          this.dis.dev_srVal_input = dis;//视频比特率input
+          this.dis.dev_srVal_range_act = dis;//互动-视频比特率-range
+          this.dis.dev_srVal_input_act = dis;//互动-视频比特率-input
+
+          //拉流
+          //$('#pullOpen').bootstrapSwitch('disabled', disabled);//拉流的传输开关
+          this.dis.PullTsOpen = dis;//拉流--传输开关
+        }else if(this.curDevSeries == "4000"){
+          //互动接收机
+          //文件
+          //*4000的互动接收机
+          /*$('#dev_interactive_mode').bootstrapSwitch('disabled', disabled);//互动模式
+          $('#dev_srt_4000').bootstrapSwitch('disabled', disabled);//互动开关
+          setSelectDisabled('#srtAudioInput_sel', disabled);//音频切换
+          $('#dev_srt_full').bootstrapSwitch('disabled', disabled);//全屏
+          setSelectDisabled('#srtTrans4000_sel', disabled);//传输通道
+          setSelectDisabled('#srtAudioMode_sel', disabled);//音频模式
+          //*文件
+          $('#back_enable').bootstrapSwitch('disabled', disabled);//回传按钮
+          setSelectDisabled('#back_sel', disabled);//回传方式  
+          $('#updateFileIcon').attr('disabled', disabled);//刷新文件列表按钮*/
+        }
+        //DV5000T
       },
 
       changeWorkMode(){
         var that = this;
         if(this.common.WorkModeOri == 0 || this.common.WorkModeOri == 2){//推流or互动
-          //工作模式是否处于传输开关开启状态
+          //判断当前(切换之前)工作模式是否处于传输开关开启状态
           that.$global.getDevOneParam('', 'dev_push_enable', function(data) {
             if (data.dev_push_enable == '1') {//推流，互动传输开关开启
               that.common.WorkMode = that.common.WorkModeOri;
@@ -1348,9 +1621,9 @@
             }
           });
         }else if(this.common.WorkModeOri == 1){
-          that.$global.getDevOneParam('', 'PullTsOpen', function(data) {
-            if (data.PullTsOpen == '0') {//拉流，传输开关关闭
-              that.common.WorkModeOri = that.common.wordMode;
+          that.$global.getDevOneParam('', 'dev_push_enable', function(data) {
+            if (data.dev_push_enable == '0') {//拉流，传输开关关闭
+              that.common.WorkModeOri = that.common.WorkMode;
               that.SET_DEVICE_MODE_SELECT(that.common.WorkMode);
               that.setDeviceParam('WorkMode',that.common.WorkMode);
               that.changeWorkModePage();
@@ -1370,11 +1643,19 @@
         switch(this.common.WorkMode){
           case 0:
             this.common.WorkModePush = true;
+            this.common.WorkModePull = false;
+            this.common.WorkModeAct = false;
+            break;
+          case 1:
+            this.common.WorkModePush = false;
+            this.common.WorkModePull = true;
             this.common.WorkModeAct = false;
             break;
           case 2:
             this.common.WorkModePush = false;
+            this.common.WorkModePull = false;
             this.common.WorkModeAct = true;
+            break;
         }
       },
       changeTransMode(){
@@ -1382,14 +1663,21 @@
         that.setDeviceParam('PushTsType');
         if(that.common.PushTsType == "1"){//单卡
           that.show.cardSelShow = true;
+          that.show.delayShow = false;//单卡隐藏延时
         }else{
           that.show.cardSelShow = false;
+          that.show.delayShow = true;
         }
       },
       changeCard(){
         var that = this;
         var cardId = that.common.PushCard;
         this.setDeviceParam('PushTsNet',that.$global.cardId2Enum(cardId));
+      },
+      changePullCard(){
+        var that = this;
+        var cardId = that.common.PullTsNet;
+        this.setDeviceParam('PullTransIf',that.$global.cardId2Enum(cardId));
       },
       //检查推流地址是否只选了一个，大于一个全部取消勾选，加提示
       /*checkPushUrlOnlyOne(cb){
@@ -1526,75 +1814,178 @@
         }
       },
       
-      //传输开关
+      //推流传输开关
       setDevPushEnable(){
         var that = this;
         this.show.pushDisShow = false;
         if (this.common.dev_push_enableVal == true) {
-          //单卡模式直接开启,汇聚模式判断是否有启用的网卡
-          if(this.common.PushTsType == 0 || this.curDevSeries=="4000"){
-            var cardUsed = that.getUsedCardCount();
-            if (cardUsed == 0) {
-              that.$toast({
-                message: "无启用的网卡！",
-                position: 'middle',
-                duration: 2000
-              });
-              setTimeout(function(){
-                that.common.dev_push_enableVal = false;  
-              },1000)
-              return;
-            }
-          }
           this.$global.getPushUrls(function(data){
+            //单卡模式直接开启,汇聚模式判断是否有启用的网卡
+            if(that.common.PushTsType == 0){//汇聚
+              var cardUsed = that.getUsedCardCount();
+              if (cardUsed == 0) {
+                that.$toast({
+                  message: "无启用的网卡！",
+                  position: 'middle',
+                  duration: 2000
+                });
+                setTimeout(function(){
+                  that.common.dev_push_enableVal = false;  
+                },1000)
+                return;
+              }
+            }else{//单卡模式
+              var selectCardName = "";
+              for(var k=0; k<that.OPTIONS_TRANS_PULL_CARD.length; k++){
+                if(that.OPTIONS_TRANS_PULL_CARD[k]["value"] == that.common.PushCard){
+                  selectCardName = that.OPTIONS_TRANS_PULL_CARD[k]["text"];
+                }
+              }
+              if(selectCardName.indexOf("在线") == -1){//启用的单卡不在线
+                that.$toast({
+                  message: "无启用的网卡！",
+                  position: 'middle',
+                  duration: 2000
+                });
+                setTimeout(function(){
+                  that.common.dev_push_enableVal = false;  
+                },1000)
+                return; 
+              }
+              var datas = data;
+              var selectedCount = 0;
+              for (var i = 0; i < datas.length; i++) {
+                if (datas[i].oneCardEnable == 1) {
+                  selectedCount++;
+                }
+              }
+              if(selectedCount > 1){
+                /*$('#url_table').bootstrapTable('refresh', {
+                  silent: true
+                });*/
+                that.$toast({
+                  message: "单卡模式下仅支持1路推流地址！",
+                  position: 'middle',
+                  duration: 2000
+                });
+                setTimeout(function(){
+                  that.common.dev_push_enableVal = false;  
+                },1000)
+                return;
+              }
+            }
+            //1080判断有无推流地址
             var pushUrlSel = 0;
             pushUrlSel = that.getUsedPushUrlCount(data);//获取勾选的推流地址个数
             if (pushUrlSel == 0 && that.curDevSeries == "1080") {
-              var info = "无勾选的推流地址！";
+              var info = "无勾选的推流地址，无法开启直播推流！";
               that.disTransSwitch(info);
               return;
             }
             //回传中要询问
             var text = '';
-            if ($('#work_str').text() == '文件离线回传中') {
-              text = '是否停止背包文件回传？';
-              //询问
-              layer.confirm(text, {
-                btn: ['确定', '取消'], //按钮
-                shade: [0.8, '#393D49'] //显示遮罩
-              }, function(index, layero) {
-                //停止文件回传
-                clickBackStopBtn();
-                $('#back_enable').bootstrapSwitch('state', false, true);
-                //setDevParam('dev_push_enable', 1, switchId);
-                $("#dev_push_enable").bootstrapSwitch('state', false, true);
-                layer.load(1, {
-                  shade: [0.1, '#fff'],
-                  time: 2000
+            that.getDevState(function(data){
+              if(data["online"] == '1' && data["OffLinePushEnable"] == '1'){//文件离线回传中
+                var text = '是否停止背包文件回传？';
+                //询问
+                MessageBox.confirm('',{
+                  title:'提示',
+                  message: text,
+                  confirmButtonText:'确定',
+                  cancelButtonText:'取消'
+                }).then(action => {
+                  if (action == 'confirm') {
+                    //停止文件回传
+                    that.clickBackStopBtn();
+                    //$('#back_enable').bootstrapSwitch('state', false, true);
+                    setTimeout(function(){
+                      that.common.dev_push_enableVal = false;  
+                    },500)
+                  }
+                }).catch(error =>{
+                  setTimeout(function(){
+                    that.common.dev_push_enableVal = false;  
+                  },500)
                 });
-                layer.close(index);
-              }, function() {
-                //取消
-              });
-            } else {
-              //打开传输
-              if(that.curDevSeries == "1080"){
-                that.checkDevPushCondition(function(){
-                  that.setDeviceParam('dev_push_enable');
-                })
-                that.common.dev_srt = true;//互动传输开关和推流传输开关状态切换保持  
-              }else if(that.curDevSeries == "4000"){
+
+              } else {
                 that.setDeviceParam('dev_push_enable');
+                //打开传输
+                if(that.curDevSeries == "1080"){
+                  that.common.dev_srt = true;//互动传输开关和推流传输开关状态切换保持  
+                }/*else if(that.curDevSeries == "4000"){
+                  that.setDeviceParam('dev_push_enable');
+                }*/
               }
-            }
+            })
           })
         } else {
-          that.stopDevPushUrl(function(){
-            that.setDeviceParam('dev_push_enable');
-          })
+          that.setDeviceParam('dev_push_enable');
           that.show.pushDisShow = false;
-          that.common.dev_srt = false;//互动传输开关和推流传输开关状态切换保持
+          if(that.curDevSeries == "1080"){
+            that.common.dev_srt = false;//互动传输开关和推流传输开关状态切换保持
+          }
         }
+      },
+      //获取背包状态
+      getDevState(cb){
+        var that = this;
+        var devSn = this.ActiveDevice.dev_sn;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevState:devSn,
+          }),
+          Api:"getDevState",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if(cb){
+              cb(res.data[0]);
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //拉流传输开关
+      changePullOpen(){
+        var that = this;
+        //0:关闭 1:打开
+        if (this.common.PullTsOpen) {//拉流传输开关--开
+          for(var i=0; i<this.OPTIONS_TRANS_PULL_CARD.length; i++){
+            if(this.OPTIONS_TRANS_PULL_CARD[i]["value"] == this.common.PullTsNet){
+              if(this.OPTIONS_TRANS_PULL_CARD[i]["text"].indexOf("在线") == -1){
+                this.$toast({
+                  message: "没有可用的网卡",
+                  position: 'middle',
+                  duration: 2000
+                });
+                setTimeout(function(){
+                  that.common.PullTsOpen = false;
+                },500)
+                return;
+              }else{
+                this.setDeviceParam('dev_push_enable',1);
+                this.dis.PullTsNet = true;//传输开关打开后，传输通道不能修改
+              }
+            }
+          }
+        } else {
+          this.setDeviceParam('dev_push_enable',0);
+          this.dis.PullTsNet = false;//传输开关关闭后，传输通道可以修改
+        }
+      },
+      changePullMHdmiOut(){
+        this.setDeviceParam('PullMHdmiOut',this.common.PullMHdmiOut);
+      },
+      changePullMHdmiAS(){
+        this.setDeviceParam('PullMHdmiAS',this.common.PullMHdmiAS);
       },
       //获取勾选的推流地址个数
       getUsedPushUrlCount(data){
@@ -1664,17 +2055,82 @@
             },500)
             return;
           }
+          for(var i=0; i<this.OPTIONS_TRANS_SRT.length; i++){
+            if(this.common.SrtTransIf == this.OPTIONS_TRANS_SRT[i]["value"]
+              && this.OPTIONS_TRANS_SRT[i]["text"].indexOf("在线") == -1){
+              this.$toast({
+                message: "没有可用的网卡",
+                position: 'middle',
+                duration: 2000
+              });
+              setTimeout(function(){
+                that.common.dev_srt = false;  //互动的传输开关
+              },500)
+              
+              return;
+            }
+          }
+
           //同时设置两个背包的推流开关，显示切换到远端
           //setDevParam('dev_push_enable', 1, switchId);
-          this.$global.setDevParamList(['dev_push_enable','ActDisplay'],[1,1]);
-          this.$global.setDevParamList(['param_lock','dev_push_enable','ActDisplay'],[1,1,1],actDev);
+          this.$global.setDevParamList(['dev_push_enable'],[1]);
+          this.$global.setDevParamList(['param_lock','dev_push_enable'],[1,1],actDev);
           
-          this.common.ActDisplay = 1;
+          //this.common.ActDisplay = 1;
           this.common.dev_push_enableVal = true;//互动传输开关和推流传输开关状态切换保持
         } else {
           //互动关
           this.actModeClose(actDev);
         }
+      },
+      //修改传输通道
+      changeSrtTransIf(){
+        var that = this;
+        this.setDeviceParam('SrtTransIf', that.$global.cardId2Enum(that.common.SrtTransIf))
+        for(var i=0; i<this.OPTIONS_TRANS_SRT.length; i++){
+          if(this.common.SrtTransIf == this.OPTIONS_TRANS_SRT[i]["value"]
+            && this.OPTIONS_TRANS_SRT[i]["text"].indexOf("在线") == -1){
+            this.dis.dev_srt = true;//互动的传输开关
+          }
+        }
+        for(var i=0; i<this.OPTIONS_TRANS_SRT.length; i++){
+          if(this.common.SrtTransIf == this.OPTIONS_TRANS_SRT[i]["value"]
+            && this.OPTIONS_TRANS_SRT[i]["text"].indexOf("在线") == -1){
+            this.dis.dev_srt = true;//互动的传输开关
+          }
+        }
+        var cardId = this.common.SrtTransIf;
+        if(cardId.indexOf("lte") != -1){
+          this.show.netWorkMode = true;
+          this.getActNetModeParam(cardId);//网络模式
+        }else{
+          this.show.netWorkMode = false;
+        }
+      },
+      //修改网络模式
+      changeNetWorkMode(){
+        var that = this;
+        var devSN = this.ActiveDevice.dev_sn;;
+        var cardId = this.common.SrtTransIf;
+        var modeVal = this.common.netWorkMode;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            setSimMode:modeVal,
+            cardId:cardId,
+            devSN:devSN,
+          }),
+          Api:"setSimMode",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       //互动模式关闭
       actModeClose(actDev){//互动关
@@ -1729,45 +2185,16 @@
           console.log(error)
         })
       },
-      //判断是否有推流地址，没有推流地址不能打开传输开关,有推流地址，启用所有推流地址
-      checkDevPushCondition(cb){
-        var that = this;
-        this.$axios({
-          method: 'post',
-          url:"/page/index/indexData.php",
-          data:this.$qs.stringify({
-            checkDevPushCondition:true,
-            boardId: that.ActiveDevice.dev_sn
-          }),
-          Api:"checkDevPushCondition",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            if(cb){
-              cb()
-            }
-          }else{
-            that.$toast({
-              message: res.res.reason,
-              position: 'middle',
-              duration: 2000
-            });
-            that.common.dev_push_enableVal = false; 
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
       setDeviceParam(key, val){
         var that = this;
         var devParamCol = key;
         var value;
         if(key == "dev_push_enable"){
-          value = that.common.dev_push_enableVal? "1" : "0";
+          if(val != undefined){
+            value = val;
+          }else{
+            value = that.common.dev_push_enableVal? "1" : "0";
+          }
         }else if(key == "dev_sr_input"){
           value = parseFloat(that.common.dev_srVal_input) * 1000;
           that.common.dev_srVal_range = that.common.dev_srVal_input*10;
@@ -1825,6 +2252,40 @@
         }
         return usedCardCount;
       },
+      //点击停止回传按钮
+      clickBackStopBtn() {
+        var that = this;
+        //回传停止，隐藏传输状态
+        /*$('#fileLi').children().html('文件');
+        $('#updateFileIcon').removeClass('disabledIcon');*/
+        this.setDeviceParam('FileCtrlFlag', 1);
+        //devSn
+        var devSN = this.ActiveDevice.dev_sn;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          this.$toast({
+            message: "未选择背包",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            setDevFileStop: devSN,
+          }),
+          Api:"setDevFileStop",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      }
     }
   }
 </script>

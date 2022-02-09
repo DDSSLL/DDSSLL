@@ -57,7 +57,7 @@
                     </div>
                   </mt-tab-container-item>
                   <mt-tab-container-item id="2">
-                    <div class="GroupItem">
+                    <div class="GroupItem" v-if="show.upShowFlg">
                       <div class="GroupItemField">
                         <div class="GroupItemTitle">发送速率</div>
                         <div class="GroupItemValue">
@@ -66,7 +66,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="GroupItem">
+                    <div class="GroupItem" v-if="show.downShowFlg">
                       <div class="GroupItemField">
                         <div class="GroupItemTitle">接收速率</div>
                         <div class="GroupItemValue">
@@ -75,16 +75,25 @@
                         </div>
                       </div>
                     </div>
-                    <div class="GroupItem" v-if="avbrShowFlg">
+                    <div class="GroupItem" v-if="show.avbrShowFlg">
                       <div class="GroupItemField">
-                        <div class="GroupItemTitle">可变码率</div>
+                        <div class="GroupItemTitle">编码码率</div>
                         <div class="GroupItemValue">
                           <mt-checklist v-model="totalSel.avbr" :options="totalSelOptionsAVBR">
                           </mt-checklist>
                         </div>
                       </div>
                     </div>
-                    <div class="GroupItem">
+                    <div class="GroupItem" v-if="show.srtShowFlg">
+                      <div class="GroupItemField">
+                        <div class="GroupItemTitle">拉流速率</div>
+                        <div class="GroupItemValue">
+                          <mt-checklist v-model="totalSel.srt" :options="totalSelOptionsSrt">
+                          </mt-checklist>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="GroupItem" v-if="show.transShowFlg">
                       <div class="GroupItemField">
                         <div class="GroupItemTitle">传输丢包</div>
                         <div class="GroupItemValue">
@@ -93,7 +102,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="GroupItem">
+                    <div class="GroupItem" v-if="show.bussShowFlg">
                       <div class="GroupItemField">
                         <div class="GroupItemTitle">业务丢包</div>
                         <div class="GroupItemValue">
@@ -178,7 +187,15 @@
       return{
         ADMIN:ADMIN,
         ChartConfTab:'1',
-        avbrShowFlg:false,
+        workMode:"",
+        show:{
+          upShowFlg:true,
+          downShowFlg:true,
+          avbrShowFlg:false,
+          srtShowFlg:false,
+          transShowFlg:true,
+          bussShowFlg:true,
+        },
         avbrFlag:"",
         //ChartConfTotalUp:[],
         cardMatch : {
@@ -201,6 +218,7 @@
         totalSelOptionsUp:[],
         totalSelOptionsDown:[],
         totalSelOptionsAVBR:[],
+        totalSelOptionsSrt:[],
         totalSelOptionsTrans:[],
         totalSelOptionsBuss:[],
         /*dev_line中保存的显示的line*/
@@ -208,6 +226,7 @@
           "up":'Total',
           "down":'Total',
           "avbr":'Total',
+          "srt":'Total',
           "trans":'Total',
           "buss":'Total'
         },
@@ -215,6 +234,7 @@
           up:"Total",
           down:"Total",
           avbr:"Total",
+          srt:"Total",
           trans:"Total",
           buss:"Total",
         },
@@ -283,8 +303,36 @@
       var that = this;
       if(this.ActiveDevice){
         this.$global.getDeviceParam(function(data){
-          that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
-          that.avbrShowFlg = that.avbrFlag;
+          var rcvSn = that.ActiveDevice.rcv_sn;
+          var rcvMode =that.$global.getRcvMode(rcvSn.substr(-4));
+          var act4000 = false;
+          if(rcvMode == 'DV4004R' || rcvMode == 'CM-IR6000T' || rcvMode == 'DV4013R'){
+            act4000 = true;//互动接收机
+          }
+
+          if(act4000){
+            that.show.upShowFlg = true;
+            that.show.downShowFlg = true;
+            that.show.avbrShowFlg = (data['bitrate_mode'] == 1 ? true : false);
+            that.show.srtShowFlg = true;
+            that.show.transShowFlg = true;
+            that.show.bussShowFlg = true;
+          }else if(data['WorkMode'] == 1){//拉流
+            that.show.upShowFlg = false;
+            that.show.downShowFlg = false;
+            that.show.avbrShowFlg = false;
+            that.show.srtShowFlg = true;
+            that.show.transShowFlg = false;
+            that.show.bussShowFlg = false;
+          }else{
+            that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
+            that.show.avbrShowFlg = that.avbrFlag;
+            that.show.upShowFlg = true;
+            that.show.downShowFlg = true;
+            that.show.srtShowFlg = false;
+            that.show.transShowFlg = true;
+            that.show.bussShowFlg = true;
+          }
         });
         this.getChartConfUnit();
         this.initChartSelect();
@@ -296,8 +344,23 @@
     activated(){  //生命周期-缓存页面激活
       var that = this;
       this.$global.getDeviceParam(function(data){
-        that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
-        that.avbrShowFlg = that.avbrFlag;
+        that.workMode = data['workMode'];
+        if(data['workMode'] == 1){//拉流
+          that.show.upShowFlg = false;
+          that.show.downShowFlg = false;
+          that.show.avbrShowFlg = false;
+          that.show.srtShowFlg = true;
+          that.show.transShowFlg = false;
+          that.show.bussShowFlg = false;
+        }else{
+          that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
+          that.show.avbrShowFlg = that.avbrFlag;
+          that.show.upShowFlg = true;
+          that.show.downShowFlg = true;
+          that.show.srtShowFlg = false;
+          that.show.transShowFlg = true;
+          that.show.bussShowFlg = true;
+        }
       });
       this.getChartConfUnit();
       this.initChartSelect();
@@ -319,48 +382,48 @@
           SET_DEVICE_PREFIX_SELECT
       }),
       getCardChartShowContent(devSn,cardData){
-      var that = this;
-      var devSn = JSON.parse(localStorage.curChart).split("/")[0];
-      that.$axios({
-        method: 'post',
-        url:"/page/index/chartData.php",
-        data:that.$qs.stringify({
-          getCardChartShowContent:true,
-          devSn: devSn
-        }),
-        Api:"getCardChartShowContent",
-        AppId:"android",
-        UserId:that.user.id
-      })
-      .then(function (response) {
-        let res = response.data;
-        if(res.res.success){
-          var data = res.data[0];
-          //var chartCardView = {};
-          for(var key in data){
-            if(key == "dev_sn" || key=="id"){
-              continue;
+        var that = this;
+        var devSn = JSON.parse(localStorage.curChart).split("/")[0];
+        that.$axios({
+          method: 'post',
+          url:"/page/index/chartData.php",
+          data:that.$qs.stringify({
+            getCardChartShowContent:true,
+            devSn: devSn
+          }),
+          Api:"getCardChartShowContent",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var data = res.data[0];
+            //var chartCardView = {};
+            for(var key in data){
+              if(key == "dev_sn" || key=="id"){
+                continue;
+              }
+              var newKey = "";
+              if(key.indexOf("_") != -1){
+                newKey = key.replace(/_/,'-');
+                that.chartCardView[newKey] = data[key];
+              }else{
+                that.chartCardView[key] = data[key];
+              }
+              //that.chartCardView[key.replace(/_/,"-")] = data[key];
             }
-            var newKey = "";
-            if(key.indexOf("_") != -1){
-              newKey = key.replace(/_/,'-');
-              that.chartCardView[newKey] = data[key];
-            }else{
-              that.chartCardView[key] = data[key];
-            }
-            //that.chartCardView[key.replace(/_/,"-")] = data[key];
+            //that.SET_CHART_CARD_VIEW(chartCardView);
+            that.initChartTotal(cardData);
+            that.initChartCards(cardData);
+          }else{
+            console.log(res)
           }
-          //that.SET_CHART_CARD_VIEW(chartCardView);
-          that.initChartTotal(cardData);
-          that.initChartCards(cardData);
-        }else{
+        })
+        .catch(function (res) {
           console.log(res)
-        }
-      })
-      .catch(function (res) {
-        console.log(res)
-      })
-    }, 
+        })
+      }, 
       getChartConfUnit(){
         var that = this;
         this.$axios({
@@ -474,6 +537,7 @@
         this.totalSel.up = this.chartGeneralView.up;
         this.totalSel.down = this.chartGeneralView.down;
         this.totalSel.avbr = this.chartGeneralView.avbr;
+        this.totalSel.srt = this.chartGeneralView.srt;
         this.totalSel.trans = this.chartGeneralView.trans;
         this.totalSel.buss = this.chartGeneralView.buss;
       },
@@ -482,6 +546,7 @@
         this.totalSel.up = "Total";
         this.totalSel.down = "Total";
         this.totalSel.avbr = "Total";
+        this.totalSel.srt = "Total";
         this.totalSel.trans = "Total";
         this.totalSel.buss = "Total";
       },
@@ -490,6 +555,7 @@
         this.totalSel.up = "";
         this.totalSel.down = "";
         this.totalSel.avbr = "";
+        this.totalSel.srt = "";
         this.totalSel.trans = "";
         this.totalSel.buss = "";
       },
@@ -508,11 +574,13 @@
             that.totalSelOptionsUp = [];
             that.totalSelOptionsDown = [];
             that.totalSelOptionsAVBR = [];
+            that.totalSelOptionsSrt = [];
             that.totalSelOptionsTrans = [];
             that.totalSelOptionsBuss = [];
             that.totalSelOptionsUp.push({label:option,value:option});
             that.totalSelOptionsDown.push({label:option,value:option});
             that.totalSelOptionsAVBR.push({label:option,value:option});
+            that.totalSelOptionsSrt.push({label:option,value:option});
             that.totalSelOptionsTrans.push({label:option,value:option});
             that.totalSelOptionsBuss.push({label:option,value:option});
           }
@@ -550,10 +618,16 @@
             that.totalSel.buss = buss;
             if(that.avbrFlag){
               var avbr = data["avbr"];//.split(",").map(function(x){return formatCardShow(x)});
-              that.chartGeneralView.avbr = avbr;//可变码率  
+              that.chartGeneralView.avbr = avbr;//编码码率  
               that.totalSel.avbr = avbr;
             }else{
-              that.chartGeneralView.avbr = [];//可变码率  
+              that.chartGeneralView.avbr = [];//编码码率  
+            }
+            if(that.workMode == "1"){//拉流
+              that.chartGeneralView.srt = data["srt"];//srt  
+              that.totalSel.srt = srt;
+            }else{
+              that.chartGeneralView.srt = [];//srt  
             }
           }else{
             that.$toast({
@@ -578,6 +652,7 @@
             up: that.totalSel.up?"Total":"",
             down: that.totalSel.down?"Total":"",
             avbr: that.totalSel.avbr?"Total":"",
+            srt: that.totalSel.srt?"Total":"",
             lossDev: that.totalSel.trans?"Total":"",
             lossRcv: that.totalSel.buss?"Total":""
           }),

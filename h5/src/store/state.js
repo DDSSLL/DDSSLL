@@ -33,4 +33,6 @@ export default {
     cardLineStyle:'old',
     /*chartCardView : {
     },*/
+    rcvTabShowFlg:false,//接收机Tab显示标志位
+    monitorFlg:true,//监控Tab显示标志位
 }

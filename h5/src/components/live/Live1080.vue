@@ -2,65 +2,76 @@
   <div class="live mainPage">
     <Device page='dev'></Device>
     <!-- <Device></Device> -->
-    <div class="Group" v-if="show.devMod">
-      <div class="GroupItem" style="padding: .1rem;border-bottom:0;text-indent:.1rem">
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">背包模式</div>
-          <div class="GroupItemValue">
-            <span style="font-size: .14rem;vertical-align: baseline;line-height: .3rem;color:#fff;">{{common.WorkMode}}</span>
+    <!-- <span>{{ curRcvSeries }}</span>
+    <span>{{ VIR_RCV }}</span> -->
+    <div v-if="curRcvSeries==VIR_RCV"><!-- 虚拟接收机 -->
+      <div class="Group" v-if="show.devMod">
+        <div class="GroupItem" style="padding: .1rem;border-bottom:0;text-indent:.1rem">
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">背包模式</div>
+            <div class="GroupItemValue">
+              <span style="font-size: .14rem;vertical-align: baseline;line-height: .3rem;color:#fff;">{{common.WorkMode}}</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="Group" v-if="common.WorkMode!='互动'">
-      <div v-if="common.WorkMode == '推流'">
-        <div class="GroupTitle">推流地址</div>
-        <transition name="slide-fade">
-          <div v-show="liveUrlShow1080">
+      <div class="Group" v-if="common.WorkMode!='互动'">
+        <div v-if="common.WorkMode == '推流'">
+          <div class="GroupTitle">推流地址</div>
+          <transition name="slide-fade">
+            <div v-show="liveUrlShow1080">
+              <div class="addressGroup" style="padding:0">
+                <div v-if="curDevSeries=='4000'">
+                  <PushUrl  v-bind:lockState="pageLock" v-bind:workMode="common.WorkMode"></PushUrl>  
+                </div>
+                <div v-else>
+                  <PushUrl v-bind:lockState="pageLock" v-bind:workMode="common.WorkMode" v-bind:transMode="common.transMode"></PushUrl>
+                </div>
+              </div>      
+            </div>
+          </transition>
+        </div>
+        <!-- <div v-if="common.WorkMode == '拉流'">
+          <div class="GroupTitle">拉流地址</div>
+          <transition name="slide-fade">
             <div class="addressGroup" style="padding:0">
-              <div v-if="curDevSeries=='4000'">
-                <PushUrl  v-bind:lockState="pageLock" v-bind:workMode="common.WorkMode"></PushUrl>  
-              </div>
-              <div v-else>
+              <div>
                 <PushUrl v-bind:lockState="pageLock" v-bind:workMode="common.WorkMode" v-bind:transMode="common.transMode"></PushUrl>
               </div>
             </div>      
-          </div>
-        </transition>
-      </div>
-      <div v-if="common.WorkMode == '拉流'">
-        <div class="GroupTitle">拉流地址</div>
-      </div>
-      <!-- <div class="Group" v-if="common.WorkMode!='互动'">
-        <PushUrl @childFn="parentFn" v-bind:lockState="rcvParamLock" v-bind:workMode="common.WorkMode" v-bind:transMode="common.transMode" v-bind:cardId="common.cardId"></PushUrl>
-      </div> -->
-      <mt-popup v-model="pushUrlsEditVisible" popup-transition="popup-fade">
-        <div class="pushEditModal">
-          <div class="modalTitle">
-            推流地址
-            <i class="closeBtn fa fa-close" @click="hideEditUrls"></i>
-          </div>
-          <div class="formContainer">
-            <div class="formItem">
-              <div class="formItemTitle">备注名</div>
-              <div class="formItemVal">
-                <input type="text" v-model="activePushObj.remark" :disabled="this.dev_push_enable">
+          </transition>
+        </div> -->
+        <!-- <div class="Group" v-if="common.WorkMode!='互动'">
+          <PushUrl @childFn="parentFn" v-bind:lockState="rcvParamLock" v-bind:workMode="common.WorkMode" v-bind:transMode="common.transMode" v-bind:cardId="common.cardId"></PushUrl>
+        </div> -->
+        <mt-popup v-model="pushUrlsEditVisible" popup-transition="popup-fade">
+          <div class="pushEditModal">
+            <div class="modalTitle">
+              推流地址
+              <i class="closeBtn fa fa-close" @click="hideEditUrls"></i>
+            </div>
+            <div class="formContainer">
+              <div class="formItem">
+                <div class="formItemTitle">备注名</div>
+                <div class="formItemVal">
+                  <input type="text" v-model="activePushObj.remark" :disabled="this.dev_push_enable">
+                </div>
+              </div>
+              <div class="formItem">
+                <div class="formItemTitle">推流地址</div>
+                <div class="formItemVal">
+                  <input type="text" v-model="activePushObj.push_url" :disabled="this.dev_push_enable">
+                  <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265</p>
+                </div>
+              </div>
+              <div class="formItem" style="text-align: right;margin-bottom: 0;" v-if="!pageLock">
+                <button class="modalBtn" @click="hideEditUrls">取消</button>
+                <button class="modalBtn" @click="saveEditUrls" style="background-color: #3d81f1;color:#fff;">确定</button>
               </div>
             </div>
-            <div class="formItem">
-              <div class="formItemTitle">推流地址</div>
-              <div class="formItemVal">
-                <input type="text" v-model="activePushObj.push_url" :disabled="this.dev_push_enable">
-                <p class="rtmpTip">支持 RTMP+H.264、RTMP+H.265</p>
-              </div>
-            </div>
-            <div class="formItem" style="text-align: right;margin-bottom: 0;" v-if="!pageLock">
-              <button class="modalBtn" @click="hideEditUrls">取消</button>
-              <button class="modalBtn" @click="saveEditUrls" style="background-color: #3d81f1;color:#fff;">确定</button>
-            </div>
           </div>
-        </div>
-      </mt-popup>
+        </mt-popup>
+      </div>
     </div>
   </div>
 </template>
@@ -73,7 +84,11 @@
     name: "Live1080",
     data(){
       return{
+        VIR_RCV:VIR_RCV,
+        PRA_RCV:PRA_RCV,
+        R1080_RCV:R1080_RCV,
         curDevSeries:"",
+        curRcvSeries:"",
         pageLock:false,
         liveUrlShow1080:true,
         devTypeArr : ["推流","拉流","互动"],
@@ -130,10 +145,16 @@
         handler(val) {
           if(this.$route.fullPath == "/live1080"){
             this.curDevSeries = this.$global.getDevSeries(this.ActiveDevice.dev_sn);
-            if(this.curDevSeries == '4000'){
+            this.curRcvSeries = this.$global.getRcvSeries(this.ActiveDevice.rcv_sn);
+            /*if(this.curDevSeries == '4000'){
               this.$router.push("/live4000");
             }else{
               this.$router.push("/live1080");
+            }*/
+            if(this.curRcvSeries == VIR_RCV){/*虚拟汇聚*/
+              this.$router.push("/live1080");
+            }else if(this.curRcvSeries==PRA_RCV || this.curRcvSeries==R1080_RCV){/*实体接收机*/
+              this.$router.push("/live4000");
             }
             clearInterval(localStorage.getPushUrl1080);
             this.getPushUrl();
@@ -149,6 +170,10 @@
       }
     },
     activated(){  //生命周期-缓存页面激活
+      console.log("activated")
+      this.curDevSeries = this.$global.getDevSeries(this.ActiveDevice.dev_sn);
+      this.curRcvSeries = this.$global.getRcvSeries(this.ActiveDevice.rcv_sn);
+      console.log("this.curRcvSeries:"+this.curRcvSeries)
       this.userFunction();
       this.getPushUrl();
       this.getDeviceParam();

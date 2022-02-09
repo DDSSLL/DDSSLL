@@ -207,7 +207,9 @@ export default {
         "up":["Total"],
         "down":["Total"],
         "trans":["Total"],
-        "buss":["Total"]
+        "buss":["Total"],
+        "avbr":["Total"],
+        "srt":["Total"],
       },
       charts : {
         "eth0": "chart_eth0",
@@ -339,12 +341,13 @@ export default {
           fontSize: '14',
           fontWeight: 'normal',
           rich: {
-            'totalUp':      {color: colorGV['发送速率'],fontWeight: 'bold',fontSize: '14'},
-            'totalDown':    {color: colorGV['接收速率'],fontWeight: 'bold',fontSize: '14'},
-            'totalAVBR':    {color: colorGV['可变码率'],fontWeight: 'bold',fontSize: '14'},
-            'TotalLossDev': {color: colorGV['传输丢包'],fontWeight: 'bold',fontSize: '14'},
-            'TotalLossRcv': {color: colorGV['业务丢包'],  fontWeight: 'bold',fontSize: '14'},
-            'TotalSRT':     {color: colorGV['SRT拉流'],  fontWeight: 'bold',fontSize: '14'},
+            'totalUp':      {color: colorGV['发送速率'],fontWeight: 'bold',fontSize: '12'},
+            'totalDown':    {color: colorGV['接收速率'],fontWeight: 'bold',fontSize: '12'},
+            'totalAVBR':    {color: colorGV['编码码率'],fontWeight: 'bold',fontSize: '12'},
+            'TotalLossDev': {color: colorGV['传输丢包'],fontWeight: 'bold',fontSize: '12'},
+            'TotalLossRcv': {color: colorGV['业务丢包'],fontWeight: 'bold',fontSize: '12'},
+            'totalSrt':     {color: colorGV['拉流速率'],fontWeight: 'bold',fontSize: '12'},
+            'TotalSRT':     {color: colorGV['SRT拉流'],  fontWeight: 'bold',fontSize: '12'},
 
             'SIM1Up':       {color: colorGV['SIM1↑'],fontWeight: 'bold',fontSize: '14'},
             'SIM1Down':     {color: colorGV['SIM1↓'],fontWeight: 'bold',fontSize: '14'},
@@ -482,6 +485,7 @@ export default {
           this.curDevSeries = this.$global.getDevSeries(this.ActiveDevice.dev_sn);
           if(this.curDevSeries == "1080"){
             this.cardIdArr = this.$global.cardIdArr_1080;
+            this.showDevSrt = false;
           }else{
             this.showDevSrtFun();
             this.cardIdArr = this.$global.cardIdArr_4000;
@@ -639,7 +643,6 @@ export default {
     },
     //获取文件列表
     getDataFile() {
-      console.log("getDataFile")
       var that = this;
       var devSN = this.ActiveDevice.dev_sn;
       if (!devSN || !this.$global.isValidSn(devSN)) {
@@ -666,7 +669,7 @@ export default {
             obj = {};
             obj.value = that.ActiveDevice.dev_sn+"/"+data[i]["fileName"];
             obj.text = data[i]["fileName"] +" / "+ data[i]["fileSize"];
-            arr.push(obj);
+            arr.unshift(obj);
           }
           that.hisFileData = arr;
           that.selectHisData = arr[0]["value"];
@@ -701,171 +704,173 @@ export default {
     //获取某个csv文件里的数据
     getCsvData(filePath, callback) {
       var that = this;
-      document.addEventListener("deviceready", onDeviceReady, false);
-      function onDeviceReady() {
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
-          function (fs) {
-            //that.DStreamer_BUILD = "D:/SYNCOR/Web/1080_4000";
-            let url = that.$axios.defaults.baseURL+'/data/'+that.selectHisData;
-            console.log(url)
-            fs.root.getFile('data.csv', { create: true, exclusive: false },
-              function(fileEntry) {
-                download(fileEntry, url)
-              },
-              function(){
-                console.log("onErrorCreateFile")
-              }
-            )
-          },
-          function(){
-            console.log("onErrorLoadFs")
-          }
-        )
-      }
-      function download(fileEntry, uri) {
-        //console.log("download")
-        var fileTransfer = new FileTransfer();
-        var fileURL = fileEntry.toURL();
-        fileTransfer.download(
-          uri, 
-          fileURL,//window.cordova.file.externalRootDirectory + 'test.apk',//
-          function (fileEntry) {
-            fileEntry.file(function (file) {
-              var reader = new FileReader();
-              reader.onloadend = function() {
-                var fileStr = this.result;
-                that.downloadData = fileStr.split("\r\n");
-                var dataArr = [];
-                var dataObj = {};
-                for(var i=1; i<that.downloadData.length; i++){
-                  dataObj = {};
-                  var arr = that.downloadData[i].split(",");
-                  if(arr.length == 1 && arr[0] == ""){
-                    continue;
-                  }
-                  var timeArr = arr[0].split("-");
-                  dataObj['time'] = timeArr[0]+' '+timeArr[1]; //日期和时间之间用空格
-                  dataObj['send'] = arr[1];
-                  dataObj['rcv'] = arr[2];
-                  dataObj['lost2'] = arr[3];
-                  dataObj['lost'] = arr[4];
-                  if(arr.length > 5){
-                    if(arr[5] == "NO INPUT\r\n" || arr[5] == "\r\n" || arr[5] == "NO INPUT" || arr[5] == ""){
-                      dataObj['VInput'] = 100;
-                    } else{
-                      dataObj['VInput'] = 0;
-                    }
-                  }
-                  if(arr.length > 6){
-                    dataObj['srt'] = arr[6];
-                  }
-                  if(arr.length > 7){
-                    dataObj['avbr'] = arr[7];
-                  } else {
-                    dataObj['avbr'] = 0;
-                  }
-                  if(arr.length > 8){
-                    dataObj['lte1-send'] = arr[8];
-                    dataObj['lte1-recv'] = arr[9];
-                    dataObj['lte1-rtt'] = arr[10];
-                    dataObj['lte1-mode'] = arr[11];
-                    dataObj['lte2-send'] = arr[12];
-                    dataObj['lte2-recv'] = arr[13];
-                    dataObj['lte2-rtt'] = arr[14];
-                    dataObj['lte2-mode'] = arr[15];
-                    dataObj['lte3-send'] = arr[16];
-                    dataObj['lte3-recv'] = arr[17];
-                    dataObj['lte3-rtt'] = arr[18];
-                    dataObj['lte3-mode'] = arr[19];
-                    dataObj['lte4-send'] = arr[20];
-                    dataObj['lte4-recv'] = arr[21];
-                    dataObj['lte4-rtt'] = arr[22];
-                    dataObj['lte4-mode'] = arr[23];
-                    dataObj['lte5-send'] = arr[24];
-                    dataObj['lte5-recv'] = arr[25];
-                    dataObj['lte5-rtt'] = arr[26];
-                    dataObj['lte5-mode'] = arr[27];
-                    dataObj['lte6-send'] = arr[28];
-                    dataObj['lte6-recv'] = arr[29];
-                    dataObj['lte6-rtt'] = arr[30];
-                    dataObj['lte6-mode'] = arr[31];
-                  }else{
-                    dataObj['lte1-send'] = 0;
-                    dataObj['lte1-recv'] = 0;
-                    dataObj['lte1-rtt'] = 0;
-                    dataObj['lte1-mode'] = 0;
-                    dataObj['lte2-send'] = 0;
-                    dataObj['lte2-recv'] = 0;
-                    dataObj['lte2-rtt'] = 0;
-                    dataObj['lte2-mode'] = 0;
-                    dataObj['lte3-send'] = 0;
-                    dataObj['lte3-recv'] = 0;
-                    dataObj['lte3-rtt'] = 0;
-                    dataObj['lte3-mode'] = 0;
-                    dataObj['lte4-send'] = 0;
-                    dataObj['lte4-recv'] = 0;
-                    dataObj['lte4-rtt'] = 0;
-                    dataObj['lte4-mode'] = 0;
-                    dataObj['lte5-send'] = 0;
-                    dataObj['lte5-recv'] = 0;
-                    dataObj['lte5-rtt'] = 0;
-                    dataObj['lte5-mode'] = 0;
-                    dataObj['lte6-send'] = 0;
-                    dataObj['lte6-recv'] = 0;
-                    dataObj['lte6-rtt'] = 0;
-                    dataObj['lte6-mode'] = 0;
-                  }
-                  if(dataObj['send'] != null){
-                    dataArr.push(dataObj) 
-                  }     
-                }
-                if (typeof(callback) == 'function') {
-                  callback(dataArr);
-                }
-              };
-              reader.readAsText(file);
-            }, function (error) {
-              console.log(error)
-            });
-          },
-          function (error) {
-            console.log("download error source " + error.source);
-            console.log("download error target " + error.target);
-            console.log("download error code" + error.code);
+      var debug = false;
+      if(debug){
+        filePath = "../../data/"+filePath;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getCsvData:filePath,
+          }),
+          Api:"getCsvData",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if (typeof(callback) == 'function') {
+              callback(res.data);
+            }
+          }else{
             console.log(error)
-          },
-          null, // or, pass false
-          {
-            //headers: {
-            //    "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
-            //}
           }
-        );
-      }
-      
-      /*this.$axios({
-        method: 'post',
-        url:"/page/index/indexData.php",
-        data:this.$qs.stringify({
-          getCsvData:filePath,
-        }),
-        Api:"getCsvData",
-        AppId:"android",
-        UserId:that.user.id
-      })
-      .then(function (response) {
-        let res = response.data;
-        if(res.res.success){
-          if (typeof(callback) == 'function') {
-            callback(res.data);
-          }
-        }else{
+        })
+        .catch(function (error) {
           console.log(error)
+        })
+      }else{
+        document.addEventListener("deviceready", onDeviceReady, false);
+        function onDeviceReady() {
+          window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
+            function (fs) {
+              //that.DStreamer_BUILD = "D:/SYNCOR/Web/1080_4000";
+              let url = that.$axios.defaults.baseURL+'/data/'+that.selectHisData;
+              fs.root.getFile('data.csv', { create: true, exclusive: false },
+                function(fileEntry) {
+                  download(fileEntry, url)
+                },
+                function(){
+                  console.log("onErrorCreateFile")
+                }
+              )
+            },
+            function(){
+              console.log("onErrorLoadFs")
+            }
+          )
         }
-      })
-      .catch(function (error) {
-        console.log(error)
-      })*/
+        function download(fileEntry, uri) {
+          var fileTransfer = new FileTransfer();
+          var fileURL = fileEntry.toURL();
+          fileTransfer.download(
+            uri, 
+            fileURL,//window.cordova.file.externalRootDirectory + 'test.apk',//
+            function (fileEntry) {
+              fileEntry.file(function (file) {
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                  var fileStr = this.result;
+                  that.downloadData = fileStr.split("\r\n");
+                  var dataArr = [];
+                  var dataObj = {};
+                  for(var i=1; i<that.downloadData.length; i++){
+                    dataObj = {};
+                    var arr = that.downloadData[i].split(",");
+                    if(arr.length == 1 && arr[0] == ""){
+                      continue;
+                    }
+                    var timeArr = arr[0].split("-");
+                    dataObj['time'] = timeArr[0]+' '+timeArr[1]; //日期和时间之间用空格
+                    dataObj['send'] = arr[1];
+                    dataObj['rcv'] = arr[2];
+                    dataObj['lost2'] = arr[3];
+                    dataObj['lost'] = arr[4];
+                    if(arr.length > 5){
+                      if(arr[5] == "NO INPUT\r\n" || arr[5] == "\r\n" || arr[5] == "NO INPUT" || arr[5] == ""){
+                        dataObj['VInput'] = 100;
+                      } else{
+                        dataObj['VInput'] = 0;
+                      }
+                    }
+                    if(arr.length > 6){
+                      dataObj['srt'] = arr[6];
+                    }
+                    if(arr.length > 7){
+                      dataObj['avbr'] = arr[7];
+                    } else {
+                      dataObj['avbr'] = 0;
+                    }
+                    if(arr.length > 8){
+                      dataObj['lte1-send'] = arr[8];
+                      dataObj['lte1-recv'] = arr[9];
+                      dataObj['lte1-rtt'] = arr[10];
+                      dataObj['lte1-mode'] = arr[11];
+                      dataObj['lte2-send'] = arr[12];
+                      dataObj['lte2-recv'] = arr[13];
+                      dataObj['lte2-rtt'] = arr[14];
+                      dataObj['lte2-mode'] = arr[15];
+                      dataObj['lte3-send'] = arr[16];
+                      dataObj['lte3-recv'] = arr[17];
+                      dataObj['lte3-rtt'] = arr[18];
+                      dataObj['lte3-mode'] = arr[19];
+                      dataObj['lte4-send'] = arr[20];
+                      dataObj['lte4-recv'] = arr[21];
+                      dataObj['lte4-rtt'] = arr[22];
+                      dataObj['lte4-mode'] = arr[23];
+                      dataObj['lte5-send'] = arr[24];
+                      dataObj['lte5-recv'] = arr[25];
+                      dataObj['lte5-rtt'] = arr[26];
+                      dataObj['lte5-mode'] = arr[27];
+                      dataObj['lte6-send'] = arr[28];
+                      dataObj['lte6-recv'] = arr[29];
+                      dataObj['lte6-rtt'] = arr[30];
+                      dataObj['lte6-mode'] = arr[31];
+                    }else{
+                      dataObj['lte1-send'] = 0;
+                      dataObj['lte1-recv'] = 0;
+                      dataObj['lte1-rtt'] = 0;
+                      dataObj['lte1-mode'] = 0;
+                      dataObj['lte2-send'] = 0;
+                      dataObj['lte2-recv'] = 0;
+                      dataObj['lte2-rtt'] = 0;
+                      dataObj['lte2-mode'] = 0;
+                      dataObj['lte3-send'] = 0;
+                      dataObj['lte3-recv'] = 0;
+                      dataObj['lte3-rtt'] = 0;
+                      dataObj['lte3-mode'] = 0;
+                      dataObj['lte4-send'] = 0;
+                      dataObj['lte4-recv'] = 0;
+                      dataObj['lte4-rtt'] = 0;
+                      dataObj['lte4-mode'] = 0;
+                      dataObj['lte5-send'] = 0;
+                      dataObj['lte5-recv'] = 0;
+                      dataObj['lte5-rtt'] = 0;
+                      dataObj['lte5-mode'] = 0;
+                      dataObj['lte6-send'] = 0;
+                      dataObj['lte6-recv'] = 0;
+                      dataObj['lte6-rtt'] = 0;
+                      dataObj['lte6-mode'] = 0;
+                    }
+                    if(dataObj['send'] != null){
+                      dataArr.push(dataObj) 
+                    }     
+                  }
+                  if (typeof(callback) == 'function') {
+                    callback(dataArr);
+                  }
+                };
+                reader.readAsText(file);
+              }, function (error) {
+                console.log(error)
+              });
+            },
+            function (error) {
+              console.log("download error source " + error.source);
+              console.log("download error target " + error.target);
+              console.log("download error code" + error.code);
+              console.log(error)
+            },
+            null, // or, pass false
+            {
+              //headers: {
+              //    "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+              //}
+            }
+          );
+        }
+      }
     },
     changeChartType(){
       var hisData = this.hisChartData;
@@ -898,7 +903,7 @@ export default {
         lost2Arr.push(data[i].lost2);
         rcvArr.push(data[i].rcv);
         sendArr.push(data[i].send);
-        timeArr.push(data[i].time);
+        timeArr.push(data[i].time.split(" ")[1]);
         vInputArr.push(data[i].VInput);
         srtArr.push(data[i].srt);
         avbrArr.push(data[i].avbr);
@@ -1024,7 +1029,7 @@ export default {
         },
         data: rcvArr
       }, {
-        name: "可变码率",
+        name: "编码码率",
         type: "line",
         symbolSize: 3,
         symbol: 'circle',
@@ -1033,9 +1038,9 @@ export default {
         yAxisIndex: 0,
         itemStyle: {
           normal: {
-            color: colorGV['可变码率'],
+            color: colorGV['编码码率'],
             lineStyle: that.lineStyle,
-            borderColor: colorGV['可变码率'], //图形的描边颜色。支持的格式同 color
+            borderColor: colorGV['编码码率'], //图形的描边颜色。支持的格式同 color
             borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
             barBorderRadius: 0,
             label: {
@@ -1105,7 +1110,7 @@ export default {
           /*tooltip: {
             show: true
           },*/
-          //data: ['发送速率','接收速率','传输丢包','业务丢包','可变码率'],
+          //data: ['发送速率','接收速率','传输丢包','业务丢包','编码码率'],
           data:[{
             name: '发送速率',
             icon: 'none',
@@ -1123,19 +1128,19 @@ export default {
             icon: 'none',
             textStyle: {color: '#f5222d'}
           },{
-            name: '可变码率',
+            name: '编码码率',
             icon: 'none',
             textStyle: {color: '#73d13d'}
           }],
-          selected:{'发送速率':true,'接收速率':true,'传输丢包':false,'业务丢包':true,'可变码率':true}
+          selected:{'发送速率':true,'接收速率':true,'传输丢包':false,'业务丢包':true,'编码码率':true}
         },
         grid: {
           containLabel: true,
           borderWidth: 0,
           top: 70,
           bottom: 40,
-          left: 10,
-          right: 10,
+          left: 20,
+          right: 5,
           textStyle: { color: "#fff" }
         },
         tooltip: {
@@ -1152,7 +1157,7 @@ export default {
                 str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'%' : '暂无') +'</br>';
               }else if(params[i].seriesName == '业务丢包'){
                 str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'%' : '暂无') +'</br>';
-              }else if(params[i].seriesName == '可变码率'){
+              }else if(params[i].seriesName == '编码码率'){
                 str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
               }
               if(showDevSrt && params[i].seriesName == 'SRT拉流'){
@@ -1629,12 +1634,13 @@ export default {
           "seriesDataDev": [],  //上传总速率
           "seriesDataRcv": [],  //下载总速率
           "seriesAVBR": [],     //AVBR
+          "seriesSrt" : [], //SRT拉流速率
           "seriesVInput": [],   //信号输入
           "TotalSendPktStr": [],//总流量
         };
-        if(that.curDevSeries == "4000"){
+        /*if(that.curDevSeries == "4000"){
           allChartData[curChart]["seriesSrt"] = []; //SRT拉流速率
-        }
+        }*/
         //11个网卡上先都填充0
         for (var i = 0; i < that.cardIdArr.length; i++) {
           //上行速率
@@ -1659,9 +1665,9 @@ export default {
         allChartData[curChart].seriesAVBR = new Array(xSplit).fill(0); //AVBR
         allChartData[curChart].seriesVInput = new Array(xSplit).fill(0); //信号输入
         allChartData[curChart].TotalSendPktStr = '';
-        if(that.curDevSeries == "4000"){
+        //if(that.curDevSeries == "4000"){
           allChartData[curChart].seriesSrt = new Array(xSplit).fill(0); //SRT拉流速率
-        }
+        //}
         localStorage.allChartData = JSON.stringify(allChartData);
       }
       var devSns = keyArr.map(x=> x.split("/")[0]);
@@ -1726,6 +1732,8 @@ export default {
         var dataSrt = "";
         if(that.curDevSeries == "4000"){
           dataSrt = data[key][5] ? data[key][5]["SrtKbps"] : 0; //srt拉流速率
+        }else{
+          dataSrt = data[key][1] ? data[key][1]["SrtKbps"] : 0;
         }
         var curChartDevRcvBoard = "";//当前设备的 devsn/rcvsn/boardid
         for (var i = 0; i < keyArr.length; i++) {
@@ -1876,10 +1884,10 @@ export default {
         seriesAVBR.pop();   
         seriesVInput.unshift(dataVInput);
         seriesVInput.pop();
-        if(this.curDevSeries == "4000" && seriesSrt){
+        //if(this.curDevSeries == "4000" && seriesSrt){
           seriesSrt.unshift(dataSrt);
           seriesSrt.pop();  
-        }
+        //}
 
         if($.isEmptyObject(validSeriesDataUp) && $.isEmptyObject(validSeriesDataDown) &&
           $.isEmptyObject(validSeriesCardLost)){
@@ -1898,10 +1906,9 @@ export default {
         allChartData[curChartDevRcvBoard].seriesAVBR = seriesAVBR;
         allChartData[curChartDevRcvBoard].seriesVInput = seriesVInput;
         allChartData[curChartDevRcvBoard].TotalSendPktStr = TotalPktStr;
-        if(that.curDevSeries == "4000"){
+        //if(that.curDevSeries == "4000"){
           allChartData[curChartDevRcvBoard].seriesSrt = seriesSrt;  
-        }
-        
+        //}
         localStorage.allChartData = JSON.stringify(allChartData);
         if (curChart.split("/")[0] == key) { //当前要显示的放在sessionStorage.cardData中
           if(that.avbrFlag == "false"){
@@ -1948,8 +1955,11 @@ export default {
     //根据配对接收机判断是否显示互动功能
     showDevSrtFun(){
       var rcvSn = this.ActiveDevice.rcv_sn;
-      if(this.$global.getRcvMode(rcvSn.substr(-4)) == 'DV4004R'){
+      var rcvMode = this.$global.getRcvMode(rcvSn.substr(-4));
+      if(rcvMode == 'DV4004R' || rcvMode == 'CM-IR6000T' || rcvMode == 'DV4013R'){
         this.showDevSrt = true;
+      }else{
+        this.showDevSrt = false;
       }
     },
     initChartTotal(cardData) {
@@ -1980,10 +1990,11 @@ export default {
       that.myChartTotal.resize();
       var upShow = that.chartGeneralView.up.map(function(item){if(item==""){return ""};return item+"↑";});
       var downShow = that.chartGeneralView.down.map(function(item){if(item==""){return ""};return item+"↓";});
-      var avbrShow = that.chartGeneralView.avbr.map(function(item){if(item==""){return ""};return item+"可变码率";});
+      var avbrShow = that.chartGeneralView.avbr.map(function(item){if(item==""){return ""};return item+"编码码率";});
       var transShow = that.chartGeneralView.trans.map(function(item){if(item==""){return ""};return item+"传输丢包";});
       var bussShow = that.chartGeneralView.buss.map(function(item){if(item==""){return ""};return item+"业务丢包";});
-      var legendName = upShow.concat(downShow).concat(avbrShow).concat(transShow).concat(bussShow).filter(function (el) {return el !== '';});
+      var srtShow = that.chartGeneralView.srt.map(function(item){if(item==""){return ""};return item+"拉流速率";});
+      var legendName = upShow.concat(downShow).concat(avbrShow).concat(srtShow).concat(transShow).concat(bussShow).filter(function (el) {return el !== '';});
       var dataAll = {};
       var maxDevLoss = 0;
       var maxRcvLoss = 0;
@@ -2039,15 +2050,17 @@ export default {
           }
         }else if(legendName[k].indexOf("业务丢包") != -1){//业务丢包
           dataAll[legendName[k]] = cardData.seriesTotalLoss.map(function(x){return (x/10).toFixed(1)*1});  
-        }else if(legendName[k].indexOf("可变码率") != -1){//可变码率
+        }else if(legendName[k].indexOf("编码码率") != -1){//编码码率
           dataAll[legendName[k]] = cardData.seriesAVBR.map(function(x){return (x/1000).toFixed(3)*1});  
+        }else if(legendName[k].indexOf("拉流速率") != -1){//拉流速率
+          dataAll[legendName[k]] = cardData.seriesSrt.map(function(x){return (x/1000).toFixed(3)*1});  
         }
       }
       dataAll['信号输入'] = cardData.seriesVInput.map(function(x){return (x).toFixed(1)*1});
-      if(this.showDevSrt){
+      /*if(this.showDevSrt){//4000
         dataAll['SRT拉流'] = cardData.seriesSrt.map(function(x){return (x/1000).toFixed(1)*1});
         legendName.push("SRT拉流");
-      }
+      }*/
       var maxDevLoss = 0;
       var maxRcvLoss = 0;
       var maxLoss = 0;
@@ -2113,14 +2126,42 @@ export default {
         },
         data: dataAll['信号输入']
       });
+      /*if(this.showDevSrt){//4000
+        //SRT拉流
+        series.push({
+          name: 'SRT拉流',
+          type: "line",
+          symbolSize: 3,
+          symbol: 'circle',
+          smooth: true,
+          showSymbol: false,
+          yAxisIndex: 2,
+          itemStyle: {
+            normal: {
+              color: colorGV['SRT拉流'],
+              lineStyle: that.lineStyle,
+              borderColor: colorGV['SRT拉流'], //图形的描边颜色。支持的格式同 color
+              borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ]
+              barBorderRadius: 0,
+              label: {
+                show: false
+              },
+              opacity: 0.5
+            }
+          },
+          data: dataAll['SRT拉流']
+        });
+      }*/
       for(var m=0; m<legendName.length; m++){
         var name = "";
         if(legendName[m] == "Total↑"){
           name = "发送速率";
         }else if(legendName[m] == "Total↓"){
           name = "接收速率";
-        }else if(legendName[m] == "Total可变码率"){
-          name = "可变码率";
+        }else if(legendName[m] == "Total编码码率"){
+          name = "编码码率";
+        }else if(legendName[m] == "Total拉流速率"){
+          name = "拉流速率";
         }else if(legendName[m] == "Total传输丢包"){
           name = "传输丢包";
         }else if(legendName[m] == "Total业务丢包"){
@@ -2212,8 +2253,10 @@ export default {
           name = "发送速率";
         }else if(legendName[n] == "Total↓"){
           name = "接收速率";
-        }else if(legendName[n] == "Total可变码率"){
-          name = "可变码率";
+        }else if(legendName[n] == "Total编码码率"){
+          name = "编码码率";
+        }else if(legendName[n] == "Total拉流速率"){
+          name = "拉流速率";
         }else if(legendName[n] == "Total传输丢包"){
           name = "传输丢包";
         }else if(legendName[n] == "Total业务丢包"){
@@ -2228,15 +2271,13 @@ export default {
             title += ['{'+colorObj[name]+'|' + dataAll[legendName[n]][0] + '}%'].join("");
           }
         }
-        if(n==0 || n%(legendName.length-1) != 0){
+        if(legendName.length!=1 && (n==0 || n%(legendName.length-1) != 0)){
           title += "/";
         }
       }
-      /*if(that.curDevSeries == "4000"){
-        //srt拉流
-        if(that.showDevSrt){
-          title += ["SRT拉流 : ", '{'+colorObj['SRT拉流']+'|' + dataAll['SRT拉流'][0] + '}Mbps  '].join("");
-        }
+      //srt拉流
+      /*if(that.showDevSrt){
+        title += ["SRT拉流 : ", '{'+colorObj['SRT拉流']+'|' + dataAll['SRT拉流'][0] + '}Mbps  '].join("");
       }*/
       option.title[1].text = title;
 
@@ -2256,8 +2297,10 @@ export default {
                                 return "发送速率";
                               }else if(x == "Total↓"){
                                 return "接收速率";
-                              }else if(x == "Total可变码率"){
-                                return "可变码率";
+                              }else if(x == "Total编码码率"){
+                                return "编码码率";
+                              }else if(x == "Total拉流速率"){
+                                return "拉流速率";
                               }else if(x == "Total传输丢包"){
                                 return "传输丢包";
                               }else if(x == "Total业务丢包"){
@@ -2266,12 +2309,12 @@ export default {
                                 return x;
                               }
                           });
-      if(that.curDevSeries == "4000"){
+      /*if(that.curDevSeries == "4000"){
         //srt拉流
         if(that.showDevSrt){
           option.legend.data.push("SRT拉流");
         }
-      }
+      }*/
       that.myChartTotal.setOption(option, true);
     },
     initChartCards(cardData){
@@ -2645,7 +2688,55 @@ export default {
         let res = response.data;
         if(res.res.success){
           var data = res.data[0];
-          that.chartGeneralView["up"] = data["up"].split(",").map(function(x){return that.formatCardShow(x)});
+          that.$global.getDeviceParam(function(dataDev){
+            var rcvSn = that.ActiveDevice.rcv_sn;
+            var rcvMode =that.$global.getRcvMode(rcvSn.substr(-4));
+            var act4000 = false;
+            if(rcvMode == 'DV4004R' || rcvMode == 'CM-IR6000T' || rcvMode == 'DV4013R'){
+              act4000 = true;//互动接收机
+            }
+            if(act4000){
+              that.chartGeneralView["up"] = data["up"].split(",").map(function(x){return that.formatCardShow(x)});
+              that.chartGeneralView["down"] = data["down"].split(",").map(function(x){return that.formatCardShow(x)});
+              if(that.avbrFlag){
+                that.chartGeneralView["avbr"] = data["avbr"].split(",").map(function(x){return that.formatCardShow(x)});  
+              }else{
+                that.chartGeneralView["avbr"] = [];
+              }
+              that.chartGeneralView["srt"] = data["srt"].split(",").map(function(x){return that.formatCardShow(x)});  
+              that.chartGeneralView["trans"] = data["lossDev"].split(",").map(function(x){return that.formatCardShow(x)});//传输丢包
+              that.chartGeneralView["buss"] = data["lossRcv"].split(",").map(function(x){return that.formatCardShow(x)});//业务丢包
+            }else if(dataDev['WorkMode'] == 1){//拉流
+              that.chartGeneralView["up"] = [];
+              that.chartGeneralView["down"] = [];
+              that.chartGeneralView["avbr"] = [];
+              that.chartGeneralView["trans"] = [];
+              that.chartGeneralView["buss"] = [];
+              data["srt"] = 'Total';//拉流默认显示srt
+              that.chartGeneralView["srt"] = data["srt"].split(",").map(function(x){return that.formatCardShow(x)});  
+            }else{
+              that.chartGeneralView["up"] = data["up"].split(",").map(function(x){return that.formatCardShow(x)});
+              that.chartGeneralView["down"] = data["down"].split(",").map(function(x){return that.formatCardShow(x)});
+              if(that.avbrFlag){
+                that.chartGeneralView["avbr"] = data["avbr"].split(",").map(function(x){return that.formatCardShow(x)});  
+              }else{
+                that.chartGeneralView["avbr"] = [];
+              }
+              that.chartGeneralView["srt"] = [];
+              that.chartGeneralView["trans"] = data["lossDev"].split(",").map(function(x){return that.formatCardShow(x)});//传输丢包
+              that.chartGeneralView["buss"] = data["lossRcv"].split(",").map(function(x){return that.formatCardShow(x)});//业务丢包
+/*
+              that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
+              that.show.avbrShowFlg = that.avbrFlag;
+              that.show.upShowFlg = true;
+              that.show.downShowFlg = true;
+              that.show.srtShowFlg = false;
+              that.show.transShowFlg = true;
+              that.show.bussShowFlg = true;*/
+            }
+          });
+
+          /*that.chartGeneralView["up"] = data["up"].split(",").map(function(x){return that.formatCardShow(x)});
           that.chartGeneralView["down"] = data["down"].split(",").map(function(x){return that.formatCardShow(x)});
           that.chartGeneralView["trans"] = data["lossDev"].split(",").map(function(x){return that.formatCardShow(x)});//传输丢包
           that.chartGeneralView["buss"] = data["lossRcv"].split(",").map(function(x){return that.formatCardShow(x)});//业务丢包
@@ -2653,7 +2744,7 @@ export default {
             that.chartGeneralView["avbr"] = data["avbr"].split(",").map(function(x){return that.formatCardShow(x)});  
           }else{
             that.chartGeneralView["avbr"] = [];
-          }
+          }*/
           that.getCardChartShowContent(devSn,cardData)
         }else{
           console.log(res)

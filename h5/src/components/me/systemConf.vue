@@ -497,7 +497,7 @@
         vertical-align: text-top;
         margin-top: 2px;
     }
-    .cellItem{overflow:hidden}
+    .cellItem{overflow:hidden;line-height:.2rem}
     .cellItem .cellName{float: left;text-align: left;}
     .cellItem .cellNameR{float: right;text-align: right;}
     .cellItem .cellAddr{color:#888;font-size:13px;}

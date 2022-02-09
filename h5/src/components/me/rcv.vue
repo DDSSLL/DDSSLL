@@ -28,7 +28,7 @@
               <mt-cell-swipe
                 :right="[ 
                 {content: '板卡',handler:() => showBoardInfo(item)},
-                {content: '编辑',style:{display:user.userGroup==ADMIN?'':'none'}, handler:() => editReceiver(item)},
+                {content: '编辑',style:{}, handler:() => editReceiver(item)},
                 {content: '删除',style:{display:rcvDelShow?'':'none'}, handler:() => deleteReceiver(item)}
                 ]">
                 <div class="cellItem">
@@ -230,7 +230,7 @@
                 <div class="GroupItemField">
                   <div class="GroupItemTitle">编码开关</div>
                   <div class="GroupItemValue">
-                    <mt-switch v-model="curBoard.start" @change="">
+                    <mt-switch v-model="curBoard.start">
                     </mt-switch>
                   </div>
                 </div>
@@ -323,9 +323,9 @@
                 <div class="GroupItemField">
                   <div class="GroupItemTitle">视频比特率</div>
                   <div class="GroupItemValue">
-                    <input type="text" class="ItemIpt" v-model.number="curBoard.Encvbr">
-                    <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
-                      Mbps(0.5-20Mbps)
+                    <input type="text" class="ItemInput ItemInputBlack" v-model.number="curBoard.Encvbr" style="width:30%">
+                    <p style="font-size: 12px;color: #eee;text-align: left;margin-top:5px;display:inline-block">
+                       Mbps ( 0.5 - 20Mbps )
                     </p>
                   </div>
                 </div>
@@ -370,18 +370,18 @@
                 <div class="GroupItemField">
                   <div class="GroupItemTitle">延时</div>
                   <div class="GroupItemValue">
-                    <input type="text" class="ItemIpt" v-model.number="curBoard.transDelay">
-                    <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">
-                      s(0.01-20s)
+                    <input type="text" class="ItemInput ItemInputBlack" v-model.number="curBoard.transDelay"  style="width:30%">
+                    <p style="font-size: 12px;color: #eee;text-align: left;margin-top:5px;display:inline-block">
+                       s ( 0.01 - 20s )
                     </p>
                   </div>
                 </div>
               </div>
-              <div class="GroupItem"><!-- 保存 -->
+              <div class="GroupItem"><!-- 确定 -->
                 <div class="GroupItemField">
                   <div class="GroupItemTitle"> </div>
                   <div class="GroupItemValue" style="float:right">
-                    <button @click.prevent="saveSRT" style="border:1px solid #666;">保存</button>
+                    <button @click.prevent="saveEncodeParam" style="border:1px solid #666;">确定</button>
                   </div>
                 </div>
               </div>
@@ -401,20 +401,20 @@
           <div class="fGrp">
             <div class="tl">名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.rcvName" required title="长度1-15,中文,字母,数字,+,-,@,(),空格">
+              <input type="text" class="ItemInput" v-model="options.rcvName" required title="长度1-15,中文,字母,数字,+,-,@,(),空格" :disabled="disable.rcvName">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">长度1-15,仅支持中文,字母,数字,+,-,@,()和空格</p>
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">序列号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.rcvSn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="receiverConfigType == 'edit'">
+              <input type="text" class="ItemInput" v-model="options.rcvSn" required pattern="[A-z0-9]{10}" title="10位数字或字母序列号" :disabled="disable.rcvSn">
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">用户组</div>
             <div class="vl">
-              <select class="ItemSelect" v-model="options.prefix" @change="changePrefixFun">
+              <select class="ItemSelect" v-model="options.prefix" @change="changePrefixFun" :disabled="disable.prefix">
                 <template v-for="(item,i) in receiverConfigPrefixOptions">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
@@ -424,7 +424,7 @@
           <div class="fGrp">
             <div class="tl">用户昵称</div>
             <div class="vl">
-              <select class="ItemSelect" v-model="options.rcvUser">
+              <select class="ItemSelect" v-model="options.rcvUser" :disabled="disable.rcvUser">
                 <template v-for="(item,i) in receiverConfigUserOptions">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
@@ -686,7 +686,7 @@
               </div>
             </div>
           </div>
-          <div class="fGrp" style="text-align: right">
+          <div class="fGrp" style="text-align: right" v-if="show.editBtn">
             <button @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
             <button type="submit">确定</button>
           </div>
@@ -836,6 +836,16 @@
           EncUdpPortStart:"",
           EncUdpPortStop:"",
         },
+        disable:{
+          rcvName : false,
+          rcvSn : false,
+          prefix : false,
+          rcvUser : false,
+        },
+        show:{
+          editBtn:true,
+        },
+        srtInterval:"",
       }
     },
     computed: {
@@ -1020,6 +1030,163 @@
           that.changeBoardNum();
         }
       },
+      changeBoardNum(){
+        var selectBoard = this.curBoard.BoardNum;
+        var param = this.boardEncodeParamList[selectBoard];
+        this.curBoard.start = (param['start'] == 1 ? true : false);
+        this.curBoard.transmode = param["transmode"];//工作模式
+        this.changeTransMode();
+        this.curBoard.EncInput = param["EncInput"];//视频输入
+        this.curBoard.EncVCodec = param["EncVCodec"];//视频编码
+        this.curBoard.EncFormat = param["EncFormat"];//分辨率
+        this.curBoard.Encvbr = (param["Encvbr"]/1000).toFixed(1);//视频比特率
+        this.curBoard.EncACodec = param["EncACodec"];//音频编码
+        this.curBoard.EncAChs = param["EncAChs"];//音频通道
+        this.curBoard.EncAbr = param["EncAbr"];//音频比特率
+        this.curBoard.transDelay = (param["transDelay"]/1000).toFixed(2);//延时
+      },
+      changeTransMode(){
+        var that = this;
+        var param = this.boardEncodeParamList[this.curBoard.BoardNum];
+        if(this.curBoard.transmode == "SRT SEND"){
+          this.sendSRT = true;
+          this.serverSRT = false;
+          this.curBoard.srt_send_pushUrl = param['srt_send_pushUrl'];//SRT推流地址
+          this.curBoard.srt_send_pullUrl = param['srt_send_pullUrl'];//SRT拉流地址
+          clearInterval(this.srtInterval);
+        }else if(this.curBoard.transmode == "SRT SERVER"){
+          this.sendSRT = false;
+          this.serverSRT = true;
+          //定时轮询取值
+          this.srtInterval = setInterval(function(){
+            that.getSeverSrt(that.curBoard.rcvSn, that.curBoard.BoardNum);
+          },1000)
+        }else{
+          this.sendSRT = false;
+          this.serverSRT = false;
+          clearInterval(this.srtInterval);
+        }
+      },
+      getSeverSrt(){
+        var that= this;
+        that.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:that.$qs.stringify({
+            getSeverSrt: true,
+            rcvSn: that.curBoard.rcvSn,
+            BoardNum: that.curBoard.BoardNum,
+          }),
+          Api:"getSeverSrt",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+             var data = res.data[0]
+            that.curBoard.srt_pushUrl = data['srt_pushUrl'];
+            that.curBoard.srt_pullUrl = data['srt_pullUrl'];
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      saveEncodeParam(){
+        var that = this;
+        var rcvSn = this.curBoard.rcvSn;
+        var BoardNum = this.curBoard.BoardNum;
+        var start = this.curBoard.start?1:0;;
+        var transmode = this.curBoard.transmode;
+        var EncInput = this.curBoard.EncInput;
+        var EncVCodec = this.curBoard.EncVCodec;
+        var EncFormat = this.curBoard.EncFormat;
+        var Encvbr = this.curBoard.Encvbr*1000;
+        var EncACodec = this.curBoard.EncACodec;
+        var EncAChs = this.curBoard.EncAChs;
+        var EncAbr = this.curBoard.EncAbr;
+        var transDelay = this.curBoard.transDelay*1000;
+        var srt_pushUrl = this.curBoard.srt_send_pushUrl;
+        var srt_pullUrl = this.curBoard.srt_send_pullUrl;
+        var srt_send_pushUrl = this.curBoard.srt_pushUrl;
+        var srt_send_pullUrl = this.curBoard.srt_pullUrl;
+          
+        if(typeof Encvbr === 'number' && !isNaN(Encvbr)){
+          if(Encvbr <500 || Encvbr> 20000){
+            that.$toast({
+              message: "请按要求输入视频比特率",
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
+        }else{
+          that.$toast({
+            message: "请按要求输入视频比特率",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if(typeof transDelay === 'number' && !isNaN(transDelay)){
+          if(transDelay <10 || transDelay> 20000){
+            that.$toast({
+              message: "请按要求输入延时",
+              position: 'middle',
+              duration: 2000
+            });
+            return;
+          }
+        }else{
+          that.$toast({
+            message: "请按要求输入延时",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        that.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:that.$qs.stringify({
+            setEncodeParam: true,
+            rcvSn: rcvSn,
+            BoardNum: BoardNum,
+            start: start,
+            transmode: transmode,
+            EncInput: EncInput?EncInput:"",
+            EncVCodec: EncVCodec?EncVCodec:"",
+            EncFormat: EncFormat?EncFormat:"",
+            Encvbr: Encvbr?Encvbr:"",
+            EncACodec: EncACodec?EncACodec:"",
+            EncAChs: EncAChs?EncAChs:"",
+            EncAbr: EncAbr?EncAbr:"",
+            transDelay: transDelay?transDelay:"",
+            srt_pushUrl: srt_pushUrl?srt_pushUrl:"",
+            srt_pullUrl: srt_pullUrl?srt_pullUrl:"",
+            srt_send_pushUrl: srt_send_pushUrl?srt_send_pushUrl:"",
+            srt_send_pullUrl: srt_send_pullUrl?srt_send_pullUrl:"",
+          }),
+          Api:"setEncodeParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.$toast({
+              message: "参数修改成功",
+              position: 'middle',
+              duration: 2000
+            });
+            clearInterval(that.srtInterval);
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
       searchRcvByFilter(){
         var that = this;
         var receiverList = that.receiverList;
@@ -1111,6 +1278,13 @@
             var data = res.data;
             var color = '#ffffff';
             var str = '无';
+            for(var i=0; i<data.length; i++){
+              if(data[i]["rcv_sn"] == '1001092141' 
+                || data[i]["rcv_sn"] == '1001242141' 
+                || data[i]["rcv_sn"] == '1001252141'){
+                data[i]["dev_model"] == 'DV4000T';
+              }
+            }
             var mapArr = {"直播":1,"在线":2,"离线":3};
             that.receiverList = data.sort(function(a, b){
               return (mapArr[a.online] - mapArr[b.online])
@@ -1198,7 +1372,19 @@
           that.showDecBoard(vpnData);
           that.showEncBoard(vpnData);
         })
-        if(item.online == "在线"){//在线才可以进行IP设置
+        if(item.online == "离线"){//离线，所有权限用户：ip设置标题可见不可点
+          this.ipConfigSetDis = false;
+          this.ipSettingShow = false;
+        }else if(item.online == "直播" || (item.online == "在线" && this.user.userGroup == NORMAL)){//所有权限的用户在直播状态或普通用户的在线状态 ip设置参数不能修改，但可见
+          this.ipConfigSetDis = true;
+          this.ipConfigDis = true;
+          this.ipConfigBtnShow = false;
+        }else{//在线才可以进行IP设置
+          this.ipConfigSetDis = true;
+          this.ipConfigDis = false;
+          this.ipConfigBtnShow = true;
+        }
+        /*if(item.online == "在线"){//在线才可以进行IP设置
           this.ipConfigSetDis = true;
           this.ipConfigDis = false;
           this.ipConfigBtnShow = true;
@@ -1209,6 +1395,30 @@
         }else{//离线 ip设置标题可见不可点
           this.ipConfigSetDis = false;
           this.ipSettingShow = false;
+        }*/
+        var hasRights = that.$global.judgeUserHasRcvRights(item.rcv_sn, that.receiverShowList);
+        if (!hasRights) {
+          that.disable.rcvName = true;
+        }
+        //$("#rcv_sn").val(row.rcv_sn);
+        that.disable.rcvSn = true;
+        //$("#edit_rcv_name").val(row.rcv_name + "_" + row.rcv_sn);
+        //普通用户只能看不能编辑(高级用户可编辑名称，管理员可编辑名称和选择用户、用户组)
+        if(that.user.userGroup == ADMIN){//管理员组编辑接收机时，可进行用户组，用户切换操作
+          that.disable.rcvName = false;
+          that.disable.prefix = false;
+          that.disable.rcvUser = false;
+          that.show.editBtn = true;
+        }else if(that.user.userGroup == ADVANCE){//高级用户组编辑接收机时，只可编辑名称，用户组，用户只显示不可操作
+          that.disable.rcvName = false;
+          that.disable.prefix = true;
+          that.disable.rcvUser = true;
+          that.show.editBtn = true;
+        }else if(that.user.userGroup == NORMAL){//高级用户组不可编辑接收机，只可显示
+          that.disable.rcvName = true;
+          that.disable.prefix = true;
+          that.disable.rcvUser = true;
+          that.show.editBtn = false;
         }
       },
       //查询实体接收机对应的VPN参数
@@ -1868,6 +2078,7 @@
         this.options.rcv_online = "离线";
         this.options.rcv_autoUpgrade = "0";
         this.ipConfigShow = false;
+        this.ipSettingShow = false;
         this.getDevPrefixList();
         this.clearRcvPopup();
       },
@@ -1905,6 +2116,11 @@
       clearRcvPopup(){
         this.options.rcvName = "";
         this.options.rcvSn = "";
+        this.disable.rcvName = false;
+        this.disable.rcvSn = false;
+        this.disable.prefix = false;
+        this.disable.rcvUser = false;
+        this.show.editBtn = true;
         //升级
         this.noNewVer = true;
         this.rollbackDiv = false;
@@ -2204,6 +2420,11 @@
     font-size: .12rem;
     background-color: #FFFFFF;
     color:#000;
+  }
+  .ItemInputBlack{
+    background-color:#000;
+    color:#fff;
+    border:1px solid #4b5056;
   }
   .addBtn{
     float: right;

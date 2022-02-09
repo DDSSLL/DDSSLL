@@ -35,12 +35,24 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem"><!-- 录制开关 -->
+          <div class="GroupItem" v-if="options.WorkMode != '拉流'"><!-- 录制开关、拉流模式录制不能使用 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">录制开关</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.record" @change="$global.setDeviceParam('record',options.record?'1':'0')" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.record" @change="changeRecord" :disabled="dis.record">
                 </mt-switch>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="options.WorkMode != '拉流'"><!-- 录制存储 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">录制存储</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.StorageDev" @change="$global.setDeviceParam('StorageDev', options.StorageDev)"  :disabled="dis.StorageDev">
+                  <template v-for="item in OPTIONS_STORAGE_DEV_1080">
+                    <option :value="item.value">{{ item.text }}</option>
+                  </template>
+                </select>
               </div>
             </div>
           </div>
@@ -48,7 +60,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">重传开关</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.ResendMode" @change="$global.setDeviceParam('ResendMode',options.ResendMode?'1':'0')" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.ResendMode" @change="$global.setDeviceParam('ResendMode',options.ResendMode?'1':'0')" :disabled="dis.ResendMode">
                 </mt-switch>
               </div>
             </div>
@@ -57,16 +69,16 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">纠错开关</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.OpenfecMode" @change="$global.setDeviceParam('OpenfecMode',options.OpenfecMode?'1':'0')" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.OpenfecMode" @change="changeOpenfecMode" :disabled="dis.OpenfecMode">
                 </mt-switch>
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="user.id==SUPER && options.OpenfecMode"><!-- 纠错能力 -->
+          <div class="GroupItem" v-if="show.OpenfecLevel"><!-- 纠错能力 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">纠错能力</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.OpenfecLevel" @change="$global.setDeviceParam('OpenfecLevel', options.OpenfecLevel)"  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.OpenfecLevel" @change="$global.setDeviceParam('OpenfecLevel', options.OpenfecLevel)"  :disabled="dis.OpenfecLevel">
                   <template v-for="item in OPTIONS_FEC_LEVEL">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -78,7 +90,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">ETH0 IP</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options['Eth0Type']" @change="changeEth0"  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options['Eth0Type']" @change="changeEth0"  :disabled="dis.Eth0Type">
                   <template v-for="item in OPTIONS_ETH0_TYPE">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -90,7 +102,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">WiFi/热点</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.WiFiSwitch" @change="$global.setDeviceParam('WiFiSwitch', options['WiFiSwitch']?1:0)" :disabled="pageLock||(options.dev_push_enable==1)?true:false">
+                <mt-switch v-model="options.WiFiSwitch" @change="$global.setDeviceParam('WiFiSwitch', options['WiFiSwitch']?1:0)" :disabled="dis.WiFiSwitch">
                 </mt-switch>
               </div>
             </div>
@@ -99,7 +111,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">显示别名</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.DevAliasSwitch" @change="$global.setDeviceParam('DevAliasSwitch',options.DevAliasSwitch?'1':'0')" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.DevAliasSwitch" @change="$global.setDeviceParam('DevAliasSwitch',options.DevAliasSwitch?'1':'0')" :disabled="dis.DevAliasSwitch">
                 </mt-switch>
               </div>
             </div>
@@ -108,7 +120,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">别名</div>
               <div class="GroupItemValue">
-                <input class="ItemInput" v-model="options.DevAlias" type="text" @change="changeAliasName" pattern="^[A-z0-9\u4e00-\u9fa5+-@()（） ]{1,10}$" :disabled="!pageLock?false:true">
+                <input class="ItemInput" v-model="options.DevAlias" type="text" @change="changeAliasName" pattern="^[A-z0-9\u4e00-\u9fa5+-@()（） ]{1,10}$" :disabled="dis.DevAlias">
               </div>
             </div>
           </div>    
@@ -127,7 +139,7 @@
               <div class="GroupItemField">
                 <div class="GroupItemTitle">SEI</div>
                 <div class="GroupItemValue">
-                  <mt-switch v-model="options.SEI" @change="$global.setDeviceParam('SEI',options.SEI?'1':'0')" :disabled="!pageLock?false:true">
+                  <mt-switch v-model="options.SEI" @change="$global.setDeviceParam('SEI',options.SEI?'1':'0')" :disabled="dis.SEI">
                   </mt-switch>
                 </div>
               </div>
@@ -137,7 +149,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">视频输入</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.video_input" @change="changeVideoInput"  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.video_input" @change="changeVideoInput"  :disabled="dis.video_input">
                   <template v-for="item in OPTIONS_VIDEOINPUT">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -149,7 +161,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">音频输入</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.audio_input" @change="$global.setDeviceParam('audio_input',options.audio_input)"  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.audio_input" @change="$global.setDeviceParam('audio_input',options.audio_input)"  :disabled="dis.audio_input">
                   <template v-for="item in OPTIONS_AUDIOINPUT">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -161,7 +173,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">视频编码</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.video_encode" @change="changeVideoEncode" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.video_encode" @change="changeVideoEncode" :disabled="dis.video_encode">
                   <template v-for="item in OPTIONS_VIDEOENCODE">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -173,7 +185,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">音频编码</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.AudioEnc" @change="$global.setDeviceParam('AudioEnc',options.AudioEnc)" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.AudioEnc" @change="$global.setDeviceParam('AudioEnc',options.AudioEnc)" :disabled="dis.AudioEnc">
                   <template v-for="item in OPTIONS_AUDIO_ENCODE">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -185,7 +197,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">音频比特率</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.AudioBitrate" @change="$global.setDeviceParam('AudioBitrate',options.AudioBitrate)" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.AudioBitrate" @change="$global.setDeviceParam('AudioBitrate',options.AudioBitrate)" :disabled="dis.AudioBitrate">
                   <template v-for="item in OPTIONS_AUDIO_BR">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -197,7 +209,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">码率控制</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.bitrate_mode" @change="changeBitrateMode" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.bitrate_mode" @change="changeBitrateMode" :disabled="dis.bitrate_mode">
                   <template v-for="item in OPTIONS_BITRATEMODE">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -210,7 +222,7 @@
               <div class="GroupItemField">
                 <div class="GroupItemTitle">HDR设置</div>
                 <div class="GroupItemValue">
-                  <select class="ItemSelect" v-model="options.hdr" @change="changeDevParam('hdr')" :disabled="!pageLock?false:true">
+                  <select class="ItemSelect" v-model="options.hdr" @change="changeDevParam('hdr')" :disabled="dis.hdr">
                     <template v-for="item in OPTIONS_HDR">
                       <option :value="item.value">{{ item.text }}</option>
                     </template>
@@ -222,7 +234,7 @@
               <div class="GroupItemField">
                 <div class="GroupItemTitle">时延模式</div>
                 <div class="GroupItemValue">
-                  <select class="ItemSelect" v-model="options.latency" @change="changeLatency" :disabled="!pageLock?false:true">
+                  <select class="ItemSelect" v-model="options.latency" @change="changeLatency" :disabled="dis.latency">
                     <template v-for="item in OPTIONS_LATENCY">
                       <option :value="item.value">{{ item.text }}</option>
                     </template>
@@ -235,7 +247,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">编码分辨率</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="$global.setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="$global.setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="dis.HdmiTransFormat">
                   <template v-for="item in OPTIONS_HDMI_FORMAT">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -298,7 +310,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="user.userGroup == ADMIN"><!-- 按钮 -->
+          <div class="GroupItem" v-if="user.userGroup != NORMAL"><!-- 按钮 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle"></div>
               <div class="GroupItemValue" style="float:right">
@@ -310,26 +322,119 @@
         </div>
       </transition>
     </div>
-    <div class="Group" v-if="dev4000Show"><!-- 直播地址 -->
+    <div class="Group" v-if="show.act4000"><!-- 4000的互动 -->
+      <div class="GroupTitle" @click="show.act4000Show=!show.act4000Show">
+        互动
+        <i class="titleIcon fa" :class="[show.act4000Show == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+      </div>
+      <transition name="slide-fade">
+        <div v-show="show.act4000Show">
+          <div class="GroupItem"><!-- 互动模式 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">互动模式</div>
+              <div class="GroupItemValue">
+                <mt-switch v-model="options.InteractiveMode" @change="changeInteractiveMode" :disabled="!pageLock?false:true">
+                </mt-switch>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 互动开关 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">互动开关</div>
+              <div class="GroupItemValue">
+                <mt-switch v-model="options.SrtSwitch" @change="changeSrtSwitch" :disabled="!pageLock?false:true">
+                </mt-switch>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 切换 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">切换</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.SrtAudioIdx" @change="changeSrtAudioIdx" :disabled="!pageLock?false:true">
+                  <template v-for="item in OPTIONS_SRT_AUDIO_SWITCH_4000">
+                    <option :value="item.value">{{ item.text }}</option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 全屏 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">全屏</div>
+              <div class="GroupItemValue">
+                <mt-switch v-model="options.SrtFullSwitch" @change="changeSrtFullSwitch" :disabled="!pageLock?false:true">
+                </mt-switch>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 传输通道 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">传输通道</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.SrtTransIf" @change="$global.setDeviceParam('SrtTransIf',options.SrtTransIf)"  :disabled="!pageLock?false:true">
+                  <template v-for="item in OPTIONS_SRT_TRANSPORT_PARAMS">
+                    <option :value="item.value">{{ item.text }}</option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 音频模式 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">音频模式</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.AudioMode" @change="changeAudioMode" :disabled="!pageLock?false:true">
+                  <template v-for="item in OPTIONS_SRT_AUDIO_MODE_SWITCH_4000">
+                    <option :value="item.value">{{ item.text }}</option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </div>
+    <div class="Group" v-if="dev4000Show"><!-- 4000推流地址 -->
       <div class="GroupTitle" @click="liveUrlShow=!liveUrlShow">
-        直播地址
+        推流地址
         <i class="titleIcon fa" :class="[liveUrlShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
       </div>
       <transition name="slide-fade">
         <div v-show="liveUrlShow">
-          <!-- <div class="GroupItem">
-            <div class="GroupItemField">
-              <div class="GroupItemTitle">推流地址</div>
-              <div style="display:inline-block;line-height:.3rem;" v-if="showAddUrl">
-                <i class="titleIcon fa fa-plus fa-large" @click="clickAddUrl"></i>
-              </div>
-            </div>
-          </div> -->
           <div class="addressGroup" style="padding:0">
             <PushUrl  v-bind:lockState="pageLock" v-bind:workMode="workMode"></PushUrl><!-- @childFn="parentFn" -->
           </div>      
         </div>
       </transition>
+    </div>
+    <div class="Group" v-if="dev1080Show"><!-- 1080 -->
+      <div v-if="options.WorkMode=='拉流'"><!-- 拉流地址 -->
+        <div class="GroupTitle" @click="pullUrlShow=!pullUrlShow">
+          拉流地址
+          <i class="titleIcon fa" :class="[pullUrlShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+        </div>
+        <transition name="slide-fade">
+          <div v-show="pullUrlShow">
+            <div class="addressGroup" style="padding:0">
+              <PullUrl v-bind:lockState="pageLock" :workMode="'拉流'" v-bind:transMode="PushTsType"></PullUrl>
+            </div>      
+          </div>
+        </transition>
+      </div>
+      <div v-else-if="options.WorkMode=='推流'"><!-- 推流地址-->
+        <div class="GroupTitle" @click="pushUrlShow=!pushUrlShow">
+          推流地址
+          <i class="titleIcon fa" :class="[pushUrlShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+        </div>
+        <transition name="slide-fade">
+          <div v-show="pushUrlShow">
+            <div class="addressGroup" style="padding:0">
+              <PushUrl v-bind:lockState="pageLock" :workMode="'推流'" v-bind:transMode="PushTsType"></PushUrl>
+            </div>      
+          </div>
+        </transition>
+      </div>
     </div>
     <div class="Group"  v-if="this.user.id==this.SUPER"><!-- 日志记录 -->
       <div class="GroupTitle"  @click="logShow=!logShow">
@@ -353,6 +458,125 @@
         </div>
       </transition>
     </div>
+    <div class="Group" v-if="dev4000Show&&devFileShow"><!-- 文件 -->
+      <div class="GroupTitle" @click="clickFileBtn">
+        {{options.fileTitle}}
+        <i class="titleIcon fa" :class="[fileShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+      </div>
+      <transition name="slide-fade">
+        <div v-show="fileShow">
+          <div class="GroupItem"><!-- 回传开关 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">回传</div>
+              <div class="GroupItemValue">
+                <mt-switch v-model="options.OffLinePushEnable" @change="changeBackEnable" :disabled="!pageLock?false:true">
+                </mt-switch>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem">
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">回传方式</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.back" @change="changeBackSel"  :disabled="!pageLock?false:true">
+                  <template v-for="item in OPTIONS_BACK">
+                    <option :value="item.value">{{ item.text }}</option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="show.recordIp">
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">选择录机</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.recordIp" @change="changeBackSel"  :disabled="!pageLock?false:true">
+                  <template v-for="item in OPTIONS_RECORD_IP">
+                    <option :value="item.value">{{ item.text }}</option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem">
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">文件列表</div>
+              <i class="titleIcon addBtn fa fa-refresh" @click.stop="clickFileRefreshIcon" style="float:right" v-if="show.refreshFileList"></i>
+              <!-- <div class="GroupItemValue" @click="changeFileShow">
+                <i class="titleIcon fa chevronStyle fa-chevron-right" style="height:.3rem; line-height:.3rem"></i>
+              </div> -->
+            </div>
+            <div class="GroupItemField" style="color:#fff">
+              <template v-for="(item,i) in fileList">
+                <div class="cellItem" style="font-size:.16rem;padding:5px 0px;">
+                  <input :name="item.fileName" type="checkbox" :disabled="item.FileTotalStatus == 1?true:false" v-model="item.fileSel == '1'?true:false" />
+                  <span class="cellName cellLabel">{{item.fileName}}</span>
+                  <span class="cellName cellLabel" style="float: right;">{{item.fileSize+"  "+(item.fileSel=='1'?item.fileProgress+"%":"")}}</span>
+                </div>
+              </template>
+            </div>
+          </div>
+          <div class="GroupItem">
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">录制中的文件</div>
+              <!-- <div class="GroupItemValue" @click="changeRecordingFileShow">
+                <i class="titleIcon fa chevronStyle fa-chevron-right" style="height:.3rem; line-height:.3rem"></i>
+              </div> -->
+            </div>
+            <div class="GroupItemField" style="color:#fff">
+              <template v-for="(item,i) in recordFileList">
+                <div class="cellItem" style="font-size:.16rem;padding:5px 0px;">
+                  <span class="cellName cellLabel">{{item.RecordName}}</span>
+                  <span class="cellName cellLabel" style="float: right;">{{item.RecordSize}}</span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </div>
+    <!-- <mt-popup v-model="show.fileListPop" position="right" popup-transition="popup-slide" class="wholePagePop">
+      <div class="GroupItem" style="height:100%">
+        <div class="popTitle">
+          <div class="back">
+            <div @click="show.fileListPop=false" class="popTitleBack">
+              <i class="fa fa-chevron-left chevronWidth chevronColor" aria-hidden="true"></i>
+              <span style="color:#fff">文件列表</span>
+            </div>            
+            <i class="titleIcon addBtn fa fa-refresh" @click.stop="clickFileRefreshIcon" style="float:right" v-if="show.refreshFileList"></i>
+          </div>
+        </div>
+        <div class="popContentStyle">
+          <template v-for="(item,i) in fileList">
+            <div class="cellItem" style="font-size:.16rem;padding:5px 0px;">
+              <input :name="item.fileName" type="checkbox" value="" :disabled="item.FileTotalStatus == 1?true:false" :checked="item.fileSel == '1'?true:false" />
+              <span class="cellName cellLabel">{{item.fileName}}</span>
+              <span class="cellName cellLabel" style="float: right;">{{item.fileSize+"/"+item.fileProgress+"%"}}</span>
+            </div>
+          </template>
+        </div>
+      </div>
+    </mt-popup> -->
+    <!-- <mt-popup v-model="show.recordingFileListPop" position="right" popup-transition="popup-slide" class="wholePagePop">
+      <div class="GroupItem" style="height:100%">
+        <div class="popTitle">
+          <div class="back">
+            <div @click="hideRecordFilePop" class="popTitleBack">
+              <i class="fa fa-chevron-left chevronWidth chevronColor" aria-hidden="true"></i>
+              <span style="color:#fff">录制中的文件</span>
+            </div>            
+          </div>
+        </div>
+        <div class="popContentStyle">
+          <template v-for="(item,i) in recordFileList">
+            <div class="cellItem" style="font-size:.16rem;padding:5px 0px;">
+              <span class="cellName cellLabel">{{item.RecordName}}</span>
+              <span class="cellName cellLabel" style="float: right;">{{item.RecordSize}}</span>
+            </div>
+          </template>
+        </div>
+      </div>
+    </mt-popup> -->
   </div>
 </template>
 
@@ -360,6 +584,7 @@
   import { mapState, mapMutations } from 'vuex';
   import { SET_USER,SET_NAV_STATUS } from '../../store/mutation-types';
   import PushUrl from '../basic/PushUrl';
+  import PullUrl from '../basic/PushUrl';
   import Device from '../basic/Device';
   import $ from 'jquery';
   export default {
@@ -367,15 +592,24 @@
     data(){
       return{
         ADMIN:ADMIN,
+        NORMAL:NORMAL,
+        VIR_RCV:VIR_RCV,
         workMode:"推流",
+        //pullWorkMode:"拉流",
+        WorkMode:"",
+        PushTsType:"",
         curDevSeries:"",
         curRcvSeries:"",
         dev1080Show:false,
         dev4000Show:false,
+        devFileShow:false,
         transConfigShow:true,
         inputEncodeShow:false,
         matchConfigShow:false,
         liveUrlShow:false,
+        pullUrlShow:false,//拉流地址
+        pushUrlShow:false,//拉流地址
+        fileShow:false,
         showAddUrl:false,
         logShow:false,
         pageLock:false,
@@ -410,8 +644,18 @@
         OPTIONS_NETMODE_PARAMS : [{text: "NSA",value: "0"}, 
                                   {text: "SA",value: "1"}, 
                                   {text: "LTE ONLY",value: "2"}],
+        OPTIONS_STORAGE_DEV_1080 : [{text: "本地",value: "0"}, 
+                                    {text: "SD",value: "1"}],
         OPTIONS_ETH0_TYPE : [{text: "固定IP地址", value: "0"}, 
                             {text: "自动获取IP地址", value: "1"}],
+        OPTIONS_BACK : [{text: "实时流", value: "1"}, 
+                            {text: "FTP", value: "2"}],
+        //4000互动  切换
+        OPTIONS_SRT_AUDIO_SWITCH_4000: [{text: "本地",value: "0"}, 
+                                        {text: "远端",value: "1"}],
+        OPTIONS_SRT_AUDIO_MODE_SWITCH_4000: [{text: "跟随",value: "0"}, 
+                                            {text: "混音",value: "1"}],
+        OPTIONS_SRT_TRANSPORT_PARAMS:[],//传输通道
         options_old_264:{
           audio_input : "",
           AudioEnc : "",
@@ -431,6 +675,7 @@
           latency:"",
         },
         options:{
+          workModeVal:"",
           WorkMode:"",//传输模式
           dev_push_enable:"",//推流开关
           curDevSn:"",//序列号
@@ -438,6 +683,7 @@
           //PushTsType:'0',//传输模式
           //PushCard : "",//单卡选择
           record:false,//录制开关
+          StorageDev:0,//录制存储
           ResendMode:false,//重传开关
           OpenfecMode:false,//纠错开关
           OpenfecLevel:0,//纠错能力
@@ -470,13 +716,62 @@
           rcvType:"0",
           rcv_board_param:"",
           address:"",
+          //文件
+          fileTitle:"文件",
+          OffLinePushEnable:false,
+          back:"",
+          online:"",
+          dev_push_status:"",
+          devFileUpFlag:0,
+          //4000互动
+
+          InteractiveMode:"",//互动模式
+          SrtSwitch:"",//互动开关
+          SrtAudioIdx:"",//切换
+          SrtFullSwitch:"",//全屏
+          SrtTransIf:"",//传输通道
+          AudioMode:"",//音频模式
         },
+        show:{
+          OpenfecLevel:false,//纠错能力
+          //4000互动
+          act4000:false,
+          act4000Show:false,
+          //文件
+          recordIp:false,//选择录机
+          fileListPop:false,//文件列表pop
+          recordingFileListPop:false,//录制中的文件Pop
+          refreshFileList:false,//刷新图标
+        },
+        dis:{
+          SEI:false,//SEI
+          video_input:false,//视频输入
+          audio_input:false,//音频输入
+          video_encode:false,//视频编码
+          AudioEnc:false,//音频编码
+          AudioBitrate:false,//音频比特率
+          bitrate_mode:false,//码率控制
+          hdr:false,//HDR设置
+          latency:false,//时延模式
+          HdmiTransFormat:false,//编码分辨率
+          record:false,//录制开关
+          StorageDev:false,//录制存储
+          ResendMode:false,//重传开关
+          OpenfecMode:false,//纠错开关
+          OpenfecLevel:false,//纠错能力
+          Eth0Type:false,//ETH0 IP
+          WiFiSwitch:false,//WiFi/热点
+          DevAliasSwitch:false,//显示别名
+          DevAlias:false,//别名
+        },
+        fileList:[],//文件列表
+        recordFileList:[],//录制中的文件
         boardShow:false,//板卡显示
         unbindBtnShow:false,
       }
     },
     components: {
-        Device,PushUrl
+        Device,PushUrl,PullUrl
     },
     computed: {
         ...mapState(['user','navHide','paramLockAck','lockUserId','ActiveDevice'])//"ActiveDeviceType",
@@ -488,6 +783,7 @@
           if(this.$route.fullPath == "/settings"){
             this.ActiveDevice = val;
             this.getLockStates();
+            this.updateDevFileAll();
           }
         }
       },
@@ -496,12 +792,18 @@
         handler(val) {
           if(this.$route.fullPath == "/settings"){
             var that=this;
+            this.options.devFileUpFlag = 0;//文件列表
             //1080-4000显示初始化
             this.selectShow();//判断设备类型显示不同内容1080 or 4000
-            this.getSelectOptions();
+            //this.getSelectOptions();
             this.$global.getDeviceParam(that.formatData);
             this.initDevMatch();//背包配对的接收机
+            this.showDevSrt(this.ActiveDevice.dev_sn); //根据配对接收机判断是否显示互动功能(4000的互动)
             this.$global.getRcvList(that.formatRcvListData);
+            if(this.fileShow){
+              this.changeFileShow();
+              this.changeRecordingFileShow();
+            }
           }
         }
       },
@@ -514,12 +816,14 @@
     },
     activated(){  //生命周期-缓存页面激活
       var that = this;
+      this.curRcvSeries = this.$global.getRcvSeries(that.ActiveDevice.rcv_sn);
       this.getLockStates();
       //1080-4000显示初始化
       this.selectShow();//判断设备类型显示不同内容1080 or 4000
-      this.getSelectOptions();
+      //this.getSelectOptions();
       this.$global.getDeviceParam(that.formatData);
       this.initDevMatch();//背包配对的接收机
+      this.showDevSrt(this.ActiveDevice.dev_sn); //根据配对接收机判断是否显示互动功能(4000的互动)
       this.$global.getRcvList(that.formatRcvListData);
       this.options.curDevSn = this.ActiveDevice.dev_sn;
       localStorage.getSettingParam1080 = setInterval(function(){
@@ -527,6 +831,13 @@
           that.$global.getDeviceParam(that.formatData)
         }
       },1000)
+      //录机
+      this.getRecordIpList();
+      //获取列表
+      setTimeout(function() {
+        //that.updateRecordFileList();
+        that.getDevFileParam();
+      }, 500);
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(localStorage.getSettingParam1080);
@@ -537,88 +848,13 @@
         SET_USER,
         SET_NAV_STATUS
       }),
-      /*clickAddUrl(){
-        this.getRcvParam();
-      },
-      //获取接收机相关数据
-      getRcvParam() {
-        var that = this;
-        //当前选中行的接收机板卡
-        var selRcvSn = that.ActiveDevice.rcv_sn;
-        var selBoardId = that.ActiveDevice.board_id;
-        that.$global.getRcvRights(selRcvSn, selBoardId, function(data) {
-          for (var i = 0; i < data.length; i++) {
-            //接收机sn_板卡id_boardListId_操作权限_查看权限
-            var value = data[i].value;
-            if (value.split('_')[0] == selRcvSn && value.split('_')[1] == selBoardId) {
-              that.options.rcv_board_param = value;
-              //根据权限设置控件是否禁用
-              break;
-            }
-          }
-          that.addUrl();
-        });
-      },
-      //点击添加URL
-      addUrl() {
-        var that = this;
-        if (that.options.address.length >= that.URL_MAX) {
-          that.$toast({
-            message: "已达添加上限!",
-            position: 'middle',
-            duration: 2000
-          });
-          return;
+      clickFileBtn(){
+        this.fileShow=!this.fileShow;
+        if(this.fileShow){
+          this.changeFileShow();
+          this.changeRecordingFileShow();
         }
-        var boardListId = that.options.rcv_board_param.split("_")[2]
-        var rcvSn = that.options.rcv_board_param.split("_")[0]
-        var boardId = that.options.rcv_board_param.split("_")[1]
-        var pushUrl = "";
-        that.$axios({
-          method: 'post',
-          url:"/page/index/indexData.php",
-          data:this.$qs.stringify({
-            addUrl: boardListId,
-            rcvSn : rcvSn,
-            boardId : boardId,
-            url : pushUrl,
-          }),
-          Api:"addUrl",
-          AppId:"android",
-          UserId:that.user.id
-        })
-        .then(function (response) {
-          let res = response.data;
-          if(res.res.success){
-            
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },*/
-      /*getPushUrlFun(){
-        var that = this;
-        this.getPushUrl = setInterval(()=>{
-          this.getBoardUrl(function(data){
-            that.formatBoardUrl(data);
-          });
-        },500)
       },
-      getBoardUrl(){
-        var that = this;
-        this.$global.getPushUrls(function(data){
-          that.formatBoardUrl(data);
-        });
-      },
-      formatBoardUrl(data){
-        this.options.address = data;
-        if(data.length >= this.URL_MAX){
-          this.showAddUrl = false;
-        }else{
-          this.showAddUrl = true;
-        }
-      },*/
       changeLatency(){
         var that = this;
         this.changeDevParam('latency');
@@ -644,6 +880,15 @@
           that.$global.setDeviceParam('latency', 0);
         }
       },
+      clickEth0(){
+        if (this.options.dev_push_enable == '1') {//推流
+          this.$toast({
+            message: '请先停止推流再进行ETH0 IP切换!',
+            position: 'middle',
+            duration: 2000
+          });
+        }
+      },
       changeEth0(){
         var that = this;
         /*this.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'dev_push_enable', function(data){
@@ -666,7 +911,8 @@
       changeMatchRcv(){
         var that = this;
         var rcvSn = that.options.matchRcv;
-        if (that.$global.getRcvSeries(rcvSn) == PRA_RCV) {
+        var rcvType = that.$global.getRcvSeries(rcvSn);
+        if (rcvType == PRA_RCV || rcvType === R1080_RCV) {
           that.$global.getUnusedBoard(rcvSn, "", that.formatUnusedBoard);
         }
       },
@@ -713,7 +959,7 @@
                 value: value.rcv_sn,
                 text: (value.color == "#2de505" ? "在线: ":"离线: ")+value.rcv_name
               });
-            }else if(that.options.rcvType == '1' && rcvType == PRA_RCV){
+            }else if(that.options.rcvType == '1' && (rcvType === PRA_RCV||rcvType === R1080_RCV)){
               //实体接收机
               result.push({
                 value: value.rcv_sn,
@@ -827,7 +1073,7 @@
           this.options.serveName = "实体接收机";
         }
       },
-      getSelectOptions(){
+      getSelectOptions(formatData){
         var that = this;
         var dev_sn = that.ActiveDevice.dev_sn;
         var userPrefix = that.user.prefix;
@@ -838,7 +1084,8 @@
           that.OPTIONS_AUDIO_ENCODE = that.$global.OPTIONS_AUDIO_ENCODE_1080;//音频编码
           that.OPTIONS_AUDIO_BR = that.$global.OPTIONS_AUDIO_BR;//音频比特率
           that.OPTIONS_BITRATEMODE = that.$global.getDevParamRange(dev_sn, userPrefix, 'bitrate_mode');//码率控制that.$global.OPTIONS_BITRATEMODE;
-          that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT_1080;//编码分辨率
+          that.OPTIONS_HDMI_FORMAT = that.$global.getDevParamRange(dev_sn,"",'HdmiTransFormat',that.options.workModeVal);;//编码分辨率
+          
         }else if(this.curDevSeries == "4000"){
           //视频输入 判断是否是PCIE版本
           that.$global.getDevListOneParam('hardVer',function(data){
@@ -852,9 +1099,17 @@
             }else{
               that.OPTIONS_VIDEOINPUT = that.$global.OPTIONS_VIDEOINPUT_4000;
             }
+            if (formatData['InteractiveMode'] == '1') {
+              //互动模式不支持HDMI H.264
+              var options = that.OPTIONS_VIDEOINPUT;//视频输入
+              options = options.filter(function(item){
+                return item.value!=4;
+              })
+              that.OPTIONS_VIDEOINPUT = options;
+            }
           })
           that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT_4000;//音频输入
-          that.OPTIONS_VIDEOENCODE = that.$global.OPTIONS_VIDEOENCODE_4000;//视频编码
+          /*that.OPTIONS_VIDEOENCODE = that.$global.OPTIONS_VIDEOENCODE_4000;//视频编码*/
           that.OPTIONS_AUDIO_ENCODE = that.$global.OPTIONS_AUDIO_ENCODE_4000;//音频编码
           that.OPTIONS_AUDIO_ENCODE_ORI = that.$global.getDevParamRange(dev_sn,userPrefix,'audio_encode');
           that.OPTIONS_AUDIO_BR = that.$global.OPTIONS_AUDIO_BR;//音频比特率
@@ -870,14 +1125,19 @@
       //判断设备类型显示不同内容1080 or 4000
       selectShow(){
         var that = this;
-
         this.curDevSeries = this.$global.getDevSeries(that.ActiveDevice?that.ActiveDevice.dev_sn:"");
+        this.curRcvSeries = this.$global.getRcvSeries(that.ActiveDevice?that.ActiveDevice.rcv_sn:"");
         if(this.curDevSeries == "1080"){
           this.dev1080Show = true;
           this.dev4000Show = false;
         }else if(this.curDevSeries == "4000"){
           this.dev1080Show = false;
           this.dev4000Show = true;
+          if(this.curRcvSeries == R1080_RCV){//2010R
+            this.devFileShow = false;
+          }else{
+            this.devFileShow = true;
+          }
         }else{
           this.dev1080Show = false;
           this.dev4000Show = false;
@@ -925,18 +1185,111 @@
           value: '0',
           disabled: this.pageLock?true:false
         }]
+        this.setElementDisable(that.pageLock);
+      },
+      setElementDisable(dis){
+        this.dis.record = dis;//录制开关
+        if(this.options.record == true){//录制开关打开
+          this.dis.StorageDev = true;
+        }else{
+          this.dis.StorageDev = dis;//录制存储  
+        }
+        this.dis.ResendMode = dis;//重传开关
+        this.dis.OpenfecMode = dis;//纠错开关
+        this.dis.OpenfecLevel = dis;//纠错能力
+        if(this.options.dev_push_enable == 1){
+          this.dis.Eth0Type = true;//ETH0 IP
+          this.dis.WiFiSwitch = true;//WiFi/热点 
+        }else{
+          this.dis.Eth0Type = dis;//ETH0 IP
+          this.dis.WiFiSwitch = dis;//WiFi/热点
+        }
+        this.dis.DevAliasSwitch = dis;//显示别名
+        this.dis.DevAlias = dis;//别名
+
+        //视频输入
+        //console.log("this.options.workModeVal:"+this.options.workModeVal)
+        
+        //console.log("this.dis.video_input:"+this.dis.video_input)
+        //文件回传中，输入编码下的参数不能编辑
+        if (this.options.OffLinePushEnable){
+          this.setEncodeParamDisabled(true);
+        }/*else if(this.curDevSeries == "1080" && that.options.dev_push_status == '1'){
+          //传输中，传输模式和单卡不能编辑
+          setTransParamDisabled(true);
+          transModeDisabled = true;
+        }*/else{
+          this.setEncodeParamDisabled(dis);
+        }
+        
+      },
+      //输入编码下的参数按钮置disabled
+      setEncodeParamDisabled(disabled){
+        var devSN = this.ActiveDevice.dev_sn;
+        var sn = devSN.substr(-4);
+        var devMode = this.$global.getDevMode(sn);
+        if(devMode != 'DV5000T'){//4000,1080不包含5000
+          if(this.options.workModeVal == 2 && this.options.dev_push_enable == 1){
+            this.dis.video_input = true;
+          }else{
+            this.dis.video_input = disabled;
+          }
+          //this.dis.video_input = disabled;//视频输入
+          this.dis.audio_input = disabled;//音频输入
+          this.dis.video_encode = disabled;//视频编码
+          this.dis.AudioEnc = disabled;//音频编码
+          this.dis.AudioBitrate = disabled;//音频比特率
+          this.dis.bitrate_mode = disabled;//码率控制
+          this.dis.HdmiTransFormat = disabled;//编码分辨率
+          if(this.curDevSeries == "1080"){
+            this.dis.SEI = disabled;//SEI
+          }else{
+            this.dis.hdr = disabled;//HDR设置
+            this.dis.latency = disabled;//时延模式
+          }
+        }else if(devMode == 'DV5000T'){//DV5000输入编码相关控制参数
+          /*setSelectDisabled('.enc_type', disabled);//单路、多路编码
+          setSelectDisabled('#dev_sdi_switch0', disabled);//通道1
+          setSelectDisabled('#dev_sdi_switch1', disabled);//通道2
+          setSelectDisabled('#dev_sdi_switch2', disabled);//通道3
+          setSelectDisabled('#dev_sdi_switch3', disabled);//通道4
+          setSelectDisabled('#video_enc_sel', disabled);//视频编码
+          setSelectDisabled('#audio_enc_sel', disabled);//音频编码
+          setSelectDisabled('#latency_mode_sel', disabled);//时延模式
+          setSelectDisabled('#video_input_sel', disabled);//输入接口
+          setSelectDisabled('#bitrate_mode_sel', disabled);//码率控制
+          setSelectDisabled('#audio_bitrate_sel', disabled);//音频码率
+          setSelectDisabled('#audio_channel_sel', disabled);//音频通道
+          setSelectDisabled('#iframeOnly_sel', disabled);//全I帧编码
+          setSelectDisabled('#chroma_sel', disabled);//色彩格式
+          setSelectDisabled('#bit_depth_sel', disabled);//比特位深
+          setSelectDisabled('#hdr_5000_sel', disabled);//HDR*/
+        }
       },
       formatData(data){
         var that = this;
+        that.options.workModeVal = data["WorkMode"];
+        this.getSelectOptions(data);
+        that.options.online = data["online"];
+        that.options.dev_push_status = data["dev_push_status"];
         that.options.curDevSn = this.ActiveDevice.dev_sn;
         that.options.dev_push_enable = data["dev_push_enable"];
         var devTypeArr = ["推流","拉流","互动"];
+        
         that.options.WorkMode = devTypeArr[data["WorkMode"]];
+        that.WorkMode = devTypeArr[data["WorkMode"]];
+        that.PushTsType = data['PushTsType'];
         //传输模式
         that.options.PushTsType = data['PushTsType'];
         /*------------------------传输控制------------------------*/
         that.options.dev_push_ip = data['dev_push_ip']=="1"?"1":"0";//传输IP
-        that.options.record = (data['record'] == '1' ? true : false);//录制开关
+        //that.options.record = (data['record'] == '1' ? true : false);
+        if(data['record'] == '1'){
+          that.options.record = true;//录制开关
+        }else{
+          that.options.record = false;//录制开关
+        }
+        that.options.StorageDev = data['StorageDev'];//录制存储
         that.options.ResendMode = (data['ResendMode'] == '1' ? true : false);//重传开关
         if(data['OpenfecMode'] == '1'){//纠错开关
           that.options.OpenfecMode = true;
@@ -951,9 +1304,9 @@
         /*------------------------输入编码------------------------*/
         //视频输入
         that.options.video_input = data['video_input'];
-        if(that.curDevSeries == "4000"){
+        //if(that.curDevSeries == "4000"){
           that.changeVideoInput(data);
-        }
+        //}
         //音频输入
         that.options.audio_input = data['audio_input'];
         //音频编码
@@ -966,6 +1319,7 @@
         that.options.HdmiTransFormat = data['HdmiTransFormat'];
         //日志等级
         that.options.ArmSenderLogLevel = data['ArmSenderLogLevel'];
+       
         //that.initLatency();//视频输入和视频编码的值，影响时延模式的选项
         if(that.curDevSeries == "4000"){
           //that.changeVideoInput(data);
@@ -1036,6 +1390,55 @@
             //时延
             that.options_old_265.latency = that.OPTIONS_LATENCY[0].value;
           }
+          //4000的互动接收机
+          //互动模式
+          var dev_interactive_mode_switch_state = "";
+          if (data['InteractiveMode'] == '1') {
+            that.options.InteractiveMode = true;
+            that.getSrtTransPortList(that.ActiveDevice.dev_sn);//传输通道
+            /*//互动模式不支持HDMI H.264
+            var options = that.OPTIONS_VIDEOINPUT;
+            options = options.filter(function(item){
+              return item.value!=4;
+            })
+            that.OPTIONS_VIDEOINPUT = options;*/
+          } else {
+            that.options.InteractiveMode = false;
+          }
+          //互动开关
+          var dev_srt_switch_state = "";
+          if (data['SrtSwitch'] == '1') {
+            that.options.SrtSwitch = true;
+          } else {
+            that.options.SrtSwitch = false;
+          }
+          //切换
+          that.options.SrtAudioIdx = data['SrtAudioIdx'];
+          //全屏
+          if (data['SrtFullSwitch'] == '1') {
+            that.options.SrtFullSwitch = true;
+          } else {
+            that.options.SrtFullSwitch = false;
+          }
+          //传输通道
+          /*var $srtTrans4000_sel = $('#srtTrans4000_sel');
+          var TransportOpt = $srtTrans4000_sel.children();
+          if(TransportOpt.length == 0){
+            getSrtTransPortList(devSN);
+          }*/
+          //音频模式
+          that.options.AudioMode = data['AudioMode'];
+          
+          //文件回传
+          if(data['OffLinePushEnable']=='1'){
+            that.options.OffLinePushEnable = true;
+            that.options.devFileUpFlag = 1;//回传开启，显示传输状态
+            that.show.refreshFileList = false;
+          } else {//回传停止
+            that.options.OffLinePushEnable = false;
+            that.options.devFileUpFlag = 0;
+            that.show.refreshFileList = true;
+          }
         }else if(that.curDevSeries == "1080"){
           //SEI
           //var sei_state = "";
@@ -1049,6 +1452,7 @@
         var that = this;
         if(this.curDevSeries == "1080"){
           this.$global.setDeviceParam('video_input', that.options.video_input);
+          this.audioEncShow = true;//1080显示音频编码
         }else if(this.curDevSeries == "4000"){
           var video_encode_option =  that.$global.getDevParamRange(that.ActiveDevice.dev_sn,that.user.prefix,'video_encode');
           if(that.options.video_input == '4'){//视频输入为HDMI 视频编码只支持H.264
@@ -1062,7 +1466,15 @@
             that.audioEncShow = false;//HDMI隐藏音频编码
             that.hdrShow = false;//HDMI隐藏HDR
           }else{
-            that.OPTIONS_VIDEOENCODE = video_encode_option;
+            if(data['InteractiveMode'] == '1'){
+              var options = "";//视频编码
+              options = video_encode_option.filter(function(item){
+                return item.value!=4;
+              })
+              that.OPTIONS_VIDEOENCODE = options;
+            }else{
+              that.OPTIONS_VIDEOENCODE = video_encode_option;
+            }
             if(data["video_encode"]){
               that.options.video_encode = data["video_encode"];
             }else{
@@ -1087,7 +1499,7 @@
             this.latencyShow = true;
           }
           
-          this.curRcvSeries = this.$global.getRcvSeries(that.ActiveDevice.rcv_sn);
+          //this.curRcvSeries = this.$global.getRcvSeries(that.ActiveDevice.rcv_sn);
           if( !this.curRcvSeries ){//非法接收机序列号，当前接收机类型设为虚拟接收机
             this.curRcvSeries = VIR_RCV;
           }
@@ -1127,25 +1539,27 @@
         that.OPTIONS_HDR = that.$global.OPTIONS_HDR_1080;//h.264只显示SDR
         //赋值上次对应参数
         //视频输入
-        that.options.audio_input = that.options_old_264.audio_input;
+        /*that.options.audio_input = that.options_old_264.audio_input;
         //音频编码
         that.options.AudioEnc = that.options_old_264.AudioEnc;
         //音频比特率
         that.options.AudioBitrate = that.options_old_264.AudioBitrate;
         //码率控制
+        //that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;
         that.options.bitrate_mode = that.options_old_264.bitrate_mode;
         //hdr设置
         that.options.hdr = that.options_old_264.hdr;
         //编码分辨率
-        that.options.HdmiTransFormat = that.options_old_264.HdmiTransFormat;
+        that.options.HdmiTransFormat = that.options_old_264.HdmiTransFormat;*/
         //码率控制
         //DV4000的背包  是所有的SDI入(包括12G-SDI 3G-SDI 4*3-2SI 4*3 SQ)这四个的H.264  都不支持AVBR
-        if(that.options.video_input == "4"){//HDMI h.264
+        /*if(that.options.video_input == "4"){//HDMI h.264
           that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;
         }else{
           that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE2;
-        }
-        that.options.bitrate_mode = 0;
+        }*/
+        
+        //that.options.bitrate_mode = 0;
       },
       formatVideoEncode265(){
         var that = this;
@@ -1161,10 +1575,10 @@
         });
         that.OPTIONS_HDR = that.$global.getDevParamRange(that.ActiveDevice.dev_sn,that.user.prefix,"hdr");//HDR设置
         //码率控制
-        that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;
+        //that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;
         //赋值上次对应参数
         //视频输入
-        that.options.audio_input = that.options_old_265.audio_input;
+        /*that.options.audio_input = that.options_old_265.audio_input;
         //音频编码
         that.options.AudioEnc = that.options_old_265.AudioEnc;
         //音频比特率
@@ -1176,7 +1590,48 @@
         //编码分辨率
         that.options.HdmiTransFormat = that.options_old_265.HdmiTransFormat;
         //时延模式
-        that.options.latency = that.options_old_265.latency;
+        that.options.latency = that.options_old_265.latency;*/
+      },
+      changeRecord(){
+        var that = this;
+        if(this.options.record == true){
+          //回传中要询问
+          var text = '';
+          if (this.options.OffLinePushEnable) {//文件离线回传中
+            text = '是否停止背包文件回传？';
+            //询问
+            that.$messagebox.confirm(text).then(
+              action => {
+                //停止文件回传
+                that.clickBackStopBtn();
+                //$('#back_enable').bootstrapSwitch('state', false, true);
+                that.options.OffLinePushEnable = false;
+                that.options.record = false;
+                //$("#dev_record").bootstrapSwitch('state', false, true);
+              },
+              action => {
+                that.options.record = false;
+              } 
+            );
+          }else if(this.options.WorkMode == '拉流'){//拉流模式不支持录制
+            setTimeout(function(){
+              this.options.record = false;
+            },500)
+          } else {
+            that.$global.setDeviceParam('record','1')
+            this.dis.StorageDev = true;//开始录制以后,存储设备不能修改
+          }
+        } else {
+          //setDevParam('record', 0, switchId);
+          that.$global.setDeviceParam('record','0')
+          this.dis.StorageDev = false;//开始录制以后,存储设备不能修改
+        }
+        /*this.$global.setDeviceParam('record',this.options.record?'1':'0')
+        if(this.options.record == 1){
+          this.dis.StorageDev = true;
+        }else{
+          this.dis.StorageDev = false;
+        }*/
       },
       //修改别名
       changeAliasName(){
@@ -1338,6 +1793,8 @@
             that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name, -1, -1, function(){
               that.unbindBtnShow = true;
               that.latencyChange(DV4000RV);
+              that.changeFileFlgShow(rcv);
+              that.$global.getDeviceParam(that.formatData);
             });
           }else if(data == 'norcv_push_difPrefix'){//无配对，背包、接收机要跨组配对
             text = '是否进行背包和接收机跨组配对？';
@@ -1346,6 +1803,8 @@
                 that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name, -1, -1, function(){
                   that.unbindBtnShow = true;
                   that.latencyChange(DV4000RV);
+                  that.changeFileFlgShow(rcv);
+                  that.$global.getDeviceParam(that.formatData);
                 });
               } 
             );
@@ -1362,6 +1821,8 @@
                 that.$global.editMatch(rcv,board,that.ActiveDevice.dev_sn, that.ActiveDevice.dev_name, -1, -1, function(){
                   that.unbindBtnShow = true;
                   that.latencyChange(DV4000RV);
+                  that.changeFileFlgShow(rcv);
+                  that.$global.getDeviceParam(that.formatData);
                 });
               } 
             );
@@ -1421,13 +1882,755 @@
                     duration: 2000
                   }); 
                 }
+                that.$global.getDeviceParam(that.formatData);
               })
               .catch(function (error) {
                 console.log(error)
               })
             }).catch();
         });
-      }
+      },
+      changeFileFlgShow(rcv){
+        var curRcvSeries = this.$global.getRcvSeries(rcv?rcv:"");
+        if(curRcvSeries == R1080_RCV){//2010R
+          this.devFileShow = false;
+        }else{
+          this.devFileShow = true;
+        }
+      },
+      changeBackEnable(){
+        var that = this;
+        var state = this.options.OffLinePushEnable;
+        if (state) {
+          var workStr = "";
+          if(this.options.online == '1'){
+            workStr = '待机';
+            if(this.options.OffLinePushEnable == false){
+              workStr = '文件离线回传中';
+            }else{
+              if(this.options.dev_push_status == '1'){
+                workStr = '直播中';
+                if(this.options.record){
+                  workStr += ' 录制中';
+                }
+              }else if(this.options.record){
+                workStr = '录制中';
+              }
+            }
+          }else{
+            workStr = '离线';
+          }
+          /*var dev_push_enable = this.options.dev_push_enable;
+          var dev_record_enable = this.options.record;*/
+          //推流中和录制中要询问
+          var text = '';
+          if (workStr == '直播中') {
+            text = '是否停止推流？';
+          }else if (workStr == '录制中') {
+            text = '是否停止录制？';
+          }else if (workStr == '直播中 录制中') {
+            text = '是否停止推流和录制？';
+          }
+          if (text != '') {
+            //询问
+            that.$messagebox.confirm(text).then(
+              action => {
+                that.options.record = false;
+                that.options.dev_push_status = false;
+                that.$global.setDevParamList(['dev_push_enable','record'],[0,0],'')
+                that.options.OffLinePushEnable = false;
+              },
+              action => {
+                that.options.OffLinePushEnable = false;
+              } 
+            );
+          }else{
+            this.clickBackStartBtn();
+          }
+        }else{
+          this.clickBackStopBtn();
+        }
+      },
+      //点击回传按钮
+      clickBackStartBtn() {
+        var that = this;
+        //是否在传输中
+        if (this.options.devFileUpFlag == 1) {
+          return;
+        }
+        //选择文件个数
+        var selFile = [];
+        for(var i=0; i<this.fileList.length; i++){
+          if(document.getElementsByName(this.fileList[i]["fileName"])[0].checked){
+            selFile.push(this.fileList[i]["fileName"]);
+          }
+        }
+        if (selFile.length < 1) {
+          this.$toast({
+            message: '请选择一个文件!',
+            position: 'middle',
+            duration: 2000
+          }); 
+          setTimeout(function(){
+            that.options.OffLinePushEnable = false;  
+          },500)
+          return;
+        }
+        if (selFile.length > 5) {
+          this.$toast({
+            message: '最多选择5个!',
+            position: 'middle',
+            duration: 2000
+          }); 
+          setTimeout(function(){
+            that.options.OffLinePushEnable = false;  
+          },500)
+          return;
+        }
+        //判断所有文件是否都是一个速率的
+        var fileBr = selFile[0].split('_')[1];
+        for(var k=1; k<selFile.length; k++){
+          var fileBrTemp = selFile[k].split('_')[1];
+          if(fileBr != fileBrTemp){
+            this.$toast({
+              message: '请选择速率相同的文件！!',
+              position: 'middle',
+              duration: 2000
+            }); 
+            setTimeout(function(){
+              that.options.OffLinePushEnable = false;  
+            },500)
+            return;
+          }
+        }
+        //devSn
+        var devSN = this.ActiveDevice.dev_sn;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          this.$toast({
+            message: '未选择背包!',
+            position: 'middle',
+            duration: 2000
+          }); 
+          setTimeout(function(){
+            that.options.OffLinePushEnable = false;  
+          },500)
+          return;
+        }
+        //回传方式
+        var type = this.options.back;
+        if (+type < 1) {
+          this.$toast({
+            message: '未选择回传类型!',
+            position: 'middle',
+            duration: 2000
+          }); 
+          setTimeout(function(){
+            that.options.OffLinePushEnable = false;  
+          },500)
+          return;
+        }
+        //recordIp
+        var recordIp = '';
+        if (type == '2') {
+          recordIp = this.options.recordIp;
+          if (recordIp == '-1') {
+            this.$toast({
+              message: '无可用录机!',
+              position: 'middle',
+              duration: 2000
+            }); 
+            setTimeout(function(){
+              that.options.OffLinePushEnable = false;  
+            },500)
+            return;
+          }
+        }
+        //回传文件数组
+        var dataJson = {};
+        dataJson.fileList = [];
+        for (var i = 0; i < selFile.length; i++) {
+          dataJson.fileList.push({
+            dev_sn: devSN,
+            fileName: selFile[i],
+            transType: type,
+            record_ip: recordIp
+          });
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:that.$qs.stringify({
+            setDevFileParam:JSON.stringify(dataJson),
+          }),
+          Api:"setDevFileParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.options.devFileUpFlag = 1;//文件列表
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+        //关闭参数里的传输开关 录制开关
+        that.$global.setDevParamList(['dev_push_enable','record','FileCtrlFlag'],[0,0,1],'');
+        //回传开启，显示传输状态
+        //$('#updateFileIcon').addClass('disabledIcon');
+      },
+      //点击停止回传按钮
+      clickBackStopBtn() {
+        var that = this;
+        //回传停止，隐藏传输状态
+        this.options.fileTitle = '文件';
+        this.show.refreshFileList = true;
+        this.$global.setDeviceParam('FileCtrlFlag', 1, '');
+        //devSn
+        var devSN = this.ActiveDevice.dev_sn;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          this.$toast({
+            message: '未选择背包!',
+            position: 'middle',
+            duration: 2000
+          }); 
+          return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:that.$qs.stringify({
+            setDevFileStop: devSN,
+          }),
+          Api:"setDevFileStop",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.options.devFileUpFlag = 0;
+            //刷新文件列表
+            that.clickFileRefreshIcon();
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //回传类型改变
+      changeBackSel(){
+        if (this.options.back == '1') {
+          this.show.recordIp = false;
+          //$('#devfile').css('height', 'calc(100% - 2.25em)');
+        } else {
+          this.show.recordIp = true;
+          //$('#devfile').css('height', 'calc(100% - 3.4em)');
+          this.getRecordIpList();
+        }
+      },
+      //获取录机IP列表
+      getRecordIpList(){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getRecordIpList: true,
+          }),
+          Api:"getRecordIpList",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var options = [];
+            for (var i = 0; i < res.data.length; i++) {
+              options.push({
+                value: res.data[i].record_ip,
+                text: res.data[i].record_ip
+              });
+            }
+            if (res.data.length == 0) {
+              options.push({
+                value: -1,
+                text: '无录机'
+              });
+            }
+            that.OPTIONS_RECORD_IP = options;
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            }); 
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //获取背包文件传输参数
+      getDevFileParam() {
+        var that = this;
+        var devSN = this.ActiveDevice.dev_sn;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevFileParam: true,
+            devSn: devSN,
+          }),
+          Api:"getDevFileParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if (res.data.length > 0) {
+              if(res.data[0].transType == '0'){
+                res.data[0].transType = 1;
+              }
+              that.options.back = res.data[0].transType;
+              if (res.data[0].record_ip != '') {
+                that.options.recordIp = res.data[0].record_ip; 
+              }
+              if (res.data[0].transType == '2') {
+                that.show.recordIp = true;
+              } else {
+                that.show.recordIp = false;
+              }
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason,
+              position: 'middle',
+              duration: 2000
+            }); 
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      changeFileShow(){
+        var that = this;
+        /*this.show.fileListPop = true;*/
+        this.fileList = [];
+        this.getFileList();
+        setTimeout(function() {
+          if(!that.options.OffLinePushEnable){
+            that.clickFileRefreshIcon();
+          }
+        }, 500);
+        //录制中文件定时刷新
+        if (localStorage.timer_devFile == "undefined") {
+          localStorage.timer_devFile = setInterval(function() {
+            that.updateDevFileAll();
+          }, 1000);
+        }
+      },
+      changeRecordingFileShow(){
+        var that = this;
+        /*this.show.recordingFileListPop = true;*/
+        this.recordFileList = [];
+        /*this.getRecordFileList();*/
+        //录制中文件定时刷新
+        localStorage.timer_recordDevFile = setInterval(function() {
+          that.updateDevFileAll();
+        }, 1000);
+      },
+      hideRecordFilePop(){
+        this.show.recordingFileListPop=false;
+        clearInterval(localStorage.timer_recordDevFile)
+      },
+      getFileList(){
+        var that = this;
+        var flagTimer = setInterval(function() {
+          that.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'FileUpFlag', function(data) {
+            if (data.FileUpFlag == '0' && flagTimer != undefined) {
+              clearInterval(flagTimer);
+              flagTimer = undefined;
+              //更新文件列表
+              that.getDevFileList(function(data) {
+                that.fileList = data;
+                if (!that.options.devFileUpFlag) {
+                  that.show.refreshFileList = true;
+                }
+              });
+            }else if(data.FileUpFlag == "1"){
+              that.fileList = [];
+            }
+          });
+        }, 500);
+      },
+      getDevFileList(callback){
+        var that = this;
+        var devSN = this.ActiveDevice.dev_sn;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          if (typeof(callback) == 'function') {
+            callback([]);
+            return;
+          }
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevFile: true,
+            devSn: devSN,
+          }),
+          Api:"getDevFile",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if (typeof(callback) == 'function') {
+              callback(res.data);
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //更新全部背包文件，包括录制完成的和录制中的
+      updateDevFileAll(){
+        if (this.options.record) {//更新录制中的文件列表
+          this.updateRecordFileList();
+        } else {
+          this.recordFileList = [];
+        }
+        if (this.options.devFileUpFlag == 1) {//更新正在回传的背包文件
+          this.updateDevFileUpState();
+        } else {
+          this.options.fileTitle = '文件';
+        }
+      },
+      //更新录制中的背包文件
+      updateRecordFileList() {
+        var that = this;
+        this.getRecordingFileList(function(data) {
+          that.recordFileList = data;
+        });
+      },
+      //读取录制中的文件列表
+      getRecordingFileList(callback) {
+        var that = this;
+        var devSN = this.ActiveDevice.dev_sn;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          if (typeof(callback) == 'function') {
+            callback([]);
+            return;
+          }
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:that.$qs.stringify({
+            getDevFileRecording:true,
+            devSn: devSN,
+          }),
+          Api:"getDevFileRecording",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if (typeof(callback) == 'function') {
+              callback(res.data);
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //更新背包回传文件状态
+      updateDevFileUpState() {
+        var that = this;
+        this.getDevFileUpList(function(data) {
+          if (data.length == 0) {
+            return;
+          }
+          that.fileList = data;
+          //总进度
+          if (that.options.OffLinePushEnable) {
+            that.options.fileTitle = '文件(' + data[0].FileTotalProgress + '%)';
+          }
+          //回传完成
+          if (data[0].OffLinePushEnable == '0') {
+            that.options.OffLinePushEnable = false;
+            that.options.fileTitle = '文件'; 
+            that.options.devFileUpFlag = 0;
+            //刷新文件列表
+            that.show.refreshFileList = true;
+            that.clickFileRefreshIcon();
+          }else{
+            that.show.refreshFileList = false;//回传中不显示刷新按钮
+          }
+        });
+      },
+      //读取回传中的文件列表
+      getDevFileUpList(callback) {
+        var that = this;
+        var devSN = this.ActiveDevice.dev_sn;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          if (typeof(callback) == 'function') {
+            callback([]);
+            return;
+          }
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:that.$qs.stringify({
+            getDevFileBack:true,
+            devSn: devSN,
+          }),
+          Api:"getDevFileBack",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if (typeof(callback) == 'function') {
+              callback(res.data);
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //点击背包文件刷新图标
+      clickFileRefreshIcon() {
+        if (this.show.refreshFileList==true) {
+          this.$global.setDeviceParam('FileUpFlag', 1, '');
+          this.show.refreshFileList = false;
+          this.fileList = [];
+          this.getFileList();
+        }
+      },
+      //获取录制文件
+      getRecordFileList(){
+        var that = this;
+        var devSN = this.ActiveDevice.dev_sn;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevFileRecording: true,
+            devSn: devSN,
+          }),
+          Api:"getDevFileRecording",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.recordFileList = res.data;
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //纠错开关
+      changeOpenfecMode(){
+        var that = this;
+        this.$global.setDeviceParam('OpenfecMode',that.options.OpenfecMode?'1':'0');
+        if(that.options.OpenfecMode){
+          this.show.OpenfecLevel = true;
+        }else{
+          this.show.OpenfecLevel = false;
+        }
+      },
+      //4000的互动
+      showDevSrt(){
+        var bShow = false;
+        var rcvSn = this.ActiveDevice.rcv_sn;
+        var rcvMode =this.$global.getRcvMode(rcvSn.substr(-4));
+        if(rcvMode == 'DV4004R' || rcvMode == 'CM-IR6000T' || rcvMode == 'DV4013R'){
+          bShow = true;
+        }
+        //bShow = true;
+        if(bShow){
+          this.show.act4000 = true;
+        } else {
+          this.show.act4000 = false;
+        }
+      },
+      //互动模式
+      changeInteractiveMode(){
+        var that = this;
+        var text = '切换模式时背包需要重启，确认切换?';
+        this.$messagebox.confirm(text).then(
+          action => {
+            if(that.options.InteractiveMode){
+              that.$global.setDeviceParam('InteractiveMode', 1);  
+            }else{
+              that.$global.setDeviceParam('InteractiveMode', 0);  
+            }
+          },
+          action => {
+            if(that.options.InteractiveMode){
+              that.options.InteractiveMode = false;
+            }else{
+              that.options.InteractiveMode = true;
+            }
+            that.options.InteractiveMode
+            if(that.options.InteractiveMode){
+              that.$global.setDeviceParam('InteractiveMode', 1);  
+            }else{
+              that.$global.setDeviceParam('InteractiveMode', 0);  
+            }
+          },
+        );
+      },
+      //互动开关
+      changeSrtSwitch(){
+        if (this.options.SrtSwitch) {
+          this.$global.setDeviceParam('SrtSwitch', 1);
+        } else {
+          this.$global.setDeviceParam('SrtSwitch', 0);
+        }
+      },
+      //音频切换
+      changeSrtAudioIdx(){
+        var that = this;
+        this.$global.setDeviceParam('SrtAudioIdx',that.options.SrtAudioIdx)
+      },
+      //全屏
+      changeSrtFullSwitch(){
+        if (this.options.SrtFullSwitch) {
+          this.show.OpenfecLevel = true;
+          this.$global.setDeviceParam('SrtFullSwitch', 1);
+        } else {
+          this.show.OpenfecLevel = false;
+          this.$global.setDeviceParam('SrtFullSwitch', 0);
+        }
+      },
+      //获取在线网卡
+      getSrtTransPortList(devSN){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevCardParam: true,
+            devSN: devSN,
+          }),
+          Api:"getSrtTransPortParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var data = res.data[0];
+            var G5Flag = false;
+            //传输通道
+            var jIndex = 0;
+            var options = [];
+            for (var i = 0; i < data.length; i++) {//传输通道，定时刷新获取在线的网卡
+              if (data[i]["online"] != "0") {//获取在线的网卡
+                options[jIndex]={};
+                options[jIndex]['text'] = data[i]["card_name"];
+                var transportValue = '';
+                switch (data[i]["card_id"]){
+                  case "eth0":
+                    transportValue = 0;
+                    break;
+                  case "wifi":
+                    transportValue = 1;
+                    break;
+                  case "lte1":
+                    transportValue = 2;
+                    break;
+                  case "lte2":
+                    transportValue = 3;
+                    break;
+                  case "lte3":
+                    transportValue = 4;
+                    break;
+                  case "lte4":
+                    transportValue = 5;
+                    break;
+                  case "lte5":
+                    transportValue = 6;
+                    break;
+                  case "lte6":
+                    transportValue = 7;
+                    break;
+                  case "usb-lan":
+                    transportValue = 8;
+                    break;
+                  case "usb-5g1":
+                    transportValue = 9;
+                    break;
+                  case "usb-5g2":
+                    transportValue = 10;
+                    break;
+                  default:
+                    transportValue = '';
+                    break;
+                }
+                options[jIndex]['value'] = transportValue;
+                jIndex++;
+              }
+            }
+            that.OPTIONS_SRT_TRANSPORT_PARAMS = options;
+            that.getSrtTransPortParam(devSN);
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //获取传输通道参数
+      getSrtTransPortParam(devSN){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevParam: true,
+            devSN: devSN,
+          }),
+          Api:"getDevSrtTransPort",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.options.SrtTransIf = res.data[0]['SrtTransIf'];   //传输通道    
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //音频模式
+      changeAudioMode(){
+        var that = this;
+        this.$global.setDeviceParam('AudioMode', that.options.AudioMode);
+      }, 
     }
   }
 </script>
@@ -1599,5 +2802,18 @@
     }
     .mint-field.is-textarea{
       width:100%;
+    }
+    .wholePagePop{
+      background-color:#000 !important;
+      font-size:.14rem;
+      color:#fff;
+      width: 100% !important;
+      height: 100%;
+      max-height: 100% !important;
+    }
+    .wholePagePop .page-title{
+      font-size:.16rem;
+      color:#fff;
+      padding:10px;
     }
 </style>

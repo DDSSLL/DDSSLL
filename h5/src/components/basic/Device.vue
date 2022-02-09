@@ -8,10 +8,23 @@
           </span>
         </div>
         <div class="rate">
-          <div v-if="this.ActiveDevice.dev_push_status!='0'">
-            <span class="us">{{ (+this.ActiveDevice.dev_push_br / 1000).toFixed(3) }}</span>
-            <span class="ds" v-if="ActiveDevice.PushTsType!=1">{{ (+this.ActiveDevice.rcv_br / 1000).toFixed(3) }}</span>
-            <span class="rl" v-if="this.ActiveDevice.TotalLossRate && this.ActiveDevice.TotalLossRate!=0" >{{ (+this.ActiveDevice.TotalLossRate / 10).toFixed(1) + '%' }}</span>  
+          <div v-if="this.ActiveDevice.dev_push_status!='0'"><!-- 背包工作中 -->
+            <div v-if="this.ActiveDevice.WorkMode =='1'"><!-- 拉流模式 -->
+              <span class="speedStyle" style="color:#00fcfc">{{ (+this.ActiveDevice.SrtKbps / 1000).toFixed(3) }}</span>  
+            </div>
+            <div v-else-if="this.ActiveDevice.WorkMode =='2'"><!-- 互动 -->
+              <span class="speedStyle" style="color:#FFFF00">{{ (+this.ActiveDevice.dev_push_br / 1000).toFixed(3) }}</span>
+              <span class="speedStyle" style="color:#22aadd">{{ (+this.ActiveDevice.rcv_br / 1000).toFixed(3) }}</span>
+              <span class="speedStyle" style="color:#f5222d" v-if="this.ActiveDevice.TotalLossRate && this.ActiveDevice.TotalLossRate!=0" >{{ (+this.ActiveDevice.TotalLossRate / 10).toFixed(1) + '%' }}</span>  
+            </div>
+            <div v-else><!-- 推流 -->
+              <span class="speedStyle" style="color:#FFFF00">{{ (+this.ActiveDevice.dev_push_br / 1000).toFixed(3) }}</span>
+              <span class="speedStyle" style="color:#22aadd" v-if="ActiveDevice.PushTsType!=1">{{ (+this.ActiveDevice.rcv_br / 1000).toFixed(3) }}</span><!-- 单卡推流只显示上传速率 -->
+              <span class="speedStyle" style="color:#f5222d" v-if="this.ActiveDevice.TotalLossRate && this.ActiveDevice.TotalLossRate!=0" >{{ (+this.ActiveDevice.TotalLossRate / 10).toFixed(1) + '%' }}</span>  
+            </div>
+          </div>
+          <div v-else-if="this.ActiveDevice.pullStart!='0'"><!-- 接收机拉流中 -->
+            <span class="speedStyle" style="color:#22aadd">{{ (+this.ActiveDevice.rcv_br / 1000).toFixed(3) }}</span>
           </div>
           <div v-else class="noSpeedInfo">--</div>
         </div>
@@ -37,9 +50,6 @@
             </span>
           </div>
         </div>
-        <!-- <div class="refreshIcon" v-if="pageType=='status'">
-          <i class="fa fa-2x fa-refresh" aria-hidden="true" @click.stop="refreshChart"></i>
-        </div> -->
         <div class="iconStyle">
           <div class="lock" v-if="pageType=='rcv'">
             <i class="fa fa-2x fa-lock" id="rcvlockIcon" aria-hidden="true" @click.stop="changeRcvLockState"></i>
@@ -64,12 +74,11 @@
               <i class="fa fa-chevron-left size2" aria-hidden="true"></i>
             </div>
             <div style="padding:5px;text-align:right">
-              <button @click="deviceModePop = true" class="TypeSelect White">{{this.deviceModeCurName}}</button><!-- 背包模式 -->
+              <button @click="deviceModePop = true" class="TypeSelect White" v-if="show.deviceModeShow">{{this.deviceModeCurName}}</button><!-- 背包模式 -->
               <button @click="deviceTypePop = true" class="TypeSelect White">{{this.deviceTypeCurName}}</button><!-- 在线类型 -->
               <button @click="devicePrefixPop = true" class="TypeSelect White" v-if="user.userGroup==ADMIN">{{this.devicePrefixCurName}}</button><!-- 用户组 -->
             </div>
           </div>
-          <!-- <mt-loadmore :top-method="getDeviceList" ref="loadmore" class="deviceListDiv"> -->
           <div class="deviceListDiv">
             <template v-for="(item,i) in deviceListShow">
               <div class="listChannel" @click="changeActiveDevice(item)" :class="[!!ActiveDevice?(ActiveDevice.dev_name == item.dev_name ? 'activeChanel' : ''):'']">
@@ -79,10 +88,23 @@
                   </span>
                 </div>
                 <div class="rate">
-                  <div v-if="item['dev_push_status']!='0'">
-                    <span class="us">{{ (+item['dev_push_br'] / 1000).toFixed(3) }}</span>
-                    <span class="ds" v-if="item.PushTsType!=1">{{ (+item['rcv_br'] / 1000).toFixed(3) }}</span>
-                    <span class="rl" v-if="item['TotalLossRate'] && item['TotalLossRate']!=0" >{{ (+item['TotalLossRate'] / 10).toFixed(1) + '%' }}</span>  
+                  <div v-if="item.dev_push_status!='0'"><!-- 背包工作中 -->
+                    <div v-if="item.WorkMode =='1'"><!-- 拉流模式 -->
+                      <span class="speedStyle" style="color:#00fcfc">{{ (+item.SrtKbps / 1000).toFixed(3) }}</span>  
+                    </div>
+                    <div v-else-if="item.WorkMode =='2'"><!-- 互动 -->
+                      <span class="speedStyle" style="color:#FFFF00">{{ (+item.dev_push_br / 1000).toFixed(3) }}</span>
+                      <span class="speedStyle" style="color:#22aadd">{{ (+item.rcv_br / 1000).toFixed(3) }}</span>
+                      <span class="speedStyle" style="color:#f5222d" v-if="item.TotalLossRate && item.TotalLossRate!=0" >{{ (+item.TotalLossRate / 10).toFixed(1) + '%' }}</span>  
+                    </div>
+                    <div v-else><!-- 推流 -->
+                      <span class="speedStyle" style="color:#FFFF00">{{ (+item.dev_push_br / 1000).toFixed(3) }}</span>
+                      <span class="speedStyle" style="color:#22aadd" v-if="item.PushTsType!=1">{{ (+item.rcv_br / 1000).toFixed(3) }}</span><!-- 单卡推流只显示上传速率 -->
+                      <span class="speedStyle" style="color:#f5222d" v-if="item.TotalLossRate && item.TotalLossRate!=0" >{{ (+item.TotalLossRate / 10).toFixed(1) + '%' }}</span>  
+                    </div>
+                  </div>
+                  <div v-else-if="item.pullStart!='0'"><!-- 接收机拉流中 -->
+                    <span class="speedStyle" style="color:#22aadd">{{ (+item.rcv_br / 1000).toFixed(3) }}</span>
                   </div>
                   <div v-else class="noSpeedInfo">--</div>
                 </div>
@@ -114,8 +136,6 @@
               </div>
             </template>
           </div>
-            
-          <!-- </mt-loadmore> -->
         </div>
       </mt-popup>
       <mt-popup v-model="deviceTypePop" position="bottom" popup-transition="popup-slide" class="deviceFilterPop">
@@ -143,7 +163,7 @@
           <i class="fa fa-chevron-down"></i>
         </span>
         <mt-radio
-          v-model="deviceMode"
+          v-model="deviceModeSelect"
           :options="deviceModeOptions"
           @change="changeDeviceMode">
         </mt-radio>
@@ -175,8 +195,6 @@
           <mt-cell title="输出分辨率">
             <span>{{status.OutputFormat}}</span>
           </mt-cell>
-          <!-- <span id="m50_format" style="display: none"></span>
-              <span id="m50_fr" style="display: none"></span> -->
           <mt-cell title="工作状态">
             <span :style="{color:status.work_str_style}">{{status.work_str}}</span>
           </mt-cell>
@@ -207,9 +225,6 @@
           <mt-cell title="流量总计">
             <span>{{status.TotalSendPktStr}}</span>
           </mt-cell>
-          <!-- <mt-cell title="历史数据" value=""  icon="fa-file-text-o">
-            <span>{{status.OutputFormat}}</span>
-          </mt-cell> -->
         </div>
       </mt-popup>
     </div>
@@ -218,7 +233,7 @@
 
 <script>
   import { mapState, mapMutations } from 'vuex';
-  import { SET_ACTIVE_DEVICE,SET_DEVICE_TYPE_SELECT,SET_DEVICE_MODE_SELECT,SET_DEVICE_PREFIX_SELECT,SET_PARAM_LOCK_ACK,SET_PARAM_LOCK,SET_LOCK_USERID } from '../../store/mutation-types';
+  import { SET_ACTIVE_DEVICE,SET_DEVICE_TYPE_SELECT,SET_DEVICE_MODE_SELECT,SET_DEVICE_PREFIX_SELECT,SET_PARAM_LOCK_ACK,SET_PARAM_LOCK,SET_LOCK_USERID,SET_RCV_TAB_SHOW_FLG,SET_MONITOR_TAB_SHOW_FLG } from '../../store/mutation-types';
   import $ from 'jquery';
   export default {
     name: "Device",
@@ -230,6 +245,7 @@
         curDevSeries:"",
         SUPER:SUPER,
         ADMIN:ADMIN,
+        NORMAL:NORMAL,
         popupVisible:false,
         popupTagsVisible:false,
         lockDisable:false,
@@ -249,13 +265,14 @@
         deviceTypePop: false,
         deviceType:"",
         deviceTypeCurName:"",
-        deviceTypeOptions: [{label: '全部设备',value: '1'},
-                            {label: '推流设备',value: '2'},
-                            {label: '在线设备',value: '3'},
-                            {label: '离线设备',value: '4'}],
+        deviceTypeOptions: [{label: '全部背包',value: '1'},
+                            {label: '直播背包',value: '2'},
+                            {label: '在线背包',value: '3'},
+                            {label: '离线背包',value: '4'},
+                            {label: '接收机',value: '5'}],
         //背包模式
         deviceModePop:false,
-        deviceMode:"",
+        deviceModeSelect:"allMode",
         deviceModeCurName:"",
         deviceModeOptions: [{label: '全部模式',value: 'allMode'},
                             {label: '推流模式',value: '0'},
@@ -286,13 +303,15 @@
         },
         show:{
           extBattery:false,
+          deviceModeShow:true,
         },
       }
     },
     computed: {
-      ...mapState(['user','ActiveDevice','deviceTypeSelect','deviceModeSelect','devicePrefixSelect','paramLockAck','paramLock','lockUserId'])
+      ...mapState(['user','ActiveDevice','deviceTypeSelect',/*'deviceModeSelect',*/'devicePrefixSelect','paramLockAck','paramLock','lockUserId','rcvTabShowFlg'])
     },
     activated(){
+      console.log("device activated")
       var that = this;
       that.initFilter();
       if(localStorage.deviceTimer){
@@ -302,7 +321,7 @@
         that.getDeviceList();
       },1000);
       that.deviceType = that.deviceTypeSelect;
-      that.deviceMode = that.deviceModeSelect;
+      //that.deviceMode = that.deviceModeSelect;
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(localStorage.deviceTimer);
@@ -315,7 +334,9 @@
         SET_DEVICE_PREFIX_SELECT,
         SET_PARAM_LOCK_ACK,
         SET_PARAM_LOCK,
-        SET_LOCK_USERID
+        SET_LOCK_USERID,
+        SET_RCV_TAB_SHOW_FLG,
+        SET_MONITOR_TAB_SHOW_FLG
       }),
       backToActivePage(){
         if(this.deviceListShow.length == 0){
@@ -563,13 +584,18 @@
       },
       changeDeviceMode(){
         var that = this;
-        that.SET_DEVICE_MODE_SELECT(that.deviceMode);
+        that.SET_DEVICE_MODE_SELECT(that.deviceModeSelect);
         that.formatDeviceModeName();
       },
       changeDeviceType(){
         var that = this;
         that.SET_DEVICE_TYPE_SELECT(that.deviceType);
         that.formatDeviceTypeName();
+        if(that.deviceType == 5){//接收机
+          this.show.deviceModeShow = false;
+        }else{
+          this.show.deviceModeShow = true;
+        }
       },
       changeDevicePrefix(){
         var that = this;
@@ -591,6 +617,11 @@
       formatDeviceTypeName(){
         var that = this;
         that.deviceType = that.deviceTypeSelect;
+        if(that.deviceType == 5){//接收机
+          this.show.deviceModeShow = false;
+        }else{
+          this.show.deviceModeShow = true;
+        }
         for(let i=0; i<that.deviceTypeOptions.length; i++){
           if(that.deviceTypeOptions[i].value == that.deviceType){
             that.deviceTypeCurName = that.deviceTypeOptions[i].label;
@@ -600,9 +631,9 @@
       },
       formatDeviceModeName(){
         var that = this;
-        that.deviceMode = that.deviceModeSelect;
+        //that.deviceMode = that.deviceModeSelect;
         for(let i=0; i<that.deviceModeOptions.length; i++){
-          if(that.deviceModeOptions[i].value == that.deviceMode){
+          if(that.deviceModeOptions[i].value == that.deviceModeSelect){
             that.deviceModeCurName = that.deviceModeOptions[i].label;
             break;
           }
@@ -612,7 +643,7 @@
         var that = this;
         that.formatDeviceTypeName();
         that.$global.getChildGrpArr(that.user.prefix, that.formatPrefix);
-        that.formatDeviceModeName();
+        //that.formatDeviceModeName();
       },
       formatPrefix(data){
         var that = this;
@@ -630,8 +661,39 @@
       },
       //更新当前设备参数
       refreshCurDevParam(datas){
-      	this.SET_ACTIVE_DEVICE(datas);
+        this.SET_ACTIVE_DEVICE(datas);
         this.getDevLockStatus();
+        var curDevSeries = this.$global.getDevSeries(datas.dev_sn);
+        var curRcvSeries = this.$global.getRcvSeries(datas.rcv_sn);
+        var actRcv = this.$global.getRcvMode(datas.rcv_sn.substr(-4)) == 'DV4004R' ? true:false;
+        var WorkMode = datas.WorkMode;
+        var PushTsType = datas.PushTsType;
+        if(WorkMode != 0){/*拉流互动不显示接收机tab*/
+          this.SET_RCV_TAB_SHOW_FLG(false);
+        }else{
+          if(curRcvSeries!=false && curRcvSeries!=VIR_RCV){//没有配对或者配了虚拟接收机不显示接收机页面,即只有实体接收机显示接收机页面
+            this.SET_RCV_TAB_SHOW_FLG(true);
+          }else{
+            this.SET_RCV_TAB_SHOW_FLG(false);
+          }
+        }
+        if(datas.rcv_sn != ""){
+          if(curDevSeries == "4000"){
+            if(actRcv){//互动接收机不显示监控
+              this.SET_MONITOR_TAB_SHOW_FLG(false);
+            }else{
+              this.SET_MONITOR_TAB_SHOW_FLG(true);
+            }
+          }else if(curDevSeries == "1080"){
+            if(WorkMode==0 && PushTsType==0){//推流模式，多卡汇聚显示监控
+              this.SET_MONITOR_TAB_SHOW_FLG(true);
+            }else{
+              this.SET_MONITOR_TAB_SHOW_FLG(false);
+            }
+          }
+        }else{//没有配对不显示监控页面
+          this.SET_MONITOR_TAB_SHOW_FLG(false);
+        }
       },
       getDeviceList(){
         var that = this;
@@ -642,11 +704,12 @@
             getDevAndMatch:true,
             userId: that.user.id,
             userGroup: that.user.userGroup,
-            prefixType: that.devicePrefix.join(",")//that.user.prefix
+            prefixType: that.devicePrefix.join(","),//that.user.prefix
+            fliter: that.getDeviceFliter()
           }),
           Api:"getDevAndMatch",
           AppId:"android",
-          UserId:that.user.login_name
+          UserId:that.user.id
         })
         .then(function (response) {
           let res = response.data;
@@ -675,16 +738,6 @@
               var extBat = fextBat["exBat"];
               var fintBat = that.formatIntBat(row.IntBat);
               var intBat = fintBat["inBat"];
-              /*if (online == 1 && extBat.indexOf("CHARGING") == -1) {
-                if(intBat <= 40 || (extBat != "nonexistent" && extBat<=40 )){
-                  row["infoStatus"] = "infoRed";
-                }else{
-                  row["infoStatus"] = "infoGreen";
-                }
-              } else {
-                row["infoStatus"] = "infoGray";
-              }*/
-
               //在线,有可能显示电池电量低
               if (online == 1){
                 if(extBat == "nonexistent" 
@@ -706,15 +759,18 @@
             that.filterDevice();
             if(!that.ActiveDevice){
               that.SET_ACTIVE_DEVICE(that.deviceListShow[0]); 
+              //that.deviceModeSelect = that.deviceListShow[0]["WorkMode"];
             }else{//存了ActiveDevice
               var devExist = false;
               for(var i=0; i<that.deviceList.length; i++){
                 if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
                   devExist = true;
+                  //that.deviceModeSelect = that.deviceList[i]["WorkMode"];
                 }
               }
               if(!devExist && that.deviceListShow.length!=0){//ActiveDevice不在设备列表中
                 that.SET_ACTIVE_DEVICE(that.deviceListShow[0]); 
+                //that.deviceModeSelect = that.deviceListShow[0]["WorkMode"];
               }
             }
             /*for(var i=0; i<that.deviceList.length; i++){
@@ -726,6 +782,7 @@
           }else{
             that.deviceList = [];
           }
+          that.formatDeviceModeName();
         })
         .catch(function (error) {
           console.log(error);
@@ -859,7 +916,7 @@
         var selBoardId = this.ActiveDevice.board_id;
         this.$global.getRcvRights(selRcvSn, selBoardId, function(data) {
           that.hasRcvRight = data[0]["value"].split("_")[3]=="1"?true:false;
-          if (that.hasRcvRight) {
+          if (that.hasRcvRight && (that.user.userGroup!=NORMAL)) {
               if($("#rcvlockIcon").hasClass("fa-lock")){
                 that.$emit('changeRcvLockState',"unlock")
                 $("#rcvlockIcon").removeClass("fa-lock").addClass("fa-unlock");
@@ -908,8 +965,59 @@
         this.$emit('changeRcvLockState',"lock")
         $("#rcvlockIcon").removeClass("fa-unlock").addClass("fa-lock");
       },
+      //获取左侧设备列表的过滤选项
+      /*
+      * device: dev/praRcv
+      * online: 0/1
+      * WorkMode:0/1/2
+      * dev_push_status:1/2
+      * */
+      getDeviceFliter(){
+        var type = this.deviceTypeSelect.toString();;
+        var mode = this.deviceModeSelect.toString();
+        //var actGrpId = getCookie('uhd-actGrpId');
+        var fliter = {device:'dev',online:'',WorkMode:'',dev_push_status:'',interact_grpid:''};
+
+        if(type == '5'){
+          //实体接收机
+          fliter['online'] = '1';
+          fliter['device'] = 'praRcv';
+          fliter['WorkMode'] = '0';
+        }else{//背包
+          fliter['device'] = 'dev';
+          //在线状态
+          if(type === '3'){//在线
+            fliter['online'] = '1';
+          } else if (type === '4'){//离线
+            fliter['online'] = '0';
+          } else if (type === '2'){//直播
+            fliter['online'] = '1';
+            fliter['dev_push_status'] = '!=0';
+          } else if (type === '1'){//全部
+            fliter['online'] = '';
+          }
+          //工作模式
+          if(mode === '0'){
+            fliter['WorkMode'] = '0';
+          } else if(mode === '1'){
+            fliter['WorkMode'] = '1';
+          } else if(mode === '2'){
+            fliter['WorkMode'] = '2';
+          } else if(mode === 'allMode'){
+            fliter['WorkMode'] = '';
+          }
+          //互动组过滤
+          /*if(mode === 'actMode' && actGrpId !== 'all'){
+            fliter['interact_grpid'] = actGrpId;
+          }*/
+        }
+
+        return fliter;
+      },
       filterDevice(){
         var that = this;
+        that.deviceListShow = that.deviceList;
+        return;
         var deviceList = this.deviceList;
         var deviceTypeSelect = this.deviceTypeSelect.toString();
         var deviceModeSelect = this.deviceModeSelect.toString();
@@ -930,6 +1038,11 @@
           case "4":
             that.deviceListShow = that.deviceList.filter(function(item){
               return (item.online == 0)
+            });
+            break;
+          case "5":
+            that.deviceListShow = that.deviceList.filter(function(item){
+              return (item.online == 1 && item.device == 'praRcv' && item.WorkMode == 0)
             });
             break;
           default:
@@ -1028,23 +1141,10 @@
       margin: auto 20%; 
       color:#eee
     }
-    .us{
-        display: block;
-        color: #FFFF00;
-        font-size: .15rem;
-        text-align: left;
-    }
-    .ds{
-        display: block;
-        color: #22aadd;
-        font-size: .15rem;
-        text-align: left;
-    }
-    .rl{
-        display: block;
-        color: #f5222d;
-        font-size: .15rem;
-        text-align: left;
+    .speedStyle{
+      display: block;
+      font-size: .15rem;
+      text-align: left;
     }
     .info{
         width: 60%;

@@ -1,7 +1,7 @@
 <template>
   <div class="pushurl">
     <div class="GroupItem">
-      <div class="GroupItemField">
+      <div class="GroupItemField" v-if="workMode==0"><!-- 推流 -->
         <div class="GroupItemTitle">推流地址</div>
         <div style="display:inline-block;line-height:.3rem;" v-if="show.showAddUrl">
           <i class="titleIcon fa fa-plus fa-large" @click="clickAddUrl"></i>
@@ -9,10 +9,10 @@
       </div>
     </div>
     <div class="addressGroup">
-      <div v-if="workMode=='推流'">
+      <div v-if="workMode==0"><!-- 推流 -->
         <template v-for="(item,i) in address">
           <div class="address" :key="i">
-            <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);float:left" @change="changeUrlEnableFun(item)"></mt-switch>  
+            <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);float:left" @change="changeUrlEnableFun(item)" :disabled="dis.urlEditable"></mt-switch>  
             <div class="title widthPart">
               <p :class="[item.push_url?'addressTitleLineH':'',item.remarkColor]">{{ item.remark?item.remark : "推流地址"+(i+1) }}</p>
               <p :class="[item.push_url ? 'addressTitleLineH' : '', 
@@ -26,18 +26,18 @@
           </div>
         </template>
       </div>
-      <div v-if="workMode=='拉流'">
+      <div v-if="workMode==1"><!-- 拉流 -->
         <template v-for="(item,i) in addressPull">
           <div class="address" :key="i">
+            <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);;float:left" @change="changePullUrlEnable(item)" :disabled="dis.pullUrlEditable"></mt-switch>  
             <div class="title widthPart">
-              <p :class="[item.push_url ? 'addressTitleLineH' : '']">{{ item.remark?item.remark : "拉流地址"+(i+1) }}</p>
-              <p :class="[item.push_url ? 'addressTitleLineH' : '', 
-              item.push_status == 'running' ? 'pushStyle' : (item.push_status == '' ? 'defaultStyle' : 'errStyle')]" class="addressUrl" v-if="item.push_url">{{ item.input_url }}</p>
+              <p :class="[item.input_url?'addressTitleLineH' : '',item.remarkColor]">{{ item.remark?item.remark : "拉流地址"+(i+1)}}</p>
+              <p :class="[item.input_url ? 'addressTitleLineH' : '', 
+              item.push_status == 'running' ? 'pushStyle' : (item.push_status == '' ? 'defaultStyle' : 'errStyle')]" class="addressUrl" v-if="item.input_url">{{ item.input_url }}</p>
             </div>
             <div class="buttons">
-              <mt-switch v-model="item.enable" style="display: inline-block;vertical-align: middle;transform: scale(0.6);" @change="changePullUrlEnable(item)"  :disabled="lockState"></mt-switch>  
               <i class="iconBtn fa fa-pencil-square-o" aria-hidden="true" @click="showEditUrls(item,i)"></i>
-              <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="delPullUrl(item)" :style="{display:(lockState||dev_push_enable)?'none':'inline-block'}"></i>
+              <i class="iconBtn fa fa-trash-o" aria-hidden="true" @click="delPullUrl(item)" :style="{display:(show.pullDelShow?'inline-block':'none')}"></i>
             </div>
           </div>
         </template>
@@ -55,7 +55,7 @@
                 <mt-field label="" placeholder="" type="textarea" rows="3" v-model="activePushObj.remark"></mt-field>
               </div>
             </div>
-            <div class="formItem" v-if="workMode == '推流'">
+            <div class="formItem" v-if="workMode == 0">
               <div class="formItemTitle">视频源</div>
               <div class="formItemVal">
                 <select class="ItemSelect2" v-model="activePushObj.sourceIndex" @change="changeVideoSource">
@@ -133,12 +133,16 @@
   import $ from 'jquery';
   export default {
     name: "PushUrl",
-    props:['lockState','workMode','transMode'/*,'cardId'*/],
+    props:['lockState','transMode'/*,'cardId'*/],
     data(){
       return{
         SUPER:SUPER,
         ADMIN:ADMIN,
+        PRA_RCV:PRA_RCV,
+        R1080_RCV:R1080_RCV,
+        workMode:"",
         URL_MAX:5,
+        mode:"",
         curDevSeries:"",
         address:[],
         addressPull:[],
@@ -165,18 +169,24 @@
           srt_url:false,
           showAddUrl:true,
           delShow:true,
+          pullDelShow:true,
           showSubmitBtn:true,
         },
+        dis:{
+          urlEditable:false,
+          
+        },
+        pullUrlEditable:false,
         /*common:{
           WorkMode:"",
           transMode:"",
           PushCard:"",
         },*/
         pushUrlsEditVisible:false,
-        OPTIONS_URL_SOURCE: [{text: "自动",value: "0"}, 
-                            {text: "源1(背包透传)",value: "1"}, 
-                            {text: "源2(板卡转码)",value: "2"}],
+        OPTIONS_URL_SOURCE: [{text: "自动",value: "0"}],
         OPTIONS_URL_SOURCE1: [{text: "源1(背包透传)",value: "1"}],
+        OPTIONS_URL_SOURCE2: [{text: "源1(背包透传)",value: "1"},
+                              {text: "源2(板卡转码)",value: "2"}],
         OPTIONS_ADDRESS_TYPE: [{label: "RTMP",value: "0"}, 
                               {label: "SRT",value: "1"}],
       }
@@ -189,13 +199,22 @@
     },
     activated(){
       var that = this;
-      clearInterval(localStorage.getPushUrl)
-      localStorage.removeItem('getPushUrl');
-      this.getURL();
+      this.$global.getDevOneParam(this.ActiveDevice.dev_sn, 'WorkMode', function(data) {
+        that.workMode = data.WorkMode;
+        //this.mode = this.workMode;
+        clearInterval(localStorage.getPushUrl)
+        clearInterval(localStorage.getPullUrl)
+        localStorage.removeItem('getPushUrl');
+        localStorage.removeItem('getPullUrl');
+        that.getURL();
+      })
+      
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(localStorage.getPushUrl);
+      clearInterval(localStorage.getPullUrl);
       localStorage.removeItem('getPushUrl');
+      localStorage.removeItem('getPullUrl');
       clearInterval(this.getPushUrlInterval);
     },
     watch:{
@@ -203,10 +222,15 @@
         immediate: true,
         handler(val) {
           var that = this;
-          clearInterval(localStorage.getPushUrl);
-          localStorage.removeItem('getPushUrl');
-          this.curDevSeries = this.$global.getDevSeries(that.ActiveDevice.dev_sn);
-          this.getURL();
+          this.$global.getDevOneParam(this.ActiveDevice.dev_sn, 'WorkMode', function(data) {
+            that.workMode = data.WorkMode;
+            clearInterval(localStorage.getPushUrl);
+            clearInterval(localStorage.getPullUrl);
+            localStorage.removeItem('getPushUrl');
+            localStorage.removeItem('getPullUrl');
+            that.curDevSeries = that.$global.getDevSeries(that.ActiveDevice.dev_sn);
+            that.getURL();
+          })
         }
       }
     },
@@ -278,21 +302,35 @@
         })
       },
       getURL(){
-        if(this.workMode == "推流"){
+        if(this.workMode == "0"){
           this.getPushUrl();
         }else{
-          this.getDevPullUrl();
+          //this.getDevPullUrl();
+          this.getPullUrl();
         }
       },
       getPushUrl(){
         var that = this;
-        that.address = [];
+        //that.address = [];
         that.$global.getPushUrls(that.formatPushUrls);
         if(localStorage.getPushUrl){
           clearInterval(localStorage.getPushUrl)
         }else{
           localStorage.getPushUrl = setInterval(function(){
             that.$global.getPushUrls(that.formatPushUrls);  
+            that.getPushParam();
+          },500)
+        }
+      },
+      getPullUrl(){
+        var that = this;
+        //that.addressPull = [];
+        that.getDevPullUrl();
+        if(localStorage.getPullUrl){
+          clearInterval(localStorage.getPullUrl)
+        }else{
+          localStorage.getPullUrl = setInterval(function(){
+            that.getDevPullUrl();
             that.getPushParam();
           },500)
         }
@@ -307,34 +345,35 @@
             }else if(data[i].push_status == ''){
               data[i].remarkColor = 'grayColor';
             }else{
-              data[i].push_url += ('(' + data[i].push_status + ')');
+              //data[i].push_url += ('(' + data[i].push_status + ')');
+              data[i].remark += ('(error:' + data[i].push_status + ')');
               data[i].remarkColor = 'redColor';
             }  
           }
           var disFlag = false;
-          if(that.curDevSeries=="1080"){
+          //if(that.curDevSeries=="1080"){
             //单卡推流
             if((that.curDevSeries=="1080") && that.transMode=="1"){
               if (data[i].oneCardEnable == 1){//设置选中
-                data[i]["enable"] = true;
+                data[i]["enable"] = true;//设置选中
               }else{
                 data[i]["enable"] = false;
               }
             } else {
               //汇聚
-              if (data[i].nEnable == 1){
-                data[i]["enable"] = true;
+              if (data[i].push_sel == 1){
+                data[i]["enable"] = true;//设置选中
               }else{
                 data[i]["enable"] = false;
               }
             }
-          }else if(that.curDevSeries=="4000"){
+          /*}else if(that.curDevSeries=="4000"){
             if (data[i].nEnable == 1){
               data[i]["enable"] = true;
             }else{
               data[i]["enable"] = false;
             }
-          }
+          }*/
         }
         that.address = data;
         if(data.length >= this.URL_MAX){
@@ -374,6 +413,23 @@
           }else{
             data[i]["enable"] = false;
           }
+          if (data[i].enable == true) {
+            data[i].remarkColor = 'grayColor';
+            var text = data[i].remark;
+            if (text == "") {
+              text = "拉流地址" + (i + 1);
+            }
+            if (data[i].pull_status == 'running') {
+              data[i].remarkColor = 'greenColor'; //绿
+            } else if (data[i].pull_status == '') {
+              data[i].remarkColor = 'grayColor';
+            } else if(data[i].pull_status == 'Closed'){
+              data[i].remarkColor = 'redColor';
+            }
+          } else {
+            data[i].remarkColor = 'grayColor';
+          }
+
         }
         this.addressPull = data;
       },
@@ -404,11 +460,36 @@
             }
             that.$emit('childFn',{"dev_push_enable":that.dev_push_enable})
             if(that.curDevSeries == "1080"){
-              if(that.lockState || that.dev_push_enable){
+              if(that.lockState){
                 that.show.delShow = false;
+                that.show.pullDelShow = false;
+                that.show.showSubmitBtn = false;
+                that.dis.urlEditable = true;
+                that.pullUrlEditable = true;
+                that.dis.pullUrlEditable = true;
               } else{
-                that.show.delShow = true;
-                that.show.showSubmitBtn = true;
+                if(data.WorkMode == 0){//推流
+                  //单卡推流 推流中不能修改推流地址
+                  if(that.transMode == 1 && that.dev_push_enable){
+                    that.dis.urlEditable = true;
+                    that.show.delShow = false;
+                    that.show.showSubmitBtn = false;
+                  }else{
+                    that.dis.urlEditable = false;
+                    that.show.delShow = true;
+                    that.show.showSubmitBtn = true;
+                  }
+                }else if(that.workMode == 1){//"拉流"
+                  if(that.dev_push_enable){
+                    that.dis.pullUrlEditable = true;
+                    that.show.pullDelShow = false;
+                    that.show.showSubmitBtn = false;
+                  }else{
+                    that.dis.pullUrlEditable = false;
+                    that.show.pullDelShow = true;
+                    that.show.showSubmitBtn = true;
+                  }
+                }
               } 
             }else if(that.curDevSeries == "4000"){
               if(that.lockState){
@@ -429,26 +510,14 @@
       changeUrlEnableFun(item){
         var that = this;
         //锁定或推流中
-        if(this.curDevSeries == '1080'){
-          if(this.lockState || this.dev_push_enable){
-            this.$toast({
-              message: '请先解锁或停止推流！',
-              position: 'middle',
-              duration: 2000
-            });
-            that.$global.getPushUrls(that.formatPushUrls); 
-            return;
-          }
-        }else if(this.curDevSeries == "4000"){
-          if(this.lockState){
-            this.$toast({
-              message: '请先解锁！',
-              position: 'middle',
-              duration: 2000
-            });
-            that.$global.getPushUrls(that.formatPushUrls); 
-            return;
-          }
+        if(this.lockState){
+          this.$toast({
+            message: '请先解锁！',
+            position: 'middle',
+            duration: 2000
+          });
+          that.$global.getPushUrls(that.formatPushUrls); 
+          return;
         }
         //地址为空
         if (item.push_url == '') {
@@ -459,52 +528,102 @@
           });
           return;
         }
-
-        if(this.curDevSeries=="1080"){
-          //单卡推流
-          if(this.transMode == '1'){
-            var len = this.address.length;
-            for(var i=0; i<len; i++){
-              if(this.address[i].oneCardEnable == 1){
-                this.checkOneCardEnable(that.address[i].id,0);
+        var checked = item.enable;
+        if(checked){//check
+          if(this.curDevSeries=="1080"){
+            var cur_row_enable  = false;
+            //单卡推流
+            if(this.transMode == '1'){
+              var len = this.address.length;
+              for(var i=0; i<len; i++){
+                if(this.address[i].oneCardEnable == 1){//表示选中此推流地址之前本身就有选中的推流地址
+                  cur_row_enable  = true;
+                  //this.editUrl(that.address[i].id, 'oneCardEnable', '0');
+                }
+              }
+              if(cur_row_enable && this.dev_push_enable){
+                var text = '单卡模式下仅支持1路推流地址，确认需要切换该推流地址？';
+                this.$messagebox.confirm(text).then(
+                  action => {
+                    for(var j=0; j<len; j++){
+                      if(this.address[j].oneCardEnable == 1){
+                        this.editUrl(that.address[j].id, 'oneCardEnable', '0');
+                      }
+                    }
+                    this.editUrl(item.id, 'oneCardEnable', '1');
+                  }
+                );
+              }else{
+                for(var k=0; k<len; k++){
+                  if(this.address[k].oneCardEnable == 1){
+                    this.editUrl(this.address[k].id, 'oneCardEnable', '0');
+                  }
+                }
+                this.editUrl(item.id, 'oneCardEnable', '1');
+              }
+            } else{//多卡汇聚
+              this.editUrl(item.id, 'push_sel', '1');
+            }  
+          }else if(this.curDevSeries=="4000"){
+            //srt只能生效一个
+            var datas = this.address;
+            var srt = 0;
+            for (var i = 0; i < datas.length; i++) {
+              if (datas[i].id == item.id) {
+                continue;
+              }
+              if (datas[i].push_url.indexOf('srt://') != -1 && datas[i].push_sel == '1') {
+                srt++;
               }
             }
-            this.checkOneCardEnable(item.id,1);
-          } else{
-            this.changeUrlEnable(item);
-          }
-        }else if(this.curDevSeries=="4000"){
-          //开启
-          var checked = '0';
-          if (item.push_sel == '0') {
-            checked = '1';
-          } else {
-            checked = '0';
-          }
-          //srt只能生效一个
-          var datas = this.address;
-          var srt = 0;
-          for (var i = 0; i < datas.length; i++) {
-            if (datas[i].id == item.id) {
-              continue;
+            if (item.push_url.indexOf('srt://') != -1 && srt > 0) {
+              that.$toast({
+                message: 'srt只能生效一个！',
+                position: 'middle',
+                duration: 2000
+              });
+              setTimeout(function(){
+                item.enable = false;
+              },500)
+              return;
             }
-            if (datas[i].push_url.indexOf('srt://') != -1 && datas[i].push_sel == '1') {
-              srt++;
+            //开启
+            this.editUrl(item.id, 'push_sel', 1);//push_sel:1
+            //刷新表格
+            item.push_sel = 1;
+            item.push_status = '';
+          }
+        }else{//uncheck
+          if(this.dev_push_enable == true){
+            var text = '正在推流中，确认需要取消推流地址吗？';
+            this.$messagebox.confirm(text).then(
+              action => {
+                if(this.curDevSeries == "1080"){
+                  //单卡推流
+                  if(this.transMode == '1'){
+                    this.editUrl(item.id, 'oneCardEnable', '0');
+                  } else{
+                    this.editUrl(item.id, 'push_sel', '0');
+                  }  
+                }else if(this.curDevSeries == "4000"){
+                  //停止
+                  this.editUrl(item.id, 'push_sel', '0');//push_sel:0
+                }
+              }
+            );
+          }else{
+            if(this.curDevSeries == "1080"){
+              //单卡推流
+              if(this.transMode == "1"){
+                this.editUrl(item.id, 'oneCardEnable', '0');
+              } else{
+                this.editUrl(item.id, 'push_sel', '0');
+              }  
+            }else if(this.curDevSeries == "4000"){
+              //停止
+              this.editUrl(item.id, 'push_sel', '0');//push_sel:0
             }
           }
-          if (item.push_url.indexOf('srt://') != -1 && srt > 0) {
-            this.$toast({
-              message: 'srt只能生效一个！',
-              position: 'middle',
-              duration: 2000
-            });
-            return;
-          }
-          this.editUrl(item.id, 'push_sel', checked);//push_sel:1,nEnable:1
-          this.editUrl(item.id, 'nEnable', checked);//push_sel:1,nEnable:1
-          //刷新表格
-          item.push_sel = checked;
-          item.push_status = '';
         }
       },
       //单卡推流地址使能
@@ -568,17 +687,34 @@
       //拉流地址enable
       changePullUrlEnable(item){
         var that= this;
-        var urlData = this.addressPull;
-        for(var i=0; i<urlData.length; i++){
-          if(urlData[i].url_enable == '1'){
-            urlData[i].enable = false;
-            that.editPullUrlFn(urlData[i].dev_sn,urlData[i].url_id,['url_enable'],['0']);
+        var checked = item.enable;
+        if(checked){//CHECK
+          //地址为空
+          if (item.input_url == '') {
+            this.$toast({
+              message: '请先输入拉流地址！',
+              position: 'middle',
+              duration: 2000
+            });
+            setTimeout(function(){
+              item.enable = false;
+            },500)
+            return; 
           }
-        }
-        if(item.enable == true){
-          this.editPullUrlFn(item.dev_sn,item.url_id,['url_enable'],['1'],function(){
-            that.getDevPullUrl();
-          });   
+          var urlData = this.addressPull;
+          //只能勾选一个
+          for(var i=0; i<urlData.length; i++){
+            if(urlData[i]["input_url"] == item.input_url){
+              continue;
+            }
+            if(urlData[i].enable == true){
+              urlData[i].enable = false;
+              that.editPullUrlFn(urlData[i].dev_sn,urlData[i].url_id,['url_enable'],['0']);
+            }
+          }
+          that.editPullUrlFn(item.dev_sn,item.url_id,['url_enable'],['1']);  
+        }else{//UNCHECK
+          that.editPullUrlFn(item.dev_sn,item.url_id,['url_enable'],['0']);
         }
       },
       //编辑拉流地址参数，多个 colArr:['',''] valueArr:['','']
@@ -618,12 +754,35 @@
       },
       //修改地址类型
       changeAddressType(){
+        var urlId = this.activePushObj.id;
         if(this.activePushObj.addressType == 0){
           this.show.rtmp_url = true;
           this.show.srt_url = false;
         }else{
           this.show.rtmp_url = false;
           this.show.srt_url = true;
+        }
+        var rcvType = this.$global.getRcvSeries(this.ActiveDevice.rcv_sn);
+        if(rcvType == this.PRA_RCV){//实体接收机 srt:源1，rtmp:自动
+          if(this.activePushObj.addressType == 0){//rtmp
+            this.videoSource = this.OPTIONS_URL_SOURCE;
+            this.activePushObj.sourceIndex = 0;
+            this.editUrl(urlId,'sourceIndex',0);
+          }else{
+            this.videoSource = this.OPTIONS_URL_SOURCE1;
+            this.activePushObj.sourceIndex = 1;
+            this.editUrl(urlId,'sourceIndex',1);
+          }
+        }else if(rcvType == this.R1080_RCV){//2010R--源1，源2，默认源2
+          this.videoSource = this.OPTIONS_URL_SOURCE2;
+          if(this.activePushObj.sourceIndex == 0){
+            this.activePushObj.sourceIndex = 2;
+            this.editUrl(urlId,'sourceIndex',2);
+          }
+        }else{//虚拟接收机或无接收机--源1
+          this.videoSource = this.OPTIONS_URL_SOURCE1;
+          this.activePushObj.sourceIndex = 1;
+          this.editUrl(urlId,'sourceIndex',1);
         }
       },
       //数据库编辑url
@@ -652,7 +811,8 @@
         })
       },
       clickTrash(item){
-        if(this.curDevSeries == "1080"){
+         this.delUrl(item.id, item.enable);
+        /*if(this.curDevSeries == "1080"){
           this.delUrl(item.id);
         }else if(this.curDevSeries == "4000"){
           if (item.enable){
@@ -665,44 +825,67 @@
           }else{
             this.delUrl(item.id);
           }
+        }*/
+      },
+      delUrl(delId, enable) {
+        var that = this;
+        if(this.dev_push_enable == true){
+          if (enable){//直播中，正在推流的地址删除要提示
+            var text = "正在推流中，确定需要删除该地址？"
+            this.$messagebox.confirm(text).then(
+              action => {
+                this.delUrlApiFn(delId)
+              }
+            );
+          }else{//直播中未推流的地址直接删除
+            var text = "确定删除该地址？"
+            this.$messagebox.confirm(text).then(
+              action => {
+                this.delUrlApiFn(delId)
+              }
+            );
+          }
+        }else{//未直播,可直接删除，无需提示
+          var text = "确定删除该地址？"
+          this.$messagebox.confirm(text).then(
+            action => {
+              this.delUrlApiFn(delId)
+            }
+          );
         }
       },
-      delUrl(delId) {
+      delUrlApiFn(delId){
         var that = this;
-        this.$messagebox.confirm("确定删除该推流地址?").then(
-          action => {
-            this.$axios({
-              method: 'post',
-              url:"/page/index/indexData.php",
-              data:this.$qs.stringify({
-                delUrl:delId
-              }),
-              Api:"delUrl",
-              AppId:"android",
-              UserId:that.user.id
-            })
-            .then(function (response) {
-              let res = response.data;
-              if(res.res.success){
-                /*that.$toast({
-                  message: '删除成功！',
-                  position: 'middle',
-                  duration: 2000
-                });*/
-                //that.getPushUrl();
-              }else{
-                that.$toast({
-                  message: '删除失败！',
-                  position: 'middle',
-                  duration: 2000
-                });
-              }
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            delUrl:delId
+          }),
+          Api:"delUrl",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.$toast({
+              message: '删除成功！',
+              position: 'middle',
+              duration: 2000
+            });
+            //that.getPushUrl();
+          }else{
+            that.$toast({
+              message: '删除失败！',
+              position: 'middle',
+              duration: 2000
+            });
           }
-        );
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       delPullUrl(item){
         var that = this;
@@ -722,8 +905,8 @@
         var that = this;
         this.pushUrlsEditVisible = true;
         //推流还是拉流
-        if(this.workMode == "推流"){
-          var isSrt = obj.push_url.indexOf('srt://');
+        if(this.workMode == 0){
+          /*var isSrt = obj.push_url.indexOf('srt://');
           //虚拟接收机或SRT，只支持背包透传
           if((this.ActiveDevice.board_id && this.ActiveDevice.board_id.length == 10) || isSrt>=0){    
             this.videoSource = this.OPTIONS_URL_SOURCE1;
@@ -731,7 +914,7 @@
           } else{
             this.videoSource = this.OPTIONS_URL_SOURCE;
             this.activePushObj.sourceIndex = obj.sourceIndex?obj.sourceIndex:0;
-          }
+          }*/
           //推流
           this.activePushObj.urlId = obj.id;
           this.activePushObj.rcvSn = obj.rcv_sn;
@@ -752,7 +935,7 @@
             this.show.showSubmitBtn = false;
           }
         }
-        else if(this.workMode=="拉流"){
+        else if(this.workMode==1){
           //拉流
           this.activePushObj.pull_urlId = obj.url_id;
           this.activePushObj.pull_devSn = obj.dev_sn;
@@ -775,6 +958,7 @@
           }
         }
         this.activePushObj.addressType = obj.url_type?obj.url_type:0;
+        this.activePushObj.sourceIndex = obj.sourceIndex;
         this.changeAddressType();
         this.activePushObj.url_error = "";
         this.activePushObj.remark = obj.remark==""?("推流地址"+(index*1+1)):obj.remark;
@@ -894,6 +1078,7 @@
           return;
         }
         //重复判断
+        var cur_row_enable  = false;
         var datas = this.address;
         if(remark == ""){
           that.$toast({
@@ -920,7 +1105,37 @@
             });
             return;
           }
+          if(urlId == datas[i].id){
+            if(datas[i].enable){
+              cur_row_enable  = true;
+            }
+          }
         }
+        if(remark.indexOf("error:") != -1){
+          remark = remark.split("(error:")[0];
+        }
+        this.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'dev_push_enable', function(data) {
+          if (data.dev_push_enable == '1') {//推流，互动传输开关开启
+            if(cur_row_enable){//直播中正在推流的地址
+              var text = '正在推流中，确定需要修改推流地址？';
+              //询问
+              that.$messagebox.confirm(text).then(
+                action => {
+                  that.editUrlRemark(urlId, rcvSn, boardID, urlAddress, remark, urlType)
+                }
+              );
+            }else{//直播中未推流的地址
+              //写数据库
+              that.editUrlRemark(urlId, rcvSn, boardID, urlAddress, remark, urlType)
+            }
+          }else{
+            //写数据库
+            that.editUrlRemark(urlId, rcvSn, boardID, urlAddress, remark, urlType)
+          }
+        })
+      },
+      editUrlRemark(urlId, rcvSn, boardID, urlAddress, remark, urlType){
+        var that = this;
         this.$axios({
           method: 'post',
           url:"/page/index/indexData.php",
@@ -1037,26 +1252,51 @@
             return;
           }
         }
-        //写数据库
-        var colArr = ['input_url','remark','card_id','url_type'];
-        var valArr = [url,remark,cardId,urlType];
-        this.editPullUrlFn(devSn, urlId, colArr, valArr, function(res) {
-          if (res.res.success) {
-            that.pushUrlsEditVisible = false;
-            that.getDevPullUrl();
-          } else {
-            that.$toast({
-              message: res.res.reason,
-              position: 'middle',
-              duration: 2000
+        this.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'dev_push_enable', function(data) {
+          if (data.dev_push_enable == '1') {//推流，互动传输开关开启
+            var text = '正在推流中，确定需要修改推流地址？';
+            that.$messagebox.confirm(text).then(
+              action => {
+                //写数据库
+                var colArr = ['input_url','remark','card_id','url_type'];
+                var valArr = [url,remark,cardId,urlType];
+                that.editPullUrlFn(devSn, urlId, colArr, valArr, function(res) {
+                  if (res.res.success) {
+                    that.pushUrlsEditVisible = false;
+                    that.getDevPullUrl();
+                  } else {
+                    that.$toast({
+                      message: res.res.reason,
+                      position: 'middle',
+                      duration: 2000
+                    });
+                  }
+                });
+              }
+            );
+          }else{
+            //写数据库
+            var colArr = ['input_url','remark','card_id','url_type'];
+            var valArr = [url,remark,cardId,urlType];
+            that.editPullUrlFn(devSn, urlId, colArr, valArr, function(res) {
+              if (res.res.success) {
+                that.pushUrlsEditVisible = false;
+                that.getDevPullUrl();
+              } else {
+                that.$toast({
+                  message: res.res.reason,
+                  position: 'middle',
+                  duration: 2000
+                });
+              }
             });
           }
         });
       },
       saveEditUrls(){
-        if(this.workMode == "推流"){
+        if(this.workMode == 0){
           this.savePushUrl();
-        }else if(this.workMode == "拉流"){
+        }else if(this.workMode == 1){
           this.savePullUrl();
         }
       },

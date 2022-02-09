@@ -15,10 +15,14 @@
         <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab == 'settings' }"></i>
         {{ $t('basic.settings') }}
       </mt-tab-item>
-      <mt-tab-item id="live">
+      <!-- 没有配对或者配了虚拟接收机不显示接收机页面,即只有实体接收机显示接收机页面 -->
+      <mt-tab-item id="live" v-show="rcvTabShowFlg">
         <i class="tab tab-live" v-bind:class="{ 'tab-live-active': activeTab == 'live' }"></i>
-        <span v-if="curDevSeries=='1080'">{{ $t('basic.live1080') }}</span>
-        <span v-else>{{ $t('basic.live4000') }}</span>
+        <span>{{ $t('basic.live4000') }}</span>
+      </mt-tab-item>
+      <mt-tab-item id="monitor" v-show="monitorFlg">
+        <i class="tab tab-monitor" v-bind:class="{ 'tab-monitor-active': activeTab == 'monitor' }"></i>
+        <span>{{ $t('basic.monitor') }}</span>
       </mt-tab-item>
       <mt-tab-item id="me">
         <i class="tab tab-me" v-bind:class="{ 'tab-me-active': activeTab == 'me' }"></i>
@@ -46,11 +50,16 @@
         isLoggedIn: false,
         tabShow:false,
         curDevSeries:'1080',
+        curRcvSeries:"",
+        workMode:"",
+        VIR_RCV:VIR_RCV,
+        PRA_RCV:PRA_RCV,
+        R1080_RCV:R1080_RCV,
       }
     },
     components: {Ad},
     computed: {
-      ...mapState(['user','navHide','activedevicetype','ActiveDevice'])
+      ...mapState(['user','navHide','activedevicetype','ActiveDevice','rcvTabShowFlg','monitorFlg'])
     },
     mounted(){
       this.SET_NAV_STATUS(true);
@@ -85,24 +94,25 @@
             }else{
               this.curDevSeries = '4000';
             }
-          
           }
         }
       },
       activeTab(val){
+        this.curRcvSeries = this.$global.getRcvSeries(this.ActiveDevice.rcv_sn);
         if(this.user.id){
           switch (val){
             //DV1080
             case 'status': this.$router.push("/status");break;
             case 'control': this.$router.push("/control");break;
             case 'live': 
-              if(this.curDevSeries == '4000'){
-                this.$router.push("/live4000");
-              }else{
+              if(this.curRcvSeries == VIR_RCV){
                 this.$router.push("/live1080");
+              }else if(this.curRcvSeries==PRA_RCV || this.curRcvSeries==R1080_RCV){
+                this.$router.push("/live4000");
               }
               break;
             case 'settings': this.$router.push("/settings");break;
+            case 'monitor': this.$router.push("/monitor");break;
             case 'me': this.$router.push("/me");break;
             default: return null;
           }
@@ -186,6 +196,9 @@ html,body{
 .tab-live{
   background-image: url('assets/icon/videocam_white_48.png');
 }
+.tab-monitor{
+  background-image: url('assets/icon/monitor_white_48.png');
+}
 .tab-settings{
   background-image: url('assets/icon/settings_white_48.png');
 }
@@ -218,6 +231,9 @@ html,body{
 }
 .tab-settings-active{
   background-image: url('assets/icon/settings_48.png');
+}
+.tab-monitor-active{
+  background-image: url('assets/icon/monitor_48.png');
 }
 .tab-me-active{
   background-image: url('assets/icon/me_48.png');

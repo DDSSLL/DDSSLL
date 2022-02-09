@@ -28,7 +28,7 @@
               <mt-cell-swipe
                 :right="[ 
                 {content: '背包',handler:() => showDevice(item)},
-                {content: '编辑',style:{display:user.userGroup==ADMIN?'':'none'}, handler:() => editReceiver(item)},
+                {content: '编辑',style:{}, handler:() => editReceiver(item)},
                 {content: '删除',style:{display:rcvDelShow?'':'none'}, handler:() => deleteReceiver(item)}
                 ]">
                 <div class="cellItem">
@@ -133,20 +133,20 @@
           <div class="fGrp">
             <div class="tl">名称</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.rcvName" required>
+              <input type="text" class="ItemInput" v-model="options.rcvName" required :disabled="disable.rcvName">
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;">名称(长度1~15，仅支持中文,字母,数字,+,-,@,(),和空格)</p>
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">序列号</div>
             <div class="vl">
-              <input type="text" class="ItemInput" v-model="options.rcvSn" required :disabled="receiverConfigType == 'edit'"> 
+              <input type="text" class="ItemInput" v-model="options.rcvSn" required :disabled="disable.rcvSn"> 
             </div>
           </div>
           <div class="fGrp">
             <div class="tl">用户组</div>
             <div class="vl">
-              <select class="ItemSelect" v-model="options.prefix" @change="changePrefixFun">
+              <select class="ItemSelect" v-model="options.prefix" @change="changePrefixFun" :disabled="disable.prefix">
                 <template v-for="(item,i) in receiverConfigPrefixOptions">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
@@ -156,7 +156,7 @@
           <div class="fGrp">
             <div class="tl">用户昵称</div>
             <div class="vl">
-              <select class="ItemSelect" v-model="options.rcvUser">
+              <select class="ItemSelect" v-model="options.rcvUser" :disabled="disable.rcvUser">
                 <template v-for="(item,i) in receiverConfigUserOptions">
                   <option :value="item.value">{{ item.text }}</option>
                 </template>
@@ -166,7 +166,7 @@
           <div class="fGrp" v-if="receiverConfigType=='edit'">
             <div class="tl">系统配置</div>
             <div class="vl">
-               <mt-field type="textarea" rows="3" v-model="options.infoStr" readonly="readonly" style="    word-break: break-all;"></mt-field>
+               <mt-field type="textarea" rows="3" v-model="options.infoStr" readonly="readonly" style="word-break: break-all;"></mt-field>
             </div>
           </div>
           <div class="fGrp">
@@ -174,14 +174,14 @@
             <div style="margin-top:5px;">
               <div v-if="upgradeDiv">
                 <span style="color: #ff9945;">有新版本!</span>
-                <button type="button" id="upgradeBtn" @click="upgradeVirRcv('upgrade')">更新</button>
+                <button type="button" id="upgradeBtn" @click="upgradeVirRcv('upgrade')" v-if="user.userGroup == ADMIN">更新</button>
                 <span> -> </span>
                 <span style="color: #ff9945">{{ newVerStr }}</span>
               </div>
               <div v-if="rollbackDiv">
                 <span style="color: #2de505;">已是最新版本!</span>
                 <div v-if="rollbackBtnDiv">
-                  <button type="button" @click="upgradeVirRcv('rollback')">回退</button>
+                  <button type="button" @click="upgradeVirRcv('rollback')" v-if="user.userGroup == ADMIN">回退</button>
                   <span> -> </span>
                   <span>{{ oldVerStr }}</span>
                 </div>
@@ -191,7 +191,7 @@
               </div>
             </div>
           </div>
-          <div class="fGrp" style="text-align: right">
+          <div class="fGrp" style="text-align: right" v-if="show.editBtn">
             <button type="button" @click="receiverConfigVisible = false" style="margin-right: .06rem;">取消</button>
             <button type="submit">确定</button>
           </div>
@@ -247,7 +247,16 @@
         selectPrefix:[],//选中的用户组
         selectPrefixName:[],//显示过滤组的名称
         prefixArr:[],//用户组下拉框数据
-        userPrefixPop:false,//用户组pop的show
+        userPrefixPop:false,//用户组pop的show,
+        disable:{
+          rcvName : false,
+          rcvSn : false,
+          prefix : false,
+          rcvUser : false,
+        },
+        show:{
+          editBtn:true,
+        }
       }
     },
     computed: {
@@ -452,6 +461,7 @@
         })
       },
       editReceiver(item){
+        var that = this;
         this.receiverConfigVisible = true;
         this.receiverConfigType = "edit";
         this.getDevPrefixList(item);
@@ -462,6 +472,28 @@
           rcv_online:item.online,
           rcv_autoUpgrade:item.autoUpgrade,
           infoStr:item.infoStr
+        }
+        var hasRights = that.$global.judgeUserHasRcvRights(item.rcv_sn, that.receiverShowList);
+        if (!hasRights) {
+          that.disable.rcvName = true;
+        }
+        that.disable.rcvSn = true;
+        //普通用户只能看不能编辑(高级用户可编辑名称，管理员可编辑名称和选择用户、用户组)
+        if(that.user.userGroup == ADMIN){//管理员组编辑接收机时，可进行用户组，用户切换操作
+          that.disable.rcvName = false;
+          that.disable.prefix = false;
+          that.disable.rcvUser = false;
+          that.show.editBtn = true;
+        }else if(that.user.userGroup == ADVANCE){//高级用户组编辑接收机时，只可编辑名称，用户组，用户只显示不可操作
+          that.disable.rcvName = false;
+          that.disable.prefix = true;
+          that.disable.rcvUser = true;
+          that.show.editBtn = true;
+        }else if(that.user.userGroup == NORMAL){//高级用户组不可编辑接收机，只可显示
+          that.disable.rcvName = true;
+          that.disable.prefix = true;
+          that.disable.rcvUser = true;
+          that.show.editBtn = false;
         }
         //升级
         if (item['newestVer'] != ''){
@@ -649,6 +681,7 @@
         this.receiverConfigType = "add";
         this.options.rcv_online = "离线";
         this.options.rcv_autoUpgrade = "0";
+        this.disable.rcvSn = false;
         this.getDevPrefixList();
         this.clearRcvPopup();
       },

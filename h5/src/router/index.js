@@ -8,6 +8,7 @@ import Status from '@/components/status/Status'
 import Control from '@/components/control/Control'
 import Live1080 from '@/components/live/Live1080'
 import Live4000 from '@/components/live/Live4000'
+import Monitor from '@/components/monitor/Monitor'
 import Settings from '@/components/settings/Settings'
 import Me from '@/components/me/Me'
 
@@ -80,6 +81,14 @@ export default new Router({
         path: '/live4000',
         name: 'Live4000',
         component: Live4000,
+        meta: {
+          keepAlive: true
+        }
+      },
+      {
+        path: '/monitor',
+        name: "Monitor",
+        component: Monitor,
         meta: {
           keepAlive: true
         }

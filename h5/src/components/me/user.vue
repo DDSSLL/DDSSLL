@@ -493,6 +493,7 @@
         var that = this;
         that.userConfigVisible = true;
         that.curUser.userEditType = "add";
+        that.curUser.resetPwd = false;//重置密码
         that.initUserGroup(function(){
           that.curUser.userGroup = that.curUser.userGroupOptions[0]["value"];
         });
@@ -604,6 +605,7 @@
             return;
           }
         }else{
+          pwd = newPwd;
           if(this.curUser.pwdReset == '1'){
             //新密码
             if (!this.$global.pwdCheckType(newPwd)) {

@@ -11,7 +11,9 @@ var DEV_MODE = [{sn: 2140,name: 'DV4000T'},
                 {sn: 2155,name: 'CM-T5G 1000'},
                 {sn: "",name: 'MH5000-31'}, //华为5G
                 {sn: "",name: 'EC200T'},    //高通4G
-                {sn: "",name: 'RG500QEA'}   //高通5G
+                {sn: "",name: 'RG500QEA'},   //高通5G
+                {sn: 2157,name: 'DV2010T'},
+                {sn: 2161,name: 'CM-T5G 2100'},
               ];
 var RCV_MODE = [{sn: 2141,name: 'DV4000R'}, 
                 {sn: 2143,name: 'DV4001R'}, 
@@ -24,7 +26,11 @@ var RCV_MODE = [{sn: 2141,name: 'DV4000R'},
                 {sn: 7192,name: 'CM-IR5500T'}, 
                 {sn: 2152,name: 'CM-IR6000T'}, 
                 {sn: 2154,name: 'DV1080R'}, 
-                {sn: 2156,name: 'DV1080R+'}];
+                {sn: 2156,name: 'DV1080R+'}, 
+		            {sn: 2162,name: 'CM-IR5100T'}, 
+                {sn: 2164,name: 'DV2004R'}, 
+                {sn: 2165,name: 'DV2000R'}, 
+                {sn: 2167,name: 'DV4013R'}];
 window.xSplit = 300;
 
 window.DEBUG_USER = 'debug';//debug用户
@@ -54,16 +60,17 @@ window.UHDXPRESS_BUILD = "http://4000.uhdxpress.com";//4000一级域名
 window.UHDXPRESS_SERVE = "http://139.129.91.106/";//4000二级域名
 window.VIR_RCV = '2999'; //虚拟接收机
 window.PRA_RCV = '2141'; //实体接收机
-window.R1080_RCV = '2154'; //1080R
+window.R1080_RCV = '2154'; //2010R
 
 window.colorGV = {
     '发送速率':'#FFFF00',
     '接收速率': '#22aadd',
-    '可变码率': '#73d13d',
+    '编码码率': '#73d13d',
     '传输丢包': '#f1a1ff',
     '业务丢包': '#f5222d',
     '信号输入': '#f5a122',
-    'SRT拉流': '#68F55F',
+    'SRT拉流': '#00fcfc',
+    '拉流速率': '#00fcfc',
 
     'SIM1↑':'#fa8c16',
     'SIM1↓':'#ffc069',
@@ -126,7 +133,7 @@ window.colorGV = {
     'WIFI业务丢包':'#597ef7'
 };
 window.colorObj = {
-    "发送速率":'totalUp', "接收速率":'totalDown',"可变码率":'totalAVBR',
+    "发送速率":'totalUp', "接收速率":'totalDown',"编码码率":'totalAVBR',"拉流速率":'totalSrt',
     "传输丢包":'TotalLossDev', "业务丢包":'TotalLossRcv',"SRT拉流":'TotalSRT',
     "SIM1↑":'SIM1Up',"SIM1↓":'SIM1Down',"SIM1传输丢包":'SIM1LossDev',"SIM1业务丢包":'SIM1LossRcv',
     "SIM2↑":'SIM2Up',"SIM2↓":'SIM2Down',"SIM2传输丢包":'SIM2LossDev',"SIM2业务丢包":'SIM2LossRcv',
@@ -246,7 +253,7 @@ export default {
                               {text: "1280x720p50",value: "8"}, 
                               {text: "720x576p50",value: "11"}, 
                               {text: "720x480p59.94",value: "12"}],
-
+  OPTIONS_HDMI_FORMAT_1080_ACT : [{text: "1920x1080p50",value: "3"}],
   OPTIONS_HDMI_FORMAT_1080 : [{text: "1920x1080p30",value: "1"},
                               {text: "1920x1080p60",value: "2"}, 
                               {text: "1920x1080p50",value: "3"}, 
@@ -288,8 +295,8 @@ export default {
                             {text: "720p",value: "3"}],
   //接收机板卡相关参数--start
   OPTION_TRANSMODE:[{text: "SRT (Caller)",value: "SRT SEND"},
-                    {text: "SRT (Listener)",value: "SRT SERVER"},
-                    {text: "UDPLIVE",value: "UDPLIVE"}],
+                    {text: "SRT (Listener)",value: "SRT SERVER"}/*,
+                    {text: "UDPLIVE",value: "UDPLIVE"}*/],
   OPTION_ENCINPUT : [{text: "SDI",value: "SDI"},
                     {text: "HDMI",value: "HDMI"}],
   OPTION_ENCVCODEC : [{text: "H.264",value: "H.264"}],
@@ -741,7 +748,7 @@ export default {
       method: 'post',
       url:"/page/index/indexData.php",
       data:qs.stringify({
-        getBoardUrl:true,
+        getBoardUrl:"true",
         rcvSn: store.state.ActiveDevice.rcv_sn,
         boardId: boardId,
         devSN: store.state.ActiveDevice.dev_sn
@@ -859,6 +866,29 @@ export default {
         res = that.OPTIONS_AUDIO_ENCODE_4000;
       }else{
         res = that.OPTIONS_AUDIO_ENCODE2_4000;
+      }
+    }
+    else if(param === 'HdmiTransFormat'){
+      if(devSeries === '1080'){
+        /*if(qukanUrlMode == "qukan"){//趣看对接，要求隐藏编码分辨率的1920*1080i50、1920x1080i60
+          res = OPTIONS_HDMI_FORMAT_1080_QUKAN;
+        }else{*/
+          if(extraParam == '2'){//互动
+              res = that.OPTIONS_HDMI_FORMAT_1080_ACT;
+          }else{
+              res = that.OPTIONS_HDMI_FORMAT_1080;    
+          }
+        //}
+      }
+      else if(devSeries === '4000'){
+          //related2：视频编码
+          if(extraParam && extraParam == '4'){
+              //H.264
+              res = that.OPTIONS_HDMI_FORMAT_4000;
+          } else{
+              //H.265 编码分辨率只有自动
+              res = [that.OPTIONS_HDMI_FORMAT_4000[0]];
+          }
       }
     }
     return res;
@@ -1224,6 +1254,21 @@ export default {
     }
     return true;
   },
+  judgeUserHasRcvRights(rcvSn, rcvList) {
+    if (store.state.user.userGroup == NORMAL) { //普通用户
+      return false;
+    }
+    //var rcvList = $('#rcv_table').bootstrapTable('getData');
+    for (var i = 0; i < rcvList.length; i++) {
+      if (rcvList[i].rcv_sn == rcvSn) { //用户相同接收机id相同返回true
+        if (rcvList[i].user_id == store.state.user.id) {
+          return true;
+        }
+        break;
+      }
+    }
+    return false;
+  },
   //初始化用户组对应的用户下拉列表
   initUserListByPrefix(prefix,cb) {
     //获取设备的使用者和全部非管理员用户列表
@@ -1499,7 +1544,7 @@ export default {
     return res;
   },
   //获取某个参数
-  getDevOneParam(devSn, param, callback) {
+  getDevOneParam(devSn, param, callback,url) {
     var devSN = "";
     if(devSn != ""){
       devSN = devSn;
@@ -1512,9 +1557,10 @@ export default {
         return;
       }
     }
+    var urlAddr = url?url:"/page/index/indexData.php";
     axios({
       method: 'post',
-      url:"/page/index/indexData.php",
+      url: urlAddr,//"/page/index/indexData.php",
       data:qs.stringify({
         getDevOneParam:devSN ,
         devParamCol:param
@@ -1664,12 +1710,13 @@ export default {
     }
     var sn_4 = devSn.substr(-4);
     sn_4 = +sn_4;
-    //DV4000T,DV3000T,DV406,CM-T5G 2000
-    if(sn_4 == 2140 || sn_4 == 2142 || sn_4 == 2147 || sn_4 == 2148 || sn_4 === 2153 || sn_4 === 2155){
+    //DV4000T,DV3000T,DV406,CM-T5G 2000, DV5000
+    if(sn_4 == 2140 || sn_4 == 2142 || sn_4 == 2147 || sn_4 == 2148 || sn_4 === 2153 || sn_4 === 2155 
+      || sn_4 == 2158 ||sn_4 == 2160 || sn_4 == 2151){
       return '4000';
     }
     //DV1080,QUK100,DV1080P,ICBT-201
-    else if(sn_4 == 2146 || sn_4 == 2150 || sn_4 == 7189 || sn_4 == 7207){
+    else if(sn_4 == 2146 || sn_4 == 2150 || sn_4 == 7189 || sn_4 == 7207 || sn_4 == 2157 || sn_4 == 2161){
       return '1080';
     }
     else{
@@ -1682,7 +1729,7 @@ export default {
   * 输出：‘2999’ ‘2141’
   ************************/
   getRcvSeries(sn){
-    if(!this.isValidRcvSn(sn)){
+    if(!sn || !this.isValidRcvSn(sn)){
       return false;
     }
     var sn_4 = sn.substr(-4);
@@ -1854,5 +1901,25 @@ export default {
     localStorage.autoYaxis = "true";
     localStorage.maxYaxis = "";
     localStorage.intervalYaxis = "";
+  },
+  //特殊字符转译输出
+  charHtmlEnc(str){
+    var res = '';
+    var reg1 = new RegExp("<","g");//g,表示全部替换。
+    var reg2 = new RegExp(">","g");//g,表示全部替换。
+    str = str.replace(reg1,'&lt;');
+    str = str.replace(reg2,'&gt;');
+    return str;
+  },
+  //获取登录账号
+  getLoginId() {
+    console.log("getLoginId")
+    console.log(store.state.user.id)
+    var res = store.state.user.id;
+    console.log("res:"+store.state.user.id)
+    if (res == '001-admin1' || res == '001-admin2' || res == '001-admin3') {
+        res = '001-admin';
+    }
+    return res;
   }
 }

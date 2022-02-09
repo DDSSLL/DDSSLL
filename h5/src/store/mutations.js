@@ -1,5 +1,4 @@
 import * as types from './mutation-types'
-/*import Vue from 'vue'*/
 
 // 改变state数据
 export default {
@@ -14,13 +13,7 @@ export default {
     },
     // 设置当前设备
     [types.SET_ACTIVE_DEVICE]: (state, datas) => {
-        //if(datas){
-            state.ActiveDevice = datas;    
-            /*Vue.set(state.ActiveDevice,'dev_sn', datas.dev_sn);
-            Vue.set(state.ActiveDevice,'dev_name', datas.dev_name);
-            Vue.set(state.ActiveDevice,'rcv_sn', datas.rcv_sn);
-            Vue.set(state.ActiveDevice,'board_id', datas.board_id);*/
-        //}
+        state.ActiveDevice = datas
     },
     // 设置设备定时器
     /*[types.SET_DEVICE_TIMER]: (state, datas) => {
@@ -47,7 +40,7 @@ export default {
     [types.SET_DEVICE_TYPE_SELECT]: (state, datas) => {
         state.deviceTypeSelect = datas
     },
-    //设置设备里诶博爱显示模式
+    //设置设备列表显示模式
     [types.SET_DEVICE_MODE_SELECT]: (state, datas) => {
         state.deviceModeSelect = datas
     },
@@ -75,4 +68,12 @@ export default {
     /*[types.SET_CHART_CARD_VIEW]: (state, datas) => {
         state.chartCardView = datas
     }*/
+    // 设置接收机Tab显示标志位
+    [types.SET_RCV_TAB_SHOW_FLG]: (state, datas) => {
+        state.rcvTabShowFlg = datas
+    },
+    // 设置监控Tab显示标志位
+    [types.SET_MONITOR_TAB_SHOW_FLG]: (state, datas) => {
+        state.monitorFlg = datas
+    },    
 }

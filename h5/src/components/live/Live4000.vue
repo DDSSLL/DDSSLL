@@ -55,7 +55,7 @@
       </div>
       <transition name="slide-fade">
         <div v-show="outputShow">
-          <div class="GroupItem"><!-- SDI -->
+          <div class="GroupItem" v-if="show.sdi_title"><!-- SDI -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">SDI</div>
               <div class="GroupItemValue infoShow" v-show="show.SDIinfoShow">
@@ -63,42 +63,40 @@
               </div>
             </div>
           </div>
-          <div v-show="show.SDIShow">
-            <div class="GroupItem"><!-- 分辨率 -->
-              <div class="GroupItemField">
-                <div class="GroupItemTitle">分辨率</div>
-                <div class="GroupItemValue">
-                  <select class="ItemSelect" v-model="options.SDI_resolution" @change="editBoardListParam('value3',options.SDI_resolution)" :disabled="disable.SDI_resolution">
+          <div class="GroupItem" v-if="show.sdi_resolution"><!-- 分辨率 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">分辨率</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.SDI_resolution" @change="editBoardListParam('value3',options.SDI_resolution)" :disabled="disable.SDI_resolution">
                   <template v-for="item in OPTIONS_SDI_RESULUTION_SDI">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
                 </select>
-                </div>
-              </div>
-            </div>
-            <div class="GroupItem"><!-- 帧率 -->
-              <div class="GroupItemField">
-                <div class="GroupItemTitle">帧率</div>
-                <div class="GroupItemValue">
-                  <select class="ItemSelect" v-model="options.SDI_framerate" @change="editBoardListParam('value4',options.SDI_framerate)" :disabled="disable.SDI_framerate">
-                    <template v-for="item in OPTIONS_FRAMERATE_SDI">
-                      <option :value="item.value">{{ item.text }}</option>
-                    </template>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="GroupItem"><!-- 解码器 -->
-              <div class="GroupItemField">
-                <div class="GroupItemTitle">解码器</div>
-                <div class="GroupItemValue">
-                  <mt-button class="ItemBtn" type="primary" @click="clickEncodeResetBtn" :disabled="rcvParamLock || disable.encodeReset">{{options.encodeResetName}}</mt-button>
-                  <mt-button class="ItemBtn" style="margin-left:10px;" @click="clickEncodeStartBtn" :disabled="disable.encodeStop">停止</mt-button>
-                </div>
               </div>
             </div>
           </div>
-          <div class="GroupItem"><!-- hdmi -->
+          <div class="GroupItem" v-if="show.sdi_framerate"><!-- 帧率 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">帧率</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.SDI_framerate" @change="editBoardListParam('value4',options.SDI_framerate)" :disabled="disable.SDI_framerate">
+                  <template v-for="item in OPTIONS_FRAMERATE_SDI">
+                    <option :value="item.value">{{ item.text }}</option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="show.sdi_encode"><!-- 解码器 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">解码器</div>
+              <div class="GroupItemValue">
+                <mt-button class="ItemBtn" type="primary" @click="clickEncodeResetBtn" :disabled="rcvParamLock || disable.encodeReset">{{options.encodeResetName}}</mt-button>
+                <mt-button class="ItemBtn" style="margin-left:10px;" @click="clickEncodeStartBtn" :disabled="disable.encodeStop">停止</mt-button>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="show.hdmi_title"><!-- hdmi -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">HDMI</div>
               <div class="GroupItemValue infoShow" v-show="show.HDMIinfoShow">
@@ -106,44 +104,95 @@
               </div>
             </div>
           </div>
-          <div v-show="show.HDMIShow">
-            <div class="GroupItem"><!-- 输出透传 -->
-              <div class="GroupItemField">
-                <div class="GroupItemTitle">输出透传</div>
-                <div class="GroupItemValue">
-                  <mt-switch v-model="options.HDMI_througu" @change="changeHDMIThrougu" :disabled="disable.HDMI_througu">
-                  </mt-switch>
-                </div>
+          <div class="GroupItem" v-if="show.hdmi_througu"><!-- 输出透传 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">输出透传</div>
+              <div class="GroupItemValue">
+                <mt-switch v-model="options.HDMI_througu" @change="changeHDMIThrougu" :disabled="disable.HDMI_througu">
+                </mt-switch>
               </div>
             </div>
-            <div class="GroupItem"><!-- 分辨率 -->
-              <div class="GroupItemField">
-                <div class="GroupItemTitle">分辨率</div>
-                <div class="GroupItemValue">
-                  <select class="ItemSelect" v-model="options.HDMI_resolution" @change="changeHDMIResolution" :disabled="disable.HDMI_resolution">
-                  <template v-for="item in $global.OPTIONS_HDMI_RESULUTION">
+          </div>
+          <div class="GroupItem" v-if="show.hdmi_resolution"><!-- 分辨率 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">分辨率</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.HDMI_resolution" @change="changeHDMIResolution" :disabled="disable.HDMI_resolution">
+                <template v-for="item in $global.OPTIONS_HDMI_RESULUTION">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem" v-if="show.hdmi_framerate"><!-- 帧率 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">帧率</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.HDMI_framerate" @change="editBoardListParam('value8',options.HDMI_framerate)" :disabled="disable.HDMI_framerate">
+                  <template v-for="item in OPTIONS_FRAMERATE_HDMI">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
                 </select>
-                </div>
               </div>
             </div>
-            <div class="GroupItem"><!-- 帧率 -->
-              <div class="GroupItemField">
-                <div class="GroupItemTitle">帧率</div>
-                <div class="GroupItemValue">
-                  <select class="ItemSelect" v-model="options.HDMI_framerate" @change="editBoardListParam('value8',options.HDMI_framerate)" :disabled="disable.HDMI_framerate">
-                    <template v-for="item in OPTIONS_FRAMERATE_HDMI">
-                      <option :value="item.value">{{ item.text }}</option>
-                    </template>
-                  </select>
-                </div>
+          </div>
+          <div class="GroupItem" v-if="show.audio_output"><!-- 音频输出 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">音频输出</div>
+              <div class="GroupItemValue">
+                <select class="ItemSelect" v-model="options.audioOutput" @change="editBoardListParam('value16',options.audioOutput)" :disabled="disable.audioOutput">
+                  <template v-for="item in OPTIONS_AUDIO_OUTPUT">
+                    <option :value="item.value">{{ item.text }}</option>
+                  </template>
+                </select>
               </div>
             </div>
           </div>
         </div>
       </transition>
     </div>
+    <div class="Group" v-if="show.showPullParam"><!-- 拉流 -->
+      <div class="GroupTitle" @click="pullParamShow=!pullParamShow">
+        拉流
+        <i class="titleIcon fa" :class="[pullParamShow == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
+      </div>
+      <transition name="slide-fade">
+        <div v-show="pullParamShow">
+          <!-- <div class="GroupItem">
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">拉流模式</div>
+              <div class="GroupItemValue" style="padding-top:7px">
+                <a style="color:#3d81f1;" @click="showUrlSourceWin" v-if="!rcvParamLock">
+                  <i class="fa fa-pencil-square-o fa-lg"></i>
+                </a>
+              </div>
+            </div>
+          </div> -->
+          <div class="GroupItem"><!-- 拉流地址 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">{{"板卡"+options.boardName+"拉流地址"}}</div>
+              <div class="GroupItemValue" style="padding-top:7px" v-if="rcvParamLock">
+                <span :style="{color:options.boardColor}" style="word-break: break-all;">{{ options.boardUrl }}</span>
+              </div>
+              <div class="GroupItemValue" v-if="!rcvParamLock">
+                <input type="text" class="ItemIpt byteIpt" v-model="options.boardUrl" @blur="changeBoardUrl" style="width:96%">
+              </div>
+            </div>
+          </div>
+          <div class="GroupItem"><!-- 拉流模式 -->
+            <div class="GroupItemField">
+              <div class="GroupItemTitle">{{ "板卡"+options.boardName }}</div>
+              <div class="GroupItemValue" style="width:auto">
+                <mt-switch v-model="options.boardSwitch" @change="changeBoardSwitch" :disabled="rcvParamLock">
+                </mt-switch>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </div>
+    
     <div class="Group" v-if="show.record"><!-- 录机 -->
       <div class="GroupTitle" @click="recordShow=!recordShow">
         录机
@@ -254,6 +303,10 @@
       </div>
     </mt-popup>
 
+    <!-- 2010R 和背包没有关系，故显示在接收机页面 --><!-- 带页面开发完成后再加 -->
+    <!-- <div class="Group" v-if="curRcvSeries==R1080_RCV">
+      
+    </div> -->
   </div>
 </template>
 
@@ -265,9 +318,13 @@
     name: "Live",
     data(){
       return{
+        userId:this.$global.getLoginId(),
+        R1080_RCV:R1080_RCV,
+        NORMAL:NORMAL,
         workMode:"推流",
         boardUrlShow:true,
         outputShow:false,
+        pullParamShow:false,
         recordShow:false,
         rcvParamLock: true,
         PREFIX:PREFIX,
@@ -285,7 +342,8 @@
         OPTIONS_URL_SOURCE1: [{text: "源1(背包透传)",value: "1"}],
         OPTIONS_ADDRESS_TYPE: [{label: "RTMP",value: "0"}, 
                               {label: "SRT",value: "1"}],
-
+        OPTIONS_AUDIO_OUTPUT: [{text:"模拟",value:0},
+                              {text:"AES",value:1}],
         dev_options:{
           video_encode:"",
           latency:"",
@@ -331,6 +389,11 @@
           urlresolution2:"1080p50",
           urlVEnc2:"H.264",
           urlAEnc2:"AAC",
+          boardName:"",
+          boardSwitch:false,
+          boardUrl:"",
+          boardUrlOri:"",
+          boardColor:"",
         },
         disable:{
           board_mbps:false,//传输速率
@@ -348,8 +411,9 @@
         },
         show:{
           pushUrl:true,
-          record:true,
+          record:false,
           showOutput:true,//输出tab
+          showPullParam:false,//2010R拉流
           SDIShow:true,//SDI输出
           HDMIShow:true,//HDMI输出
           SDIinfoShow:false,//输出提示信息
@@ -360,8 +424,18 @@
           recordErrInfo:false,//录制开关报错信息
           source2:false,//源2显示
           saveUrlShow:true,//编辑推流地址的确定按钮
-          //showUrlShow:true,//编辑源2的确定按钮
+           //showUrlShow:true,//编辑源2的确定按钮
           showAddUrl:false,//添加推流地址
+          //输出
+          sdi_title:false,//SDI
+          sdi_resolution:false,//SDI分辨率
+          sdi_framerate:false,//SDI帧率
+          sdi_encode:false,//SDI解码器
+          hdmi_title:false,//HDMI
+          hdmi_througu:false,//HDMI输出透传
+          hdmi_resolution:false,//HDMI分辨率
+          hdmi_framerate:false,//HDMI帧率
+          audio_output:false,//HDMI音频输出
         },
         pushUrlsEditVisible:false,
         source2Visible:false,//源2配置
@@ -390,19 +464,27 @@
         handler(val) {
           if(this.$route.fullPath == "/live4000"){
             this.curDevSeries = this.$global.getDevSeries(this.ActiveDevice.dev_sn);
-            if(this.curDevSeries == '4000'){
+            this.curRcvSeries = this.$global.getRcvSeries(this.ActiveDevice.rcv_sn);
+            /*if(this.curDevSeries == '4000'){
               this.$router.push("/live4000");
             }else{
               this.$router.push("/live1080");
+            }*/
+            if(this.curRcvSeries == VIR_RCV){/*虚拟汇聚*/
+              //this.$router.push("/live1080");
+            }else if(this.curRcvSeries==PRA_RCV || this.curRcvSeries==R1080_RCV){/*实体接收机*/
+              this.$router.push("/live4000");
             }
             if(this.$route.fullPath == "/live4000"){
               if(val){
                 var that = this;
                 this.$global.getDeviceParam(this.initDevParam);//获取设备参数
                 this.$global.getMbps();
-                this.getRcvParam();
+                console.log("dev sn change")
+                //this.getRcvParam();
                 this.getDevState();//源1
                 this.source2Show();//源2
+                this.showBoardMode();//2010R拉流
               }
             }
           }
@@ -410,11 +492,13 @@
       }
     },
     activated(){  //生命周期-缓存页面激活
+      console.log("activated")
       this.$global.getDeviceParam(this.initDevParam);//获取设备参数
       this.$global.getMbps();
       this.getRcvParam();
       this.getDevState();//源1
       this.source2Show();//源2
+      this.showBoardMode();//2010R拉流
     },
     deactivated(){   //生命周期-缓存页面失活
       clearInterval(this.getPushUrl);
@@ -423,6 +507,236 @@
       Device
     },
     methods:{
+      showBoardMode(){
+        var rcvSn = this.ActiveDevice.rcv_sn;
+        if(!this.$global.isValidRcvSn(rcvSn)){
+          return;
+        }
+        if(this.$global.getRcvSeries(rcvSn) == R1080_RCV){ //2010R
+          this.show.showPullParam = true;
+          this.getBoardListData(rcvSn);
+        }else{
+          this.show.showPullParam = false;
+        }
+      },
+      getBoardListData(rcvSn){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getBoardListData:true,
+            rcvSn: rcvSn,
+            boardId: that.ActiveDevice.board_id,
+          }),
+          Api:"getBoardListData",
+          AppId:"android",
+          UserId:that.userId
+        })
+        .then(function (response) {
+          console.log("getDevState")
+          let res = response.data;
+          var data = res.data;
+          var color = '#ffffff';
+          if(data['pullStatus'] === 'running'){
+            color = '#00ff00';
+          } else if(data['pullStatus'] === 'error'){
+            color = '#FF0000';
+          }
+          that.options.boardColor = color;
+          //地址
+          that.options.boardName = data["board_id"]*1+1;
+          that.options.boardUrl = that.$global.charHtmlEnc(data["pullUrl"]);
+          that.options.boardUrlOri = that.options.boardUrl;
+          if(data['pullStart'] == 1){
+            that.options.boardSwitch = true;
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })  
+      },
+      changeBoardSwitch(){
+        var that = this;
+        var text = "";
+        if(this.options.boardSwitch){//开
+          if(this.options.boardUrl==""){
+            that.$toast({
+              message: '请先填写当前板卡的拉流地址',
+              position: 'middle',
+              duration: 2000
+            });
+            setTimeout(function(){
+              that.options.boardSwitch = false;
+            },500)
+            return;
+          }
+          text = "是否开启板卡"+that.options.boardName+"的拉流模式？"
+        }else{
+          text = "是否关闭板卡"+that.options.boardName+"的拉流模式？"
+        }
+        that.$messagebox.confirm(text).then(
+          action => {
+            that.setBoardParam(that.ActiveDevice.rcv_sn,that.options.boardName-1,that.options.boardSwitch);
+            //更新颜色
+            that.updateBoardPullStatus();
+          },
+          action => {
+            setTimeout(function(){
+              that.options.boardSwitch = !that.options.boardSwitch;
+            },500)
+          } 
+        );
+      },
+      setBoardParam(rcvSn, boardId, enable){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            setBoardParam:true,
+            rcvSn: rcvSn,
+            boardId: boardId,
+            enable: enable?1:0,
+          }),
+          Api:"setBoardParam",
+          AppId:"android",
+          UserId:that.userId
+        })
+        .then(function (response) {
+          console.log("getDevState")
+          let res = response.data;
+          var data = res.data;
+          
+        })
+        .catch(function (error) {
+          console.log(error)
+        }) 
+      },
+      //自动获取5次板卡拉流的状态
+      updateBoardPullStatus(){
+        var that = this;
+        var timerNum_boardPull = 5;
+        var timer_boardPull = setInterval(function(){
+          that.refreshBoardUrl(that.ActiveDevice.rcv_sn,that.ActiveDevice.board_id);
+          if(that.options.boardSwitch != true){
+            clearInterval(timer_boardPull);
+            return;
+          }
+          timerNum_boardPull--;
+          if(timerNum_boardPull <= 0){
+            clearInterval(timer_boardPull);
+            timerNum_boardPull = 5;
+          }
+        },1000);
+      },
+      refreshBoardUrl(rcvSn,boardId){
+        var that = this;
+        if(!that.$global.isValidRcvSn(rcvSn)){
+          return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getBoardPullState:true,
+            rcvSn: rcvSn,
+            boardId: boardId,
+          }),
+          Api:"getBoardPullState",
+          AppId:"android",
+          UserId:that.userId
+        })
+        .then(function (response) {
+          let res = response.data;
+          var data = res.data;
+          var color = '#ffffff';
+          if(data['pullStatus'] === 'running'){
+            color = '#00ff00';
+          } else if(data['pullStatus'] === 'error'){
+            color = '#FF0000';
+          }
+          //更新地址和颜色
+          that.options.boardUrl = data['pullUrl'];
+          that.options.boardUrlOri = that.options.boardUrl;
+          that.options.boardColor = color;
+        })
+        .catch(function (error) {
+          console.log(error)
+        })  
+      },
+      //下发板卡地址
+      changeBoardUrl(){
+        console.log("changeBoardUrl")
+        var that = this;
+        console.log("this.options.boardUrl:"+this.options.boardUrl)
+        console.log("this.options.boardUrlOri:"+this.options.boardUrlOri)
+        if(this.options.boardUrl == this.options.boardUrlOri){
+          console.log("return")
+          return;
+        }
+        var text = "确定修改板卡地址?"
+        that.$messagebox.confirm(text).then(
+          action => {
+            var boardIdArr = [];
+            var boardUrlArr = [];
+            var id = that.options.boardName-1;
+            var url = that.options.boardUrl;
+            var result = that.checkUrl(url);
+            if (result != '') {
+              that.$toast({
+                message: result,
+                position: 'middle',
+                duration: 2000
+              });
+              that.options.boardUrl = "";
+              return;
+            }
+            boardIdArr.push(id);
+            boardUrlArr.push(url);
+            that.$axios({
+              method: 'post',
+              url:"/page/index/indexData.php",
+              data:this.$qs.stringify({
+                setBoardUrl: true,
+                rcvSn: that.ActiveDevice.rcv_sn,
+                boardIdArr: boardIdArr,
+                boardUrlArr: boardUrlArr,
+              }),
+              Api:"setBoardUrl",
+              AppId:"android",
+              UserId:that.userId
+            })
+            .then(function (response) {
+              //更新地址颜色
+              that.updateBoardPullStatus();
+              that.options.boardUrlOri = that.options.boardUrl;
+            })
+            .catch(function (error) {
+              console.log(error)
+            })  
+          },
+          action => {
+            that.options.boardUrl = that.options.boardUrlOri;
+          } 
+        );
+      },
+      //判断URL合法性
+      checkUrl(url) {
+        var result = '';
+        if (url == '') {
+          return result;
+        }
+        if (url.indexOf('rtmp://') != 0 && url.indexOf('rtsp://') != 0 && url.indexOf('udp://') != 0 
+          && url.indexOf('rtp://') != 0 && url.indexOf('srt://') && url.indexOf('R2TP://') != 0
+          && url.indexOf('r2tp://') != 0) {
+          result = "仅支持 'rtmp://'、'rtsp://'、'udp://'、'rtp://'、'srt://'";
+        }
+        if(url.indexOf(' ') >= 0){
+          result = "不能有空格！";
+        }
+        return result;
+      },
       //获取背包参数
       initDevParam(data){
         var that = this;
@@ -443,8 +757,10 @@
           UserId:that.user.id
         })
         .then(function (response) {
+          console.log("getDevState")
           let res = response.data;
           var data = res.data[0];
+          console.log(data)
           //视频分发 源1 参数
           var br = data["dev_sr"] / 1000;
           //输出分辨率
@@ -453,6 +769,7 @@
           //视频编码
           var videoEncodeStr = "";
           var videoEncode = that.$global.OPTIONS_VIDEOENCODE_4000;
+          var videoEncode = that.$global.getDevParamRange(that.ActiveDevice.dev_sn,"",'video_encode');
           for (var i = 0; i < videoEncode.length; i++) {
             if (videoEncode[i]["value"] == data["video_encode"]) {
               videoEncodeStr = videoEncode[i]["text"];
@@ -488,7 +805,7 @@
       //修改接收机锁定状态
       changeRcvLockState(data){
         console.log("changeRcvLockState")
-        if(this.hasRcvRight){
+        if(this.hasRcvRight && (this.user.userGroup!=NORMAL)){
           if(data == "lock"){
             this.rcvParamLock = true;
             //this.setRcvParamDisable(true);
@@ -528,6 +845,19 @@
           } else {
             that.options.HDMI_framerate = old_framerate;
           }
+        } else if(value == '1' && (this.$global.getRcvSeries(this.ActiveDevice.rcv_sn) == R1080_RCV)){//2010R的输出  屏蔽2160p时的  60 59.94 50
+          var newOption = [];
+          for (var i = 3; i < this.$global.OPTIONS_FRAMERATE_6.length; i++) {
+            newOption.push(that.$global.OPTIONS_FRAMERATE_6[i]);
+          }
+          this.OPTIONS_FRAMERATE_HDMI = newOption;
+          //如果之前的帧率>50 重新设置帧率为30
+          if (old_framerate == 0 || old_framerate == 1 || old_framerate == 2) {
+            that.options.HDMI_framerate = 3;
+            that.editBoardListParam('value8', 3);
+          } else {
+            that.options.HDMI_framerate = old_framerate;
+          }
         } else {
           that.OPTIONS_FRAMERATE_HDMI = that.$global.OPTIONS_FRAMERATE_6;
           that.options.HDMI_framerate = old_framerate;
@@ -540,15 +870,19 @@
         var that = this;
         var rcv_sn = that.ActiveDevice.rcv_sn;
         var boardId = that.ActiveDevice.board_id;
+        console.log("boardId:"+boardId)
+        console.log("rcv_sn:"+rcv_sn)
         if(rcv_sn == "" || boardId.length == 10){//没有接收机或者虚拟接收机 隐藏二次分发
           that.show.pushUrl = false;//视频分发
           that.show.record = false;//录机
           that.show.showOutput = false;//输出
+          that.show.showPullParam = false;//拉流
           return;
         }else{
           that.show.pushUrl = true;
-          that.show.record = true;
+          that.show.record = false;
           that.show.showOutput = true;
+          //that.show.showPullParam = false;//拉流
         }
         //接收机序列号合法判断
         if (!that.$global.isValidRcvSn(rcv_sn)) {
@@ -561,8 +895,6 @@
         }
         //当前选中行的接收机板卡
         that.$global.getRcvRights(rcv_sn, boardId, function(data) {
-          var rcvSn = that.getSelRcvBoard('rcvSn');
-          var boardId = that.ActiveDevice.board_id;
           for (let i=0; i<data.length; i++) {
             //接收机sn_板卡id_boardListId_操作权限_查看权限
             var value = data[i].value;
@@ -577,12 +909,12 @@
               break;
             }
           }
-          if (rcvSn) {
+          if (rcv_sn) {
             //获取板卡参数
-            that.getBoardListParam(rcvSn, boardId);
+            that.getBoardListParam(rcv_sn, boardId);
           }
           //获取录机参数
-          that.initRecordList(rcvSn, boardId);
+          that.initRecordList(rcv_sn, boardId);
           if (that.options.rcv_board_param.split("_")[3] == "1") { //用户有接收机权限
             that.hasRcvRight = true;
           } else {
@@ -784,6 +1116,7 @@
           that.disable.HDMI_througu = true;//HDMI输出透传
           that.disable.HDMI_resolution = true;//HDMI分辨率
           that.disable.HDMI_framerate = true;//HDMI帧率
+          that.disable.audioOutput = true;//音频输出
           that.disable.record_sel =true;//录机IP
           that.disable.record_port = true;//录机端口
           that.disable.rcv_record = true;//录制开关
@@ -805,6 +1138,7 @@
             that.disable.HDMI_resolution = false;//HDMI分辨率
             that.disable.HDMI_framerate = false;//HDMI帧率
           }
+          that.disable.audioOutput = false;//音频输出
           that.disable.record_sel =false;//录机IP
           that.disable.record_port = false;//录机端口
           that.disable.rcv_record = false;//录制开关
@@ -875,13 +1209,55 @@
         that.options.board_mbps_range = mbps.toFixed(1);
         //SDI输出
         //视频编码是H.264，无SDI输出
-        if(that.dev_options.video_encode == '4'){
-          that.show.SDIShow = false;
-          that.show.SDIinfoShow = true;
-          that.options.outputSDIInfo = 'H.264无SDI输出';
+        if(this.$global.getRcvSeries(rcvSn) == R1080_RCV){//和1080配对的实体接收机
+          this.showRCV2010R();
         }else{
-          that.show.SDIShow = true;
-          that.show.SDIinfoShow = false;
+          if(this.dev_options.video_encode == '2' || that.dev_options.video_encode == '3'){
+            this.sdiShow(true);
+            this.show.SDIinfoShow = false;
+            this.hdmiShow(false);
+            this.show.hdmi_title = true;
+            this.show.HDMIinfoShow = true;
+            this.options.outputHDMIInfo = 'H.265 4:2:2无HDMI输出';
+            this.show.audio_output = false;
+          }else if(this.dev_options.video_encode == '4'){
+            this.sdiShow(false);
+            this.show.sdi_title = true;
+            this.show.SDIinfoShow = true;
+            this.options.outputSDIInfo = 'H.264无SDI输出';
+            this.hdmiShow(true);
+            this.show.HDMIinfoShow = false;
+            this.show.audio_output = false;
+          }else{
+            this.sdiShow(true);
+            this.show.SDIinfoShow = false;
+            if(this.dev_options.latency == '1'){//超低时延，无HDMI输出
+              this.hdmiShow(false);
+              this.show.hdmi_title = true;
+              this.show.HDMIinfoShow = true;
+              this.options.outputHDMIInfo = '超低时延无HDMI输出';
+            }else{
+              this.hdmiShow(true);
+              this.show.HDMIinfoShow = false;
+              this.show.audio_output = false;
+            }
+          }  
+          /*//HDMI输出
+          
+          if(that.dev_options.video_encode == '2' || that.dev_options.video_encode == '3'){
+            this.hdmiShow(false);
+            this.show.hdmi_title = true;
+            this.show.HDMIinfoShow = true;
+            this.options.outputHDMIInfo = 'H.265 4:2:2无HDMI输出';
+          }else if(that.dev_options.latency == '1'){
+            this.hdmiShow(false);
+            this.show.hdmi_title = true;
+            this.show.HDMIinfoShow = true;
+            this.options.outputHDMIInfo = '超低时延无HDMI输出';
+          }else{
+            this.hdmiShow(true);
+            this.show.HDMIinfoShow = false;
+          }*/
         }
         //透传 不是4k
         //4k:分辨率可填，帧率不可以填写
@@ -942,21 +1318,26 @@
           that.disable.encodeStop = false;
           that.updateEncodeReset();
         }
-        //HDMI输出
+        /*//HDMI输出
         //超低时延，无HDMI输出
         if(that.dev_options.video_encode == '2' || that.dev_options.video_encode == '3'){
-          that.show.HDMIShow = false;
-          that.show.HDMIinfoShow = true;
-          that.options.outputHDMIInfo = 'H.265 4:2:2无HDMI输出';
+          this.hdmiShow(false);
+          this.show.hdmi_title = true;
+          this.show.HDMIinfoShow = true;
+          this.options.outputHDMIInfo = 'H.265 4:2:2无HDMI输出';
         }else if(that.dev_options.latency == '1'){
-          that.show.HDMIShow = false;
-          that.show.HDMIinfoShow = true;
-          that.options.outputHDMIInfo = '超低时延无HDMI输出';
+          this.hdmiShow(false);
+          this.show.hdmi_title = true;
+          this.show.HDMIinfoShow = true;
+          this.options.outputHDMIInfo = '超低时延无HDMI输出';
         }else{
-          that.show.HDMIShow = true;
-          that.show.HDMIinfoShow = false;
-        }
+          this.hdmiShow(true);
+          this.show.HDMIinfoShow = false;
+        }*/
         //HDMI输出透传
+        if(this.$global.getRcvSeries(rcvSn) == R1080_RCV){//和1080配对的实体接收机
+          res.data[0].value6 = 1;
+        }
         if (res.data[0].value6 == '0') {
           that.options.HDMI_througu = true;
           if (that.getSelRcvBoard('disabled') == false) {
@@ -986,11 +1367,18 @@
               }
             }
             that.OPTIONS_FRAMERATE_HDMI = newOption;
+          }else if(res.data[0].value7 == '1' && (that.$global.getRcvSeries(rcvSn) == R1080_RCV)){//2010R的输出  屏蔽2160p时的  60 59.94 50  这三个
+            var newOption = [];
+            for (var i = 3; i < that.$global.OPTIONS_FRAMERATE_6.length; i++) {
+              newOption.push(that.$global.OPTIONS_FRAMERATE_6[i]);
+            }
+            that.OPTIONS_FRAMERATE_HDMI = newOption;
           }else{
             that.OPTIONS_FRAMERATE_HDMI = that.$global.OPTIONS_FRAMERATE_6;
           }
           that.options.HDMI_framerate = res.data[0].value8
         }
+        that.options.audioOutput = res.data[0].value16;
         //回流录制
         /*if (res.data[0].value1 == '0') {
           that.options.rcv_record = false;
@@ -1005,6 +1393,26 @@
           $('#HDMI_througu').bootstrapSwitch('disabled', true);
           $("#rcv_record").bootstrapSwitch('disabled', true)
         }*/
+      },
+      showRCV2010R(){
+        this.sdiShow(false);
+        this.show.sdi_encode = true;
+        this.hdmiShow(false);
+        this.show.hdmi_resolution = true;
+        this.show.hdmi_framerate = true;
+        this.show.audio_output = true;
+      },
+      sdiShow(showFlag){
+        this.show.sdi_title = showFlag;
+        this.show.sdi_resolution = showFlag;
+        this.show.sdi_framerate = showFlag;
+        this.show.sdi_encode = showFlag;
+      },
+      hdmiShow(showFlag){
+        this.show.hdmi_title = showFlag;
+        this.show.hdmi_througu = showFlag;
+        this.show.hdmi_resolution = showFlag;
+        this.show.hdmi_framerate = showFlag;
       },
       //更新复位是否完成
       updateEncodeReset() {

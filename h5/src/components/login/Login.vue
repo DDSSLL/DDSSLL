@@ -11,6 +11,12 @@
         <div class="form-item">
           <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" placeholder="登录密码">
         </div>
+        <div class="form-item">
+          <input type="text" autocomplete="false" class="loginIpt" v-model="checkCode" style="width: 50%;display: inline-block !important;" placeholder="输入验证码" @blur="changeCheckCode">
+          <img :src="vImg" id="checkImg" class="loginIpt" style="width: 30%;display: inline-block;vertical-align: bottom;border: 2px solid #fff;" @click="changeCheckImg">
+          <i class="fa fa-check fa-lg" v-show="show.devCode_pass" style="color: #2fb62f"></i>
+          <i class="fa fa-times fa-lg" v-show="show.devCode_fail" style="color: #ff2e2a"></i>
+        </div>
         <div class="form-item" style="text-align: right;padding-right: .2rem;margin-bottom:0;">
           <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe_1080">
           <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
@@ -84,7 +90,7 @@
         loginBtnShow:true,
         updateBtnShow:false,
         updateText:"请下载最新软件",
-        title : "DStreamer",
+        title : "DStreamer Local",
         user:{
           login_name:'',
           password:'',
@@ -110,6 +116,8 @@
           failDevSn:false,
           passDevCode:false,
           failDevCode:false,
+          devCode_pass:false,
+          devCode_fail:false,
         },
         register:{
           userName:"",
@@ -118,6 +126,8 @@
           devSn:"",
           devCode:"",
         },
+        checkCode:"",
+        vImg:"",
       }
     },
     computed: {
@@ -157,6 +167,7 @@
       }
     },
     created(){
+      this.vImg = this.DStreamer_BUILD+"/login/ValidationCode.class.php";
     },
     mounted(){
       var that = this;
@@ -179,6 +190,7 @@
         })();
       };
       this.checkUpdate();
+      this.vImg = this.$axios.defaults.baseURL+"/login/ValidationCode.class.php";
     },
     methods:{
       ...mapMutations({
@@ -187,35 +199,83 @@
         SET_ACTIVE_DEVICE,
         SET_ACTIVE_DEVICE_TYPE
       }),
+      changeCheckCode(){
+        var that = this;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(){
+          if(xhr.readyState==4 && xhr.status==200) {
+            var msg=xhr.responseText;    //设置标志用于表示验证码是否正确
+            if(msg=='1'){
+              //正确
+              that.show.devCode_pass = true;
+              that.show.devCode_fail = false;
+            }
+            else{
+              that.show.devCode_pass = false;
+              that.show.devCode_fail = true;
+            }
+          }
+        }
+        xhr.open("POST",this.$axios.defaults.baseURL+"/login/checkCode.php",true);
+        xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        xhr.send("validateCode="+this.checkCode);
+      },
+      changeCheckImg(){
+        this.vImg = this.$axios.defaults.baseURL+"/login/ValidationCode.class.php?num="+Math.random();
+      },
       msgToParent(data){
-        console.log("msgToParent")
-        console.log(data)
         this.baseURL = data;
         this.checkUpdate();
       },
       checkUpdate(){
-        console.log("checkUpdate")
         var that = this;
         this.getLastestVersion(function(){
-          console.log("lastestVersion:"+that.lastestVersion)
           document.addEventListener("deviceready", onDeviceReady1, false);
           function onDeviceReady1(){
-            console.log(device.platform);
             if(device.platform == "Android"){
               cordova.getAppVersion.getVersionNumber().then(function(version){
-              console.log("current appVersion:"+that.appVersion)
               that.appVersion = version;
-              if(that.appVersion == that.lastestVersion){
+              if(that.needUpage(that.appVersion, that.lastestVersion)){
+                that.loginBtnShow = false;
+                that.updateBtnShow = true;
+              }else{
+                that.loginBtnShow = true;
+                that.updateBtnShow = false;
+              }
+              /*if(that.appVersion == that.lastestVersion){
                 that.loginBtnShow = true;
                 that.updateBtnShow = false;
               }else{
                 that.loginBtnShow = false;
                 that.updateBtnShow = true;
-              }
+              }*/
             })  
            }
           }
         });
+      },
+      needUpage(appVer, dbVer){
+        var appVerArr = appVer.split(".");
+        var dbVerArr = dbVer.split(".");
+        var needUpage = false;
+        if(appVerArr[0] > dbVerArr[0]){
+          needUpage = false;
+        }else if(appVerArr[0] == dbVerArr[0]){
+          if(appVerArr[1] > dbVerArr[1]){
+            needUpage = false;
+          }else if(appVerArr[1] == dbVerArr[1]){
+            if(appVerArr[2] >= dbVerArr[2]){
+              needUpage = false;
+            }else{
+              needUpage = true;
+            }
+          }else{
+            needUpage = true;  
+          }
+        }else{
+          needUpage = true;
+        }
+        return needUpage;
       },
       getLastestVersion(cb){
         var that = this;
@@ -532,6 +592,31 @@
       },
       login(){
         var that = this;
+        if (this.user.login_name == '') {
+          that.$toast({
+            message: '请输入登录账号！',
+            position: 'middle',
+            duration: 3000
+          })
+          return;
+        }
+        if (this.user.password == '') {
+          that.$toast({
+            message: '请输入登录密码！',
+            position: 'middle',
+            duration: 3000
+          })
+          return;
+        }
+        //验证码
+        /*if(this.checkCode === ''){
+          that.$toast({
+            message: '请输入验证码！',
+            position: 'middle',
+            duration: 3000
+          })
+          return;
+        }*/
         //that.$axios.defaults.baseURL = that.domain;
         this.$axios({
           method: 'post',
@@ -539,7 +624,8 @@
           data:{
             loginId: that.user.login_name,
             pwd: md5(that.user.password),
-            curTime: that.$moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+            curTime: that.$moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),
+            validateCode:that.checkCode,
           },
           Api:"SetLogin",
           AppId:"android",
@@ -554,6 +640,9 @@
               var data = res.res.data;
               data.pwd = md5(data['pwd'])
               that.SET_USER(res.res.data);
+              data.oId = data.id;
+              data.id = that.$global.getLoginId();
+              that.SET_USER(data);
               localStorage.setItem("LOGIN",true);
               localStorage.setItem("USERNAME_1080",that.user.login_name);
               localStorage.setItem("PASSWORD_1080",that.user.password);
@@ -570,6 +659,10 @@
               },1000)
             },800)
           }else{
+            that.changeCheckImg();
+            that.show.devCode_pass=false;
+            that.show.devCode_fail=false;
+            that.checkCode = "";
             that.$toast({
               message: res.res.reason,
               position: 'middle',
@@ -611,7 +704,7 @@
           method: 'post',
           url:"/login/login.php",
           data:{
-            isLogged: data.id.toString(),
+            isLogged: data.oId.toString(),
             loginRand: data.loginRand.toString(),
             pwd: data.pwd.toString(),
           },

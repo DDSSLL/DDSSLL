@@ -18,7 +18,8 @@ module.exports = {
         "live":"Streaming",
         "settings":"Setting",
         "me":"My",
-        "login":"Login"
+        "login":"Login",
+        "monitor":"¼à¿Ø",
     },
     tip:{
         "authSuccess":"Auth Success"

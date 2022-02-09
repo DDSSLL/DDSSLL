@@ -128,7 +128,7 @@ service.interceptors.response.use(response => {
     } else {
         // 超时处理
         if (JSON.stringify(error).includes('timeout')) {
-            Toast('服务器响应超时，请刷新当前页')
+            //Toast('服务器响应超时，请刷新当前页')
         }
     }
 

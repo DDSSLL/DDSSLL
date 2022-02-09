@@ -25,7 +25,7 @@
     <systemConf></systemConf>
     
     <!-- 路测 -->
-    <RoadTest></RoadTest>
+    <RoadTest v-if="user.userGroup != NORMAL"></RoadTest>
     
     <div class="Group">
       <!-- <div class="GroupTitle" @click="SystemShow=!SystemShow">
@@ -34,7 +34,7 @@
       </div> -->
       <!-- <transition name="slide-fade"> -->
         <div class="GroupItem" v-show="SystemShow" id="systemInfo">
-          <mt-cell title="当前登录用户" :value="user.id" style="font-size:.14rem"></mt-cell>
+          <mt-cell title="当前登录用户" :value="user.oId" style="font-size:.14rem"></mt-cell>
           <!-- <mt-cell title="设备版本" value="1.00.02"></mt-cell> -->
           <mt-button size="large" class="logout" @click="logout">退出</mt-button>
         </div>
@@ -54,13 +54,14 @@
   import chartConf from './chartConf';
   import systemConf from './systemConf';
   import { mapState, mapMutations } from 'vuex';
-  import { SET_USER, SET_NAV_STATUS, SET_ACTIVE_DEVICE, SET_TIMER_CLEAR,SET_DEVICE_TYPE_SELECT,SET_DEVICE_PREFIX_SELECT } from '../../store/mutation-types';
+  import { SET_USER, SET_NAV_STATUS, SET_ACTIVE_DEVICE, SET_TIMER_CLEAR,SET_DEVICE_TYPE_SELECT,SET_DEVICE_PREFIX_SELECT,SET_DEVICE_MODE_SELECT } from '../../store/mutation-types';
   import $ from 'jquery';
   export default {
     name: "Me",
     data(){
       return{
         ADMIN:ADMIN,
+        NORMAL:NORMAL,
         SystemShow:true,
         RoadTestShow:false,
       }
@@ -93,7 +94,8 @@
           SET_ACTIVE_DEVICE,
           SET_TIMER_CLEAR,
           SET_DEVICE_TYPE_SELECT,
-          SET_DEVICE_PREFIX_SELECT
+          SET_DEVICE_PREFIX_SELECT,
+          SET_DEVICE_MODE_SELECT,
       }),
       logout(){
         clearInterval(this.ChartTimer);
@@ -109,6 +111,7 @@
           that.SET_NAV_STATUS(true);
           that.SET_ACTIVE_DEVICE(null);
           that.SET_DEVICE_TYPE_SELECT(1);
+          that.SET_DEVICE_MODE_SELECT(0);
           that.SET_DEVICE_PREFIX_SELECT("all");
           that.$router.replace("/login");
           localStorage.removeItem('LOGIN');
@@ -277,11 +280,10 @@
         vertical-align: text-top;
         margin-top: 2px;
     }
-    .cellItem{overflow:hidden}
-    .cellItem .cellName{float: left;text-align: left;}
+    /*.cellItem .cellName{float: left;text-align: left;}
     .cellItem .cellNameR{float: right;text-align: right;}
     .cellItem .cellAddr{color:#888;font-size:13px;}
-    .cellItem .cellCard{color:#444}
+    .cellItem .cellCard{color:#444}*/
     .slide-fade-enter-active {transition: all 1s ease;}
     .slide-fade-leave-active {transition: all 1s cubic-bezier(1.0, 0.5, 0.8, 1.0);}
     .slide-fade-enter, .slide-fade-leave-to{transform: translateY(5px);opacity: 0;}
@@ -350,6 +352,10 @@
     .me .mint-checklist-label{padding:0;}
     .me .mint-checkbox-core{width:15px;height:15px;}
     .GroupItemValue1 .mint-checklist-title{display:none;}
+    .me .cellItem{
+      overflow:hidden;
+      line-height:.2rem;
+    }
     .me .mint-cell-value{
       display: block;
       color: #EEEEEE;
@@ -444,5 +450,8 @@
     }
     .breakAll{
       word-break: break-all;
+    }
+    .userPrefix .mint-cell-title{
+      word-break:break-all;
     }
 </style>
