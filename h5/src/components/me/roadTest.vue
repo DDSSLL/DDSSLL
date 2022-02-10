@@ -654,8 +654,8 @@
         this.card5GArr = [];
         this.card5GText = "";
         this.showPoint = 200;
-        this.importTestDataTest();
-        return;
+        /*this.importTestDataTest();
+        return;*/
         var that = this;
         document.addEventListener("deviceready", onDeviceReady, false);
         function onDeviceReady() {
