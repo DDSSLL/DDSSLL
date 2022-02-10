@@ -609,14 +609,14 @@
           return;
         }
         //验证码
-        /*if(this.checkCode === ''){
+        if(this.checkCode === ''){
           that.$toast({
             message: '请输入验证码！',
             position: 'middle',
             duration: 3000
           })
           return;
-        }*/
+        }
         //that.$axios.defaults.baseURL = that.domain;
         this.$axios({
           method: 'post',
