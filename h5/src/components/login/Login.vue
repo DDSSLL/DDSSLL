@@ -90,7 +90,7 @@
         loginBtnShow:true,
         updateBtnShow:false,
         updateText:"请下载最新软件",
-        title : "DStreamer Local",
+        title : "DStreamer",
         user:{
           login_name:'',
           password:'',
