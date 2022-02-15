@@ -90,7 +90,7 @@
         loginBtnShow:true,
         updateBtnShow:false,
         updateText:"请下载最新软件",
-        title : "DStreamer",
+        title : "DController",
         user:{
           login_name:'',
           password:'',
