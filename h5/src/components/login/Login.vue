@@ -200,7 +200,7 @@
         SET_ACTIVE_DEVICE_TYPE
       }),
       changeCheckCode(){
-        var that = this;
+        /*var that = this;
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function(){
           if(xhr.readyState==4 && xhr.status==200) {
@@ -218,7 +218,34 @@
         }
         xhr.open("POST",this.$axios.defaults.baseURL+"/login/checkCode.php",true);
         xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-        xhr.send("validateCode="+this.checkCode);
+        xhr.send("validateCode="+this.checkCode);*/
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/login/checkCode.php",
+          data:{
+            validateCode: that.checkCode
+          },
+          Api:"validateCode",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          var msg=res;    //设置标志用于表示验证码是否正确
+          if(msg=='1'){
+            //正确
+            that.show.devCode_pass = true;
+            that.show.devCode_fail = false;
+          }
+          else{
+            that.show.devCode_pass = false;
+            that.show.devCode_fail = true;
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       changeCheckImg(){
         this.vImg = this.$axios.defaults.baseURL+"/login/ValidationCode.class.php?num="+Math.random();

@@ -8,7 +8,7 @@ const service = axios.create({
     timeout: 1000 * 60,
     // 请求头
     headers: {
-        'Content-Type': 'application/json;charset=UTF-8'
+        'Content-Type': 'application/json;charset=UTF-8',
     }
 })
 
@@ -55,7 +55,7 @@ service.interceptors.request.use(config => {
         "AppId":AppId/*,
         "X-Requested-With":"XMLHttpRequest"*/
     }
-
+    config.data = qs.stringify(config.data);
     return config
 }, error => {
     Promise.reject(error)
