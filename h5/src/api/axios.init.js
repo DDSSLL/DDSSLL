@@ -55,7 +55,7 @@ service.interceptors.request.use(config => {
         "AppId":AppId/*,
         "X-Requested-With":"XMLHttpRequest"*/
     }
-    config.data = qs.stringify(config.data);
+    //config.data = qs.stringify(config.data);
     return config
 }, error => {
     Promise.reject(error)
