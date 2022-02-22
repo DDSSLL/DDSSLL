@@ -253,6 +253,7 @@
       msgToParent(data){
         this.baseURL = data;
         this.checkUpdate();
+        this.changeCheckImg();
       },
       checkUpdate(){
         var that = this;
