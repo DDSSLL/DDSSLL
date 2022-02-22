@@ -167,7 +167,9 @@
       }
     },
     created(){
-      this.vImg = this.DStreamer_BUILD+"/login/ValidationCode.class.php";
+      //初始化验证码
+      this.sessionId = md5(Math.random());
+      this.vImg = this.DStreamer_BUILD+"/login/ValidationCode.class.php?num="+this.sessionId;
     },
     mounted(){
       var that = this;
@@ -190,7 +192,7 @@
         })();
       };
       this.checkUpdate();
-      this.vImg = this.$axios.defaults.baseURL+"/login/ValidationCode.class.php";
+      this.vImg = this.$axios.defaults.baseURL+"/login/ValidationCode.class.php?num="+this.sessionId;
     },
     methods:{
       ...mapMutations({
@@ -222,7 +224,7 @@
         var that = this;
         this.$axios({
           method: 'post',
-          url:"/login/checkCode.php",
+          url:"/login/checkCode.php?num="+that.sessionId,
           data:{
             validateCode: that.checkCode
           },
@@ -248,7 +250,7 @@
         })
       },
       changeCheckImg(){
-        this.vImg = this.$axios.defaults.baseURL+"/login/ValidationCode.class.php?num="+Math.random();
+        this.vImg = this.$axios.defaults.baseURL+"/login/ValidationCode.class.php?num="+this.sessionId;
       },
       msgToParent(data){
         this.baseURL = data;
@@ -648,7 +650,7 @@
         //that.$axios.defaults.baseURL = that.domain;
         this.$axios({
           method: 'post',
-          url:"/login/login.php",
+          url:"/login/login.php?num="+that.sessionId,
           data:{
             loginId: that.user.login_name,
             pwd: md5(that.user.password),
