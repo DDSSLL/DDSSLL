@@ -307,7 +307,7 @@
         </div>
         <div class="GroupItem">
           <div class="GroupItemField">
-            <div class="GroupItemTitle">流媒体服务器IP</div>
+            <div class="GroupItemTitle">流媒体内网IP</div>
             <div class="GroupItemValue">
               <input type="text" class="ItemIpt" v-model="common.actAddrIp" @blur="setDeviceParam('dev_sr_input')" :disabled="dis.actAddrIp">
             </div>
@@ -439,7 +439,7 @@
           ActHdmiOut:"",//HDMI输出
           SrtTransIf:"",//传输通道
           netWorkMode:"",//网络模式
-          actAddrIp:"",//流媒体服务器IP
+          actAddrIp:"",//流媒体内网IP
           actAddrPort:"",//端口
           actPushLatency:"",//推流延时
           actPullLatency:"",//拉流延时
@@ -475,7 +475,7 @@
           //互动
           ActDev:false,//互动背包
           ActHdmiOut:false,//HDMI输出
-          actAddrIp:false,//流媒体服务器IP
+          actAddrIp:false,//流媒体内网IP
           actAddrPort:false,//流媒体服务器端口
           actPushLatency:false,//推流延时
           actPullLatency:false,//拉流延时
@@ -1499,7 +1499,7 @@
         actDev = actDev.split('&')[0];
         that.common.ActDev = actDev;//互动背包
         //118.190.141.199
-        that.common.actAddrIp = ip_port.split(':')[0];//流媒体服务器IP
+        that.common.actAddrIp = ip_port.split(':')[0];//流媒体内网IP
         //9090
         that.common.actAddrPort = ip_port.split(':')[1];//端口
         //推流延时
@@ -1556,14 +1556,14 @@
           if(this.common.dev_srt){//互动的传输开关打开
             this.dis.SrtTransIf = true; //传输通道  
             this.dis.netWorkMode = true; //网络模式  
-            this.dis.actAddrIp = true;//互动 流媒体服务器IP
+            this.dis.actAddrIp = true;//互动 流媒体内网IP
             this.dis.actAddrPort = true;//互动 端口
             this.dis.actPushLatency = true;//互动 推流延时
             this.dis.actPullLatency = true;//互动 拉流延时
           }else{
             this.dis.SrtTransIf = dis; //传输通道  
             this.dis.netWorkMode = dis; //网络模式  
-            this.dis.actAddrIp = dis;//互动 流媒体服务器IP
+            this.dis.actAddrIp = dis;//互动 流媒体内网IP
             this.dis.actAddrPort = dis;//互动 端口
             this.dis.actPushLatency = dis;//互动 推流延时
             this.dis.actPullLatency = dis;//互动 拉流延时

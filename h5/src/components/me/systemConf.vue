@@ -35,7 +35,7 @@
                   </div>
                   <div class="GroupItem">
                     <div class="GroupItemField">
-                      <div class="GroupItemTitle">服务器IP</div>
+                      <div class="GroupItemTitle">内网IP</div>
                       <div class="GroupItemValue">
                         <input type="text" class="inputStyle1" v-model="ftp_ip">
                       </div>
@@ -43,7 +43,7 @@
                   </div>
                   <div class="GroupItem">
                     <div class="GroupItemField">
-                      <div class="GroupItemTitle">映射IP</div>
+                      <div class="GroupItemTitle">公网IP</div>
                       <div class="GroupItemValue">
                         <input type="text" class="inputStyle1" v-model="ftp_ipMapping">
                       </div>

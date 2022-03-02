@@ -22,17 +22,17 @@
           </div>
         </div>
       </div>
-      <div class="GroupItem" v-if="show.customType"><!-- 服务器IP -->
+      <div class="GroupItem" v-if="show.customType"><!-- 内网IP -->
         <div class="GroupItemField">
-          <div class="GroupItemTitle">服务器IP</div>
+          <div class="GroupItemTitle">内网IP</div>
           <div class="GroupItemValue">
             <input class="ItemInput" v-model="options.rtmp_ip" type="text" @change="">
           </div>
         </div>
       </div>  
-      <div class="GroupItem" v-if="show.customType"><!-- 映射IP -->
+      <div class="GroupItem" v-if="show.customType"><!-- 公网IP -->
         <div class="GroupItemField">
-          <div class="GroupItemTitle">映射IP</div>
+          <div class="GroupItemTitle">公网IP</div>
           <div class="GroupItemValue">
             <input class="ItemInput" v-model="options.rtmp_ipMapping" type="text" @change="">
           </div>
@@ -103,8 +103,8 @@
         },
         OPTIONS_MONITOR_TYPE:[{label: "本机", value: "0"}, 
                       {label: "自定义", value: "1"}],
-        OPTIONS_IP_TYPE:[{text: "服务器IP", value: "0"}, 
-                         {text: "映射IP", value: "1"}],
+        OPTIONS_IP_TYPE:[{text: "内网IP", value: "0"}, 
+                         {text: "公网IP", value: "1"}],
       }
     },
     computed: {
@@ -138,6 +138,7 @@
     },
     activated(){  //生命周期-缓存页面激活
       var that = this;
+      var devSn = this.ActiveDevice.dev_sn;
       this.showMonitorParam();
       this.webrtcClose();
       $("#playControl").removeClass("fa-pause").addClass("fa-play");
@@ -240,25 +241,25 @@
         var pushIpSel = this.options.pushIp_sel;
         if (!this.$global.isValidIP(rtmpIp)) {
           this.$toast({
-            message: '请输入合法服务器IP'
+            message: '请输入合法内网IP'
           });
           return;
         }
-        if (pullIpSel == '1') {//拉流IP为映射IP
+        if (pullIpSel == '1') {//拉流IP为公网IP
           if (!this.$global.isValidIP(mappingIp)) {
             this.$toast({
-              message: '请输入合法映射IP'
+              message: '请输入合法公网IP'
             });
             return;
           }
-        } else {//拉流IP为服务器IP
+        } else {//拉流IP为内网IP
           if (!this.$global.isValidIP(mappingIp)) {
             mappingIp = rtmpIp;
           }
         }
         if (rtmpIp == '') {
           this.$toast({
-            message: '服务器IP不能为空！'
+            message: '内网IP不能为空！'
           });
           return;
         }
@@ -331,12 +332,12 @@
           pushIp = "192.168.253.100";
           pullIp = data.rcv_ip;
         }else{
-          if(data.push_sel == 0){//推流IP为服务器ip
+          if(data.push_sel == 0){//推流IP为内网IP
             pushIp = data.rtmp_ip;
           }else{
             pushIp = data.rtmp_ipMapping;
           }
-          if(data.pull_sel == 0){//拉流IP为服务器ip
+          if(data.pull_sel == 0){//拉流IP为内网IP
             pullIp = data.rtmp_ip;
           }else{
             pullIp = data.rtmp_ipMapping; 
@@ -385,32 +386,32 @@
         var boardId = this.ActiveDevice.board_id;
         if(this.options.status == "" || this.options.status == "pause"){
           if(this.options.monitorType == "1"){//自定义
-            if(this.options.push_sel == 0){//推流IP为服务器IP
+            if(this.options.push_sel == 0){//推流IP为内网IP
               if(this.options.rtmp_ip == ""){
                 this.$toast({
-                  message: '请填写服务器IP'
+                  message: '请填写内网IP'
                 });
                 return; 
               }
-            }else{//推流IP为映射IP
+            }else{//推流IP为公网IP
               if(this.options.rtmp_ipMapping == ""){
                 this.$toast({
-                  message: '请填写映射IP'
+                  message: '请填写公网IP'
                 });
                 return;
               }
             }
-            if(this.options.pullIp_sel == 0){//拉流IP为服务器IP
+            if(this.options.pullIp_sel == 0){//拉流IP为内网IP
               if(this.options.rtmp_ip == ""){
                 this.$toast({
-                  message: '请填写服务器IP'
+                  message: '请填写内网IP'
                 });
                 return;
               }
-            }else{//拉流流IP为映射IP
+            }else{//拉流流IP为公网IP
               if(this.options.rtmp_ipMapping == ""){
                 this.$toast({
-                  message: '请填写映射IP'
+                  message: '请填写公网IP'
                 });
                 return;
               }

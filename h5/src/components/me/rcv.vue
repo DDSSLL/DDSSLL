@@ -56,11 +56,11 @@
                   <span class="cellName cellValue" style="float: right;">{{ item.user_name }}</span>
                 </div>
                 <div class="cellItem">
-                  <span class="cellName cellLabel" style="float: left;">映射IP</span>
+                  <span class="cellName cellLabel" style="float: left;">公网IP</span>
                   <span class="cellName cellValue" style="float: right;">{{ item.rcv_ip }}</span>
                 </div>
                 <div class="cellItem">
-                  <span class="cellName cellLabel" style="float: left;">接收机IP</span>
+                  <span class="cellName cellLabel" style="float: left;">内网IP</span>
                   <span class="cellName cellValue" style="float: right;">{{ item.rcv_ownIP }}</span>
                 </div>
                 <div class="cellItem">
@@ -450,9 +450,9 @@
               </div>
             </div>
             <div class="fGrp">
-              <div class="tl">映射IP</div>
+              <div class="tl">公网IP</div>
               <div class="vl">
-                <input type="text" class="ItemInput" v-model="ipSetting.mapIp" placeholder="映射IP" :disabled="ipConfigDis">
+                <input type="text" class="ItemInput" v-model="ipSetting.mapIp" placeholder="公网IP" :disabled="ipConfigDis">
               </div>
             </div>
             <div class="fGrp">
@@ -1564,7 +1564,7 @@
           console.log(error)
         })
       },
-      //实体接收机IP设置立即生效
+      //实体内网IP设置立即生效
       rcvIpEffect(){
         var that = this;
         //IP设置参数有效性
@@ -1640,7 +1640,7 @@
             return;
           }
           else{
-            //参数合法，且打开代理，映射IP需要等于vpn服务器ip
+            //参数合法，且打开代理，公网IP需要等于vpn内网IP
             if(dataJson.vpnEnable === '1'){
               dataJson.mapIp = dataJson.vpn_server;
               this.ipSetting.mapIp = dataJson.mapIp;
@@ -1785,7 +1785,7 @@
         }
         if(!this.$global.isValidIP(dataJson.mapIp)){
           this.$toast({
-            message: "请输入正确格式的映射IP!",
+            message: "请输入正确格式的公网IP!",
             position: 'middle',
             duration: 2000
           });
