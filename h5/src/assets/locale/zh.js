@@ -23,7 +23,7 @@ module.exports = {
         "settings":"参数",
         "me":"我的",
         "login":"登录",
-        "monitor":"监控",
+        "monitor":"预览",
 
     },
     tip:{

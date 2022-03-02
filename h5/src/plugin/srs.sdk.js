@@ -308,6 +308,7 @@ function SrsRtcPlayerAsync() {
         var session = await new Promise(function(resolve, reject) {
             // @see https://github.com/rtcdn/rtcdn-draft
             conf.apiUrl = conf.apiUrl.replace(/file:/, "http:")
+            conf.apiUrl = conf.apiUrl.replace(/app:/, "http:")
             var data = {
                 api: conf.apiUrl, tid: conf.tid, streamurl: conf.streamUrl,
                 clientip: null, sdp: offer.sdp
