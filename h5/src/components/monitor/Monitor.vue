@@ -424,7 +424,7 @@
         }else{
           this.webrtcClose();
           $("#playControl").removeClass("fa-pause").addClass("fa-play");
-          this.updateBoardPushSel(0,devSn, rcvSn, boardId);
+          //this.updateBoardPushSel(0,devSn, rcvSn, boardId);
           this.options.status = "pause";
         }
       },
