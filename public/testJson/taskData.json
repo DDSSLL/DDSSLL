@@ -1,0 +1,35 @@
+GetAlarmTime（发送）
+data:{
+  GetAlarmTime: "1",
+  DeviceSN:"",          //10位序列号
+  UpdateTime:"0",       //参数更新时间，DateTime格式，初始0
+}
+GetAlarmTime（返回）
+{
+  code:"0000",
+  msg:"OK",
+  UpdateTime:"2020-05-27 10:50:23",
+  data:[{
+    Freq:"",              //频率,kHz
+    ChannelType:"",       //频道类型,FM|中波|短波
+    Name:"",              //台名
+    Programme:"",         //节目
+    StartTime:"",         //开始时间,hh:mi:ss
+    EndTime:"",           //结束时间,hh:mi:ss
+    StartDateTime:"",     //开始日期,yyyy-mm-dd hh:mi:ss
+    EndDateTime:"",       //结束日期,yyyy-mm-dd hh:mi:ss
+    MonthTime:"1",        //标识每月有效任务
+    WeeklyTime:"0",       //标识每周有效任务
+    DayTime:"0",          //标识只执行一次任务
+    Month:"ALL",          //每月执行任务中标识哪个月,
+                          //1-12表示1月到12月,
+						  //ALL代表每个月
+    Day:"2",              //每月执行任务中标识月的具体某天
+						  //范围等同每月的天数
+    DayofWeek:"0",        //1~7表示周一至周日 0表示每天
+  }, {
+    ...
+}, {
+    ...
+}]
+}

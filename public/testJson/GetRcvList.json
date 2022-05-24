@@ -1,0 +1,44 @@
+{
+  "code":"0000",
+  "msg":"OK",
+  "data":[
+  	{
+	  	"RcvSn":"1000001234",           
+			"RcvName":"接收机",           
+			"RcvModel":"aaaa",          
+			"Online":"1",           
+			"SoftVer":"1.1.1",      
+			"HardVer":"2.2.2",      
+			"AddTime":"2022-02-02",  
+			"OnlineTime":"2022-02-02",
+			"OwnIP":"192.168.100.1",  
+			"MapIp":"1.2.3.4",        
+			"Port":"8080"             
+	  },{
+	  	"RcvSn":"1000001234",           
+			"RcvName":"接收机",           
+			"RcvModel":"aaaa",          
+			"Online":"1",           
+			"SoftVer":"1.1.1",      
+			"HardVer":"2.2.2",      
+			"AddTime":"2022-02-02",  
+			"OnlineTime":"2022-02-02",
+			"OwnIP":"192.168.100.1",  
+			"MapIp":"1.2.3.4",        
+			"Port":"8080"             
+	  },{
+	  	"RcvSn":"1000001234",           
+			"RcvName":"接收机",           
+			"RcvModel":"aaaa",          
+			"Online":"1",           
+			"SoftVer":"1.1.1",      
+			"HardVer":"2.2.2",      
+			"AddTime":"2022-02-02",  
+			"OnlineTime":"2022-02-02",
+			"OwnIP":"192.168.100.1",  
+			"MapIp":"1.2.3.4",        
+			"Port":"8080"             
+	  }
+	] 
+}
+

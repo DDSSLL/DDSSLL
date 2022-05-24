@@ -1,0 +1,78 @@
+{
+  "code":"0000",
+  "msg":"OK",
+  "UpdateTime":"2020-05-27 10:50:23",
+  "data":[{
+    "ID":"11",                
+    "Freq":"990000",              
+    "ChannelType":"2",     
+    "Name":"天津",       
+    "Programme":"音乐广播",  
+    "StartTime":"00:00:00",
+    "EndTime":"23:59:59", 
+    "StartDateTime":"2022-05-23 00:00:00",
+    "EndDateTime":"2022-05-23 23:59:59",      
+    "MonthTime":"1",    
+    "WeeklyTime":"0",   
+    "DayTime":"0",         
+    "Month":"ALL",     
+    "Day":"2",           
+    "DayofWeek":"135",
+    "SaveTime":"11",          
+    "CoverRcv":[{
+      "RcvSn":"1111111111",
+      "RcvName":"1111111"
+    },{
+      "RcvSn":"2222222222",
+      "RcvName":"2222222"
+    }]
+  },{
+    "ID":"22",   
+    "Freq":"990000",              
+    "ChannelType":"0",     
+    "Name":"天津",       
+    "Programme":"音乐广播",  
+    "StartTime":"00:00:00",
+    "EndTime":"23:59:59", 
+    "StartDateTime":"2022-05-23 00:00:00",
+    "EndDateTime":"2022-05-23 23:59:59",      
+    "MonthTime":"1",    
+    "WeeklyTime":"0",   
+    "DayTime":"0",         
+    "Month":"ALL",     
+    "Day":"2",           
+    "DayofWeek":"127",
+    "SaveTime":"22",          
+   "CoverRcv":[{
+      "RcvSn":"RcvSn",
+      "RcvName":"RcvName"
+    },{
+      "RcvSn":"RcvSn",
+      "RcvName":"RcvName"
+    }]
+  },{
+    "ID":"33",   
+    "Freq":"990000",              
+    "ChannelType":"1",     
+    "Name":"天津",       
+    "Programme":"音乐广播",  
+    "StartTime":"00:00:00",
+    "EndTime":"23:59:59", 
+    "StartDateTime":"2022-05-23 00:00:00",
+    "EndDateTime":"2022-05-23 23:59:59",      
+    "MonthTime":"1",    
+    "WeeklyTime":"0",   
+    "DayTime":"0",         
+    "Month":"ALL",     
+    "Day":"2",           
+    "DayofWeek":"1234567",
+    "SaveTime":"33",          
+    "CoverRcv":[{
+      "RcvSn":"1111111111",
+      "RcvName":"111111"
+    },{
+      "RcvSn":"2222222222",
+      "RcvName":"222222"
+    }]
+  }]
+}

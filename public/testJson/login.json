@@ -1,0 +1,10 @@
+{
+	"code":"0000",
+	"msg":"OK",
+	"data":[
+		{
+			"JwtData":" eyJhbGciOiJIUzI1NiIsInppcCI6IkRFRiJ9.eNqqVspLzE1VslJ6OnHFsxnzX67coKSjlJgOFDEzqAUAAADw.qib2DrjRKcFnY77Cuh_b1zSzXfISOpCA-g8PlAZCWoU",
+			"LoginRand":""
+		}
+	]
+}
