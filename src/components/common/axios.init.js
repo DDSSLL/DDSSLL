@@ -62,6 +62,8 @@ service.interceptors.request.use(config => {
         "AppId":AppId
     }
     config.method= 'GET';
+    console.log("config")
+    console.log(config)
     return config
 }, error => {
     Promise.reject(error)

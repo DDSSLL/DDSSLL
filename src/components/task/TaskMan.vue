@@ -12,7 +12,7 @@
       
       <el-button type="primary" size="mini" @click="setBatBtn" style="margin-left: 10px;">批量设置</el-button>
       <div style="display: inline-block;float: right;">
-        <el-select v-model="filter.selectRcv" filterable multiple collapse-tags placeholder="接收机" size="mini" style="width:180px;margin-left: 10px;">
+        <el-select class="input_dark" v-model="filter.selectRcv" filterable multiple collapse-tags placeholder="接收机" size="mini" style="width:180px;margin-left: 10px;">
           <el-option
             v-for="item in RCV_LIST_OPTION"
             :key="item.value"
@@ -20,7 +20,7 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <el-select v-model="filter.selectChannel" filterable multiple placeholder="类型" size="mini" collapse-tags  style="width:150px;">
+        <el-select class="input_dark" v-model="filter.selectChannel" filterable multiple placeholder="类型" size="mini" collapse-tags  style="width:150px;">
           <el-option
             v-for="item in CHANNEL_TYPE_OPTION"
             :key="item.value"
@@ -28,9 +28,9 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <el-input v-model="filter.freq" placeholder="频率" size="mini" style="width:100px"></el-input>
-        <el-input v-model="filter.name" placeholder="台名" size="mini" style="width:100px"></el-input>
-        <el-input v-model="filter.programme" placeholder="节目" size="mini" style="width:100px"></el-input>
+        <el-input class="input_dark" v-model="filter.freq" placeholder="频率" size="mini" style="width:100px"></el-input>
+        <el-input class="input_dark" v-model="filter.name" placeholder="台名" size="mini" style="width:100px"></el-input>
+        <el-input class="input_dark" v-model="filter.programme" placeholder="节目" size="mini" style="width:100px"></el-input>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="GetAlarmTime">查询</el-button>
       </div>
       

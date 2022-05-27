@@ -2,48 +2,48 @@
   <div id="app">
 
     <el-container>
-      <div v-if="!loginShow">
-        <el-header>
-          <el-row>
-            <el-col :span="4">
-              <div class="grid-content bg-purple" style="text-align: left;">
-                <span style="height: 60px;line-height: 60px;font-size: 36px;font-weight: bold;">DEVISER</span>
-                <!-- <img alt="Vue logo" src="./assets/logo.png" style="height: 60px;width: auto;"> -->
-              </div>
-            </el-col>
-            <el-col :span="16">
-              <div class="sysMenu grid-content bg-purple-light">
-                <el-menu
-                  :default-active="activeIndex"
-                  class="el-menu-demo"
-                  mode="horizontal"
-                  @select="handleSelect"
-                  background-color="#01152E"
-                  text-color="#fff"
-                  active-text-color="#7BB5EA"
-                  :router="true">
-                  <el-menu-item index="/homePage">首页</el-menu-item>
-                  <el-menu-item index="/monitorPage">实时监测</el-menu-item>
-                  <el-menu-item index="/deviceMan">接收机管理</el-menu-item>
-                  <el-menu-item index="/taskMan">运行图管理</el-menu-item>
-                </el-menu>
-              </div>
-            </el-col>
-            <el-col :span="4" style="color: #fff;height: 60px;line-height: 60px;cursor: pointer;">
-              <i class="fa fa-volume-up fa-lg" style="margin-left: 20px"></i>
-              <i class="fa fa-user-o fa-lg" style="margin-left: 20px"></i>
-              <i class="fa fa-sign-out fa-lg" style="margin-left: 20px" @click="siginOut"></i>
-              
-            </el-col>
-          </el-row>
-        </el-header>
-      </div>
+      <!-- <div > -->
+      <el-header v-if="!loginShow">
+        <el-row>
+          <el-col :span="4">
+            <div class="grid-content bg-purple" style="text-align: left;">
+              <span style="height: 60px;line-height: 60px;font-size: 36px;font-weight: bold;">DEVISER</span>
+              <!-- <img alt="Vue logo" src="./assets/logo.png" style="height: 60px;width: auto;"> -->
+            </div>
+          </el-col>
+          <el-col :span="16">
+            <div class="sysMenu grid-content bg-purple-light">
+              <el-menu
+                :default-active="activeIndex"
+                class="el-menu-demo"
+                mode="horizontal"
+                @select="handleSelect"
+                background-color="#01152E"
+                text-color="#fff"
+                active-text-color="#7BB5EA"
+                :router="true">
+                <el-menu-item index="/homePage">首页</el-menu-item>
+                <el-menu-item index="/monitorPage">实时监测</el-menu-item>
+                <el-menu-item index="/deviceMan">接收机管理</el-menu-item>
+                <el-menu-item index="/taskMan">运行图管理</el-menu-item>
+              </el-menu>
+            </div>
+          </el-col>
+          <el-col :span="4" style="color: #fff;height: 60px;line-height: 60px;cursor: pointer;">
+            <i class="fa fa-volume-up fa-lg" style="margin-left: 20px"></i>
+            <i class="fa fa-user-o fa-lg" style="margin-left: 20px"></i>
+            <i class="fa fa-sign-out fa-lg" style="margin-left: 20px" @click="siginOut"></i>
+            
+          </el-col>
+        </el-row>
+      </el-header>
+      <!-- </div> -->
       <el-main>
         <div class="navContent">
           <router-view></router-view>
         </div>
       </el-main>
-      <el-footer>footer</el-footer>
+      <el-footer></el-footer>
     </el-container>
     <!-- <img alt="Vue logo" src="./assets/logo.png">
     <i class="el-icon-edit"></i>

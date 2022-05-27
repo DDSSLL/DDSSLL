@@ -9,6 +9,7 @@ import App from './App.vue'
 import router from './router' //引入路由
 import store from './store'
 import md5 from 'MD5'
+import * as echarts from 'echarts'
 import 'font-awesome/css/font-awesome.min.css'
 import './assets/css/style.css'
 import common from './components/common/common.js'

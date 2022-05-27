@@ -1,0 +1,13 @@
+{
+  "code":"0000",
+  "msg":"OK",
+  "data":[{
+    "RcvSn":"",
+    "WorkMode":"1",
+    "AMP":"10",
+    "ATT":"20",
+    "RealAMP":"30",
+    "RealATT":"40",
+    "RefreshInterval":"5"
+  }]
+}

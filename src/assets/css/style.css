@@ -80,8 +80,34 @@ body{
 	text-align: left;
 	margin-bottom: 10px;
 }
-.tableToolbar .el-input__inner{
+/*.tableToolbar .el-input__inner{
 	background-color: #091939;
+	border:1px solid #6A6A8B;
+	color:#fff;
+}*/
+.input_dark .el-input__inner{
+	background-color: #091939;
+	border:1px solid #6A6A8B;
+	color:#fff;
+}
+.dark_card{
+	background-color: transparent;
+	border:1px solid #6A6A8B;
+	color:#fff;
+}
+.inputmstyle .el-input-group__append, .el-input-group__prepend{
+	padding: 0 5px;
+	background-color: transparent;
+	border:1px solid #6A6A8B;
+	color:#fff;
+}
+.inputmstyle .el-input__inner{
+	background-color: transparent;
+	border:1px solid #6A6A8B;
+	color:#fff;
+}
+.input_dark .el-checkbox-button__inner{
+	background-color: transparent;
 	border:1px solid #6A6A8B;
 	color:#fff;
 }
