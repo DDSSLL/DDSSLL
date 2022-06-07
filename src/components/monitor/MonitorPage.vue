@@ -110,11 +110,6 @@
 
 <script>
   import * as echarts from 'echarts'
-  import Vue from 'vue'
-  import $ from 'jquery'
-  import JsGdi2 from '../common/JsGdi2.js'
-  import spectrum from '../common/spectrum.js'
-  Vue.prototype.$spectrum = spectrum
   export default {
     name: "Me",
     data(){
