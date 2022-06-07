@@ -3,6 +3,7 @@
 	"msg":"OK",
 	"data":[{
 		"DeviceSN":"", 
+		"BoardId":"0",
 		"Freq":"99",
 		"Level":"10",
 		"Modulation":"20",

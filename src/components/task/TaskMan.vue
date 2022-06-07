@@ -5,22 +5,22 @@
         <el-button type="primary" size="mini" @click="addTask">添加</el-button>
         <el-button type="primary" size="mini" @click="clickTaskDelBtn">删除</el-button>
       </el-button-group>
-      <el-button-group style="margin-left:10px">
+      <!-- <el-button-group style="margin-left:10px">
         <el-button type="primary" size="mini" @click="">导入</el-button>
         <el-button type="primary" size="mini" @click="">导出</el-button>
-      </el-button-group>
+      </el-button-group> -->
       
       <el-button type="primary" size="mini" @click="setBatBtn" style="margin-left: 10px;">批量设置</el-button>
       <div style="display: inline-block;float: right;">
         <el-select class="input_dark" v-model="filter.selectRcv" filterable multiple collapse-tags placeholder="接收机" size="mini" style="width:180px;margin-left: 10px;">
           <el-option
-            v-for="item in RCV_LIST_OPTION"
+            v-for="item in RCV_ONLY_LIST_OPTION"
             :key="item.value"
             :label="item.label"
             :value="item.value">
           </el-option>
         </el-select>
-        <el-select class="input_dark" v-model="filter.selectChannel" filterable multiple placeholder="类型" size="mini" collapse-tags  style="width:150px;">
+        <el-select class="input_dark" v-model="filter.selectChannel" filterable clearable placeholder="类型" size="mini" collapse-tags  style="width:150px;">
           <el-option
             v-for="item in CHANNEL_TYPE_OPTION"
             :key="item.value"
@@ -35,12 +35,12 @@
       </div>
       
     </div>
-    <el-table :data="AlarmTimeData" stripe fit highlight-current-row style="width: 100%" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55">
+    <el-table :data="AlarmTimeData" stripe fit highlight-current-row style="width: 100%" @selection-change="handleSelectionChangeTask">
+      <el-table-column type="selection">
       </el-table-column>
-      <el-table-column prop="Freq" label="频率"  width="180">
+      <el-table-column prop="Freq" label="频率" >
       </el-table-column>
-      <el-table-column prop="Name" label="台名" width="180">
+      <el-table-column prop="Name" label="台名">
       </el-table-column>
       <el-table-column prop="Programme" label="节目">
       </el-table-column>
@@ -58,7 +58,7 @@
       </el-table-column>
       <el-table-column prop="cover_rcv" label="覆盖接收机">
       </el-table-column>
-      <el-table-column prop="SaveTime" label="保存时间">
+      <el-table-column prop="CreateTime" label="保存时间">
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
@@ -72,74 +72,70 @@
       </el-table-column>
     </el-table>
     <!-- 添加编辑运行图 -->
-    <el-drawer
-      :title="drawerTitle"
-      :visible.sync="addTaskDrawer"
-      :direction="direction"
-      :before-close="handleClose"
-      ref="drawer">
-      <div class="demo-drawer__content">
-        <el-form :model="form" class="drawerForm" >
-          <el-form-item label="频率" :label-width="formLabelWidth">
-            <el-input v-model="form.Freq" autocomplete="off" size="mini"><template slot="append">kHz</template></el-input>
-          </el-form-item>
-          <el-form-item label="类型" :label-width="formLabelWidth">
-            <el-select v-model="form.ChannelType" filterable placeholder="类型" size="mini" collapse-tags style="width:100%">
-              <el-option
-                v-for="item in CHANNEL_TYPE_OPTION"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="台名" :label-width="formLabelWidth" v-if="">
-            <el-input v-model="form.Name" autocomplete="off" size="mini"></el-input>
-          </el-form-item>
-          <el-form-item label="节目" :label-width="formLabelWidth" v-if="">
-            <el-input v-model="form.Programme" autocomplete="off" size="mini"></el-input>
-          </el-form-item>
-          <el-form-item label="开始时间" :label-width="formLabelWidth" v-if="">
-            <el-time-picker v-model="form.StartTime" size="mini" style="width:100%" arrow-control value-format="HH:mm:ss"></el-time-picker>
-          </el-form-item>
-          <el-form-item label="结束时间" :label-width="formLabelWidth" v-if="">
-            <el-time-picker v-model="form.EndTime" size="mini" style="width:100%" arrow-control value-format="HH:mm:ss"></el-time-picker>
-          </el-form-item>
-          <el-form-item label="开始日期" :label-width="formLabelWidth" v-if="">
-            <el-date-picker v-model="form.StartDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
-          </el-form-item>
-          <el-form-item label="结束日期" :label-width="formLabelWidth" v-if="">
-            <el-date-picker v-model="form.EndDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
-          </el-form-item>
-          <el-form-item label="周期" :label-width="formLabelWidth" v-if="">
-            <el-checkbox-group v-model="form.peroid" size="mini" style="text-align: left">
-              <el-checkbox-button v-for="day in peroid" :label="day" :key="day">{{day}}</el-checkbox-button>
-            </el-checkbox-group>
-            <!-- <el-input v-model="form.DayofWeek" autocomplete="off" size="mini"></el-input> -->
-          </el-form-item>
-          <el-form-item label="接收机" :label-width="formLabelWidth" v-if="">
-            <el-select v-model="form.Rcv" filterable multiple size="mini" style="width:100%;">
-              <el-option
-                v-for="item in RCV_LIST_OPTION"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-        <div class="demo-drawer__footer">
-          <el-button @click="cancelForm" size="mini" >取 消</el-button>
-          <el-button type="primary" @click="$refs.drawer.closeDrawer()" :loading="loading" size="mini" >{{ loading ? '提交中 ...' : '确 定' }}</el-button>
-        </div>
-      </div>
-    </el-drawer>
+    <el-dialog
+      :title="addTaskTitle" 
+      :visible.sync="dialogAddTaskShow"
+      width="40%"
+      >
+      <el-form :model="form" class="drawerForm" :rules="rules" ref="form" >
+        <el-form-item label="频率" :label-width="formLabelWidth" prop="Freq">
+          <el-input v-model="form.Freq" autocomplete="off" size="mini"><template slot="append">kHz</template></el-input>
+        </el-form-item>
+        <el-form-item label="类型" :label-width="formLabelWidth" prop="ChannelType">
+          <el-select v-model="form.ChannelType" filterable placeholder="类型" size="mini" collapse-tags style="width:100%">
+            <el-option
+              v-for="item in CHANNEL_TYPE_OPTION"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="台名" :label-width="formLabelWidth" prop="Name">
+          <el-input v-model="form.Name" autocomplete="off" size="mini"></el-input>
+        </el-form-item>
+        <el-form-item label="节目" :label-width="formLabelWidth" prop="Programme">
+          <el-input v-model="form.Programme" autocomplete="off" size="mini"></el-input>
+        </el-form-item>
+        <el-form-item label="开始时间" :label-width="formLabelWidth"  prop="StartTime">
+          <el-time-picker v-model="form.StartTime" size="mini" style="width:100%" arrow-control value-format="HH:mm:ss"></el-time-picker>
+        </el-form-item>
+        <el-form-item label="结束时间" :label-width="formLabelWidth" prop="EndTime">
+          <el-time-picker v-model="form.EndTime" size="mini" style="width:100%" arrow-control value-format="HH:mm:ss"></el-time-picker>
+        </el-form-item>
+        <el-form-item label="开始日期" :label-width="formLabelWidth" prop="StartDateTime">
+          <el-date-picker v-model="form.StartDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="结束日期" :label-width="formLabelWidth" prop="EndDateTime">
+          <el-date-picker v-model="form.EndDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="周期" :label-width="formLabelWidth"  prop="peroid">
+          <el-checkbox-group v-model="form.peroid" size="mini" style="text-align: left">
+            <el-checkbox-button v-for="day in peroid" :label="day" :key="day">{{day}}</el-checkbox-button>
+          </el-checkbox-group>
+          <!-- <el-input v-model="form.DayofWeek" autocomplete="off" size="mini"></el-input> -->
+        </el-form-item>
+        <el-form-item label="接收机" :label-width="formLabelWidth" prop="Rcv">
+          <el-select v-model="form.Rcv" filterable multiple size="mini" style="width:100%;">
+            <el-option
+              v-for="item in RCV_LIST_OPTION"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="mini" @click="closeAddTask('form')">取 消</el-button>
+        <el-button size="mini" type="primary" @click="submitTask('form')">确 定</el-button>
+      </span>
+    </el-dialog>
     <!-- 删除运行图 -->
     <el-dialog
       title="提示"
       :visible.sync="deleteConfirmDialog"
-      width="30%"
-      :before-close="handleClose">
+      width="30%">
       <span>确定删除选中的运行图吗？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="deleteConfirmDialog = false" size="mini">取 消</el-button>
@@ -147,9 +143,78 @@
       </span>
     </el-dialog>
     <!-- 批量设置 -->
-    <el-drawer
+    <el-dialog
+      title="批量设置" 
+      :visible.sync="setBatDialog"
+      width="40%"
+      >
+      <el-form :model="setBatForm" class="drawerForm" :rules="rules" ref="setBatForm" >
+        <el-form-item label="批量设置内容" :label-width="formLabelWidth">
+          <el-select v-model="setBatForm.content" filterable multiple size="mini" style="width:100%" @change="changeSetBat" @remove-tag="removeSet">
+            <el-option
+              v-for="item in SET_BAT_OPTION"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="频率" :label-width="formLabelWidth" prop="Freq"  v-if="setBatShow.Freq">
+          <el-input v-model="setBatForm.Freq" autocomplete="off" size="mini"><template slot="append">kHz</template></el-input>
+        </el-form-item>
+        <el-form-item label="类型" :label-width="formLabelWidth" prop="ChannelType" v-if="setBatShow.ChannelType">
+          <el-select v-model="setBatForm.ChannelType" filterable placeholder="类型" size="mini" collapse-tags style="width:100%">
+            <el-option
+              v-for="item in CHANNEL_TYPE_OPTION"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="台名" :label-width="formLabelWidth" prop="Name"  v-if="setBatShow.Name">
+          <el-input v-model="setBatForm.Name" autocomplete="off" size="mini"></el-input>
+        </el-form-item>
+        <el-form-item label="节目" :label-width="formLabelWidth" prop="Programme" v-if="setBatShow.Programme">
+          <el-input v-model="setBatForm.Programme" autocomplete="off" size="mini"></el-input>
+        </el-form-item>
+        <el-form-item label="开始时间" :label-width="formLabelWidth"  prop="StartTime" v-if="setBatShow.StartTime">
+          <el-time-picker v-model="setBatForm.StartTime" size="mini" style="width:100%" arrow-control value-format="HH:mm:ss"></el-time-picker>
+        </el-form-item>
+        <el-form-item label="结束时间" :label-width="formLabelWidth" prop="EndTime" v-if="setBatShow.EndTime">
+          <el-time-picker v-model="setBatForm.EndTime" size="mini" style="width:100%" arrow-control value-format="HH:mm:ss"></el-time-picker>
+        </el-form-item>
+        <el-form-item label="开始日期" :label-width="formLabelWidth" prop="StartDateTime" v-if="setBatShow.StartDateTime">
+          <el-date-picker v-model="setBatForm.StartDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="结束日期" :label-width="formLabelWidth" prop="EndDateTime" v-if="setBatShow.EndDateTime">
+          <el-date-picker v-model="setBatForm.EndDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="周期" :label-width="formLabelWidth"  prop="peroid" v-if="setBatShow.peroid">
+          <el-checkbox-group v-model="setBatForm.peroid" size="mini" style="text-align: left">
+            <el-checkbox-button v-for="day in peroid" :label="day" :key="day">{{day}}</el-checkbox-button>
+          </el-checkbox-group>
+          <!-- <el-input v-model="form.DayofWeek" autocomplete="off" size="mini"></el-input> -->
+        </el-form-item>
+        <el-form-item label="接收机" :label-width="formLabelWidth" prop="Rcv" v-if="setBatShow.Rcv">
+          <el-select v-model="setBatForm.Rcv" filterable multiple size="mini" style="width:100%;">
+            <el-option
+              v-for="item in RCV_LIST_OPTION"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="mini" @click="closeTaskBat('setBatForm')">取 消</el-button>
+        <el-button size="mini" type="primary" @click="submitTaskBat('setBatForm')">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!-- <el-drawer
       title="批量设置"
-      :visible.sync="setBatDrawer"
+      :visible.sync="setBatDialog"
       :direction="direction"
       :before-close="handleSetBatClose"
       ref="setBat">
@@ -165,19 +230,7 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="频率" :label-width="formLabelWidth" v-if="setBatShow.Freq">
-            <el-input v-model="setBat.Freq" autocomplete="off" size="mini"><template slot="append">kHz</template></el-input>
-          </el-form-item>
-          <el-form-item label="类型" :label-width="formLabelWidth" v-if="setBatShow.ChannelType">
-            <el-select v-model="setBat.ChannelType" filterable placeholder="类型" size="mini" collapse-tags style="width:100%">
-              <el-option
-                v-for="item in CHANNEL_TYPE_OPTION"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          
           <el-form-item label="台名" :label-width="formLabelWidth" v-if="setBatShow.Name">
             <el-input v-model="setBat.Name" autocomplete="off" size="mini"></el-input>
           </el-form-item>
@@ -217,7 +270,7 @@
           <el-button type="primary" @click="$refs.setBat.closeDrawer()" :loading="loading" size="mini" >{{ loading ? '提交中 ...' : '确 定' }}</el-button>
         </div>
       </div>
-    </el-drawer>
+    </el-drawer> -->
   </div>
   
 </template>
@@ -226,10 +279,17 @@
   export default {
     name: "AlarmTimeData",
     data(){
+      var validateFreq = (rule, value, callback) => {
+        /*if(!this.$common.nameCheckType1(value)){
+          callback(new Error('请输入合法名称'));
+        }*/
+        callback();
+      };
       return{
         multipleSelectionTask:"",
       	AlarmTimeData: [],
         RCV_LIST_OPTION:[],
+        RCV_ONLY_LIST_OPTION:[],
         CHANNEL_TYPE_OPTION: [{
           value: '0',
           label: '中播'
@@ -247,9 +307,9 @@
           name:"",
           programme:""
         },
-        addTaskDrawer:false,
+        dialogAddTaskShow:false,
         direction:'rtl',
-        drawerTitle:"添加运行图",
+        addTaskTitle:"添加运行图",
         formLabelWidth: '160px',
         loading: false,
         deleteConfirmDialog:false,
@@ -272,8 +332,8 @@
         },
         //checkboxGroup: ['1','2','5'],
         peroid: ['1', '2', '3', '4', '5', '6', '7'],
-        setBatDrawer:false,
-        setBat:{
+        setBatDialog:false,
+        setBatForm:{
           content:"",
           Freq:"",
           ChannelType:"", 
@@ -330,6 +390,30 @@
           value: 'CoverRcv',
           label: '接收机'
         }],
+        rules: {
+          Freq: [
+            { required: true, message: '请输入频率', trigger: 'blur' },
+            { validator: validateFreq, trigger: 'blur' }
+          ],
+          ChannelType: [
+            { required: true, message: '请选择频道类型', trigger: 'blur' },
+          ],
+          StartTime: [
+            { required: true, message: '请选择开始时间', trigger: 'blur' },
+          ],
+          EndTime: [
+            { required: true, message: '前选择结束时间', trigger: 'blur' },
+          ],
+          StartDateTime: [
+            { required: true, message: '请选择开始日期', trigger: 'blur' },
+          ],
+          EndDateTime: [
+            { required: true, message: '请选择结束日期', trigger: 'blur' },
+          ],
+          Rcv: [
+            { required: true, message: '请选择接收机', trigger: 'blur' },
+          ],
+        }
       }
     },
     computed: {
@@ -349,8 +433,26 @@
     mounted(){
     	console.log("page2 mounted")
     	var that = this;
-      this.GetRcvSnList();
-    	this.GetAlarmTime();
+      this.$common.GetRcvBoardList(function(data){
+        var option = {};
+        for(var i=0; i<data.length; i++){
+          option = {};
+          option.label = data[i]["RcvName"];
+          option.value = data[i]["RcvBoard"];
+          that.RCV_LIST_OPTION.push(option);
+        }
+      });
+    	this.$common.GetRcvSnList(function(data){
+        var option = {};
+        for(var i=0; i<data.length; i++){
+          option = {};
+          option.label = data[i]["RcvName"];
+          option.value = data[i]["RcvSn"];
+          that.RCV_ONLY_LIST_OPTION.push(option);
+        }
+      });
+      this.GetAlarmTime();
+
     	/*this.$axios.get('/testJson/test.json').then(res=>{
     		var data = that.$qs.parse(res.data)
     		if(data.code == 0){
@@ -373,46 +475,16 @@
       // ...mapMutations({
           
       // }),
-      handleSelectionChange(val){
+      handleSelectionChangeTask(val){
         this.multipleSelectionTask = val;
       },
-      GetRcvSnList(){
-        var that = this;
-        this.$axios({
-          //method: 'GET',
-          url:"/testJson/GetRcvSnList.json",
-          data:this.$qs.stringify({
-            GetRcvSnList: "1",
-          }),
-          Api:"GetAlarmTime",
-          AppId:"android",
-          //UserId:that.user.id
-        })
-        .then(function (response) {
-          console.log(response)
-          let res = response.data;
-          console.log(res)
-          if(res.code == "0000"){
-            var data = res.data;
-            var option = {};
-            for(var i=0; i<data.length; i++){
-              option = {};
-              option.label = data[i]["RcvName"];
-              option.value = data[i]["RcvSn"];
-              that.RCV_LIST_OPTION.push(option);
-            }
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      },
+      
       GetAlarmTime(){
         console.log("GetAlarmTime")
         var that = this;
         var dataJson = {
           GetAlarmTime: "1",
-          FilterSN:that.filter.selectRcv,           //过滤条件，全部接收机："",某些接收机："sn,sn,sn"
+          FilterSN:that.filter.selectRcv.length == 0?"":that.filter.selectRcv.join(","),//过滤条件，全部接收机："",某些接收机："sn,sn,sn"
           FilterCHType:that.filter.selectChannel,    //全部：""，0中波，1短波，2调频
           FilterFreq:that.filter.freq,              //全部："",某个频率Hz
           FilterName:that.filter.name,              //全部："",某个台名
@@ -421,10 +493,10 @@
         console.log(dataJson)
         this.$axios({
           //method: 'GET',
-          url:"/testJson/GetAlarmTime.json",
+          url:"/protocol/index.php",//"/testJson/GetAlarmTime.json",
           data:this.$qs.stringify(dataJson),
           Api:"GetAlarmTime",
-          AppId:"android",
+          AppId:"web",
           //UserId:that.user.id
         })
         .then(function (response) {
@@ -447,8 +519,8 @@
         })
       },
       addTask(){
-        this.addTaskDrawer = true;
-        this.drawerTitle = "添加运行图";
+        this.dialogAddTaskShow = true;
+        this.addTaskTitle = "添加运行图";
         this.form.type = 'add';
         this.form.Freq = "";
         this.form.ChannelType = ""; 
@@ -462,11 +534,13 @@
         this.form.Rcv = "";
       },
       editTaskRow(index, datas){
+        console.log("editTaskRow")
+        console.log(datas)
         var data = datas[index];
-        this.addTaskDrawer = true;
-        this.drawerTitle = "编辑运行图";
+        this.dialogAddTaskShow = true;
+        this.addTaskTitle = "编辑运行图";
         this.form.type = 'edit';
-        this.form.ID = data["ID"];
+        this.form.ID = data["id"];
         this.form.Freq = data["Freq"];
         this.form.ChannelType = data["ChannelType"];
         this.form.Name = data["Name"];
@@ -476,7 +550,7 @@
         this.form.StartDateTime = data["StartDateTime"];
         this.form.EndDateTime = data["EndDateTime"];
         this.form.peroid = data["DayofWeek"].split("");
-        this.form.Rcv =  data["CoverRcv"].map(item=>{return item["RcvSn"]});
+        this.form.Rcv =  data["CoverRcv"].map(item=>{return item["RcvSn"]+"_"+item["BoardId"]});
       },
       clickTaskDelBtn(){
         if(this.multipleSelectionTask.length == 0){
@@ -496,12 +570,12 @@
       DelTask(){
         var that = this;
         this.deleteConfirmDialog = false;
-        var DelIDs = this.multipleSelectionTask.map(item => item.ID);
+        var DelIDs = this.multipleSelectionTask.map(item => {return parseInt(item.id) });
         console.log(DelIDs)
         this.$axios({
-          url:"/testJson/DelAlarmTimeFrep.json",
+          url:"/protocol/index.php",//"/testJson/DelAlarmTimeFrep.json",
           data:{
-            DelAlarmTimeFrep: "1",
+            DelAlarmTimeFreq: "1",
             DelIDs:DelIDs, 
           },
           Api:"DelAlarmTimeFrep",
@@ -530,13 +604,13 @@
             }
           });
         }else{
-          this.setBatDrawer = true;
+          this.setBatDialog = true;
         }
       },
       changeSetBat(a){//修改批量设置的内容
         var addSet = "";
         var delSet = "";
-        var newCon = this.setBat.content;
+        var newCon = this.setBatForm.content;
         var oldCon = this.lastBatCon;
         if(newCon.length > oldCon.length){
           for(var i=0; i<newCon.length; i++){
@@ -563,14 +637,73 @@
       removeSet(removeTag){
         this.setBatShow[removeTag] = false;
       },
-      handleClose(done) {
+      submitTask(formName){
+        var that = this
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            this.AddAlarmTimeFreq(function(){
+              that.dialogAddTaskShow = false;
+              that.GetAlarmTime();
+            });     
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
+      closeAddTask(formName){
+        this.dialogAddTaskShow = false;
+        this.$refs[formName].resetFields();
+      },
+      
+      /*handleClose(done) {
         var that = this;
         if (this.loading) {
           return;
         }
         this.$confirm('确定要提交表单吗？')
         .then(_ => {
-          this.AddAlarmTimeFrep(function(){
+          this.AddAlarmTimeFreq(function(){
+            that.GetAlarmTime();
+            that.loading = true;
+            that.timer = setTimeout(() => {
+              done();
+              // 动画关闭需要一定的时间
+              setTimeout(() => {
+                that.loading = false;
+              }, 400);
+            }, 2000);
+          });        
+        })
+        .catch(_ => {});
+      },*/
+      submitTaskBat(formName){
+        var that = this
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            this.EditMultyAlarmTimeFreq(function(){
+              that.setBatDialog = false;
+              that.GetAlarmTime();
+            });
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
+      closeTaskBat(formName){
+        this.setBatDialog = false;
+        this.$refs[formName].resetFields();
+        
+      },
+      /*handleSetBatClose(done){
+        var that = this;
+        if (this.loading) {
+          return;
+        }
+        this.$confirm('确定要提交表单吗？')
+        .then(_ => {
+          this.EditMultyAlarmTimeFreq(function(){
             that.GetAlarmTime();
             that.loading = true;
             that.timer = setTimeout(() => {
@@ -584,53 +717,36 @@
                 
         })
         .catch(_ => {});
-      },
-      handleSetBatClose(done){
+      },*/
+      EditMultyAlarmTimeFreq(cb){
         var that = this;
-        if (this.loading) {
-          return;
-        }
-        this.$confirm('确定要提交表单吗？')
-        .then(_ => {
-          this.EditMultyAlarmTimeFrep(function(){
-            that.GetAlarmTime();
-            that.loading = true;
-            that.timer = setTimeout(() => {
-              done();
-              // 动画关闭需要一定的时间
-              setTimeout(() => {
-                that.loading = false;
-              }, 400);
-            }, 2000);
-          });
-                
-        })
-        .catch(_ => {});
-      },
-      EditMultyAlarmTimeFrep(cb){
-        var that = this;
-        var IDList = this.multipleSelectionTask.map(item => {return item.ID})
-        var showContent = this.setBat.content;
+        var IDList = this.multipleSelectionTask.map(item => {return item.id})
+        var showContent = this.setBatForm.content;
         var ParamCol = [];
         var ParamValue = [];
         for(var i=0; i<showContent.length; i++){
           if(showContent[i] == "CoverRcv"){
-            ParamValue.push(this.setBat[showContent[i]].join(","));
+            var rcvSelect = [];
+            for(var j=0; j<this.setBatForm[showContent[i]].length; j++){
+              rcvSelect.push({RcvSn:this.setBatForm[showContent[i]][j].split("_")[0], 
+                              BoardId:this.setBatForm[showContent[i]][j].split("_")[1]}) 
+            }
+            ParamValue.push(rcvSelect);
             ParamCol.push(showContent[i]);
           }else if(showContent[i] == "peroid"){
             ParamCol.push("WeeklyTime","DayTime","DayofWeek");
-            if(this.setBat[showContent[i]].length == 0){
+            if(this.setBatForm[showContent[i]].length == 0){
               ParamValue.push("0","1","");
             }else{
-              ParamValue.push("1","0",this.setBat[showContent[i]].join(""));
+              ParamValue.push("1","0",this.setBatForm[showContent[i]].join(""));
             }
           }else{
-            ParamValue.push(this.setBat[showContent[i]]); 
+            ParamValue.push(this.setBatForm[showContent[i]]); 
             ParamCol.push(showContent[i]);
           }
         }
         var jsonData = {
-          EditMultyAlarmTimeFrep: "1",
+          EditMultyAlarmTimeFreq: "1",
           IDList:IDList,       
           ParamCol:ParamCol,       
           ParamValue:ParamValue,      //要修改的数值
@@ -638,10 +754,10 @@
         console.log("jsonData")
         console.log(jsonData)
         this.$axios({
-          url:"/testJson/EditMultyAlarmTimeFrep.json",
+          url:"/protocol/index.php",//"/testJson/EditMultyAlarmTimeFreq.json",
           data:this.$qs.stringify(jsonData),
-          Api:"EditMultyAlarmTimeFrep",
-          AppId:"android",
+          Api:"EditMultyAlarmTimeFreq",
+          AppId:"web",
           //UserId:that.user.id
         })
         .then(function (response) {
@@ -649,14 +765,16 @@
           let res = response.data;
           console.log(res)
           if(res.code == "0000"){
-             cb();
+            cb();
+          }else{
+            that.$message.error(res.msg);
           }
         })
         .catch(function (error) {
           console.log(error)
         })
       },
-      AddAlarmTimeFrep(cb){
+      AddAlarmTimeFreq(cb){
         var that = this;
         if(this.form.peroid.length == 0){
           this.form.WeeklyTime = '0';
@@ -666,35 +784,63 @@
           this.form.DayTime = '0';
           this.form.DayofWeek = this.form.peroid;
         }
-        var jsonData = {
-          AddAlarmTimeFrep: "1",
-          AlarmTime:[{
-            Freq:that.form.Freq,
-            ChannelType:that.form.ChannelType, 
-            Name:that.form.Name,
-            Programme:that.form.Programme,
-            StartTime:that.form.StartTime,
-            EndTime:that.form.EndTime,
-            StartDateTime:that.form.StartDateTime,
-            EndDateTime:that.form.EndDateTime,
-            MonthTime:"",        //标识每月有效任务
-            WeeklyTime:that.form.WeeklyTime,       //标识每周有效任务
-            DayTime:that.form.DayTime,          //标识只执行一次任务
-            Month:"",          //每月执行任务中标识哪个月,//1-12表示1月到12月,//ALL代表每个月
-            Day:"",              //每月执行任务中标识月的具体某天//范围等同每月的天数
-            DayofWeek:that.form.DayofWeek,        //1~7表示周一至周日 0表示每天
-            CoverRcv:that.form.Rcv.join(","),
-          }]
+        var cover_rcv = [];
+        for(var i=0; i<this.form.Rcv.length; i++){
+          cover_rcv.push({RcvSn:this.form.Rcv[i].split("_")[0], BoardId:this.form.Rcv[i].split("_")[1],})
         }
-        if(this.form.type == "edit"){
-          jsonData.AlarmTime[0]["ID"] = this.form.ID;
+        var jsonData = {};
+        if(this.form.type == "add"){
+          jsonData = {
+            AddAlarmTimeFreq: "1",
+            AlarmTime:[{
+              Freq:that.form.Freq,
+              ChannelType:that.form.ChannelType, 
+              Name:that.form.Name,
+              Programme:that.form.Programme,
+              StartTime:that.form.StartTime,
+              EndTime:that.form.EndTime,
+              StartDateTime:that.form.StartDateTime,
+              EndDateTime:that.form.EndDateTime,
+              MonthTime:0,        //标识每月有效任务
+              WeeklyTime:that.form.WeeklyTime,       //标识每周有效任务
+              DayTime:that.form.DayTime,          //标识只执行一次任务
+              Month:"",          //每月执行任务中标识哪个月,//1-12表示1月到12月,//ALL代表每个月
+              Day:0,              //每月执行任务中标识月的具体某天//范围等同每月的天数
+              DayofWeek:that.form.DayTime==1?"":that.form.DayofWeek.join(""),        //1~7表示周一至周日 0表示每天
+              CoverRcv:cover_rcv,
+            }]
+          }
+        }else{
+          console.log(that.form)
+          jsonData = {
+            EditAlarmTimeFreq: "1",
+            AlarmTime:{
+              ID:that.form.ID,
+              Freq:that.form.Freq,
+              ChannelType:that.form.ChannelType, 
+              Name:that.form.Name,
+              Programme:that.form.Programme,
+              StartTime:that.form.StartTime,
+              EndTime:that.form.EndTime,
+              StartDateTime:that.form.StartDateTime,
+              EndDateTime:that.form.EndDateTime,
+              MonthTime:0,        //标识每月有效任务
+              WeeklyTime:that.form.WeeklyTime,       //标识每周有效任务
+              DayTime:that.form.DayTime,          //标识只执行一次任务
+              Month:"",          //每月执行任务中标识哪个月,//1-12表示1月到12月,//ALL代表每个月
+              Day:0,              //每月执行任务中标识月的具体某天//范围等同每月的天数
+              DayofWeek:that.form.DayTime==1?"":that.form.DayofWeek.join(""),        //1~7表示周一至周日 0表示每天
+              CoverRcv:cover_rcv,
+            }
+          }
         }
+
         this.$axios({
           //method: 'GET',
-          url:"/testJson/AddAlarmTimeFrep.json",
+          url:"/protocol/index.php",//"/testJson/AddAlarmTimeFrep.json",
           data:this.$qs.stringify(jsonData),
-          Api:"GetAlarmTime",
-          AppId:"android",
+          Api:"AddAlarmTimeFreq",
+          AppId:"web",
           //UserId:that.user.id
         })
         .then(function (response) {
@@ -703,7 +849,8 @@
           console.log(res)
           if(res.code == "0000"){
              cb();
-            
+          }else{
+            that.$message.error(res.msg);
           }
         })
         .catch(function (error) {
@@ -712,7 +859,7 @@
       },
       cancelForm() {
         this.loading = false;
-        this.addTaskDrawer = false;
+        this.dialogAddTaskShow = false;
         clearTimeout(this.timer);
       },
 

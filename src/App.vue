@@ -18,7 +18,7 @@
                 class="el-menu-demo"
                 mode="horizontal"
                 @select="handleSelect"
-                background-color="#01152E"
+                background-color="#2C468D"
                 text-color="#fff"
                 active-text-color="#7BB5EA"
                 :router="true">
@@ -26,12 +26,12 @@
                 <el-menu-item index="/monitorPage">实时监测</el-menu-item>
                 <el-menu-item index="/deviceMan">接收机管理</el-menu-item>
                 <el-menu-item index="/taskMan">运行图管理</el-menu-item>
-              </el-menu>
+              </el-menu><!-- 深色系："#01152E" -->
             </div>
           </el-col>
           <el-col :span="4" style="color: #fff;height: 60px;line-height: 60px;cursor: pointer;">
             <i class="fa fa-volume-up fa-lg" style="margin-left: 20px"></i>
-            <i class="fa fa-user-o fa-lg" style="margin-left: 20px"></i>
+            <i class="fa fa-user-o fa-lg" style="margin-left: 20px"></i><span style="margin-left:5px;">{{user.name}}</span>
             <i class="fa fa-sign-out fa-lg" style="margin-left: 20px" @click="siginOut"></i>
             
           </el-col>
