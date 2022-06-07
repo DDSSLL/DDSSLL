@@ -477,7 +477,7 @@
         var that = this;
         var chartId = "chart_"+index;
         if (!this.myChartArr[chartId]) {
-          this.myChartArr[chartId] = echarts.init(document.getElementById(chartId));
+          this.myChartArr[chartId] = echarts.init(document.getElementById(chartId), null, {renderer:'svg'});
         }
         
         console.log(this.myChartArr[chartId])
