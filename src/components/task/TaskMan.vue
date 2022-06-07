@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="taskPage" style="height:100%">
     <div class="tableToolbar">
       <el-button-group>
         <el-button type="primary" size="mini" @click="addTask">添加</el-button>
@@ -35,10 +35,12 @@
       </div>
       
     </div>
-    <el-table :data="AlarmTimeData" stripe fit highlight-current-row style="width: 100%" @selection-change="handleSelectionChangeTask">
+    <el-table :data="AlarmTimeData" stripe fit highlight-current-row style="width: 100%" @selection-change="handleSelectionChangeTask" :height="tableHeight">
       <el-table-column type="selection">
       </el-table-column>
-      <el-table-column prop="Freq" label="频率" >
+      <el-table-column prop="Freq" label="频率(kHz)" >
+      </el-table-column>
+      <el-table-column prop="channel_type" label="类型">
       </el-table-column>
       <el-table-column prop="Name" label="台名">
       </el-table-column>
@@ -53,8 +55,6 @@
       <el-table-column prop="EndDateTime" label="结束日期">
       </el-table-column>
       <el-table-column prop="peroid" label="周期">
-      </el-table-column>
-      <el-table-column prop="channel_type" label="类型">
       </el-table-column>
       <el-table-column prop="cover_rcv" label="覆盖接收机">
       </el-table-column>
@@ -98,16 +98,16 @@
           <el-input v-model="form.Programme" autocomplete="off" size="mini"></el-input>
         </el-form-item>
         <el-form-item label="开始时间" :label-width="formLabelWidth"  prop="StartTime">
-          <el-time-picker v-model="form.StartTime" size="mini" style="width:100%" arrow-control value-format="HH:mm:ss"></el-time-picker>
+          <el-time-picker v-model="form.StartTime" size="mini" style="width:100%" value-format="HH:mm:ss"></el-time-picker>
         </el-form-item>
         <el-form-item label="结束时间" :label-width="formLabelWidth" prop="EndTime">
-          <el-time-picker v-model="form.EndTime" size="mini" style="width:100%" arrow-control value-format="HH:mm:ss"></el-time-picker>
+          <el-time-picker v-model="form.EndTime" size="mini" style="width:100%" value-format="HH:mm:ss"></el-time-picker>
         </el-form-item>
         <el-form-item label="开始日期" :label-width="formLabelWidth" prop="StartDateTime">
-          <el-date-picker v-model="form.StartDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
+          <el-date-picker v-model="form.StartDateTime" type="datetime" placeholder="选择日期" size="mini" style="width:100%"></el-date-picker>
         </el-form-item>
         <el-form-item label="结束日期" :label-width="formLabelWidth" prop="EndDateTime">
-          <el-date-picker v-model="form.EndDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
+          <el-date-picker v-model="form.EndDateTime" type="datetime" placeholder="选择日期" size="mini" style="width:100%"></el-date-picker>
         </el-form-item>
         <el-form-item label="周期" :label-width="formLabelWidth"  prop="peroid">
           <el-checkbox-group v-model="form.peroid" size="mini" style="text-align: left">
@@ -185,10 +185,10 @@
           <el-time-picker v-model="setBatForm.EndTime" size="mini" style="width:100%" arrow-control value-format="HH:mm:ss"></el-time-picker>
         </el-form-item>
         <el-form-item label="开始日期" :label-width="formLabelWidth" prop="StartDateTime" v-if="setBatShow.StartDateTime">
-          <el-date-picker v-model="setBatForm.StartDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
+          <el-date-picker v-model="setBatForm.StartDateTime" type="datetime" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
         </el-form-item>
         <el-form-item label="结束日期" :label-width="formLabelWidth" prop="EndDateTime" v-if="setBatShow.EndDateTime">
-          <el-date-picker v-model="setBatForm.EndDateTime" type="date" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
+          <el-date-picker v-model="setBatForm.EndDateTime" type="datetime" placeholder="选择日期" size="mini" style="width:100%" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
         </el-form-item>
         <el-form-item label="周期" :label-width="formLabelWidth"  prop="peroid" v-if="setBatShow.peroid">
           <el-checkbox-group v-model="setBatForm.peroid" size="mini" style="text-align: left">
@@ -196,8 +196,8 @@
           </el-checkbox-group>
           <!-- <el-input v-model="form.DayofWeek" autocomplete="off" size="mini"></el-input> -->
         </el-form-item>
-        <el-form-item label="接收机" :label-width="formLabelWidth" prop="Rcv" v-if="setBatShow.Rcv">
-          <el-select v-model="setBatForm.Rcv" filterable multiple size="mini" style="width:100%;">
+        <el-form-item label="接收机" :label-width="formLabelWidth" prop="Rcv" v-if="setBatShow.CoverRcv">
+          <el-select v-model="setBatForm.CoverRcv" filterable multiple size="mini" style="width:100%;">
             <el-option
               v-for="item in RCV_LIST_OPTION"
               :key="item.value"
@@ -286,6 +286,7 @@
         callback();
       };
       return{
+        tableHeight:"600px",
         multipleSelectionTask:"",
       	AlarmTimeData: [],
         RCV_LIST_OPTION:[],
@@ -410,7 +411,7 @@
           EndDateTime: [
             { required: true, message: '请选择结束日期', trigger: 'blur' },
           ],
-          Rcv: [
+          CoverRcv: [
             { required: true, message: '请选择接收机', trigger: 'blur' },
           ],
         }
@@ -433,6 +434,7 @@
     mounted(){
     	console.log("page2 mounted")
     	var that = this;
+      
       this.$common.GetRcvBoardList(function(data){
         var option = {};
         for(var i=0; i<data.length; i++){
@@ -462,9 +464,14 @@
       return;*/
       
     },
+    created(){
+      console.log("aaa")
+      var contentHeight = document.getElementById("taskPage").offsetHeight;
+      this.tableHeight = (contentHeight-50)+"px";  
+    },
     activated(){  //生命周期-缓存页面激活
     	console.log("page2 active")
-    	/*this.$axios.get('/public/testJson/test.json').then(res=>{
+      /*this.$axios.get('/public/testJson/test.json').then(res=>{
     		console.log(res)
     	})*/
     },
@@ -534,8 +541,6 @@
         this.form.Rcv = "";
       },
       editTaskRow(index, datas){
-        console.log("editTaskRow")
-        console.log(datas)
         var data = datas[index];
         this.dialogAddTaskShow = true;
         this.addTaskTitle = "编辑运行图";
@@ -719,11 +724,14 @@
         .catch(_ => {});
       },*/
       EditMultyAlarmTimeFreq(cb){
+        console.log("EditMultyAlarmTimeFreq")
         var that = this;
         var IDList = this.multipleSelectionTask.map(item => {return item.id})
         var showContent = this.setBatForm.content;
         var ParamCol = [];
         var ParamValue = [];
+        console.log("showContent")
+        console.log(showContent)
         for(var i=0; i<showContent.length; i++){
           if(showContent[i] == "CoverRcv"){
             var rcvSelect = [];
