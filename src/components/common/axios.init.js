@@ -1,13 +1,15 @@
 import axios from 'axios'
 import md5 from 'MD5'
 import qs from 'qs'
+import store from '../../store'
 
-let baseURL = 'http://localhost:8080';
-if(process.env.NODE_ENV == 'development'){
-    baseURL = 'http://localhost:8080';
+window.baseURL = 'http://139.129.91.106:8060';
+//let baseURL = 'http://localhost:8081';
+/*if(process.env.NODE_ENV == 'development'){
+    window.baseURL = 'http://localhost:8081';
 }else{
-    baseURL = ''
-}
+    window.baseURL = ''
+}*/
 // 创建axios实例
 const service = axios.create({
     baseURL:baseURL,
@@ -23,7 +25,7 @@ const service = axios.create({
 service.interceptors.request.use(config => {
     //发请求前做的一些处理，数据转化，配置请求头，设置token,设置loading等，根据需求去添加
     // config.data = JSON.stringify(config.data); //数据转化,也可以使用qs转换
-    var UserId = config.UserId;
+    var UserId = store.state.user.name;
     var Api = config.Api;
     var AppId = config.AppId?config.AppId:"web";
     var SignatureNonce = generateMixed(10);
@@ -61,9 +63,9 @@ service.interceptors.request.use(config => {
         "SignatureNonce":SignatureNonce,
         "AppId":AppId
     }
-    config.method= 'GET';
-    console.log("config")
-    console.log(config)
+    config.method= 'POST';
+    /*console.log("config")
+    console.log(config)*/
     return config
 }, error => {
     Promise.reject(error)

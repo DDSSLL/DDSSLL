@@ -1,0 +1,18 @@
+/*.el-main{
+	background-color: #F5F5F5;
+}*/
+.el-header{
+	background-color: #2C468D;
+}
+.el-table tr{
+	background: #F0FAFD;
+}
+.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+    background: #EFFACF;
+}
+.el-dialog__header{
+	background: #F0F0F0;	
+}
+.el-table th.el-table__cell{
+	background: #FFF;		
+}

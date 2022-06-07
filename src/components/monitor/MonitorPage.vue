@@ -5,7 +5,7 @@
       <el-col :span="4" class="leftDiv">
         <div class="contentDiv" style="height: 96%" id="contentDiv">
           <div id="rcvParamDiv">
-            <el-select class="input_dark" v-model="rcv" style="width:50%;" @change="changeRcv">
+            <el-select class="input_dark" v-model="rcv_board" style="width:50%;" @change="changeRcv" size="small">
               <el-option
                 v-for="item in RCV_OPTION"
                 :key="item.value"
@@ -13,14 +13,22 @@
                 :value="item.value">
               </el-option>
             </el-select>
-            <el-select class="input_dark" v-model="rcvMode" style="width:50%;" @change="changeRcvMode">
+            <el-select class="input_dark" v-model="RefreshInterval" style="width:50%;" @change="changeRefreshTime" size="small">
+              <el-option
+                v-for="item in REFRESH_TIME_OPTION"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <!-- <el-select class="input_dark" v-model="rcvMode" style="width:50%;" @change="changeRcvMode">
               <el-option
                 v-for="item in RCV_MODE_OPTION"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value">
               </el-option>
-            </el-select>
+            </el-select> -->
             <div style="text-align: left;"  class="input_dark" >
               <div style="margin-top: 10px;width:45%;display: inline-block;">
                 <el-input v-model="amplifier" :min="0" :max="50" class="inputmstyle" @blur="changeAMP">
@@ -87,10 +95,11 @@
       <div class="contentDiv" style="height: 100%;">
         <el-row style="height: 100%">
           <el-col :span="12" style="height:100%">
-            <div id="test" style="width:50%;height: 100%"></div>
+            <div id="freq1" style="width:100%;height:100%"></div>
+<!--              <canvas id="crvCanvas" class="spectrum_canvas"></canvas> -->
           </el-col>
-          <el-col :span="12">
-            <div class=""></div>
+          <el-col :span="12" style="height:100%">
+            <div id="freq2" style="width:100%;height:100%"></div>
           </el-col>
         </el-row>
 
@@ -101,11 +110,16 @@
 
 <script>
   import * as echarts from 'echarts'
+  import Vue from 'vue'
+  import $ from 'jquery'
+  import JsGdi2 from '../common/JsGdi2.js'
+  import spectrum from '../common/spectrum.js'
+  Vue.prototype.$spectrum = spectrum
   export default {
     name: "Me",
     data(){
       return{
-        rcv:"",
+        rcv_board:"",
         rcvMode:'0',
         amplifier:"0",
         attenuator:"0",
@@ -114,12 +128,28 @@
         attenuator_0:"",
         attenuator_1:"",
         RCV_OPTION:[],
-        RCV_MODE_OPTION:[{
+        /*RCV_MODE_OPTION:[{
           value: '0',
           label: '实时模式'
         }, {
           value: '1',
           label: '任务模式'
+        }],*/
+        REFRESH_TIME_OPTION:[{
+          value: '1',
+          label: '1s定时刷新'
+        }, {
+          value: '2',
+          label: '2s定时刷新'
+        }, {
+          value: '3',
+          label: '3s定时刷新'
+        }, {
+          value: '4',
+          label: '4s定时刷新'
+        }, {
+          value: '5',
+          label: '5s定时刷新'
         }],
         freq_type:[],
         FREQ_TYPE:["中波","短波","调频"],
@@ -127,15 +157,24 @@
         channelData:[],
         total:"",
         allData:[],
+        totalData:[],
+        xAxisMin:"",
+        xAxisMax:"",
+        xAxisNum:"",
+        xAxisData:[],
         chartClass:"",
         selectChartIndex:0,
         //chartDivClass:[],
+        intervalRealTime:"",
         RefreshIntervalTime:1,//刷新间隔
-        RefreshInterval:"",
+        RefreshInterval:1,
+        spectInterval:"",//频谱刷新
         myChartArr : [],
+        chartFreq1:"",
+        reqTimes:0,
         chartInfo : [],
         currentFreq:"",
-        color:{'电平':'#2976FF','幅度':"#31FF24"},
+        color:{'电平':'#2976FF','幅度':"#31FF24",'yellow':'#ffff00'},
         commonOptionGrid : {
           containLabel: true,
           borderWidth: 0,
@@ -146,6 +185,10 @@
           textStyle: {
             color: "#fff"
           }
+        },
+        lineStyle : {
+          width: 1,
+          type: 'solid' //'dotted'虚线 'solid'实线
         },
         commonOptionXAxis : [{
           type: "category",
@@ -180,7 +223,7 @@
           axisLabel: {
             textStyle: {color: '#BFBFBF',fontWeight: 'normal',fontSize: '14'},
             formatter: function (value, index) {           
-              return value.toFixed(2);      
+              return value.toFixed(1);      
             }
           }
         },
@@ -221,14 +264,14 @@
     mounted(){
       var that = this;
       this.initPageStyle();
-      this.$common.GetRcvSnList(function(data){
+      this.$common.GetRcvBoardList(function(data){
         that.initRcvSelect(data);
-        that.rcv = data[0]["RcvSn"];
+        that.rcv_board = data[0]["RcvBoard"];
         that.getRcvAllData();
       })
-      
-      /*this.initCharts();
-      this.initManyCharts();*/
+      console.log("aaaaa")
+      console.log(this.$spectrum)
+      //this.$spectrum.initOptical();
     },
     activated(){  //生命周期-缓存页面激活
     },
@@ -241,12 +284,9 @@
       // }),
       initPageStyle(){
         setTimeout(function(){
-          console.log( )
-          console.log()
           var contentHeight = document.getElementById("contentDiv").offsetHeight;
           var rcvParamDivHeight = document.getElementById("rcvParamDiv").offsetHeight;
           var tableHeight = contentHeight-rcvParamDivHeight-20;
-          console.log("tableHeight:"+tableHeight)
           document.getElementById("channelTable").style.height =  tableHeight+"px";
         },500)
       },
@@ -258,36 +298,37 @@
 
       },
       getRcvAllData(){
-        this.getRcvModeParam();
-        this.getChannelData();
+        //this.getRcvModeParam();
+        //this.getChannelData();
+        this.getRealtimeSpectData();
       },
       initRcvSelect(data){
         var option = {};
         for(var i=0; i<data.length; i++){
           option = {};
           option.label = data[i]["RcvName"];
-          option.value = data[i]["RcvSn"];
+          option.value = data[i]["RcvBoard"];
           this.RCV_OPTION.push(option);
         }
       },
       getRcvModeParam(){
         var that = this;
+        var rcvSn = this.rcv_board.split("_")[0];
+        var boardId = this.rcv_board.split("_")[1];
         this.$axios({
           url:"/testJson/GetRcvModeParam.json",
           data:this.$qs.stringify({
             GetRcvModeParam: 1,
-            RcvSn: that.rcv,         //序列号
+            RcvSn: rcvSn,   
+            BoardId:boardId,
           }),
           Api:"GetRcvModeParam",
           AppId:"android",
           //UserId:that.user.id
         })
         .then(function (response) {
-          console.log(response)
           let res = response.data;
-          console.log(res)
           if(res.code == "0000"){
-            console.log(res.data)
             var data = res.data;
             that.rcvMode = data[0]["WorkMode"];
             that.amplifier_0=data[0]["RealAMP"];
@@ -335,21 +376,36 @@
         var paramName = ['ATT'];
         var paramValue = [this.attenuator];
         var that = this;
-        this.setRcvParams(paramName, paramValue, function(data){
+        this.setRcvParams(paramName, paramValue/*, function(data){
           if(that.rcvMode == 0){
             that.attenuator_0 = that.attenuator;
           }else{
             that.attenuator_1 = that.attenuator;
           }
-        })
+        }*/)
+      },
+      changeRefreshTime(){
+        var paramName = ['RefreshInterval'];
+        var paramValue = [this.RefreshInterval];
+        var that = this;
+        this.setRcvParams(paramName, paramValue/*, function(data){
+          if(that.rcvMode == 0){
+            that.attenuator_0 = that.attenuator;
+          }else{
+            that.attenuator_1 = that.attenuator;
+          }
+        }*/)
       },
       setRcvParams(paramName,paramValue,callback){
         var that = this;
+        var rcn_sn = this.rcv_board.split("_")[0];
+        var board_id = this.rcv_board.split("_")[1];
         this.$axios({
-          url:"/testJson/SetRcvParams.json",
+          url:"/protocol/index.php",//"/testJson/SetBoardParams.json",
           data:this.$qs.stringify({
-            SetRcvParams: 1,
-            RcvSn: "" ,         
+            SetBoardParams: 1,
+            RcvSn: rcn_sn ,
+            BoardId:board_id,    
             ParamCol:paramName,
             ParamValue:paramValue
           }),
@@ -358,11 +414,8 @@
           //UserId:that.user.id
         })
         .then(function (response) {
-          console.log(response)
           let res = response.data;
-          console.log(res)
           if(res.code == "0000"){
-            console.log(res.data)
             var data = res.data;
             if(typeof(callback) == 'function'){
               callback(data);
@@ -376,10 +429,23 @@
       getChannelData(){
         var that = this;
         clearInterval(this.RefreshInterval);//清除定时刷新 
-        /*this.RefreshInterval = setInterval(function(){
+        this.RefreshInterval = setInterval(function(){
           that.GetChannelInfo();
-        },that.RefreshIntervalTime)*/
+        },that.RefreshIntervalTime*1000)
         that.GetChannelInfo();
+      },
+      getRealtimeSpectData(){
+        var that = this;
+        clearInterval(this.spectInterval);//清除定时刷新 
+        this.spectInterval = setInterval(function(){
+          if(that.$route.fullPath == "/monitorPage"){
+            that.intervalRealTime = that.GetRealtimeSpect();
+          }else{
+            clearInterval(that.intervalRealTime)
+          }
+          
+        },300)
+        that.GetRealtimeSpect();
       },
       changeFreqType(){
         this.getChannelData();
@@ -389,11 +455,14 @@
         var ChannelType = this.freq_type.map(item => {
           return this.FREQ_TYPE_MAP[item];
         }).join(",");
+        var rcvSn = this.rcv_board.split("_")[0];
+        var boardId = this.rcv_board.split("_")[1];
         this.$axios({
           url:"/testJson/GetChannelInfo.json",
           data:this.$qs.stringify({
             GetChannelInfo: "1",
-            DeviceSN:that.rcv,           //10位序列号
+            DeviceSN:rcvSn,           //10位序列号
+            BoardId:boardId,
             ChannelType:ChannelType,        //0中波,1短波,2调频，不填代表所有类型
             Freq:"",                //频率,不填代表所有频率
             GetPoints:"1",  
@@ -403,11 +472,8 @@
           //UserId:that.user.id
         })
         .then(function (response) {
-          console.log(response)
           let res = response.data;
-          console.log(res)
           if(res.code == "0000"){
-            console.log(res.data)
             var data = res.data;
             that.allData = data;
             that.formatTable(data);
@@ -423,8 +489,6 @@
         this.channelData = data;
       },
       formatCharts(data){
-        console.log("formatCharts")
-        console.log(data)
         var that = this;
         this.total = data.length;
         this.initManyCharts(data.length)
@@ -472,15 +536,12 @@
         this.chartClass = chartClass;
       },
       initChartChannelChart(data, index){
-        console.log("initChartChannel："+index)
-        console.log(data)
         var that = this;
         var chartId = "chart_"+index;
         if (!this.myChartArr[chartId]) {
           this.myChartArr[chartId] = echarts.init(document.getElementById(chartId));
         }
         
-        console.log(this.myChartArr[chartId])
         this.myChartArr[chartId].resize();
         var option = {};
         var legendName = ['电平','幅度'];
@@ -515,8 +576,8 @@
           })
         }
         var xAxisOption = {};
-        var yAxisOption1 = that.commonOptionYAxis1;
-        var yAxisOption2 = that.commonOptionYAxis2;
+        var yAxisOption1 = that.$common.copy(that.commonOptionYAxis1);
+        var yAxisOption2 = that.$common.copy(that.commonOptionYAxis2);
         
         var option = {
           title: '',
@@ -547,14 +608,9 @@
           series: series,
           animation: false
         };
-       
-        
-        console.log(option)
         this.myChartArr[chartId].setOption(option, true);
       },
       initChartChannelInfo(data, index){
-        console.log("initChartChannelInfo")
-        console.log(data)
         this.chartInfo[index] = {};
         var datas = {
           "Freq":data["Freq"],
@@ -569,16 +625,11 @@
         this.chartInfo[index]["Modulation"] = data["Modulation"]
         this.chartInfo[index]["Offset"] = data["Offset"]
         this.chartInfo[index]["BW"] = data["BW"]*/
-        console.log(this.chartInfo)
       },
       changeActiveChart(e){
-        console.log("changeActiveChart")
-        console.log(e.currentTarget)
-        console.log()
         if( e.currentTarget.getAttribute("class") && e.currentTarget.getAttribute("class").includes("activeChart") ){//点击的是当前选中项，什么也不做
           
         }else{
-          console.log("else")
           for(var i=0; i<this.total; i++){
             //this.chartDivClass[i] = ""; 
             //this.$set(this.chartDivClass, i, "");
@@ -586,31 +637,237 @@
           }
           e.currentTarget.classList.add('activeChart')
           this.selectChartIndex = e.currentTarget.classList[1].split("_")[1]-1;
-          console.log("this.selectChartIndex:"+this.selectChartIndex)
           this.currentFreq = this.allData[this.selectChartIndex]["Freq"];
         }
       },
-      initCharts(){
-        // 基于准备好的dom，初始化echarts实例
-        var myChart = echarts.init(document.getElementById('test'));
-        // 绘制图表
-        myChart.setOption({
-          title: {
-            text: 'ECharts 入门示例'
+      GetRealtimeSpect(){
+        console.log("GetRealtimeSpect")
+        var that = this;
+        var devSn = "1000012150";//this.rcv_board.split("_")[0];
+        var boardId = 0;//this.rcv_board.split("_")[1];
+        this.$axios({
+          url:"/protocol/index.php",//"/testJson/GetRealtimeSpect.json",
+          data:this.$qs.stringify({
+            GetRealtimeSpect: "1",
+            DeviceSN:devSn,
+            BoardId:boardId,
+          }),
+          Api:"GetRealtimeSpect",
+          AppId:"web",
+          //UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.code == "0000"){
+            var data = res.data;
+            that.allData = data;
+            /*if(that.totalData.length >= 30){
+              that.totalData.shift();
+            }
+            that.totalData.push(data["Spect"]);*/
+            that.xAxisMin = data["SpectStart"];
+            that.xAxisMax = data["SpectEnd"];
+            that.xAxisNum = data["Points"];
+            var inter = (that.xAxisMax - that.xAxisMin)/(that.xAxisNum-1);
+            that.xAxisData = [];
+            for(var i=0; i<that.xAxisNum; i++){
+              that.xAxisData.push((that.xAxisMin*1+i*inter)/1000000+"MHz")
+            }
+            that.formatFreqCharts(data);
+            console.log("111")
+            if(++that.reqTimes == 3){
+              console.log("222")
+              if(that.totalData.length >= 30){
+                that.totalData.shift();
+              }
+              that.totalData.push(data["Spect"]);
+              that.formatFreqHeatMap(data);
+              that.reqTimes = 0;
+            }
+            
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      formatFreqCharts(data){
+        var that = this;
+        if (!this.chartFreq1) {
+          this.chartFreq1 = echarts.init(document.getElementById("freq1"));
+        }
+        //this.myChartArr[chartId].resize();
+        var option = {};
+        var legendName = ['电平'];
+        var series = [];
+        var spectData = data["Spect"];
+        var min = data["SpectStart"];
+        var max = data["SpectEnd"]
+        var points = data["Points"];
+        series.push({
+          name: '电平',
+          type: "line",
+          symbolSize: 3,
+          symbol: 'circle',
+          smooth: true,
+          showSymbol: false,
+          yAxisIndex: 0,
+          itemStyle: {
+            normal: {
+              color: this.color['yellow'],
+              lineStyle: that.lineStyle,
+              borderColor: 'red', //图形的描边颜色。支持的格式同 color
+              borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ] 
+              barBorderRadius: 0,
+              label: {
+                show: false
+              },
+              opacity: 0.5
+            }
           },
+          data: spectData
+        })
+        var yAxisOption1 = that.$common.copy(that.commonOptionYAxis1);
+        yAxisOption1.name = '电平';
+        var xAxisOption = that.$common.copy(that.commonOptionXAxis[0]);
+        xAxisOption["axisLabel"].show = true;
+        xAxisOption["axisLabel"].type = 'category';
+        xAxisOption["axisLabel"].interval = points-2;
+        xAxisOption["data"] = that.xAxisData;
+        var grid = that.commonOptionGrid;
+        grid.left = 40;
+        grid.right = 40;
+        var option = {
+          title: '',
+          legend: {
+            show:false,
+            type: 'scroll',
+            pageTextStyle: {
+              color: '#ccc'
+            },
+            /*pageIconColor: '#337ab7',
+            pageIconInactiveColor: "#B4B5B7",*/
+            top: this.legendTop,
+            itemGap: 5,
+            itemWidth: 5,
+            textStyle: {
+              color: '#DDD',
+              fontSize: '10'
+            },
+            tooltip: {
+              show: true
+            },
+            data: legendName
+          },
+          grid: grid,
+          tooltip: that.commonOptionTooltipFalse,
+          xAxis: xAxisOption,
+          yAxis: yAxisOption1,
+          series: series,
+          animation: false
+        };
+        this.chartFreq1.setOption(option, true);
+      },
+      formatFreqHeatMap(data){
+        var that = this;
+        //return;
+        if (!this.chartFreq2) {
+          this.chartFreq2 = echarts.init(document.getElementById("freq2"));
+        }
+        //this.myChartArr[chartId].resize();
+        var option = {};
+        //var legendName = ['电平'];
+        var yData = [];
+        for (let y = 0; y < 30; y++) {
+          yData.push(y);
+        }
+        var yAxisOption1 = that.$common.copy(that.commonOptionYAxis1);
+        yAxisOption1.axisLabel.show = false;
+        yAxisOption1.type = 'category';
+        yAxisOption1.data =  yData;
+        var xAxisOption = that.$common.copy(that.commonOptionXAxis[0]);
+        xAxisOption["axisLabel"].show = true;
+        xAxisOption["axisLabel"].type = 'category';
+        var xx = [];
+        for(var m=0; m<500; m++){
+          xx.push(m)
+        }
+        xAxisOption["data"] = that.xAxisData;
+        var grid = that.commonOptionGrid;
+        grid.left = 40;
+        grid.right = 40;
+
+        var series = [];
+        var xData = xx;//that.xAxisData;
+        var seriesData = [];
+       
+        for(var i=0; i<xData.length; i++){
+          for(var j=0; j<that.totalData.length; j++){
+            seriesData.push([xData[i], j, that.totalData[j][i]])
+          }
+        }
+        series.push({
+          type: 'heatmap',
+          data: seriesData,
+          emphasis: {
+            itemStyle: {
+              borderColor: '#333',
+              borderWidth: 1
+            }
+          },
+          progressive: 1000,
+          animation: false
+        })
+        var option = {
           tooltip: {},
           xAxis: {
-            data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+            type: 'category',
+            data: xData
           },
-          yAxis: {},
+          yAxis: {
+            type: 'category',
+            data: yData
+          },
+          visualMap: {
+            show:false,
+            min: 0,
+            max: 87,
+            calculable: true,
+            realtime: false,
+            inRange: {
+              color: [
+                '#313695',
+                '#4575b4',
+                '#74add1',
+                '#abd9e9',
+                '#e0f3f8',
+                '#ffffbf',
+                '#fee090',
+                '#fdae61',
+                '#f46d43',
+                '#d73027',
+                '#a50026'
+              ]
+            }
+          },
           series: [
             {
-              name: '销量',
-              type: 'bar',
-              data: [5, 20, 36, 10, 10, 20]
+              name: '',
+              type: 'heatmap',
+              data: seriesData,
+              emphasis: {
+                itemStyle: {
+                  borderColor: '#333',
+                  borderWidth: 1
+                }
+              },
+              progressive: 0,
+              animation: false
             }
           ]
-        });
+        };
+        console.log(option)
+        this.chartFreq2.setOption(option, true);
       },
     }
   }

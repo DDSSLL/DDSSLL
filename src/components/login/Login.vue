@@ -12,9 +12,9 @@
           </div>
           <div class="noLableForm">
             <el-input type="text" v-model="user.checkCode" autocomplete="off" style="width: 50%;display: inline-block !important;" placeholder="输入验证码" @blur="changeCheckCode"></el-input>
-            <img :src="vImg" id="checkImg" class="loginIpt" style="width: 30%;display: inline-block;vertical-align: bottom;border: 2px solid #fff;" @click="changeCheckImg">
-            <!-- <i class="fa fa-check fa-lg" v-show="show.devCode_pass" style="color: #2fb62f"></i>
-            <i class="fa fa-times fa-lg" v-show="show.devCode_fail" style="color: #ff2e2a"></i> -->
+            <img :src="vImg" id="checkImg" class="loginIpt" style="width: 30%;height:100%;display: inline-block;vertical-align: bottom;border: 4px solid #fff;margin-left:10px" @click="changeCheckImg">
+            <i class="fa fa-check fa-lg" v-show="show.devCode_pass" style="color: #2fb62f"></i>
+            <i class="fa fa-times fa-lg" v-show="show.devCode_fail" style="color: #ff2e2a"></i>
           </div>
           <div class="noLableForm" style="text-align: center;">
             <el-button type="primary" @click.native="login" class="loginBtn">登 录</el-button>
@@ -41,11 +41,14 @@
           checkCode:"",
           loginStatus:false,
         },
+        show:{
+          devCode_pass:false,
+          devCode_fail:false,
+        },
         /*SYS_BUILD:SYS_BUILD,
         SYS_SERVE:SYS_SERVE,*/
         
         sessionId:"",
-        checkCode:"",
         vImg:"",
       }
     },
@@ -70,8 +73,8 @@
     created(){
       this.SET_LOGIN_STATUS(true);
       //初始化验证码
-      //this.sessionId = md5(Math.random());
-      //this.vImg = this.DStreamer_BUILD+"/login/ValidationCode.class.php?num="+this.sessionId;
+      this.sessionId = md5(Math.random());
+      this.vImg = window.baseURL+"/protocol/ValidationCode.class.php?num="+this.sessionId;
     },
     mounted(){
       // var that = this;
@@ -87,37 +90,35 @@
         SET_ACTIVE_TAB
       }),
       changeCheckCode(){
-        
-        // var that = this;
-        // this.$axios({
-        //   method: 'post',
-        //   url:"/login/checkCode.php?num="+that.sessionId,
-        //   data:{
-        //     validateCode: that.checkCode
-        //   },
-        //   Api:"validateCode",
-        //   AppId:"android",
-        //   UserId:that.user.login_name
-        // })
-        // .then(function (response) {
-        //   let res = response.data;
-        //   var msg=res;    //设置标志用于表示验证码是否正确
-        //   if(msg=='1'){
-        //     //正确
-        //     that.show.devCode_pass = true;
-        //     that.show.devCode_fail = false;
-        //   }
-        //   else{
-        //     that.show.devCode_pass = false;
-        //     that.show.devCode_fail = true;
-        //   }
-        // })
-        // .catch(function (error) {
-        //   console.log(error)
-        // })
+        var that = this;
+        this.$axios({
+          url:"/protocol/checkCode.php?num="+that.sessionId,
+          data:{
+            validateCode: that.user.checkCode
+          },
+          Api:"validateCode",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          var msg=res;    //设置标志用于表示验证码是否正确
+          if(msg=='1'){
+            //正确
+            that.show.devCode_pass = true;
+            that.show.devCode_fail = false;
+          }
+          else{
+            that.show.devCode_pass = false;
+            that.show.devCode_fail = true;
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       },
       changeCheckImg(){
-        this.vImg = this.$axios.defaults.baseURL+"/login/ValidationCode.class.php?num="+this.sessionId+"&aa="+Math.random();
+        this.vImg = this.$axios.defaults.baseURL+"/protocol/ValidationCode.class.php?num="+this.sessionId+"&aa="+Math.random();
       },
       login(){
         /*this.$router.push("/monitorPage");
@@ -135,19 +136,19 @@
           return;
         }
         //验证码
-        /*if(this.checkCode === ''){
+        if(this.user.checkCode === ''){
           this.$message.error('请输入验证码！');
           return;
-        }*/
+        }
         //that.$axios.defaults.baseURL = that.domain;
         this.$axios({
           //method: 'post',
-          url:"/testJson/login.json",//"/login/login.php?num="+that.sessionId,
+          url:"/protocol/login.php?num="+that.sessionId,//"/testJson/login.json",//
           data:{
             UserLogin: "1",
             LoginId:that.user.login_name,     //登录名
-            LoginPwd:md5(that.user.password), //登录密码，AES(md5(原始密码))
-            ValidateCode:that.checkCode,      //验证码
+            LoginPwd:that.$common.encrypPwd(md5(that.user.password)), //登录密码，AES(md5(原始密码))
+            ValidateCode:that.user.checkCode,      //验证码
           },
           Api:"UserLogin",
           AppId:"web",
@@ -159,10 +160,11 @@
           console.log(res)
           if(res.code == "0000"){
             that.$router.push("/homePage");
+            that.SET_USER({name:that.user.login_name});
             that.SET_LOGIN_STATUS(false);
             that.SET_ACTIVE_TAB('/homePage');
             localStorage.loginTimer = setInterval(function(){
-              that.CheckLogged(res.data)
+              that.CheckLogged(res.data,that.user.password)
             },1000)
           }else{
             that.$message.error(res.msg);
@@ -228,18 +230,15 @@
         }
       },
       //单用户登录校验
-      CheckLogged(data){
+      CheckLogged(data, pwd){
         var that = this;
         that.$axios({
           method: 'post',
-          url:"testJson/UserIsLogged.json",//"/login/login.php",
+          url:"/protocol/login.php",//"testJson/UserIsLogged.json",//
           data:{
-            IsLogged: "",          //登录名
-            LoginPwd:"",          //登录密码，AES(md5(原始密码))
-            LoginRand:"",         //登录随机数
-            /*isLogged: data.oId.toString(),
-            loginRand: data.loginRand.toString(),
-            pwd: data.pwd.toString(),*/
+            IsLogged: that.user.login_name,          //登录名
+            LoginPwd:that.$common.encrypPwd(md5(pwd)),          //登录密码，AES(md5(原始密码))
+            LoginRand:data.LoginRand,         //登录随机数
           },
           Api:"UserIsLogged",
           AppId:"web",
@@ -247,7 +246,7 @@
         })
         .then(function (response) {
           let res = response.data;
-          if(res.res.success){
+          if(res.code == "0000"){
             
           }else{
             /*that.SET_USER(null);
@@ -273,13 +272,15 @@
       height: 100%;
       overflow: hidden;
       position: relative;
+      /*background-image: url('../../assets/img/2.png');*/
     }
     .loginBg{
       position: absolute;
       width: 100%;
       top: 50%;
       transform: translateY(-70%);
-      background-image: url('../../assets/img/loginBg.png');
+      /*background-image: url('../../assets/img/loginBg.png');*/
+      background-size:cover;
       padding-top: 20px;
       padding-bottom: 20px;
     }
@@ -300,11 +301,12 @@
       text-align: left;
     }
     .title{
-      font-size: 36px;
+      font-size: 30px;
       display: block;
       margin-bottom: 20px;
       font-weight: bold;
       letter-spacing: 10px;
+      color:#2C468D;
     }
     .loginBtn{
       width: 100%;
