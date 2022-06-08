@@ -436,7 +436,6 @@
     	console.log("page2 mounted")
     	var that = this;
       this.contentHeight = document.getElementById("taskPage").offsetHeight;
-      console.log("contentHeight:"+this.contentHeight)
       this.tableHeight = (this.contentHeight-50)+"px";  
       this.$common.GetRcvBoardList(function(data){
         var option = {};
@@ -471,7 +470,6 @@
       console.log("aaa")
       this.tableHeight = (this.contentHeight-50)+"px";  
     },
-
     activated(){  //生命周期-缓存页面激活
     	console.log("page2 active")
       /*this.$axios.get('/public/testJson/test.json').then(res=>{
@@ -727,14 +725,11 @@
         .catch(_ => {});
       },*/
       EditMultyAlarmTimeFreq(cb){
-        console.log("EditMultyAlarmTimeFreq")
         var that = this;
         var IDList = this.multipleSelectionTask.map(item => {return item.id})
         var showContent = this.setBatForm.content;
         var ParamCol = [];
         var ParamValue = [];
-        console.log("showContent")
-        console.log(showContent)
         for(var i=0; i<showContent.length; i++){
           if(showContent[i] == "CoverRcv"){
             var rcvSelect = [];

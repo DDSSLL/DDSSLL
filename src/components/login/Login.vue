@@ -168,6 +168,10 @@
             },1000)
           }else{
             that.$message.error(res.msg);
+            that.changeCheckImg();
+            that.user.checkCode = "";
+            that.show.devCode_pass = false;
+            that.show.devCode_fail = false;
           }
           /*if(res.res.success){
             setTimeout(function(){

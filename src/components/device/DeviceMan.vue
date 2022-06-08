@@ -1,5 +1,5 @@
 <template>
-  <div id="devicePage">
+  <div id="devicePage" style="height:100%">
     <div class="tableToolbar">
       <el-button type="primary" size="mini" @click="showAddForm">添加</el-button>
       <el-button type="primary" size="mini" @click="clickDelBtn">删除</el-button>
@@ -305,6 +305,7 @@
         callback();
       };
       return{
+        contentHeight:"",
         tableHeight:"600px",
         refreshInterval:"",
         rcvListData: [],
@@ -501,6 +502,7 @@
     },*/
     mounted(){
       var that = this;
+      this.contentHeight = document.getElementById("devicePage").offsetHeight;
       this.GetRcvList();  
       if(this.refreshInterval){
         clearInterval(that.refreshInterval)
@@ -516,9 +518,8 @@
       }
     },
     created(){
-      console.log("aaa")
-      var contentHeight = document.getElementById("devicePage").offsetHeight;
-      this.tableHeight = (contentHeight-50)+"px";  
+      this.contentHeight = document.getElementById("devicePage").offsetHeight;
+      this.tableHeight = (this.contentHeight-50)+"px";  
     },
     activated(){  //生命周期-缓存页面激活
     },
@@ -582,8 +583,6 @@
         this.dialogAddDeviceShow = true;
       },
       editRcvRow(index, data){
-        console.log("editRcvRow")
-        console.log(data)
         this.form.type = "edit";
         this.show.LocalIp = true;
         this.show.MapIp = true;
@@ -690,7 +689,6 @@
       EditRcv(cb){
         console.log("EditRcv")
         var that = this;
-        console.log(that.form)
         this.$axios({
           url:"/protocol/index.php",//"/testJson/EditRcv.json",
           data:{
@@ -716,9 +714,6 @@
         })
       },
       editBoardRow(index, data){
-        console.log("editBoardRow")
-        console.log(data)
-        console.log(index)
         this.dialogBoardShow = true;
         var that = this;
         this.$axios({
