@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div id="devicePage">
     <div class="tableToolbar">
       <el-button type="primary" size="mini" @click="showAddForm">添加</el-button>
       <el-button type="primary" size="mini" @click="clickDelBtn">删除</el-button>
     </div>
-    <el-table ref="multipleTable" :data="rcvListData" :row-key="getRowKeys" stripe fit highlight-current-row style="width: 100%" @selection-change="handleSelectionChange">
+    <el-table ref="multipleTable" :data="rcvListData" :row-key="getRowKeys" stripe fit highlight-current-row style="width: 100%" @selection-change="handleSelectionChange" :height="tableHeight">
       <el-table-column type="selection" :reserve-selection="true">
       </el-table-column>
       <el-table-column label="接收机名" sortable>
@@ -96,7 +96,7 @@
       <el-table :data="boardData" stripe fit highlight-current-row style="width: 100%">
         <el-table-column label="板卡">
           <template slot-scope="scope">
-            <span :class="scope.row.onlineStyle">{{ scope.row.BoardId }}</span>
+            <span :class="scope.row.onlineStyle">{{ scope.row.BoardIdStr }}</span>
           </template>
         </el-table-column>
         <el-table-column label="在线">
@@ -110,9 +110,7 @@
         </el-table-column>
         <el-table-column prop="FPGAVer" label="FPGA版本">
         </el-table-column>
-        <el-table-column prop="WorkMode" label="内网IP">
-        </el-table-column>
-        <el-table-column prop="RcvModel" label="工作模式">
+        <el-table-column prop="WorkMode" label="工作模式">
         </el-table-column>
         <el-table-column prop="Channels" label="通道数">
         </el-table-column>
@@ -132,159 +130,108 @@
         <el-button type="primary" @click="dialogBoardShow = false">确 定</el-button>
       </span>
       <el-dialog
-        width="70%"
-        :title="'板卡'+(boardParamform.BoardId*1+1)+'参数设置'"
+        width="35%"
+        :title="'板卡'+(boardParamform.BoardIdStr)+'参数设置'"
         :visible.sync="dialogBoardParamShow"
         append-to-body
         :before-close="handleCloseBoardParam">
         <el-form :model="boardParamform" class="dialogForm" :rules="rules" ref="boardParamform">
-          <el-row>
-            <el-col :span="12">
-              <div>
-                <el-form-item label="工作模式" :label-width="formLabelWidth" prop="WorkMode">
-                  <el-select class="" v-model="boardParamform.WorkMode" size="mini">
-                    <el-option
-                      v-for="item in RCV_MODE_OPTION"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <!-- 任务模式下 -->
-                <div v-if="boardParamform.WorkMode==0">
-                  <el-form-item label="放大器" :label-width="formLabelWidth" prop="AMP" >
-                    <el-select class="" v-model="boardParamform.AMP" size="mini">
-                      <el-option
-                        v-for="item in AMP_OPTION"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                      </el-option>
-                    </el-select>
-                  </el-form-item>
-                  <el-form-item label="衰减器" :label-width="formLabelWidth" prop="ATT" >
-                    <el-input v-model="boardParamform.ATT" autocomplete="off" size="mini" placeholder="0-50">
-                      <template slot="append">dB</template>
-                    </el-input>
-                  </el-form-item>  
-                </div>
-                <!-- 实时模式下 -->
-                <div v-if="boardParamform.WorkMode==1">
-                  <el-form-item label="放大器" :label-width="formLabelWidth" prop="RealAMP">
-                    <el-select class="" v-model="boardParamform.RealAMP" size="mini">
-                      <el-option
-                        v-for="item in AMP_OPTION"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                      </el-option>
-                    </el-select>
-                  </el-form-item>
-                  <el-form-item label="衰减器" :label-width="formLabelWidth" prop="RealATT">
-                    <el-input v-model="boardParamform.RealATT" autocomplete="off" size="mini" placeholder="0-50">
-                      <template slot="append">dB</template>
-                    </el-input>
-                  </el-form-item>  
-                </div>
-                <el-form-item label="刷新间隔" :label-width="formLabelWidth" prop="RefreshInterval">
-                  <el-input v-model="boardParamform.RefreshInterval" autocomplete="off" size="mini" placeholder="1-5">
-                    <template slot="append">s</template>
-                  </el-input>
-                </el-form-item>
-                <el-form-item label="采样率" :label-width="formLabelWidth" prop="SampRate">
-                  <el-select class="" v-model="boardParamform.SampRate" size="mini">
-                    <el-option
-                      v-for="item in SAMPLE_RATE_OPTION"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="监听频率" :label-width="formLabelWidth" prop="ListenFreq">
-                  <el-input v-model="boardParamform.ListenFreq" autocomplete="off" size="mini">
-                    <template slot="append">Hz</template>
-                  </el-input>
-                </el-form-item>
-                <el-form-item label="监听开关" :label-width="formLabelWidth" prop="ListenSwitch">
-                  <el-select class="" v-model="boardParamform.ListenSwitch" size="mini">
-                    <el-option
-                      v-for="item in STATUS_OPTION"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="监听录音" :label-width="formLabelWidth" prop="ListenRecord">
-                  <el-select class="" v-model="boardParamform.ListenRecord" size="mini">
-                    <el-option
-                      v-for="item in STATUS_OPTION"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-              </div>
-            </el-col>
-            <el-col :span="12">
-              <div>
-                <el-form-item label="全带频谱采样间隔" :label-width="formLabelWidth" prop="FBInterval">
-                  <el-input v-model="boardParamform.FBInterval" autocomplete="off" size="mini" placeholder="10-3600000">
-                    <template slot="append">ms</template>
-                  </el-input>
-                </el-form-item>
-                <el-form-item label="全带频谱FFT" :label-width="formLabelWidth" prop="FBFFT">
-                  <el-select class="" v-model="boardParamform.FBFFT" size="mini">
-                    <el-option
-                      v-for="item in FBFFT_OPTION"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="全带频谱缩放" :label-width="formLabelWidth" prop="FBZoom">
-                  <el-input v-model="boardParamform.FBZoom" autocomplete="off" size="mini" placeholder="0-10"></el-input>
-                </el-form-item>
-                <el-form-item label="窄带频谱开关" :label-width="formLabelWidth" prop="NBStart">
-                  <el-select class="" v-model="boardParamform.NBStart" size="mini">
-                    <el-option
-                      v-for="item in STATUS_OPTION"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="窄带频谱采样间隔" :label-width="formLabelWidth" prop="NBInterval">
-                  <el-input v-model="boardParamform.NBInterval" autocomplete="off" size="mini" placeholder="10-3600000">
-                    <template slot="append">ms</template>
-                  </el-input>
-                </el-form-item>
-                <el-form-item label="窄带频谱FFT" :label-width="formLabelWidth" prop="NBFFT">
-                  <el-select class="" v-model="boardParamform.NBFFT" size="mini">
-                    <el-option
-                      v-for="item in FBFFT_OPTION"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="窄带频谱缩放" :label-width="formLabelWidth" prop="NBZoom">
-                  <el-input v-model="boardParamform.NBZoom" autocomplete="off" size="mini" placeholder="0-10"></el-input>
-                </el-form-item>
-                <el-form-item label="窄带频谱中心频率" :label-width="formLabelWidth" prop="NBCentFreq">
-                  <el-input v-model="boardParamform.NBCentFreq" autocomplete="off" size="mini">
-                    <template slot="append">Hz</template>
-                  </el-input>
-                </el-form-item>
-              </div>
-            </el-col>
-          </el-row>
+          <el-form-item label="工作模式" :label-width="formLabelWidth" prop="WorkMode">
+            <el-select class="" v-model="boardParamform.WorkMode" size="mini">
+              <el-option
+                v-for="item in RCV_MODE_OPTION"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <!-- 任务模式下 -->
+          <div v-if="boardParamform.WorkMode==0">
+            <el-form-item label="放大器" :label-width="formLabelWidth" prop="AMP" >
+              <el-select class="" v-model="boardParamform.AMP" size="mini">
+                <el-option
+                  v-for="item in AMP_OPTION"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="衰减器" :label-width="formLabelWidth" prop="ATT" >
+              <el-input v-model="boardParamform.ATT" autocomplete="off" size="mini" placeholder="0-50">
+                <template slot="append">dB</template>
+              </el-input>
+            </el-form-item>  
+          </div>
+          <!-- 实时模式下 -->
+          <div v-if="boardParamform.WorkMode==1">
+            <el-form-item label="放大器" :label-width="formLabelWidth" prop="RealAMP">
+              <el-select class="" v-model="boardParamform.RealAMP" size="mini">
+                <el-option
+                  v-for="item in AMP_OPTION"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="衰减器" :label-width="formLabelWidth" prop="RealATT">
+              <el-input v-model="boardParamform.RealATT" autocomplete="off" size="mini" placeholder="0-50">
+                <template slot="append">dB</template>
+              </el-input>
+            </el-form-item>  
+          </div>
+          <el-form-item label="采样率" :label-width="formLabelWidth" prop="SampRate">
+            <el-select class="" v-model="boardParamform.SampRate" size="mini">
+              <el-option
+                v-for="item in SAMPLE_RATE_OPTION"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="全带频谱采样间隔" :label-width="formLabelWidth" prop="FBInterval">
+            <el-input v-model="boardParamform.FBInterval" autocomplete="off" size="mini" placeholder="10-3600000">
+              <template slot="append">ms</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="全带频谱FFT" :label-width="formLabelWidth" prop="FBFFT">
+            <el-select class="" v-model="boardParamform.FBFFT" size="mini">
+              <el-option
+                v-for="item in FBFFT_OPTION"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="窄带频谱开关" :label-width="formLabelWidth" prop="NBStart">
+            <el-select class="" v-model="boardParamform.NBStart" size="mini">
+              <el-option
+                v-for="item in STATUS_OPTION"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="窄带频谱采样间隔" :label-width="formLabelWidth" prop="NBInterval">
+            <el-input v-model="boardParamform.NBInterval" autocomplete="off" size="mini" placeholder="10-3600000">
+              <template slot="append">ms</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="窄带频谱FFT" :label-width="formLabelWidth" prop="NBFFT">
+            <el-select class="" v-model="boardParamform.NBFFT" size="mini">
+              <el-option
+                v-for="item in FBFFT_OPTION"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button size="mini" @click="closeBoardParam('boardParamform')">取 消</el-button>
@@ -325,71 +272,40 @@
         callback();
       };
       var validateNum = (rule, value, callback) => {
-        console.log("validateNum")
-        console.log(rule.field)
-        console.log(value)
         if(isNaN(value)){
           callback(new Error('请输入合法参数'));
         }
         switch(rule.field){
           case "ATT":
           case "RealATT":
-            console.log("cccc")
             if(value < 0 || value > 50){
               callback(new Error('请按要求输入'));
             }
             break;
-          case "RefreshInterval":
+          /*case "RefreshInterval":
             if(value < 1 || value > 5){
               console.log("aaaa")
               callback(new Error('请按要求输入'));
             }
-            break;
+            break;*/
           case "FBInterval":
           case "NBInterval":
-            console.log("bbbb")
             if(value < 10 || value > 3600000){
               callback(new Error('请按要求输入'));
             }
             break;
-          case "FBZoom":
+          /*case "FBZoom":
           case "NBZoom":
             console.log("bbbb")
             if(value < 0 || value > 10){
               callback(new Error('请按要求输入'));
             }
-            break;
+            break;*/
         }
         callback();
       };
-      /*var validateATT = (rule, value, callback) => {
-        if(isNaN(value)){
-          callback(new Error('请输入合法ATT'));
-        }else if(value < 0 || value > 50){
-          callback(new Error('请输入合法ATT'));
-        }
-        callback();
-      };*/
-      /*var validateRefreshInterval = (rule, value, callback) => {
-        if(isNaN(value)){
-          callback(new Error('请输入合法数值'));
-        }else if(value < 1 || value > 5){
-          callback(new Error('请输入合法数值'));
-        }
-        callback();
-      };
-      var validateFBInterval= (rule, value, callback) => {
-        console.log("validateFBInterva")
-        console.log(rule)
-        console.log(value)
-        if(isNaN(value)){
-          callback(new Error('请输入合法数值'));
-        }else if(value < 1 || value > 5){
-          callback(new Error('请输入合法数值'));
-        }
-        callback();
-      };*/
       return{
+        tableHeight:"600px",
         refreshInterval:"",
         rcvListData: [],
         boardData:[],
@@ -448,24 +364,42 @@
           value: '16384',
           label: '16384'
         }],
-        
+        LISTEN_LOOP_TYPE_OPTION:[{
+          value: '0',
+          label: '按运行图'
+        }, {
+          value: '1',
+          label: '按频率范围'
+        }],
         boardParamform:{
           RcvSn:"",              //序列号
           BoardId:"0",           //板卡号， "-1"代表无效
+          BoardIdStr:"",
           WorkMode:0,           //工作模式，0任务，1实时
           AMP:0,                 //放大器,dB, 任务模式生效
           ATT:0,                  //衰减器,dB, 任务模式生效
           RealAMP:0,             //放大器,dB, 实时模式生效
           RealATT:0,              //衰减器,dB, 实时模式生效
           SampRate: 65000000,  //采样率
-          FBInterval:200,         //全带频谱采样间隔ms10-3600000
+          //FBInterval:200,         //全带频谱采样间隔ms10-3600000
           FBFFT:8192,            //全带频谱FFT
-          FBZoom:0,             //全带频谱缩放0-10
+          //FBZoom:0,             //全带频谱缩放0-10
           NBStart:0,             //窄带频谱开关，0关 1开
           NBInterval:200,        //窄带频谱采样间隔ms10-3600000
           NBFFT:8192,           //窄带频谱FFT
-          NBZoom:0,            //窄带频谱缩放0-10
-          NBCentFreq:15000000,  //窄带频谱中心频率Hz
+          //NBZoom:0,            //窄带频谱缩放0-10
+          //NBCentFreq:15000000,  //窄带频谱中心频率Hz
+          /*ListenFreq:0,      //监听频率Hz
+          ListenSwitch:0,    //监听开关，0关1开
+          ListenRecord:0,   //监听录音，0关1开
+          ListenPushUrl:"",   //监听推流地址
+          ListenPullUrl:"",    //监听拉流地址
+          ListenSFreq:0,    //监听起始频率
+          ListenEFreq:0,    //监听终止频率
+          ListenStep:0,     //监听频率步进Hz
+          ListenCHType:"",  //监听频道类型
+          ListenInterval:"",  //监听轮巡间隔，秒
+          ListenLoopType:"", //监听模式，0按运行图,1按频率范围*/
         },
         boardsParam:[
         ],
@@ -580,6 +514,11 @@
           
         },3000)  
       }
+    },
+    created(){
+      console.log("aaa")
+      var contentHeight = document.getElementById("devicePage").offsetHeight;
+      this.tableHeight = (contentHeight-50)+"px";  
     },
     activated(){  //生命周期-缓存页面激活
     },
@@ -820,14 +759,14 @@
         console.log(data)
         var that = this;
         var rcvSn = data[index]["RcvSn"];
-        var BoardId = data[index]["BoardId"]?data[index]["BoardId"].split("板卡")[1]:"";
+        var BoardId = data[index]["BoardId"];
         this.dialogBoardParamShow = true;
         this.$axios({
-          url:"/protocol/device.php",//"/testJson/GetBoardParam.json",
+          url:"/protocol/index.php",//"/testJson/GetBoardParam.json",
           data:{
             GetBoardParam: 1,
             DeviceSN:rcvSn,
-            DateTime:0,
+            BoardId:BoardId,
           },
           Api:"GetBoardParam",
           AppId:"web",
@@ -835,9 +774,11 @@
         .then(function (response) {
           let res = response.data;
           if(res.code == "0000"){
-            var data= res.data;
-            that.boardsParam = data;
-            that.formatCurrentBoardParam(data[index]);
+            console.log("GetBoardParam")
+            console.log(res.data);
+            var dataParam= res.data;
+            that.boardsParam = dataParam;
+            that.formatCurrentBoardParam(dataParam[0]);
           }
           console.log("that.boardData")
           console.log(that.boardData)
@@ -851,27 +792,10 @@
         console.log(data)
         var that = this;
         this.boardParamform = data;
-        /*boardParamform:{
-          RcvSn:"",              //序列号
-          BoardId:"0",           //板卡号， "-1"代表无效
-          WorkMode:0,           //工作模式，0任务，1实时
-          AMP:0,                 //放大器,dB, 任务模式生效
-          ATT:0,                  //衰减器,dB, 任务模式生效
-          RealAMP:0,             //放大器,dB, 实时模式生效
-          RealATT:0,              //衰减器,dB, 实时模式生效
-          Channels:16,           //通道数
-          SampRate: 65000000,  //采样率
-          FBInterval:200,         //全带频谱采样间隔ms10-3600000
-          FBFFT:8192,            //全带频谱FFT
-          FBZoom:0,             //全带频谱缩放0-10
-          NBStart:0,             //窄带频谱开关，0关 1开
-          NBInterval:200,        //窄带频谱采样间隔ms10-3600000
-          NBFFT:8192,           //窄带频谱FFT
-          NBZoom:0,            //窄带频谱缩放0-10
-          NBCentFreq:15000000,  //窄带频谱中心频率Hz
-        },*/
       },
       submitBoardParam(formName){
+        console.log("submitBoardParam")
+        console.log(formName)
         var that = this
         this.$refs[formName].validate((valid) => {
           if (valid) {
@@ -889,45 +813,32 @@
         var that = this;
         var data = {};
         data.SetBoardParams = "1";
-        data.RcvSn = this.boardParamform.RcvSn;
+        data.DeviceSN = this.boardParamform.RcvSn;
         data.BoardId = this.boardParamform.BoardId;
-        data.ParamCol = ["Channels",          //通道数
-                        "LocalIP",            //内网IP
-                        "MapIP",             //公网IP
-                        "Netmask",          //子网掩码
-                        "Gateway",          //网关
-                        "DNS",              //DNS
-                        "DHCP",             //1:开启DHCP 0:不开启
-                        "WorkMode",        //0:实时模式 1:任务模式
+        data.ParamCol = ["WorkMode",        //0:实时模式 1:任务模式
                         "AMP",              //任务模式放大器,0-20dB
                         "ATT",              //任务模式衰减器,0-50dB
                         "RealAMP",         //实时模式放大器
                         "RealATT",         //实时模式衰减器
-                        "RefreshInterval", //实时模式数据刷新间隔
                         "SampRate",      //采样率
                         "FBInterval",      //全带频谱采样间隔ms
                         "FBFFT",          //全带频谱FFT
-                        "FBZoom",        //全带频谱缩放0-10
                         "NBStart",        //窄带频谱开关，0关 1开
                         "NBInterval",      //窄带频谱采样间隔ms
                         "NBFFT",          //窄带频谱FFT
-                        "NBZoom",        //窄带频谱缩放0-10
-                        "NBCentFreq",      //窄带频谱中心频率Hz
-                        "ListenFreq",      //监听频率Hz
-                        "ListenSwitch",    //监听开关，0关1开
-                        "ListenRecord",   //监听录音，0关1开
-                        "ListenPushUrl",   //监听推流地址
-                        "ListenPullUrl",    //监听拉流地址
-                        "ListenSFreq",    //监听起始频率
-                        "ListenEFreq",    //监听终止频率
-                        "ListenStep",     //监听频率步进Hz
-                        "ListenCHType",  //监听频道类型
-                        "ListenInterval",  //监听轮巡间隔，秒
-                        "ListenLoopType"];//监听模式，0按运行图,1按频率范围
-        data.ParamValue = [],       //要修改的数值
-
-
-        
+                        ];
+        data.ParamValue =[this.boardParamform.WorkMode,//0:实时模式 1:任务模式
+                          this.boardParamform.AMP,     //任务模式放大器,0-20dB
+                          this.boardParamform.ATT,     //任务模式衰减器,0-50dB
+                          this.boardParamform.RealAMP, //实时模式放大器
+                          this.boardParamform.RealATT, //实时模式衰减器
+                          this.boardParamform.SampRate,  //采样率
+                          this.boardParamform.FBInterval,//全带频谱采样间隔ms
+                          this.boardParamform.FBFFT,     //全带频谱FFT
+                          this.boardParamform.NBStart,   //窄带频谱开关，0关 1开
+                          this.boardParamform.NBInterval,//窄带频谱采样间隔ms
+                          this.boardParamform.NBFFT,    //窄带频谱FFT
+                        ];
         this.$axios({
           url:"/protocol/index.php",//"/testJson/GetBoardParam.json",
           data:data,
@@ -938,11 +849,10 @@
           let res = response.data;
           if(res.code == "0000"){
             var data= res.data;
-            that.boardsParam = data;
-            this.dialogBoardParamShow = false;
+            that.dialogBoardParamShow = false;
+          }else{
+            that.$message.error(res.msg);
           }
-          console.log("that.boardData")
-          console.log(that.boardData)
         })
         .catch(function (error) {
           console.log(error)

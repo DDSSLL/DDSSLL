@@ -1,6 +1,6 @@
 <template>
   <div class="monitor">
-    <el-row style="height: 65%">
+    <el-row style="height: 64%">
       <!-- left part 1 -->
       <el-col :span="4" class="leftDiv">
         <div class="contentDiv" style="height: 96%" id="contentDiv">
@@ -31,7 +31,7 @@
             </el-select> -->
             <div style="text-align: left;"  class="input_dark" >
               <div style="margin-top: 10px;width:45%;display: inline-block;">
-                <el-input v-model="amplifier" :min="0" :max="50" class="inputmstyle" @blur="changeAMP">
+                <el-input v-model="amplifier" :min="0" :max="50" class="inputmstyle" @blur="changeAMP" style="padding:0 5px">
                   <template slot="prepend">放大器</template>
                   <template slot="append">db</template>
                 </el-input>
@@ -47,15 +47,15 @@
               <span class="statisticsTitle" style="font-size: 24px;">{{currentFreq}}</span>
             </el-card>
             <div style="margin-top: 15px" class="input_dark">
-              <el-checkbox-group v-model="freq_type" size="medium" @change="changeFreqType">
+              <el-checkbox-group v-model="freq_type" size="small" @change="changeFreqType">
                 <el-checkbox-button v-for="freq in FREQ_TYPE" :label="freq" :key="freq">{{freq}}</el-checkbox-button>
               </el-checkbox-group>
             </div>
           </div>
           <div style="margin-top: 10px;" class="monitorTable">
             <template >
-              <el-table :data="channelData" height="250" border style="width: 100%" id="channelTable">
-                <el-table-column type="index" width="50"></el-table-column>
+              <el-table :data="channelData" height="250" border style="width: 100%;font-size:12px;" id="channelTable">
+                <el-table-column type="index" width="40"></el-table-column>
                 <el-table-column prop="Freq" label="频率"></el-table-column>
                 <el-table-column prop="Level" label="电平"></el-table-column>
                 <el-table-column prop="Modulation" label="幅度"></el-table-column>
@@ -67,23 +67,23 @@
       <el-col :span="20" class="rightDiv">
         <div class="contentDiv" style="height: 96%;margin-left: 10px;text-align: left;overflow-y: auto;">
           <div v-for="o in total" :key="o" class="text item chartStyle" :class="chartClass">
-            <div style="width:100%;height:100%;outline: 1px solid #0F2E62" class="chartDiv" :class="'chartDiv_'+o" @click="changeActiveChart">
+            <div style="width:100%;height:100%;" class="chartDiv" :class="'chartDiv_'+o" @click="changeActiveChart">
               <div v-bind:id="'chart_' + o" style="width: 100%; height: 80%"></div>
-              <div v-bind:id="'chart_info_' + o" style="text-align: center;">
+              <div class="chartInfo" v-bind:id="'chart_info_' + o" style="text-align: center;size:12px">
                 <span style="display:inline-block; padding:0 5px">
-                  <span>频率:</span><span>{{chartInfo[o]?chartInfo[o]["Freq"]:""}}</span>
+                  <span>频率:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["Freq"]:""}}</span>
                 </span>
                 <span style="display:inline-block; padding:0 5px">
-                  <span>电平:</span><span>{{chartInfo[o]?chartInfo[o]["Level"]:""}}</span>
+                  <span>电平:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["Level"]:""}}</span>
                 </span>
                 <span style="display:inline-block; padding:0 5px">
-                  <span>幅度:</span><span>{{chartInfo[o]?chartInfo[o]["Modulation"]:""}}</span>
+                  <span>幅度:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["Modulation"]:""}}</span>
                 </span>
                 <span style="display:inline-block; padding:0 5px">
-                  <span>频偏:</span><span>{{chartInfo[o]?chartInfo[o]["Offset"]:""}}</span>
+                  <span>频偏:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["Offset"]:""}}</span>
                 </span>
                 <span style="display:inline-block; padding:0 5px">
-                  <span>带宽:</span><span>{{chartInfo[o]?chartInfo[o]["BW"]:""}}</span>
+                  <span>带宽:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["BW"]:""}}</span>
                 </span>
               </div>
             </div>
@@ -118,10 +118,6 @@
         rcvMode:'0',
         amplifier:"0",
         attenuator:"0",
-        amplifier_0:"",
-        amplifier_1:"",
-        attenuator_0:"",
-        attenuator_1:"",
         RCV_OPTION:[],
         /*RCV_MODE_OPTION:[{
           value: '0',
@@ -174,7 +170,7 @@
           containLabel: true,
           borderWidth: 0,
           top: 40,
-          bottom: 20,
+          bottom: 5,
           left: 20,
           right: 20,
           textStyle: {
@@ -193,7 +189,7 @@
             show: false,
             //interval:3,
             inside: false,
-            textStyle: {color: '#BFBFBF',fontWeight: 'normal',fontSize: '14'}
+            textStyle: {color: '#363636',fontWeight: 'normal',fontSize: '14'}
           },
           splitLine: {
             show: false,
@@ -205,7 +201,7 @@
         commonOptionYAxis1 : {
           type: 'value',
           name: '电平',
-          nameTextStyle: {color: '#BFBFBF'},
+          nameTextStyle: {color: '#363636'},
           axisTick: {show: false},
           axisLine: {
             show: true,
@@ -213,10 +209,10 @@
           },
           splitLine: {
             show: true,
-            lineStyle: {color: '#1c1c45'} //'#32346c '
+            lineStyle: {color: '#fff'} //'#32346c '
           },
           axisLabel: {
-            textStyle: {color: '#BFBFBF',fontWeight: 'normal',fontSize: '14'},
+            textStyle: {color: '#363636',fontWeight: 'normal',fontSize: '12'},
             formatter: function (value, index) {           
               return value.toFixed(1);      
             }
@@ -225,7 +221,7 @@
         commonOptionYAxis2 : {
           type: 'value',
           name: '幅度',
-          nameTextStyle: {color: '#BFBFBF'},
+          nameTextStyle: {color: '#363636'},
           axisTick: {show: false},
           axisLine: {
             show: true,
@@ -236,10 +232,12 @@
             lineStyle: {color: '#32346c'}
           },
           axisLabel: {
-            textStyle: {color: '#BFBFBF',fontWeight: 'normal',fontSize: '14'},
+            textStyle: {color: '#363636',fontWeight: 'normal',fontSize: '12'},
             formatter: '{value}'
           }
         },
+        levelChartXAxis:30,
+        levelChartDatas:{},
       }
     },
     computed: {
@@ -258,17 +256,17 @@
     },*/
     mounted(){
       var that = this;
+      this.levelChartDatas = localStorage.levelChartDatas?JSON.parse(localStorage.levelChartDatas):{};
       this.initPageStyle();
       this.$common.GetRcvBoardList(function(data){
         that.initRcvSelect(data);
         that.rcv_board = data[0]["RcvBoard"];
         that.getRcvAllData();
       })
-      console.log("aaaaa")
-      console.log(this.$spectrum)
-      //this.$spectrum.initOptical();
     },
     activated(){  //生命周期-缓存页面激活
+      console.log("activated")
+      this.levelChartDatas = JSON.parse(localStorage.levelChartDatas);
     },
     deactivated(){   //生命周期-缓存页面失活
 
@@ -293,8 +291,8 @@
 
       },
       getRcvAllData(){
-        //this.getRcvModeParam();
-        //this.getChannelData();
+        this.GetBoardParam();
+        this.getChannelData();
         this.getRealtimeSpectData();
       },
       initRcvSelect(data){
@@ -306,37 +304,27 @@
           this.RCV_OPTION.push(option);
         }
       },
-      getRcvModeParam(){
+      GetBoardParam(){
         var that = this;
         var rcvSn = this.rcv_board.split("_")[0];
         var boardId = this.rcv_board.split("_")[1];
         this.$axios({
-          url:"/testJson/GetRcvModeParam.json",
+          url:"/protocol/index.php",//"/testJson/GetRcvModeParam.json",
           data:this.$qs.stringify({
-            GetRcvModeParam: 1,
-            RcvSn: rcvSn,   
+            GetBoardParam: 1,
+            DeviceSN: rcvSn,   
             BoardId:boardId,
           }),
-          Api:"GetRcvModeParam",
-          AppId:"android",
+          Api:"GetBoardParam",
+          AppId:"web",
           //UserId:that.user.id
         })
         .then(function (response) {
           let res = response.data;
           if(res.code == "0000"){
             var data = res.data;
-            that.rcvMode = data[0]["WorkMode"];
-            that.amplifier_0=data[0]["RealAMP"];
-            that.amplifier_1=data[0]["AMP"];
-            that.attenuator_0=data[0]["RealATT"];
-            that.attenuator_1=data[0]["ATT"];
-            if(that.rcvMode == 0){
-              that.amplifier = data[0]["RealAMP"];
-              that.attenuator = data[0]["RealATT"];
-            }else{
-              that.amplifier = data[0]["AMP"];
-              that.attenuator = data[0]["ATT"];
-            }
+            that.amplifier = data[0]["RealAMP"];
+            that.attenuator = data[0]["RealATT"];
             that.RefreshIntervalTime = data[0]["RefreshInterval"];
           }
         })
@@ -344,40 +332,17 @@
           console.log(error)
         })
       },
-      changeRcvMode(){
-        if(this.rcvMode == 0){
-          this.amplifier = this.amplifier_0;
-          this.attenuator = this.attenuator_0;
-        }else{
-          this.amplifier = this.amplifier_1;
-          this.attenuator = this.attenuator_1;
-        }
-      },
       changeAMP(){
-        var paramName = ['AMP'];
+        var paramName = ['RealAMP'];
         var paramValue = [this.amplifier];
         var that = this;
-        this.setRcvParams(paramName, paramValue, function(data){
-          if(that.rcvMode == 0){
-            that.amplifier_0 = that.amplifier;
-            that.attenuator_0 = that.attenuator;
-          }else{
-            that.amplifier_1 = that.amplifier;
-            that.attenuator_1 = that.attenuator;
-          }
-        })
+        this.setRcvParams(paramName, paramValue)
       },
       changeATT(){
-        var paramName = ['ATT'];
+        var paramName = ['RealATT'];
         var paramValue = [this.attenuator];
         var that = this;
-        this.setRcvParams(paramName, paramValue/*, function(data){
-          if(that.rcvMode == 0){
-            that.attenuator_0 = that.attenuator;
-          }else{
-            that.attenuator_1 = that.attenuator;
-          }
-        }*/)
+        this.setRcvParams(paramName, paramValue)
       },
       changeRefreshTime(){
         var paramName = ['RefreshInterval'];
@@ -425,7 +390,9 @@
         var that = this;
         clearInterval(this.RefreshInterval);//清除定时刷新 
         this.RefreshInterval = setInterval(function(){
-          that.GetChannelInfo();
+          if(that.$route.fullPath == "/monitorPage"){
+            that.GetChannelInfo();  
+          }
         },that.RefreshIntervalTime*1000)
         that.GetChannelInfo();
       },
@@ -453,7 +420,7 @@
         var rcvSn = this.rcv_board.split("_")[0];
         var boardId = this.rcv_board.split("_")[1];
         this.$axios({
-          url:"/testJson/GetChannelInfo.json",
+          url:"/protocol/index.php",//"/testJson/GetChannelInfo.json",
           data:this.$qs.stringify({
             GetChannelInfo: "1",
             DeviceSN:rcvSn,           //10位序列号
@@ -463,17 +430,18 @@
             GetPoints:"1",  
           }),
           Api:"GetChannelInfo",
-          AppId:"android",
-          //UserId:that.user.id
+          AppId:"web",
         })
         .then(function (response) {
           let res = response.data;
           if(res.code == "0000"){
             var data = res.data;
             that.allData = data;
-            that.formatTable(data);
-            that.formatCharts(data);
-            that.currentFreq = data[that.selectChartIndex]["Freq"];
+            if(data.length != 0){
+              that.formatTable(data);
+              that.formatCharts(data);
+              that.currentFreq = data[that.selectChartIndex]["Freq"];
+            }
           }
         })
         .catch(function (error) {
@@ -530,9 +498,17 @@
         }
         this.chartClass = chartClass;
       },
+      initChartData(chartId){
+        if(!this.levelChartDatas[chartId]){
+          this.levelChartDatas[chartId] = {};
+          this.levelChartDatas[chartId]["Level"] = (new Array(this.levelChartXAxis)).fill(0)
+          this.levelChartDatas[chartId]["Modulation"] = (new Array(this.levelChartXAxis)).fill(0)
+        }
+      },
       initChartChannelChart(data, index){
         var that = this;
         var chartId = "chart_"+index;
+        this.initChartData(chartId);
         if (!this.myChartArr[chartId]) {
           this.myChartArr[chartId] = echarts.init(document.getElementById(chartId), null, {renderer:'svg'});
         }
@@ -541,8 +517,14 @@
         var option = {};
         var legendName = ['电平','幅度'];
         var series = [];
-        var LevelData = data.Points.map(item => {return item.Level});
-        var ModulationData = data.Points.map(item => {return item.Modulation});
+        this.levelChartDatas[chartId]["Level"].unshift(data.Level);
+        this.levelChartDatas[chartId]["Level"].pop();
+        var LevelData = this.levelChartDatas[chartId]["Level"]
+        this.levelChartDatas[chartId]["Modulation"].unshift(data.Modulation);
+        this.levelChartDatas[chartId]["Modulation"].pop();
+        var ModulationData = this.levelChartDatas[chartId]["Modulation"]
+        
+        localStorage.setItem("levelChartDatas",JSON.stringify(this.levelChartDatas));
         var chartData = {"电平":LevelData, "幅度":ModulationData}
         for(var m=0; m<legendName.length; m++){
           var name = legendName[m];
@@ -553,7 +535,7 @@
             symbol: 'circle',
             smooth: true,
             showSymbol: false,
-            yAxisIndex: legendName[m].indexOf("电平")!=-1?1:0,
+            yAxisIndex: legendName[m].indexOf("电平")!=-1?0:1,
             itemStyle: {
               normal: {
                 color: this.color[legendName[m]],
@@ -615,11 +597,6 @@
           "BW":data["BW"],
         }
         this.$set(this.chartInfo, index, datas);
-       /* this.chartInfo[index]["Freq"] = data["Freq"]
-        this.chartInfo[index]["Level"] = data["Level"]
-        this.chartInfo[index]["Modulation"] = data["Modulation"]
-        this.chartInfo[index]["Offset"] = data["Offset"]
-        this.chartInfo[index]["BW"] = data["BW"]*/
       },
       changeActiveChart(e){
         if( e.currentTarget.getAttribute("class") && e.currentTarget.getAttribute("class").includes("activeChart") ){//点击的是当前选中项，什么也不做
@@ -636,7 +613,7 @@
         }
       },
       GetRealtimeSpect(){
-        console.log("GetRealtimeSpect")
+        //console.log("GetRealtimeSpect")
         var that = this;
         var devSn = "1000012150";//this.rcv_board.split("_")[0];
         var boardId = 0;//this.rcv_board.split("_")[1];
@@ -669,9 +646,7 @@
               that.xAxisData.push((that.xAxisMin*1+i*inter)/1000000+"MHz")
             }
             that.formatFreqCharts(data);
-            console.log("111")
             if(++that.reqTimes == 3){
-              console.log("222")
               if(that.totalData.length >= 30){
                 that.totalData.shift();
               }
@@ -861,7 +836,6 @@
             }
           ]
         };
-        console.log(option)
         this.chartFreq2.setOption(option, true);
       },
     }
@@ -879,13 +853,13 @@
   height: 100%;
   /*border:1px solid red;*/
 }
-.contentDiv{
+/*.contentDiv{
   border:1px solid #1F2C62;
   border-radius: 4px;
   box-shadow: 1px 2px 2px 1px #1F2C62;
   margin-bottom: 10px;
   padding: 5px;
-}
+}*/
 .statisticsStyle{
   /*outline: 1px solid yellow;*/
   text-align: left;
@@ -914,10 +888,9 @@
   display: inline-block;
   /*outline: 1px solid red;*/
 }
-.activeChart{
-  /*outline:1px solid red;*/
+/*.activeChart{
   background-color: #0A2148;
-}
+}*/
 .chart_1_1{
   width: 100%;
   height: 100%;
@@ -965,5 +938,8 @@
 }
 .monitorTable .el-table__body-wrapper{
   overflow-x: hidden;
+}
+.inputmstyle .el-input__inner{
+  padding:0 5px;
 }
 </style>

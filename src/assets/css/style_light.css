@@ -1,6 +1,10 @@
 /*.el-main{
 	background-color: #F5F5F5;
 }*/
+html,body{
+	color: #121212;
+	
+}
 .el-header{
 	background-color: #2C468D;
 }
@@ -15,4 +19,17 @@
 }
 .el-table th.el-table__cell{
 	background: #FFF;		
+}
+.activeChart{
+  background-color: #F0FAFD;
+}
+.contentDiv{
+  border:1px solid #ADADAD;
+  border-radius: 4px;
+  box-shadow: 1px 2px 2px 1px #e8e8e8;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+.chartDiv{
+	outline: 1px solid #DBDBDB
 }
