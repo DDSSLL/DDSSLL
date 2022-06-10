@@ -6,6 +6,8 @@ import HomePage from '@/components/home/home'
 import MonitorPage from '@/components/monitor/MonitorPage'
 import DeviceMan from '@/components/device/DeviceMan'
 import TaskMan from '@/components/task/TaskMan'
+import UserMan from '@/components/user/UserMan'
+import LogMan from '@/components/log/LogMan'
 
 //解决(in promise) NavigationDuplicated: Avoided redundant navigation问题
 const originalPush = Router.prototype.push
@@ -63,7 +65,22 @@ export default new Router({
           keepAlive: false
         }
       },
-      
+      {
+        path: '/userMan',
+        name: '用户管理',
+        component: UserMan,
+        meta: {
+          keepAlive: false
+        }
+      },
+      {
+        path: '/logMan',
+        name: '日志管理',
+        component: LogMan,
+        meta: {
+          keepAlive: false
+        }
+      },
       //------------DV1080路由-----------
       /*{
         path: '/wifi',

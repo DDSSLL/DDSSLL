@@ -98,9 +98,48 @@ export default {
     return res;
   },
   nameCheckType1(name) {
-    var pattern = /^[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\(\)（）]{1,15}$/gi;
+    var pattern = /^[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\(\)]{1,15}$/gi;
     return pattern.test(name);
-  },  // 判断是否是有效IP
+  },  
+  isValidUserID(id) {
+    var pattern = /^[A-Za-z0-9-_@+()]{1,20}$/gi;
+    return pattern.test(id);
+  },
+  //用户名校验,长度1~20，仅支持中文,字母,数字,+,-,_,@,()和空格
+  isValidName20(name) {
+    var pattern = /^[A-Za-z0-9\u4e00-\u9fa5 \@\+\-\_\(\)]{1,20}$/gi;
+    return pattern.test(name);
+  },
+  //密码校验 6-16位字母数字，至少包含一个字母一个数字
+  pwdCheckType(pwd,required){
+    var password = pwd;
+    var numberCount,//数字字符数目
+        letterCount,//字母字符数目
+        numberRegExp = /[0-9]/,//数字正则
+        letterRegExp = /[a-z]/i,//字母正则,不区分大小写
+        length = (password = password || '').length;
+    if(!required){//不必填的情况下，为空返回true
+      if(pwd.trim() == ""){
+        return true;
+      }  
+    }
+    if(length < 6 || length > 16){
+      return false;
+    }
+    numberCount = letterCount = 0;
+    for(var i = 0, char; i < length; i++){
+        char = password.charAt(i);//取得每个字符
+        if(numberRegExp.test(char)){
+            numberCount += 1;//数字字符数目加1
+        }else if(letterRegExp.test(char)){
+            letterCount += 1;//字母字符数目加1
+        }else{
+        }
+    }
+    //全是数字、全是字母、全是特殊符号：返回false
+    return !(numberCount == length || letterCount == length || (numberCount==0&&letterCount==0));
+  },
+  // 判断是否是有效IP
   isValidIP(ip) {
     var reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/,
         sectionArray = null,

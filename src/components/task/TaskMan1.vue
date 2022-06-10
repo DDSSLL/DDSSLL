@@ -79,7 +79,7 @@
       >
       <el-form :model="form" class="drawerForm" :rules="rules" ref="form" >
         <el-form-item label="频率" :label-width="formLabelWidth" prop="Freq">
-          <el-input v-model="form.Freq" autocomplete="off" size="mini" :placeholder="parseInt(range_Freq.min/1000)+'-'+parseInt(range_Freq.max/1000)" ><template slot="append">kHz</template></el-input>
+          <el-input v-model="form.Freq" autocomplete="off" size="mini"><template slot="append">kHz</template></el-input>
         </el-form-item>
         <el-form-item label="类型" :label-width="formLabelWidth" prop="ChannelType">
           <el-select v-model="form.ChannelType" filterable placeholder="类型" size="mini" collapse-tags style="width:100%">
@@ -276,23 +276,17 @@
 </template>
 
 <script>
-  import { mapState,mapMutations } from 'vuex';
-  //import { SET_CHART_TIMER, SET_CHART_CARD_VIEW } from '../../store/mutation-types';
   export default {
     name: "AlarmTimeData",
     data(){
       var validateFreq = (rule, value, callback) => {
-        if(isNaN(value)){
-          callback(new Error('请输入数字'));
-        }else if(value < this.range_Freq.min || value > this.range_Freq.max){
-          callback(new Error('请输入合法数字'));
-        }else{
-          callback();  
-        }
+        /*if(!this.$common.nameCheckType1(value)){
+          callback(new Error('请输入合法名称'));
+        }*/
+        callback();
       };
       return{
         tableHeight:"600px",
-        contentHeight:"",
         multipleSelectionTask:"",
       	AlarmTimeData: [],
         RCV_LIST_OPTION:[],
@@ -424,8 +418,8 @@
       }
     },
     computed: {
-      ...mapState(['range_Freq'])
-    },  
+     
+    },
     components: {
       
     },
@@ -440,8 +434,6 @@
     mounted(){
     	console.log("page2 mounted")
     	var that = this;
-      this.contentHeight = document.getElementById("taskPage").offsetHeight;
-      this.tableHeight = (this.contentHeight-50)+"px";  
       this.$common.GetRcvBoardList(function(data){
         var option = {};
         for(var i=0; i<data.length; i++){
@@ -473,7 +465,8 @@
     },
     created(){
       console.log("aaa")
-      this.tableHeight = (this.contentHeight-50)+"px";  
+      var contentHeight = document.getElementById("taskPage").offsetHeight;
+      this.tableHeight = (contentHeight-50)+"px";  
     },
     activated(){  //生命周期-缓存页面激活
     	console.log("page2 active")

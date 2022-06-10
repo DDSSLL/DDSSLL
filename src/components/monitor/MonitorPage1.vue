@@ -13,7 +13,7 @@
                 :value="item.value">
               </el-option>
             </el-select>
-            <el-select class="input_dark" v-model="RefreshIntervalTime" style="width:50%;" @change="changeRefreshTime" size="small">
+            <el-select class="input_dark" v-model="RefreshInterval" style="width:50%;" @change="changeRefreshTime" size="small">
               <el-option
                 v-for="item in REFRESH_TIME_OPTION"
                 :key="item.value"
@@ -29,37 +29,23 @@
                 :value="item.value">
               </el-option>
             </el-select> -->
-            <el-row>
-              <el-col :span="12">
-                <div style="text-align: left;"  class="input_dark" >
-                  <div style="margin-top: 10px;display: inline-block;">
-                    放大器
-                    <el-select class="input_dark" v-model="amplifier" @change="changeAMP" size="mini" style="width:60%">
-                      <el-option
-                        v-for="item in AMP_OPTION"
-                        :key="item.value"
-                        :label="item.text"
-                        :value="item.value">
-                      </el-option>
-                    </el-select>
-                  </div>
-                  <div style="margin-top: 10px;display: inline-block;float:right;">
-                    衰减器
-                    <el-input v-model="attenuator" autocomplete="off" size="mini" class="inputmstyle" @blur="changeATT"  :placeholder="range_ATT.min+'-'+range_ATT.max" style="width:60%">
-                      <template slot="append">db</template>
-                    </el-input>
-                  </div>
-                  
-                </div>
-              </el-col>
-              <el-col :span="12">
-                <el-card class="box-card dark_card" style="margin-top: 10px;height:63px;display: flex;align-items: center;">
-                  <span class="statisticsTitle" style="font-size: 24px;">{{currentFreq+"MHz"}}</span>
-                </el-card>
-              </el-col>
-            </el-row>
-            
-            
+            <div style="text-align: left;"  class="input_dark" >
+              <div style="margin-top: 10px;width:45%;display: inline-block;">
+                <el-input v-model="amplifier" :min="0" :max="50" class="inputmstyle" @blur="changeAMP" style="padding:0 5px">
+                  <template slot="prepend">放大器</template>
+                  <template slot="append">db</template>
+                </el-input>
+              </div>
+              <div style="margin-top: 10px;width:45%;display: inline-block;float:right;">
+                <el-input v-model="attenuator" min="0" max="50" class="inputmstyle" @blur="changeATT">
+                  <template slot="prepend">衰减器</template>
+                  <template slot="append">db</template>
+                </el-input>
+              </div>
+            </div>
+            <el-card class="box-card dark_card" style="margin-top: 10px;">
+              <span class="statisticsTitle" style="font-size: 24px;">{{currentFreq}}</span>
+            </el-card>
             <div style="margin-top: 15px" class="input_dark">
               <el-checkbox-group v-model="freq_type" size="small" @change="changeFreqType">
                 <el-checkbox-button v-for="freq in FREQ_TYPE" :label="freq" :key="freq">{{freq}}</el-checkbox-button>
@@ -80,71 +66,24 @@
       </el-col>
       <el-col :span="20" class="rightDiv">
         <div class="contentDiv" style="height: 96%;margin-left: 10px;text-align: left;overflow-y: auto;">
-          <!-- 中播 -->
-          <div v-for="o in total_MW" :key="'MW_'+o" class="text item chartStyle" :class="chartClass" v-if="show.MWChart">
+          <div v-for="o in total" :key="o" class="text item chartStyle" :class="chartClass">
             <div style="width:100%;height:100%;" class="chartDiv" :class="'chartDiv_'+o" @click="changeActiveChart">
-              <div v-bind:id="'chart_MW_' + o" style="width: 100%; height: 80%"></div>
-              <div class="chartInfo" v-bind:id="'chart_info_MW_' + o" style="text-align: center;size:12px">
+              <div v-bind:id="'chart_' + o" style="width: 100%; height: 80%"></div>
+              <div class="chartInfo" v-bind:id="'chart_info_' + o" style="text-align: center;size:12px">
                 <span style="display:inline-block; padding:0 5px">
-                  <span>频率:</span><span>{{chartInfo_MW[o-1]?chartInfo_MW[o-1]["Freq"]:""}}</span>
+                  <span>频率:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["Freq"]:""}}</span>
                 </span>
                 <span style="display:inline-block; padding:0 5px">
-                  <span>电平:</span><span>{{chartInfo_MW[o-1]?chartInfo_MW[o-1]["Level"]:""}}</span>
+                  <span>电平:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["Level"]:""}}</span>
                 </span>
                 <span style="display:inline-block; padding:0 5px">
-                  <span>幅度:</span><span>{{chartInfo_MW[o-1]?chartInfo_MW[o-1]["Modulation"]:""}}</span>
+                  <span>幅度:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["Modulation"]:""}}</span>
                 </span>
                 <span style="display:inline-block; padding:0 5px">
-                  <span>频偏:</span><span>{{chartInfo_MW[o-1]?chartInfo_MW[o-1]["Offset"]:""}}</span>
+                  <span>频偏:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["Offset"]:""}}</span>
                 </span>
                 <span style="display:inline-block; padding:0 5px">
-                  <span>带宽:</span><span>{{chartInfo_MW[o-1]?chartInfo_MW[o-1]["BW"]:""}}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-          <!-- 短波 -->
-          <div v-for="p in total_SW" :key="'SW_'+p" class="text item chartStyle" :class="chartClass" v-if="show.SWChart">
-            <div style="width:100%;height:100%;" class="chartDiv" :class="'chartDiv_'+(total_MW+p)" @click="changeActiveChart">
-              <div v-bind:id="'chart_SW_' + p" style="width: 100%; height: 80%"></div>
-              <div class="chartInfo" v-bind:id="'chart_info_SW_' + p" style="text-align: center;size:12px">
-                <span style="display:inline-block; padding:0 5px">
-                  <span>频率:</span><span>{{chartInfo_SW[p-1]?chartInfo_SW[p-1]["Freq"]:""}}</span>
-                </span>
-                <span style="display:inline-block; padding:0 5px">
-                  <span>电平:</span><span>{{chartInfo_SW[p-1]?chartInfo_SW[p-1]["Level"]:""}}</span>
-                </span>
-                <span style="display:inline-block; padding:0 5px">
-                  <span>幅度:</span><span>{{chartInfo_SW[p-1]?chartInfo_SW[p-1]["Modulation"]:""}}</span>
-                </span>
-                <span style="display:inline-block; padding:0 5px">
-                  <span>频偏:</span><span>{{chartInfo_SW[p-1]?chartInfo_SW[p-1]["Offset"]:""}}</span>
-                </span>
-                <span style="display:inline-block; padding:0 5px">
-                  <span>带宽:</span><span>{{chartInfo_SW[p-1]?chartInfo_SW[p-1]["BW"]:""}}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-          <!-- 调频 -->
-          <div v-for="q in total_FM" :key="'FM_'+q" class="text item chartStyle" :class="chartClass" v-if="show.FMChart">
-            <div style="width:100%;height:100%;" class="chartDiv" :class="'chartDiv_'+(total_MW+total_SW+q)" @click="changeActiveChart">
-              <div v-bind:id="'chart_FM_' + q" style="width: 100%; height: 80%"></div>
-              <div class="chartInfo" v-bind:id="'chart_info_FM_' + q" style="text-align: center;size:12px">
-                <span style="display:inline-block; padding:0 5px">
-                  <span>频率:</span><span>{{chartInfo_FM[q-1]?chartInfo_FM[q-1]["Freq"]:""}}</span>
-                </span>
-                <span style="display:inline-block; padding:0 5px">
-                  <span>电平:</span><span>{{chartInfo_FM[q-1]?chartInfo_FM[q-1]["Level"]:""}}</span>
-                </span>
-                <span style="display:inline-block; padding:0 5px">
-                  <span>幅度:</span><span>{{chartInfo_FM[q-1]?chartInfo_FM[q-1]["Modulation"]:""}}</span>
-                </span>
-                <span style="display:inline-block; padding:0 5px">
-                  <span>频偏:</span><span>{{chartInfo_FM[q-1]?chartInfo_FM[q-1]["Offset"]:""}}</span>
-                </span>
-                <span style="display:inline-block; padding:0 5px">
-                  <span>带宽:</span><span>{{chartInfo_FM[q-1]?chartInfo_FM[q-1]["BW"]:""}}</span>
+                  <span>带宽:</span><span>{{chartInfo[o-1]?chartInfo[o-1]["BW"]:""}}</span>
                 </span>
               </div>
             </div>
@@ -157,7 +96,7 @@
         <el-row style="height: 100%">
           <el-col :span="12" style="height:100%">
             <div id="freq1" style="width:100%;height:100%"></div>
-            <!--<canvas id="crvCanvas" class="spectrum_canvas"></canvas> -->
+<!--              <canvas id="crvCanvas" class="spectrum_canvas"></canvas> -->
           </el-col>
           <el-col :span="12" style="height:100%">
             <div id="freq2" style="width:100%;height:100%"></div>
@@ -170,7 +109,6 @@
 </template>
 
 <script>
-  import { mapState,mapMutations } from 'vuex';
   import * as echarts from 'echarts'
   export default {
     name: "Me",
@@ -181,10 +119,6 @@
         amplifier:"0",
         attenuator:"0",
         RCV_OPTION:[],
-        AMP_OPTION:[],
-        freq1_count:0,
-        freq2_count:0,
-        freq2Rows:50,
         /*RCV_MODE_OPTION:[{
           value: '0',
           label: '实时模式'
@@ -210,10 +144,10 @@
         }],
         freq_type:[],
         FREQ_TYPE:["中波","短波","调频"],
-        FREQ_TYPE_MAP:{"中波":"MW","短波":"SW","调频":"FM"},
+        FREQ_TYPE_MAP:{"中波":"0","短波":"1","调频":"2"},
         channelData:[],
+        total:"",
         allData:[],
-        channelAllData:[],//一次请求的所有电平图的数据
         totalData:[],
         xAxisMin:"",
         xAxisMax:"",
@@ -226,15 +160,10 @@
         RefreshIntervalTime:1,//刷新间隔
         RefreshInterval:1,
         spectInterval:"",//频谱刷新
-        myChartArr : {},
+        myChartArr : [],
         chartFreq1:"",
         reqTimes:0,
-        total_MW:"",
-        total_SW:"",
-        total_FM:"",
-        chartInfo_SW : [],/*短波*/
-        chartInfo_MW : [],/*中播*/
-        chartInfo_FM : [],/*调频*/
+        chartInfo : [],
         currentFreq:"",
         color:{'电平':'#2976FF','幅度':"#31FF24",'yellow':'#ffff00'},
         commonOptionGrid : {
@@ -309,18 +238,10 @@
         },
         levelChartXAxis:30,
         levelChartDatas:{},
-        chartData_SW:{},
-        chartData_MW:{},
-        chartData_FM:{},
-        show:{
-          MWChart:true,
-          SWChart:true,
-          FMChart:true,
-        },
       }
     },
     computed: {
-      ...mapState(['range_ATT','range_AMP'])
+     
     },
     components: {
       
@@ -335,11 +256,7 @@
     },*/
     mounted(){
       var that = this;
-      this.initPageEle();
       this.levelChartDatas = localStorage.levelChartDatas?JSON.parse(localStorage.levelChartDatas):{};
-      /*this.chartData_SW = localStorage.chartData_SW?JSON.parse(localStorage.chartData_SW):{};
-      this.chartData_MW = localStorage.chartData_MW?JSON.parse(localStorage.chartData_MW):{};
-      this.chartData_FM = localStorage.chartData_FM?JSON.parse(localStorage.chartData_FM):{};*/
       this.initPageStyle();
       this.$common.GetRcvBoardList(function(data){
         that.initRcvSelect(data);
@@ -349,7 +266,7 @@
     },
     activated(){  //生命周期-缓存页面激活
       console.log("activated")
-      //this.levelChartDatas = localStorage.levelChartDatas?JSON.parse(localStorage.levelChartDatas):{};
+      this.levelChartDatas = localStorage.levelChartDatas?JSON.parse(localStorage.levelChartDatas):{};
     },
     deactivated(){   //生命周期-缓存页面失活
 
@@ -358,9 +275,6 @@
       // ...mapMutations({
           
       // }),
-      initPageEle(){
-        this.AMP_OPTION = this.range_AMP;
-      },
       initPageStyle(){
         setTimeout(function(){
           var contentHeight = document.getElementById("contentDiv").offsetHeight;
@@ -370,12 +284,13 @@
         },500)
       },
       changeRcv(){//修改接收机时，清空定时器，重新开始获取数据
-        this.myChartArr = new Object();
-        this.getRcvAllData();
+        if(this.RefreshInterval){
+          this.getRcvAllData();
+        }
+        
+
       },
       getRcvAllData(){
-        this.formatFreqCharts([]);
-        this.formatFreqHeatMap();
         this.GetBoardParam();
         this.getChannelData();
         this.getRealtimeSpectData();
@@ -408,8 +323,8 @@
           let res = response.data;
           if(res.code == "0000"){
             var data = res.data;
-            that.amplifier = data[0]["RealAMP"]*1;
-            that.attenuator = data[0]["RealATT"]+"";
+            that.amplifier = data[0]["RealAMP"];
+            that.attenuator = data[0]["RealATT"];
             that.RefreshIntervalTime = data[0]["RefreshInterval"];
           }
         })
@@ -491,39 +406,17 @@
             clearInterval(that.intervalRealTime)
           }
           
-        },100)
+        },300)
         that.GetRealtimeSpect();
       },
       changeFreqType(){
-        if(this.freq_type.length == 0){
-          this.show.MWChart = true;
-          this.show.SWChart = true;
-          this.show.FMChart = true;  
-        }else{
-          this.show.MWChart = false;
-          this.show.SWChart = false;
-          this.show.FMChart = false;  
-          this.myChartArr = new Object();
-          for(var i=0; i<this.freq_type.length; i++){
-            this.show[this.FREQ_TYPE_MAP[this.freq_type[i]]+"Chart"] = true;
-          }
-        }
-        for(var i=0; i<this.total; i++){
-          if(document.getElementsByClassName("chartDiv")[i]){
-            document.getElementsByClassName("chartDiv")[i].classList.remove('activeChart')  
-          }
-        }
-        
-        /*var ChannelType = this.freq_type.map(item => {
-          return this.FREQ_TYPE_MAP[item];
-        }).join(",");*/
+        this.getChannelData();
       },
       GetChannelInfo(){
         var that = this;
-        /*var ChannelType = this.freq_type.map(item => {
+        var ChannelType = this.freq_type.map(item => {
           return this.FREQ_TYPE_MAP[item];
-        }).join(",");*/
-        var ChannelType = "";
+        }).join(",");
         var rcvSn = this.rcv_board.split("_")[0];
         var boardId = this.rcv_board.split("_")[1];
         this.$axios({
@@ -543,13 +436,12 @@
           let res = response.data;
           if(res.code == "0000"){
             var data = res.data;
-            var dataMW = data.filter((item) => { return item.ChannelType == 0; })
-            var dataSW = data.filter((item) => { return item.ChannelType == 1; })
-            var dataFM = data.filter((item) => { return item.ChannelType == 2; })
-            var orderData = dataMW.concat(dataSW, dataFM);
-            that.channelAllData = orderData;
-            that.formatTable(orderData);
-            that.formatCharts(data, dataMW, dataSW, dataFM);  
+            that.allData = data;
+            if(data.length != 0){
+              that.formatTable(data);
+              that.formatCharts(data);
+              that.currentFreq = data[that.selectChartIndex]["Freq"];
+            }
           }
         })
         .catch(function (error) {
@@ -559,59 +451,7 @@
       formatTable(data){
         this.channelData = data;
       },
-      formatCharts(data, dataMW, dataSW, dataFM){
-        var that = this;
-        this.total = data.length;
-        this.total_MW = dataMW.length;
-        this.total_SW = dataSW.length;
-        this.total_FM = dataFM.length;
-        if(data.length == 0){
-          return;
-        }
-        this.initManyCharts(data.length)
-        this.$nextTick(function(){
-          if(this.show.MWChart){
-            this.formatChartsMW(dataMW);  
-          }
-          if(this.show.SWChart){
-            this.formatChartsSW(dataSW);  
-          }
-          if(this.show.FMChart){
-            this.formatChartsFM(dataFM);
-          }
-          if(document.getElementsByClassName("chartDiv")[that.selectChartIndex]){
-            document.getElementsByClassName("chartDiv")[that.selectChartIndex].classList.add('activeChart')  
-            var index = document.getElementsByClassName("chartDiv")[that.selectChartIndex].classList[1].split("_")[1]-1;
-            this.currentFreq = this.channelAllData[index]["Freq"];
-          }else{
-           // document.getElementsByClassName("chartDiv")[that.selectChartIndex].classList.add('activeChart')
-          }
-          
-        })
-      },
-      formatChartsMW(data){
-        var that = this;
-        for(var i=1; i<this.total_MW+1; i++){
-          that.initChartChannelChart(data[i-1], i, "MW");
-          that.initChartChannelInfo(data[i-1], i-1, "MW");
-        }
-      },
-      formatChartsSW(data){
-        var that = this;
-        for(var i=1; i<this.total_SW+1; i++){
-          that.initChartChannelChart(data[i-1], i, "SW");
-          that.initChartChannelInfo(data[i-1], i-1, "SW");
-        }
-      },
-      formatChartsFM(data){
-        var that = this;
-        for(var i=1; i<this.total_FM+1; i++){
-          that.initChartChannelChart(data[i-1], i, "FM");
-          that.initChartChannelInfo(data[i-1], i-1, "FM");
-        }
-      },
-
-      /*formatCharts(data, dataMW, dataSW, dataFM){
+      formatCharts(data){
         var that = this;
         this.total = data.length;
         this.initManyCharts(data.length)
@@ -622,7 +462,7 @@
           }
           document.getElementsByClassName("chartDiv")[that.selectChartIndex].classList.add('activeChart')
         })
-      },*/
+      },
       initManyCharts(){
         var chartClass = "";
         switch(this.total){
@@ -658,48 +498,31 @@
         }
         this.chartClass = chartClass;
       },
-      initChartData(chartId,channelType){
-        var rcvSn = this.rcv_board;
-        if(!this.levelChartDatas[rcvSn]){
-          this.levelChartDatas[rcvSn] = {};
-          if(!this.levelChartDatas[rcvSn][chartId]){
-            this.levelChartDatas[rcvSn][chartId] = {};
-            this.levelChartDatas[rcvSn][chartId]["Level"] = (new Array(this.levelChartXAxis)).fill(0);
-            this.levelChartDatas[rcvSn][chartId]["Modulation"] = (new Array(this.levelChartXAxis)).fill(0);
-          }
-        }else{
-          if(!this.levelChartDatas[rcvSn][chartId]){
-            this.levelChartDatas[rcvSn][chartId] = {};
-            this.levelChartDatas[rcvSn][chartId]["Level"] = (new Array(this.levelChartXAxis)).fill(0);
-            this.levelChartDatas[rcvSn][chartId]["Modulation"] = (new Array(this.levelChartXAxis)).fill(0);
-          }
-        }
-        /*if(!this.levelChartDatas[rcvSn].chartData_SW[chartId]){
+      initChartData(chartId){
+        if(!this.levelChartDatas[chartId]){
           this.levelChartDatas[chartId] = {};
           this.levelChartDatas[chartId]["Level"] = (new Array(this.levelChartXAxis)).fill(0)
           this.levelChartDatas[chartId]["Modulation"] = (new Array(this.levelChartXAxis)).fill(0)
-        }*/
+        }
       },
-      initChartChannelChart(data, index, channelType){
+      initChartChannelChart(data, index){
         var that = this;
-        var chartId = "chart_"+channelType+"_"+index;
-        this.initChartData(chartId, channelType);
-
+        var chartId = "chart_"+index;
+        this.initChartData(chartId);
         if (!this.myChartArr[chartId]) {
-          this.myChartArr[chartId] = echarts.init(document.getElementById(chartId), null, {renderer:'svg'});
+          this.myChartArr[chartId] = echarts.init(document.getElementById(chartId));
         }
         
         this.myChartArr[chartId].resize();
         var option = {};
         var legendName = ['电平','幅度'];
         var series = [];
-        var rcvSn = this.rcv_board;
-        this.levelChartDatas[rcvSn][chartId]["Level"].unshift(data.Level);
-        this.levelChartDatas[rcvSn][chartId]["Level"].pop();
-        var LevelData = this.levelChartDatas[rcvSn][chartId]["Level"]
-        this.levelChartDatas[rcvSn][chartId]["Modulation"].unshift(data.Modulation);
-        this.levelChartDatas[rcvSn][chartId]["Modulation"].pop();
-        var ModulationData = this.levelChartDatas[rcvSn][chartId]["Modulation"]
+        this.levelChartDatas[chartId]["Level"].unshift(data.Level);
+        this.levelChartDatas[chartId]["Level"].pop();
+        var LevelData = this.levelChartDatas[chartId]["Level"]
+        this.levelChartDatas[chartId]["Modulation"].unshift(data.Modulation);
+        this.levelChartDatas[chartId]["Modulation"].pop();
+        var ModulationData = this.levelChartDatas[chartId]["Modulation"]
         
         localStorage.setItem("levelChartDatas",JSON.stringify(this.levelChartDatas));
         var chartData = {"电平":LevelData, "幅度":ModulationData}
@@ -764,8 +587,8 @@
         };
         this.myChartArr[chartId].setOption(option, true);
       },
-      initChartChannelInfo(data, index, channelType){
-        this["chartInfo_"+channelType][index] = {};
+      initChartChannelInfo(data, index){
+        this.chartInfo[index] = {};
         var datas = {
           "Freq":data["Freq"],
           "Level":data["Level"],
@@ -773,7 +596,7 @@
           "Offset":data["Offset"],
           "BW":data["BW"],
         }
-        this.$set(this["chartInfo_"+channelType], index, datas);
+        this.$set(this.chartInfo, index, datas);
       },
       changeActiveChart(e){
         if( e.currentTarget.getAttribute("class") && e.currentTarget.getAttribute("class").includes("activeChart") ){//点击的是当前选中项，什么也不做
@@ -782,19 +605,18 @@
           for(var i=0; i<this.total; i++){
             //this.chartDivClass[i] = ""; 
             //this.$set(this.chartDivClass, i, "");
-            if(document.getElementsByClassName("chartDiv")[i]){
-              document.getElementsByClassName("chartDiv")[i].classList.remove('activeChart')  
-            }
+            document.getElementsByClassName("chartDiv")[i].classList.remove('activeChart')
           }
           e.currentTarget.classList.add('activeChart')
           this.selectChartIndex = e.currentTarget.classList[1].split("_")[1]-1;
-          this.currentFreq = this.channelAllData[this.selectChartIndex]["Freq"];
+          this.currentFreq = this.allData[this.selectChartIndex]["Freq"];
         }
       },
       GetRealtimeSpect(){
+        //console.log("GetRealtimeSpect")
         var that = this;
-        var devSn = this.rcv_board.split("_")[0];
-        var boardId = this.rcv_board.split("_")[1];
+        var devSn = "1000012150";//this.rcv_board.split("_")[0];
+        var boardId = 0;//this.rcv_board.split("_")[1];
         this.$axios({
           url:"/protocol/index.php",//"/testJson/GetRealtimeSpect.json",
           data:this.$qs.stringify({
@@ -823,19 +645,14 @@
             for(var i=0; i<that.xAxisNum; i++){
               that.xAxisData.push((that.xAxisMin*1+i*inter)/1000000+"MHz")
             }
-            if(++that.freq1_count == 3){
-              that.formatFreqCharts(data);
-              that.freq1_count = 0;
-            }
-            
-            that.totalData.push(data["Spect"]);
-            if(that.totalData.length >= that.freq2Rows){
-              that.totalData.shift();
-            }
-            if(++that.freq2_count == 10){
-              //that.totalData.push(data["Spect"]);
-              that.formatFreqHeatMap();
-              that.freq2_count = 0;
+            that.formatFreqCharts(data);
+            if(++that.reqTimes == 3){
+              if(that.totalData.length >= 30){
+                that.totalData.shift();
+              }
+              that.totalData.push(data["Spect"]);
+              that.formatFreqHeatMap(data);
+              that.reqTimes = 0;
             }
             
           }
@@ -921,7 +738,7 @@
         };
         this.chartFreq1.setOption(option, true);
       },
-      formatFreqHeatMap(){
+      formatFreqHeatMap(data){
         var that = this;
         //return;
         if (!this.chartFreq2) {
@@ -931,7 +748,7 @@
         var option = {};
         //var legendName = ['电平'];
         var yData = [];
-        for (let y = 0; y < this.freq2Rows; y++) {
+        for (let y = 0; y < 30; y++) {
           yData.push(y);
         }
         var yAxisOption1 = that.$common.copy(that.commonOptionYAxis1);
@@ -951,7 +768,7 @@
         grid.right = 40;
 
         var series = [];
-        var xData = that.xAxisData;//xx;//
+        var xData = xx;//that.xAxisData;
         var seriesData = [];
        
         for(var i=0; i<xData.length; i++){
@@ -973,7 +790,6 @@
         })
         var option = {
           tooltip: {},
-          grid: grid,
           xAxis: {
             type: 'category',
             data: xData

@@ -28,7 +28,7 @@
 <script>
   import md5 from 'MD5';
   import { mapState, mapMutations } from 'vuex';
-  import { SET_USER,SET_LOGIN_STATUS,SET_ACTIVE_TAB} from '../../store/mutation-types';
+  import { SET_USER,SET_LOGIN_STATUS,SET_ACTIVE_TAB,SET_RANGE_FREQ, SET_RANGE_ATT, SET_RANGE_AMP, SET_RANGE_CHANNELTYPE, SET_RANGE_SAMPINTERVAL, SET_RANGE_SAMPRATE, SET_RANGE_FFT, SET_RANGE_ZOOM, SET_RANGE_CHANNELMODE} from '../../store/mutation-types';
   export default {
     name: "Login",
     data(){
@@ -87,7 +87,16 @@
       ...mapMutations({
         SET_USER,
         SET_LOGIN_STATUS,
-        SET_ACTIVE_TAB
+        SET_ACTIVE_TAB,
+        SET_RANGE_FREQ,
+        SET_RANGE_ATT,
+        SET_RANGE_AMP,
+        SET_RANGE_CHANNELTYPE,
+        SET_RANGE_SAMPINTERVAL,
+        SET_RANGE_SAMPRATE,
+        SET_RANGE_FFT,
+        SET_RANGE_ZOOM,
+        SET_RANGE_CHANNELMODE
       }),
       changeCheckCode(){
         var that = this;
@@ -160,9 +169,10 @@
           console.log(res)
           if(res.code == "0000"){
             that.$router.push("/homePage");
-            that.SET_USER({name:that.user.login_name});
+            that.SET_USER({id:that.user.login_name, level:res.data.UserLevel,name:res.data.UserName});
             that.SET_LOGIN_STATUS(false);
             that.SET_ACTIVE_TAB('/homePage');
+            that.GetParamValueRange();
             localStorage.loginTimer = setInterval(function(){
               that.CheckLogged(res.data,that.user.password)
             },1000)
@@ -173,46 +183,6 @@
             that.show.devCode_pass = false;
             that.show.devCode_fail = false;
           }
-          /*if(res.res.success){
-            setTimeout(function(){
-              that.$router.push("/status");
-              that.SET_NAV_STATUS(false);
-              var data = res.res.data;
-              data.pwd = md5(data['pwd'])
-              that.SET_USER(res.res.data);
-              data.oId = data.id;
-              data.id = that.$global.getLoginId();
-              that.SET_USER(data);
-              localStorage.setItem("LOGIN",true);
-              localStorage.setItem("USERNAME_1080",that.user.login_name);
-              localStorage.setItem("PASSWORD_1080",that.user.password);
-              localStorage.setItem("DEVICE",that.activedevicetype);
-              localStorage.setItem("SAVEME_1080",that.user.saveMe_1080);
-              //每次重新登录echarts图都重新画
-              localStorage.removeItem("cardData");
-              localStorage.removeItem("chartKey");
-              localStorage.removeItem("curChart");
-              localStorage.removeItem("allChartData");
-
-              localStorage.loginTimer = setInterval(function(){
-                that.CheckLogged(res.res.data)
-              },1000)
-            },800)
-          }else{
-            that.changeCheckImg();
-            that.checkCode = "";
-            that.$toast({
-              message: res.res.reason,
-              position: 'middle',
-              duration: 3000
-            })
-            localStorage.setItem("USERNAME_1080",that.user.login_name);
-            localStorage.setItem("PASSWORD_1080",that.user.password);
-            localStorage.setItem("DEVICE",that.activedevicetype);
-            localStorage.setItem("SAVEM_1080",that.user.saveMe_1080);
-            that.$axios.defaults.baseURL = that.DStreamer_BUILD;
-            that.vImg = that.$axios.defaults.baseURL+"/login/ValidationCode.class.php?num="+that.sessionId;
-          }*/
         })
         .catch(function (error) {
           console.log(error)
@@ -253,17 +223,48 @@
           if(res.code == "0000"){
             
           }else{
-            /*that.SET_USER(null);
-            that.SET_NAV_STATUS(true);
-            that.SET_ACTIVE_DEVICE(null);
-            that.$router.replace("/login");
-            localStorage.removeItem('LOGIN');
-            clearInterval(localStorage.loginTimer);
-            localStorage.loginTimer = undefined;  */
+            console.log("CheckLogged")
+            clearInterval(localStorage.loginTimer)
+            that.$router.push("/login");
+
           }
         })
         .catch(function (error) {
           console.log(error)
+        })
+      },
+      GetParamValueRange(){
+        var that = this;
+        this.$axios({
+          url:"/protocol/index.php",
+          data:{ GetParamValueRange: "1", },
+          Api:"GetParamValueRange",
+          AppId:"web",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          console.log("res")
+          console.log(res)
+          var data = res.data[0];
+          if(res.code == "0000"){
+            that.SET_RANGE_FREQ({"min":data["Freq"]["min"],"max":data["Freq"]["max"]})
+            that.SET_RANGE_ATT({"min":data["ATT"]["min"],"max":data["ATT"]["max"]})
+            that.SET_RANGE_AMP(data["AMP"])
+            that.SET_RANGE_CHANNELTYPE(data["ChannelType"])
+            that.SET_RANGE_SAMPINTERVAL({"min":data["SampInterval"]["min"],"max":data["SampInterval"]["max"]})
+            that.SET_RANGE_SAMPRATE(data["SampRate"])
+            that.SET_RANGE_FFT(data["FFT"])
+            that.SET_RANGE_ZOOM({"min":data["Zoom"]["min"],"max":data["Zoom"]["max"]})
+            that.SET_RANGE_CHANNELMODE(data["ChannelMode"])
+          }else{
+          
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error("登录失败");
+          
         })
       },
     }

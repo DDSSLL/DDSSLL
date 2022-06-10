@@ -153,13 +153,13 @@
                 <el-option
                   v-for="item in AMP_OPTION"
                   :key="item.value"
-                  :label="item.label"
+                  :label="item.text"
                   :value="item.value">
                 </el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="衰减器" :label-width="formLabelWidth" prop="ATT" >
-              <el-input v-model="boardParamform.ATT" autocomplete="off" size="mini" placeholder="0-50">
+              <el-input v-model="boardParamform.ATT" autocomplete="off" size="mini" :placeholder="range_ATT.min+'-'+range_ATT.max">
                 <template slot="append">dB</template>
               </el-input>
             </el-form-item>  
@@ -171,13 +171,13 @@
                 <el-option
                   v-for="item in AMP_OPTION"
                   :key="item.value"
-                  :label="item.label"
+                  :label="item.text"
                   :value="item.value">
                 </el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="衰减器" :label-width="formLabelWidth" prop="RealATT">
-              <el-input v-model="boardParamform.RealATT" autocomplete="off" size="mini" placeholder="0-50">
+              <el-input v-model="boardParamform.RealATT" autocomplete="off" size="mini" :placeholder="range_ATT.min+'-'+range_ATT.max">
                 <template slot="append">dB</template>
               </el-input>
             </el-form-item>  
@@ -187,13 +187,13 @@
               <el-option
                 v-for="item in SAMPLE_RATE_OPTION"
                 :key="item.value"
-                :label="item.label"
+                :label="item.text"
                 :value="item.value">
               </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="全带频谱采样间隔" :label-width="formLabelWidth" prop="FBInterval">
-            <el-input v-model="boardParamform.FBInterval" autocomplete="off" size="mini" placeholder="10-3600000">
+            <el-input v-model="boardParamform.FBInterval" autocomplete="off" size="mini" :placeholder="range_SampInterval.min+'-'+range_SampInterval.max">
               <template slot="append">ms</template>
             </el-input>
           </el-form-item>
@@ -202,7 +202,7 @@
               <el-option
                 v-for="item in FBFFT_OPTION"
                 :key="item.value"
-                :label="item.label"
+                :label="item.text"
                 :value="item.value">
               </el-option>
             </el-select>
@@ -218,7 +218,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="窄带频谱采样间隔" :label-width="formLabelWidth" prop="NBInterval">
-            <el-input v-model="boardParamform.NBInterval" autocomplete="off" size="mini" placeholder="10-3600000">
+            <el-input v-model="boardParamform.NBInterval" autocomplete="off" size="mini" :placeholder="range_SampInterval.min+'-'+range_SampInterval.max">
               <template slot="append">ms</template>
             </el-input>
           </el-form-item>
@@ -243,7 +243,7 @@
 </template>
 
 <script>
-  //import qs from 'qs'
+  import { mapState,mapMutations } from 'vuex';
   export default {
     name: "RcvMan",
     data(){
@@ -278,7 +278,7 @@
         switch(rule.field){
           case "ATT":
           case "RealATT":
-            if(value < 0 || value > 50){
+            if(value < this.range_ATT.min || value > this.range_ATT.max){
               callback(new Error('请按要求输入'));
             }
             break;
@@ -290,17 +290,10 @@
             break;*/
           case "FBInterval":
           case "NBInterval":
-            if(value < 10 || value > 3600000){
+            if(value < this.range_SampInterval.min || value > this.range_SampInterval.max){
               callback(new Error('请按要求输入'));
             }
             break;
-          /*case "FBZoom":
-          case "NBZoom":
-            console.log("bbbb")
-            if(value < 0 || value > 10){
-              callback(new Error('请按要求输入'));
-            }
-            break;*/
         }
         callback();
       };
@@ -331,13 +324,7 @@
           value: '1',
           label: '任务模式'
         }],
-        AMP_OPTION:[{
-          value: '0',
-          label: '0'
-        }, {
-          value: '20',
-          label: '20dB'
-        }],
+        AMP_OPTION:[],
         STATUS_OPTION:[{
           value: '0',
           label: '关'
@@ -345,26 +332,8 @@
           value: '1',
           label: '开'
         }],
-        SAMPLE_RATE_OPTION:[{
-          value: '65000000',
-          label: '65000000'
-        }],
-        FBFFT_OPTION:[{
-          value: '1024',
-          label: '1024'
-        },{
-          value: '2048',
-          label: '2048'
-        },{
-          value: '4096',
-          label: '4096'
-        },{
-          value: '8192',
-          label: '8192'
-        },{
-          value: '16384',
-          label: '16384'
-        }],
+        SAMPLE_RATE_OPTION:[],
+        FBFFT_OPTION:[],
         LISTEN_LOOP_TYPE_OPTION:[{
           value: '0',
           label: '按运行图'
@@ -382,25 +351,10 @@
           RealAMP:0,             //放大器,dB, 实时模式生效
           RealATT:0,              //衰减器,dB, 实时模式生效
           SampRate: 65000000,  //采样率
-          //FBInterval:200,         //全带频谱采样间隔ms10-3600000
           FBFFT:8192,            //全带频谱FFT
-          //FBZoom:0,             //全带频谱缩放0-10
           NBStart:0,             //窄带频谱开关，0关 1开
           NBInterval:200,        //窄带频谱采样间隔ms10-3600000
           NBFFT:8192,           //窄带频谱FFT
-          //NBZoom:0,            //窄带频谱缩放0-10
-          //NBCentFreq:15000000,  //窄带频谱中心频率Hz
-          /*ListenFreq:0,      //监听频率Hz
-          ListenSwitch:0,    //监听开关，0关1开
-          ListenRecord:0,   //监听录音，0关1开
-          ListenPushUrl:"",   //监听推流地址
-          ListenPullUrl:"",    //监听拉流地址
-          ListenSFreq:0,    //监听起始频率
-          ListenEFreq:0,    //监听终止频率
-          ListenStep:0,     //监听频率步进Hz
-          ListenCHType:"",  //监听频道类型
-          ListenInterval:"",  //监听轮巡间隔，秒
-          ListenLoopType:"", //监听模式，0按运行图,1按频率范围*/
         },
         boardsParam:[
         ],
@@ -487,8 +441,8 @@
       }
     },
     computed: {
-     
-    },
+      ...mapState(['range_ATT','range_AMP','range_SampInterval','range_SampRate','range_FFT'])
+    },  
     components: {
       
     },
@@ -503,6 +457,7 @@
     mounted(){
       var that = this;
       this.contentHeight = document.getElementById("devicePage").offsetHeight;
+      this.initRangeParam();
       this.GetRcvList();  
       if(this.refreshInterval){
         clearInterval(that.refreshInterval)
@@ -513,7 +468,6 @@
           }else{
             clearInterval(that.refreshInterval)
           }
-          
         },3000)  
       }
     },
@@ -529,20 +483,23 @@
       // ...mapMutations({
           
       // }),
+      initRangeParam(){
+        this.AMP_OPTION = this.range_AMP;
+        this.SAMPLE_RATE_OPTION = this.range_SampRate;
+        this.FBFFT_OPTION = this.range_FFT;
+      },
       getRowKeys(row){
         return row.id;
       },
       GetRcvList(){
         var that = this;
         this.$axios({
-          //method: 'GET',
           url:"/protocol/index.php",//"/testJson/GetRcvList.json",
           data:{
             GetRcvList: "1"
           },
           Api:"GetRcvList",
           AppId:"web",
-          //UserId:that.user.id
         })
         .then(function (response) {
           let res = response.data;
@@ -555,21 +512,16 @@
               }else{
                 data[i]["online"] = "离线"
                 data[i]["onlineStyle"] = "colorGray"
-
               }
             }
             that.rcvListData = data;
           }
-          console.log("that.rcvListData")
-          console.log(that.rcvListData)
         })
         .catch(function (error) {
           console.log(error)
         })
       },
       handleSelectionChange(val) {
-        console.log("handleSelectionChange")
-        console.log(val);
         this.multipleSelection = val;
       },
       showAddForm(){
@@ -623,7 +575,6 @@
           },
           Api:"DelRcv",
           AppId:"web",
-          //UserId:that.user.id
         })
         .then(function (response) {
           let res = response.data;
@@ -661,7 +612,6 @@
         this.$refs[formName].resetFields();
       },
       AddRcv(cb){
-        console.log("AddRcv")
         var that = this;
         this.$axios({
           url:"protocol/index.php",//"/testJson/AddRcv.json",
@@ -672,7 +622,6 @@
           },
           Api:"AddRcv",
           AppId:"web",
-          //UserId:that.user.id
         })
         .then(function (response) {
           let res = response.data;
@@ -687,7 +636,6 @@
         })
       },
       EditRcv(cb){
-        console.log("EditRcv")
         var that = this;
         this.$axios({
           url:"/protocol/index.php",//"/testJson/EditRcv.json",
@@ -701,7 +649,6 @@
           },
           Api:"EditRcv",
           AppId:"web",
-          //UserId:that.user.id
         })
         .then(function (response) {
           let res = response.data;
@@ -736,26 +683,24 @@
               }else{
                 data[i]["online"] = "离线"
                 data[i]["onlineStyle"] = "colorGray"
-
               }
             }
             that.boardData = data;
           }
-          console.log("that.boardData")
-          console.log(that.boardData)
         })
         .catch(function (error) {
           console.log(error)
         })
       },
       editBoardParamRow(index, data){
-        console.log("editBoardParamRow")
-        console.log("index:"+index)
-        console.log(data)
         var that = this;
         var rcvSn = data[index]["RcvSn"];
         var BoardId = data[index]["BoardId"];
         this.dialogBoardParamShow = true;
+        this.GetBoardParam(rcvSn, BoardId);
+      },
+      GetBoardParam(rcvSn, BoardId, cb){
+        var that = this;
         this.$axios({
           url:"/protocol/index.php",//"/testJson/GetBoardParam.json",
           data:{
@@ -769,28 +714,23 @@
         .then(function (response) {
           let res = response.data;
           if(res.code == "0000"){
-            console.log("GetBoardParam")
-            console.log(res.data);
             var dataParam= res.data;
             that.boardsParam = dataParam;
             that.formatCurrentBoardParam(dataParam[0]);
           }
-          console.log("that.boardData")
-          console.log(that.boardData)
         })
         .catch(function (error) {
           console.log(error)
         })
       },
       formatCurrentBoardParam(data){
-        console.log("formatCurrentBoardParam")
-        console.log(data)
         var that = this;
+        data["AMP"] = data["AMP"]*1;
+        data["RealAMP"] = data["RealAMP"]*1;
+        data["SampRate"] = data["SampRate"]*1;
         this.boardParamform = data;
       },
       submitBoardParam(formName){
-        console.log("submitBoardParam")
-        console.log(formName)
         var that = this
         this.$refs[formName].validate((valid) => {
           if (valid) {
@@ -804,7 +744,6 @@
         });
       },
       SetBoardParams(){
-        console.log("EditBoardParam")
         var that = this;
         var data = {};
         data.SetBoardParams = "1";

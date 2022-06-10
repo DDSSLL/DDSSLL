@@ -26,6 +26,8 @@
                 <el-menu-item index="/monitorPage">实时监测</el-menu-item>
                 <el-menu-item index="/deviceMan">接收机管理</el-menu-item>
                 <el-menu-item index="/taskMan">运行图管理</el-menu-item>
+                <el-menu-item index="/userMan">用户管理</el-menu-item>
+                <el-menu-item index="/logMan" v-if="user.level == 1">日志</el-menu-item>
               </el-menu><!-- 深色系："#01152E" -->
             </div>
           </el-col>
@@ -108,6 +110,8 @@ export default {
         this.activeIndex = '/deviceMan'
       }else if(routePath == '/taskMan'){
         this.activeIndex = '/taskMan'
+      }else if(routePath == '/userMan'){
+        this.activeIndex = '/userMan'
       }else{
         this.activeIndex = routePath;
       }
@@ -116,7 +120,8 @@ export default {
       this.$router.push("/login");
       this.SET_LOGIN_STATUS(true);
       this.SET_ACTIVE_TAB('/login');
-    }
+    },
+
   }
 
 }

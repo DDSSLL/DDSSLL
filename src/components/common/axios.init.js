@@ -27,7 +27,7 @@ service.interceptors.request.use(config => {
     // config.data = JSON.stringify(config.data); //数据转化,也可以使用qs转换
     /*console.log("config")
     console.log(config)*/
-    var UserId = config.UserId?config.UserId:store.state.user.name;
+    var UserId = config.UserId?config.UserId:store.state.user.id;
     var Api = config.Api;
     var AppId = config.AppId?config.AppId:"web";
     var SignatureNonce = generateMixed(10);
