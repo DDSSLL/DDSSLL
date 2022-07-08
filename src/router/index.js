@@ -4,10 +4,13 @@ import Router from 'vue-router'
 import Login from '@/components/login/Login'
 import HomePage from '@/components/home/home'
 import MonitorPage from '@/components/monitor/MonitorPage'
+import MonitorPageCustom from '@/components/monitor/MonitorPageCustom'
 import DeviceMan from '@/components/device/DeviceMan'
 import TaskMan from '@/components/task/TaskMan'
 import UserMan from '@/components/user/UserMan'
 import LogMan from '@/components/log/LogMan'
+import DataAnalyse from '@/components/dataAnalyse/DataAnalyse'
+import test from '@/components/test'
 
 //解决(in promise) NavigationDuplicated: Avoided redundant navigation问题
 const originalPush = Router.prototype.push
@@ -50,6 +53,14 @@ export default new Router({
         }
       },
       {
+        path: '/monitorPageCustom',
+        name: '实时监测',
+        component: MonitorPageCustom,
+        meta: {
+          keepAlive: false
+        }
+      },
+      {
         path: '/deviceMan',
         name: '接收机管理',
         component: DeviceMan,
@@ -77,6 +88,22 @@ export default new Router({
         path: '/logMan',
         name: '日志管理',
         component: LogMan,
+        meta: {
+          keepAlive: false
+        }
+      },
+      {
+        path: '/dataAnalyse',
+        name: '数据分析',
+        component: DataAnalyse,
+        meta: {
+          keepAlive: false
+        }
+      },
+      {
+        path: '/test',
+        name: '测试页面',
+        component: test,
         meta: {
           keepAlive: false
         }

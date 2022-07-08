@@ -14,7 +14,6 @@ import 'font-awesome/css/font-awesome.min.css'
 import './assets/css/style.css'
 import './assets/css/style_light.css'
 import common from './components/common/common.js'
- 
 
 Vue.config.productionTip = false;//true:开发模式，false：生产模式
 //全局挂载aixos

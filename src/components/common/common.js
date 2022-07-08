@@ -89,7 +89,7 @@ export default {
     if (sn.length != 10) {
         return false;
     }
-    if (/^[0-9]+$/.test(sn)) {
+    if (/^[0-9a-zA-Z]+$/.test(sn)) {
         res = true;
     } else {
         res = false;

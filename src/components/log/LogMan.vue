@@ -21,22 +21,22 @@
                 :value="item.UserID">
               </el-option>
             </el-select>
-            <el-date-picker v-model="filter.StartTime" type="datetime" placeholder="开始时间" size="mini" style="width:150px"></el-date-picker>
-            <el-date-picker v-model="filter.EndTime" type="datetime" placeholder="结束时间" size="mini" style="width:150px"></el-date-picker>
+            <el-date-picker v-model="filter.StartTime" type="datetime" placeholder="开始时间" size="mini" style="width:180px"></el-date-picker>
+            <el-date-picker v-model="filter.EndTime" type="datetime" placeholder="结束时间" size="mini" style="width:180px"></el-date-picker>
             <el-button type="primary" icon="el-icon-search" size="mini" @click="GetOperationLog"></el-button>
           </div>
           <el-table ref="multipleTable" :data="opLogData" stripe highlight-current-row style="width: 100%" @selection-change="" ><!-- :height="tableHeight" -->
             <!-- <el-table-column type="selection" :reserve-selection="true">
             </el-table-column> -->
-            <el-table-column prop="CreateTime" label="时间" sortable width="150">
+            <el-table-column prop="CreateTime" label="时间" sortable>
             </el-table-column>
-            <el-table-column prop="UserID" label="用户ID" sortable width="150">
+            <el-table-column prop="UserID" label="用户ID" sortable>
             </el-table-column>
-            <el-table-column prop="UserName" label="用户名" sortable width="150">
+            <el-table-column prop="UserName" label="用户名" sortable>
             </el-table-column>
-            <el-table-column prop="RcvSn" label="设备序列号" sortable width="150">
+            <el-table-column prop="RcvSn" label="设备序列号" sortable>
             </el-table-column>
-            <el-table-column prop="RcvName" label="设备名" sortable width="150">
+            <el-table-column prop="RcvName" label="设备名" sortable>
             </el-table-column>
             <el-table-column prop="Operate" label="操作" sortable>
             </el-table-column>
@@ -55,19 +55,19 @@
                 <span :style="{color:item.color}">{{ item.label }}</span>
               </el-option>
             </el-select>
-            <el-select class="input_dark" v-model="filter.UserID2" filterable clearable placeholder="用户" size="mini" collapse-tags  style="width:150px;">
+            <!-- <el-select class="input_dark" v-model="filter.UserID2" filterable clearable placeholder="用户" size="mini" collapse-tags  style="width:150px;">
               <el-option
                 v-for="item in USER_OPTION"
                 :key="item.UserID"
                 :label="item.UserName"
                 :value="item.UserID">
               </el-option>
-            </el-select>
-            <el-date-picker v-model="filter.StartTime2" type="datetime" placeholder="开始时间" size="mini" style="width:150px"></el-date-picker>
-            <el-date-picker v-model="filter.EndTime2" type="datetime" placeholder="结束时间" size="mini" style="width:150px"></el-date-picker>
+            </el-select> -->
+            <el-date-picker v-model="filter.StartTime2" type="datetime" placeholder="开始时间" size="mini" style="width:180px"></el-date-picker>
+            <el-date-picker v-model="filter.EndTime2" type="datetime" placeholder="结束时间" size="mini" style="width:180px"></el-date-picker>
             <el-button type="primary" icon="el-icon-search" size="mini" @click="GetOperationLog"></el-button>
           </div>
-          <el-table ref="multipleTable" :data="opLogData" stripe highlight-current-row style="width: 100%" @selection-change="" ><!-- :height="tableHeight" -->
+          <el-table ref="multipleTable" :data="runLogData" stripe highlight-current-row style="width: 100%" @selection-change="" ><!-- :height="tableHeight" -->
             <!-- <el-table-column type="selection" :reserve-selection="true">
             </el-table-column> -->
             <el-table-column prop="RcvSn" label="设备序列号" sortable>
@@ -99,11 +99,12 @@
           StartTime: "",
           EndTime: "",
           DeviceSN2:"",
-          UserID2: "",
+          /*UserID2: "",*/
           StartTime2: "",
           EndTime2: ""
         },
         opLogData:[],
+        runLogData:[],
         DEVICE_OPTION:[],
         USER_OPTION:[],
       }
@@ -133,6 +134,7 @@
       })
       this.initUserOption();
       this.GetOperationLog();
+      this.GetRunLog();
     },
     created(){
       /*this.contentHeight = document.getElementById("logPage").offsetHeight;
@@ -164,7 +166,7 @@
           data:{
             GetUserIDList: "1",
           },
-          Api:"GetOperationLog",
+          Api:"GetUserIDList",
           AppId:"web",
         })
         .then(function (response) {
@@ -209,7 +211,7 @@
           data:{
             GetRunLog: "1",
             DeviceSN: that.filter.DeviceSN2,
-            UserID: that.filter.UserID2,
+            /*UserID: that.filter.UserID2,*/
             StartTime: that.filter.StartTime2?that.filter.StartTime2:"",
             EndTime: that.filter.EndTime2?that.filter.EndTime2:"",
           },
@@ -221,7 +223,7 @@
           if(res.code == "0000"){
             var data= res.data;
             console.log(data)
-            that.opLogData = data;
+            that.runLogData = data;
           }
         })
         .catch(function (error) {

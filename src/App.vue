@@ -4,11 +4,11 @@
     <el-container>
       <!-- <div > -->
       <el-header v-if="!loginShow">
-        <el-row>
+        <el-row style="display: flex;align-items: center;">
           <el-col :span="4">
             <div class="grid-content bg-purple" style="text-align: left;">
-              <span style="height: 60px;line-height: 60px;font-size: 36px;font-weight: bold;">DEVISER</span>
-              <!-- <img alt="Vue logo" src="./assets/logo.png" style="height: 60px;width: auto;"> -->
+              <!-- <span style="height: 60px;line-height: 60px;font-size: 36px;font-weight: bold;">DEVISER</span> -->
+              <img alt="Vue logo" src="./assets/logo.png" style="height: auto;width: 150px;">
             </div>
           </el-col>
           <el-col :span="16">
@@ -28,11 +28,14 @@
                 <el-menu-item index="/taskMan">运行图管理</el-menu-item>
                 <el-menu-item index="/userMan">用户管理</el-menu-item>
                 <el-menu-item index="/logMan" v-if="user.level == 1">日志</el-menu-item>
+                <el-menu-item index="/dataAnalyse">数据分析</el-menu-item>
+                <el-menu-item index="/test">测试页面</el-menu-item>
               </el-menu><!-- 深色系："#01152E" -->
             </div>
           </el-col>
           <el-col :span="4" style="color: #fff;height: 60px;line-height: 60px;cursor: pointer;">
-            <i class="fa fa-volume-up fa-lg" style="margin-left: 20px"></i>
+            <!-- <i class="fa fa-volume-up fa-lg" style="margin-left: 20px"></i> -->
+            <span>V1.00.03</span>
             <i class="fa fa-user-o fa-lg" style="margin-left: 20px"></i><span style="margin-left:5px;">{{user.name}}</span>
             <i class="fa fa-sign-out fa-lg" style="margin-left: 20px" @click="siginOut"></i>
             
@@ -112,6 +115,10 @@ export default {
         this.activeIndex = '/taskMan'
       }else if(routePath == '/userMan'){
         this.activeIndex = '/userMan'
+      }else if(routePath == '/logMan'){
+        this.activeIndex = '/LogMan'
+      }else if(routePath == '/dataAnalyse'){
+        this.activeIndex = '/DataAnalyse'
       }else{
         this.activeIndex = routePath;
       }

@@ -3,7 +3,11 @@ import md5 from 'MD5'
 import qs from 'qs'
 import store from '../../store'
 
-window.baseURL = 'http://139.129.91.106:8060';
+//window.baseURL = 'http://139.129.91.106:8060';
+window.baseURL = 'http://192.168.63.50:8060';
+//window.baseURL = 'http://192.168.100.191:8060';
+//window.baseURL = 'http://47.104.161.61:8060';
+//window.baseURL = 'http://localhost:8060';
 //let baseURL = 'http://localhost:8081';
 /*if(process.env.NODE_ENV == 'development'){
     window.baseURL = 'http://localhost:8081';

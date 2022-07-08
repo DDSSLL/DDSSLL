@@ -1,4 +1,5 @@
 const { defineConfig } = require('@vue/cli-service')
+const os = require('os');
 module.exports = defineConfig({
   transpileDependencies: true,
   lintOnSave:false,

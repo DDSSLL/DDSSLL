@@ -104,10 +104,10 @@
           <el-time-picker v-model="form.EndTime" size="mini" style="width:100%" value-format="HH:mm:ss"></el-time-picker>
         </el-form-item>
         <el-form-item label="开始日期" :label-width="formLabelWidth" prop="StartDateTime">
-          <el-date-picker v-model="form.StartDateTime" type="datetime" placeholder="选择日期" size="mini" style="width:100%"></el-date-picker>
+          <el-date-picker v-model="form.StartDateTime" type="datetime" placeholder="选择日期" size="mini" style="width:100%" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
         </el-form-item>
         <el-form-item label="结束日期" :label-width="formLabelWidth" prop="EndDateTime">
-          <el-date-picker v-model="form.EndDateTime" type="datetime" placeholder="选择日期" size="mini" style="width:100%"></el-date-picker>
+          <el-date-picker v-model="form.EndDateTime" type="datetime" placeholder="选择日期" size="mini" style="width:100%" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
         </el-form-item>
         <el-form-item label="周期" :label-width="formLabelWidth"  prop="peroid">
           <el-checkbox-group v-model="form.peroid" size="mini" style="text-align: left">
@@ -116,7 +116,7 @@
           <!-- <el-input v-model="form.DayofWeek" autocomplete="off" size="mini"></el-input> -->
         </el-form-item>
         <el-form-item label="接收机" :label-width="formLabelWidth" prop="Rcv">
-          <el-select v-model="form.Rcv" filterable multiple size="mini" style="width:100%;">
+          <el-select v-model="form.Rcv" filterable multiple size="mini" style="width:100%;" @change="changeRcv">
             <el-option
               v-for="item in RCV_LIST_OPTION"
               :key="item.value"
@@ -284,7 +284,7 @@
       var validateFreq = (rule, value, callback) => {
         if(isNaN(value)){
           callback(new Error('请输入数字'));
-        }else if(value < this.range_Freq.min || value > this.range_Freq.max){
+        }else if(value < this.range_Freq.min/1000 || value > this.range_Freq.max/1000){
           callback(new Error('请输入合法数字'));
         }else{
           callback();  
@@ -299,7 +299,7 @@
         RCV_ONLY_LIST_OPTION:[],
         CHANNEL_TYPE_OPTION: [{
           value: '0',
-          label: '中播'
+          label: '中波'
         }, {
           value: '1',
           label: '短波'
@@ -444,6 +444,9 @@
       this.tableHeight = (this.contentHeight-50)+"px";  
       this.$common.GetRcvBoardList(function(data){
         var option = {};
+        option.label = "全部";
+        option.value = "";
+        that.RCV_LIST_OPTION.push(option);
         for(var i=0; i<data.length; i++){
           option = {};
           option.label = data[i]["RcvName"];
@@ -488,6 +491,22 @@
       // ...mapMutations({
           
       // }),
+      changeRcv(val){
+        if(val[val.length-1] == ""){//当前选择了全部，则将所有勾选去掉
+          this.form.Rcv = [""];
+        }else{//勾选的不是全部，则将全部选项去掉
+          var arr = this.form.Rcv;
+          if(arr.includes("")){
+            var arrNew = [];
+            for(var i=0; i<arr.length; i++){
+              if(arr[i] != ""){
+                arrNew.push(arr[i])
+              }
+            }
+            this.form.Rcv = arrNew;
+          }
+        }
+      },
       handleSelectionChangeTask(val){
         this.multipleSelectionTask = val;
       },
@@ -522,7 +541,12 @@
               data[i]["channel_type"] = that.CHANNEL_TYPE_OPTION.filter(item => {return item.value==data[i]["ChannelType"]})
                 .map(item=> {return item.label});
               data[i]["peroid"] = data[i]["DayofWeek"].split("").join(",");
-              data[i]["cover_rcv"] = data[i]["CoverRcv"].map(item => {return item.RcvName}).join(",")
+              if(data[i]["CoverRcv"].length==0){
+                data[i]["cover_rcv"] = "全部";
+              }else{
+                data[i]["cover_rcv"] = data[i]["CoverRcv"].length==0?"全部":data[i]["CoverRcv"].map(item => {return item.RcvName}).join(",")
+              }
+              data[i]["Freq"] = data[i]["Freq"]/1000
             }
             that.AlarmTimeData = res.data;
           }
@@ -561,7 +585,12 @@
         this.form.StartDateTime = data["StartDateTime"];
         this.form.EndDateTime = data["EndDateTime"];
         this.form.peroid = data["DayofWeek"].split("");
-        this.form.Rcv =  data["CoverRcv"].map(item=>{return item["RcvSn"]+"_"+item["BoardId"]});
+        if(data["CoverRcv"].length == 0){
+          this.form.Rcv = [""];  
+        }else{
+          this.form.Rcv =  data["CoverRcv"].map(item=>{return item["RcvSn"]+"_"+item["BoardId"]});
+        }
+        
       },
       clickTaskDelBtn(){
         if(this.multipleSelectionTask.length == 0){
@@ -804,7 +833,7 @@
           jsonData = {
             AddAlarmTimeFreq: "1",
             AlarmTime:[{
-              Freq:that.form.Freq,
+              Freq:that.form.Freq*1000,
               ChannelType:that.form.ChannelType, 
               Name:that.form.Name,
               Programme:that.form.Programme,
@@ -827,7 +856,7 @@
             EditAlarmTimeFreq: "1",
             AlarmTime:{
               ID:that.form.ID,
-              Freq:that.form.Freq,
+              Freq:that.form.Freq*1000,
               ChannelType:that.form.ChannelType, 
               Name:that.form.Name,
               Programme:that.form.Programme,

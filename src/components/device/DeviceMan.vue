@@ -23,9 +23,9 @@
       </el-table-column>
       <el-table-column  prop="CreateTime" label="创建时间" sortable>
       </el-table-column>
-      <el-table-column prop="MapIp" label="公网IP" sortable>
-      </el-table-column>
-      <el-table-column prop="LocalIp" label="内网IP" sortable>
+      <!-- <el-table-column prop="MapIp" label="公网IP" sortable>
+      </el-table-column> -->
+      <el-table-column prop="LocalIp" label="IP" sortable>
       </el-table-column>
       <el-table-column prop="RcvModel" label="型号" sortable>
       </el-table-column>
@@ -131,7 +131,7 @@
       </span>
       <el-dialog
         width="35%"
-        :title="'板卡'+(boardParamform.BoardIdStr)+'参数设置'"
+        :title="(boardParamform.BoardIdStr)+'参数设置'"
         :visible.sync="dialogBoardParamShow"
         append-to-body
         :before-close="handleCloseBoardParam">
@@ -147,7 +147,7 @@
             </el-select>
           </el-form-item>
           <!-- 任务模式下 -->
-          <div v-if="boardParamform.WorkMode==0">
+          <div v-if="boardParamform.WorkMode==1">
             <el-form-item label="放大器" :label-width="formLabelWidth" prop="AMP" >
               <el-select class="" v-model="boardParamform.AMP" size="mini">
                 <el-option
@@ -165,7 +165,7 @@
             </el-form-item>  
           </div>
           <!-- 实时模式下 -->
-          <div v-if="boardParamform.WorkMode==1">
+          <div v-if="boardParamform.WorkMode==0">
             <el-form-item label="放大器" :label-width="formLabelWidth" prop="RealAMP">
               <el-select class="" v-model="boardParamform.RealAMP" size="mini">
                 <el-option

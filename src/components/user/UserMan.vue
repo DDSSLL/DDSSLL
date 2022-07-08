@@ -379,7 +379,7 @@
           data.UserPwd = this.$common.encrypPwd(md5(this.form.UserPwd));
         }else{
           data.EditUser = "1";
-          data.UserPwd = this.$common.encrypPwd(md5(this.form.UserPwdEdit));
+          data.UserPwd = this.form.UserPwdEdit?this.$common.encrypPwd(md5(this.form.UserPwdEdit)):"";
           data.Valid = this.form.Valid?1:0;
         }
         this.$axios({
