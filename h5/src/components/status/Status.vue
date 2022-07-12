@@ -11,7 +11,7 @@
       <div class="mainChart" id="mainChart">
         <div id="totalChart" class="totalChart"></div>
       </div>
-      <div id="cardsChart" class="cardsChart" @click="showBigChart">
+      <div id="cardsChart" class="cardsChart" @click="showBigChart" v-if="showCardsChart">
         <div class="lteChart" v-if="eth0Show" :class="chartStyle">
           <div class="chartTitle"></div>
           <div id="chart_eth0" class="chart"></div>
@@ -126,7 +126,7 @@
         <div class="hisChartTitle">
           <div class="back" @click="closeHisChart">
             <i class="fa fa-arrow-left" aria-hidden="true"></i>
-            <span>历史数据</span>
+            <span>{{ $t( 'status.102000' ) }}</span><!-- 历史数据 -->
           </div>  
         </div>
         <div class="hisChartContent">
@@ -166,7 +166,10 @@ export default {
       progress:"",
       curDevSeries:"",
       cardIdArr:[],
+      showCardsChart:true,
       showDevSrt:false,
+      InteractiveMode:0,//4000的互动模式
+      WorkMode:0,//背包工作模式
       //ActiveDevice:null,
       timer:null,
       myChartTotal:null,
@@ -256,7 +259,7 @@ export default {
       }],
       commonOptionYAxis1 : {
         type: 'value',
-        name: '速率(Mbps)',
+        name: this.$t('status.102001'),//'速率(Mbps)',
         /*min:0,
         max:80,*/
         nameTextStyle: {color: '#BFBFBF'},
@@ -278,7 +281,7 @@ export default {
       },
       commonOptionYAxis2 : {
         type: 'value',
-        name: '丢包率(%)',
+        name: this.$t('status.102002'),//'丢包率(%)',
         min: 0,
         max: 100,
         nameTextStyle: {color: '#BFBFBF'},
@@ -471,8 +474,8 @@ export default {
             }
           }
           var initData = that.initChartData();
-          var devSns = initData.devSns;
-          that.getChartData(devSns);
+          //var devSns = initData.devSns;
+          that.getChartData(initData);
         }
       }
     },
@@ -511,8 +514,8 @@ export default {
     }
     var initData = this.initChartData();
     if(initData){
-      var devSns = initData.devSns;
-      this.getChartData(devSns);
+      //var devSns = initData.devSns;
+      this.getChartData(initData);
     }
   },
   deactivated(){   //生命周期-缓存页面失活
@@ -628,6 +631,7 @@ export default {
       cardData.seriesAVBR = dataAVBR;
       cardData.dataVInput = dataVInput;
       cardData.dataSrt = dataSrt;
+      cardData.seriesSrt = dataSrt;
       localStorage.cardData = JSON.stringify(cardData);
       allChartData[curChart] = null;
       allChartData[curChart] = cardData;
@@ -695,7 +699,7 @@ export default {
     },
     changeChartFile(){
       var that = this;
-      this.progress = "正在获取数据,请稍后...";
+      this.progress = this.$t('status.102003');//"正在获取数据,请稍后...";
       this.getCsvData(that.selectHisData, function(data) {
         that.hisChartData = data;
         that.changeChartType();
@@ -950,7 +954,7 @@ export default {
         },
         data: vInputArr
       }, {
-        name: 'SRT拉流',
+        name: this.$t('status.102004'),//'SRT拉流',
         type: "line",
         symbolSize: 3,
         symbol: 'circle',
@@ -972,7 +976,7 @@ export default {
         },
         data: srtArr
       }, {
-        name: "发送速率",
+        name: this.$t('status.102005'),//"发送速率",
         type: "line",
         symbolSize: 3,
         symbol: 'circle',
@@ -994,7 +998,7 @@ export default {
         },
         data: sendArr
       }, {
-        name: "接收速率",
+        name: this.$t('status.102006'),//"接收速率",
         type: "line",
         symbolSize: 3,
         symbol: 'circle',
@@ -1029,7 +1033,7 @@ export default {
         },
         data: rcvArr
       }, {
-        name: "编码码率",
+        name: this.$t('status.102007'),//"编码码率",
         type: "line",
         symbolSize: 3,
         symbol: 'circle',
@@ -1051,7 +1055,7 @@ export default {
         },
         data: avbrArr
       }, {
-        name: "传输丢包",
+        name: this.$t('status.102008'),//"传输丢包",
         type: "line",
         symbolSize: 3,
         symbol: 'circle',
@@ -1073,7 +1077,7 @@ export default {
         },
         data: lostArr
       }, {
-        name: "业务丢包",
+        name: this.$t('status.102009'),//"业务丢包",
         type: "line",
         symbolSize: 3,
         symbol: 'circle',
@@ -1112,23 +1116,23 @@ export default {
           },*/
           //data: ['发送速率','接收速率','传输丢包','业务丢包','编码码率'],
           data:[{
-            name: '发送速率',
+            name: this.$t('status.102005'),//'发送速率',
             icon: 'none',
             textStyle: {color: '#FFFF00'}
           },{
-            name: '接收速率',
+            name: this.$t('status.102006'),//'接收速率',
             icon: 'none',
             textStyle: {color: '#22aadd'}
           },{
-            name: '传输丢包',
+            name: this.$t('status.102008'),//'传输丢包',
             icon: 'none',
             textStyle: {color: '#f1a1ff'}
           },{
-            name: '业务丢包',
+            name: this.$t('status.102009'),//'业务丢包',
             icon: 'none',
             textStyle: {color: '#f5222d'}
           },{
-            name: '编码码率',
+            name: this.$t('status.102007'),//'编码码率',
             icon: 'none',
             textStyle: {color: '#73d13d'}
           }],
@@ -1149,19 +1153,19 @@ export default {
             var str = '';
             str += '<div>'+ params[0].name +'</div>'; //显示日期的函数
             for(var i=0; i<params.length; i++) {
-              if(params[i].seriesName == '发送速率'){
-                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
-              }else if(params[i].seriesName == '接收速率'){
-                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
-              }else if(params[i].seriesName == '传输丢包'){
-                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'%' : '暂无') +'</br>';
-              }else if(params[i].seriesName == '业务丢包'){
-                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'%' : '暂无') +'</br>';
-              }else if(params[i].seriesName == '编码码率'){
-                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
+              if(params[i].seriesName == that.$t('status.102005')/*'发送速率'*/){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : that.$t('status.102010')/*'暂无'*/) +'</br>';
+              }else if(params[i].seriesName == that.$t('status.102006')/*'接收速率'*/){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : that.$t('status.102010')/*'暂无'*/) +'</br>';
+              }else if(params[i].seriesName == that.$t('status.102008')/*'传输丢包'*/){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'%' : that.$t('status.102010')/*'暂无'*/) +'</br>';
+              }else if(params[i].seriesName == that.$t('status.102009')/*'业务丢包'*/){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'%' : that.$t('status.102010')/*'暂无'*/) +'</br>';
+              }else if(params[i].seriesName == that.$t('status.102007')/*'编码码率'*/){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : that.$t('status.102010')/*'暂无'*/) +'</br>';
               }
-              if(showDevSrt && params[i].seriesName == 'SRT拉流'){
-                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
+              if(showDevSrt && params[i].seriesName == that.$t('status.102004')/*'SRT拉流'*/){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : that.$t('status.102010')/*'暂无'*/) +'</br>';
               }
             }
             return str;
@@ -1229,7 +1233,7 @@ export default {
         }],
         yAxis: [{
           type: 'value',
-          name: '速率(Mbps)',
+          name: that.$t('status.102001'),//'速率(Mbps)',
           nameTextStyle: { color: '#ddd' },
           axisTick: { show: false },
           axisLine: {
@@ -1250,7 +1254,7 @@ export default {
           }
         }, {
           type: 'value',
-          name: '丢包率(%)',
+          name: that.$t('status.102002'),//'丢包率(%)',
           nameTextStyle: { color: '#ddd' },
           axisTick: { show: false },
           axisLine: {
@@ -1355,7 +1359,7 @@ export default {
         },
         data: simModeArr
       }, {
-        name: "发送速率",
+        name: that.$t('status.102005'),//"发送速率",
         type: "line",
         symbolSize: 3,
         symbol: 'circle',
@@ -1377,7 +1381,7 @@ export default {
         },
         data: sendArr
       }, {
-        name: "接收速率",
+        name: that.$t('status.102006'),//"接收速率",
         type: "line",
         symbolSize: 3,
         symbol: 'circle',
@@ -1424,11 +1428,11 @@ export default {
             fontSize: '10'
           },
           data: [{
-            name: '发送速率',
+            name: that.$t('status.102005'),//'发送速率',
             icon: 'none',
             textStyle: {color: '#FFFF00'}
           },{
-            name: '接收速率',
+            name: that.$t('status.102006'),//'接收速率',
             icon: 'none',
             textStyle: {color: '#22aadd'}
           }],
@@ -1450,13 +1454,13 @@ export default {
             str += '<div>'+ params[0].name +'</div>'; //显示日期的函数
             for(var i=0; i<params.length; i++) {
               if(params[i].seriesName == 'RTT'){
-                str += params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data : '暂无') +'</br>';
+                str += params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data : that.$t('status.102010')/*'暂无'*/) +'</br>';
               }else if(params[i].seriesName == 'SIM MODE'){
-                str += params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data : '暂无') +'</br>';
-              }else if(params[i].seriesName == '发送速率'){
-                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
-              }else if(params[i].seriesName == '接收速率'){
-                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : '暂无') +'</br>';
+                str += params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data : that.$t('status.102010')/*'暂无'*/) +'</br>';
+              }else if(params[i].seriesName == that.$t('status.102005')/*'发送速率'*/){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : that.$t('status.102010')/*'暂无'*/) +'</br>';
+              }else if(params[i].seriesName == that.$t('status.102006')/*'接收速率'*/){
+                str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : that.$t('status.102010')/*'暂无'*/) +'</br>';
               }
             }
             return str;
@@ -1522,7 +1526,7 @@ export default {
         }],
         yAxis: [{
           type: 'value',
-          name: '速率(Mbps)',
+          name: that.$t('status.102001')/*'速率(Mbps)'*/,
           nameTextStyle: { color: '#ddd' },
           axisTick: { show: false },
           axisLine: {
@@ -1638,9 +1642,6 @@ export default {
           "seriesVInput": [],   //信号输入
           "TotalSendPktStr": [],//总流量
         };
-        /*if(that.curDevSeries == "4000"){
-          allChartData[curChart]["seriesSrt"] = []; //SRT拉流速率
-        }*/
         //11个网卡上先都填充0
         for (var i = 0; i < that.cardIdArr.length; i++) {
           //上行速率
@@ -1665,25 +1666,66 @@ export default {
         allChartData[curChart].seriesAVBR = new Array(xSplit).fill(0); //AVBR
         allChartData[curChart].seriesVInput = new Array(xSplit).fill(0); //信号输入
         allChartData[curChart].TotalSendPktStr = '';
-        //if(that.curDevSeries == "4000"){
-          allChartData[curChart].seriesSrt = new Array(xSplit).fill(0); //SRT拉流速率
-        //}
+        allChartData[curChart].seriesSrt = new Array(xSplit).fill(0); //SRT拉流速率
         localStorage.allChartData = JSON.stringify(allChartData);
       }
-      var devSns = keyArr.map(x=> x.split("/")[0]);
+      var devSns = keyArr.map(x=> x.split("/")[0]).filter(str => {return  str!=""});
+      var rcvSns = keyArr.filter(str => {return  str.split("/")[0]=="" && str.split("/")[1]!=""})
+                      .map(x=> x.split("/")[1]+"-"+x.split("/")[2]);
       //过滤掉被报名非法和重复的背包
-      var devFilterArr = [];
+      var devFilterArr = [], rcvFilterArr = [];
       for (var i = 0; i < devSns.length; i++) {
         if(devSns[i] != "undefined" && devFilterArr.indexOf(devSns[i]) == -1){
           devFilterArr.push(devSns[i]);
         }
       }
+      for (var i = 0; i < rcvSns.length; i++) {
+        if(rcvSns[i].split("-")[0] && rcvSns[i].split("-")[1] && rcvFilterArr.indexOf(rcvSns[i]) == -1){
+          rcvFilterArr.push(rcvSns[i]);
+        }
+      }
       devSns = devFilterArr.join("/");
+      rcvSns = rcvFilterArr.join("/");
       var resData = {};
       resData.devSns = devSns;
+      resData.rcvSns = rcvSns;
       return resData;
     },
-    getChartData(devSns){
+    getChartData(data){
+      var that = this;
+      var devSns = data.devSns;
+      var rcvSns = data.rcvSns;
+      if(devSns){
+        this.getDevChartData(devSns, function(devData){
+          if(rcvSns) {
+            that.getRcvChartData(rcvSns, function(rcvData){
+              var data = $.extend({}, devData, rcvData)
+              that.formatDatas(data);
+            })
+          }else{
+            that.formatDatas(devData);
+          }
+        })
+      }else if(rcvSns){
+        that.getRcvChartData(rcvSns, function(rcvData){
+          that.formatDatas(rcvData)
+        })
+      }
+    },
+    formatDatas(data){
+      this.formatChartData(data);
+      var cardData = localStorage.cardData ? JSON.parse(localStorage.cardData) : {};
+      var curChart = localStorage.curChart ? JSON.parse(localStorage.curChart) : {};;
+      if(curChart.split("/")[0] != ""){
+        this.initChartStyle(cardData);
+        this.getChartShowContent(cardData);  
+        //this.showCardsChart = true;
+      }else{
+        this.initChartTotalRcv(cardData);
+        this.showCardsChart = false;
+      }
+    },
+    getDevChartData(devSns, callback){
       var that = this;
       this.$axios({
         method: 'post',
@@ -1700,10 +1742,41 @@ export default {
       .then(function (response) {
         let res = response.data;
         if(res.res.success){
-          that.formatChartData(res.data);
+          if(typeof(callback) == 'function'){
+            callback(res.data)
+          }
+          /*that.formatChartData(res.data);
           var cardData = localStorage.cardData ? JSON.parse(localStorage.cardData) : {};
           that.initChartStyle(cardData);
-          that.getChartShowContent(cardData);
+          that.getChartShowContent(cardData);*/
+        }else{
+          console.log(error)
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
+    },
+    getRcvChartData(rcvSns, callback){
+      var that = this;
+      this.$axios({
+        method: 'post',
+        url:"/page/index/chartData.php",
+        data:this.$qs.stringify({
+          getChartsData:true,
+          rcvSns: rcvSns,
+        }),
+        Api:"getChartsData",
+        AppId:"android",
+        UserId:that.user.id
+      })
+      .then(function (response) {
+        let res = response.data;
+        if(res.res.success){
+          if(typeof(callback) == 'function'){
+            callback(res.data)
+          }
+          
         }else{
           console.log(error)
         }
@@ -1718,203 +1791,234 @@ export default {
       var allChartData = localStorage.allChartData ? JSON.parse(localStorage.allChartData) : {};
       var curChart = localStorage.curChart ? JSON.parse(localStorage.curChart) : {};
       for (var key in data) {
-        if(!data[key] || data[key] == ""){
-          continue;
-        }
-        var dataAll = data[key][0]; //上行速率，下行速率，上行丢包率
-        var dataAVBR = data[key][1] ? data[key][1]["AvbrKbps"] : 0; //AVBR
-        var dataVInput = data[key][1]["VInput"]; //信号输入
-        var dataDev = data[key][1]["dev_push_br"]; //上行总速率
-        var dataRcv = data[key][2] ? data[key][2]["rcv_br"] : 0; //下行速率
-        var dataDownLoss = data[key][3] ? data[key][3]["TotalLossRate"] : 0; //下行总丢包
-        var dataUpLoss = data[key][4]["dev_lost_br"]; //上行总丢包
-        var TotalPktStr = data[key][1]["TotalSendPktStr"];
-        var dataSrt = "";
-        if(that.curDevSeries == "4000"){
-          dataSrt = data[key][5] ? data[key][5]["SrtKbps"] : 0; //srt拉流速率
-        }else{
-          dataSrt = data[key][1] ? data[key][1]["SrtKbps"] : 0;
-        }
-        var curChartDevRcvBoard = "";//当前设备的 devsn/rcvsn/boardid
-        for (var i = 0; i < keyArr.length; i++) {
-          if (keyArr[i].split("/")[0] == key) {
-            curChartDevRcvBoard = keyArr[i];
-          }
-        }
-        //allChartData中缺少curChart数据
-        if(!allChartData.hasOwnProperty(curChartDevRcvBoard)){
-          //删除chartKey
-          var chartKey = JSON.parse(localStorage.getItem("chartKey"));
-          var newChartKey = [];
-          var delSn = curChartDevRcvBoard.split('/')[0]; //要删除的背包序列号
-          for(var m=0; m<chartKey.length; m++){
-            if(chartKey[m].split('/')[0] != delSn){
-              newChartKey.push(chartKey[m]);
-            }
-          }
-          localStorage.setItem('chartKey',JSON.stringify(newChartKey));
-          return;
-        }
-        var seriesDataUp = allChartData[curChartDevRcvBoard].seriesDataUp;
-        var seriesDataDown = allChartData[curChartDevRcvBoard].seriesDataDown;
-        var seriesCardLost = allChartData[curChartDevRcvBoard].seriesCardLost;
-        var seriesDataDev = allChartData[curChartDevRcvBoard].seriesDataDev;
-        var seriesDataRcv = allChartData[curChartDevRcvBoard].seriesDataRcv;
-        var seriesDevLost = allChartData[curChartDevRcvBoard].seriesDevLost;
-        var seriesTotalLoss = allChartData[curChartDevRcvBoard].seriesTotalLoss;
-        var seriesAVBR = allChartData[curChartDevRcvBoard].seriesAVBR;
-        var seriesVInput = allChartData[curChartDevRcvBoard].seriesVInput;
-        var seriesSrt = allChartData[curChartDevRcvBoard].seriesSrt;
-        for (var i = 0; i < dataAll.length; i++) {
-          if (that.cardIdArr.indexOf(dataAll[i]['card_id']) == -1) {
+        if(key.indexOf("-") == -1){//正常配对的背包
+          if(!data[key] || data[key] == ""){
             continue;
           }
-          //如果当前网卡没有存过数据，则将该网卡初始化
-          //网卡上行速率
-          if (!seriesDataUp[dataAll[i]["card_id"]]) {
-            seriesDataUp[dataAll[i]["card_id"]] = {};
-            seriesDataUp[dataAll[i]["card_id"]]["ip"] = "";
-            seriesDataUp[dataAll[i]["card_id"]]["name"] = "";
-            seriesDataUp[dataAll[i]["card_id"]]["operator"] = "";
-            seriesDataUp[dataAll[i]["card_id"]]["data"] = new Array(xSplit).fill(0);
+          var dataAll = data[key][0]; //上行速率，下行速率，上行丢包率
+          var dataAVBR = data[key][1] ? data[key][1]["AvbrKbps"] : 0; //AVBR
+          var dataVInput = data[key][1]["VInput"]; //信号输入
+          var dataDev = data[key][1]["dev_push_br"]; //上行总速率
+          var dataRcv = data[key][2] ? data[key][2]["rcv_br"] : 0; //下行速率
+          var dataDownLoss = data[key][3] ? data[key][3]["TotalLossRate"] : 0; //下行总丢包
+          var dataUpLoss = data[key][4]["dev_lost_br"]; //上行总丢包
+          var TotalPktStr = data[key][1]["TotalSendPktStr"];
+          var dataSrt = "";
+          if(that.curDevSeries == "4000"){
+            dataSrt = data[key][5] ? data[key][5]["SrtKbps"] : 0; //srt拉流速率
+          }else{
+            dataSrt = data[key][1] ? data[key][1]["SrtKbps"] : 0;
           }
-          //网卡下行速率
-          if (!seriesDataDown[dataAll[i]["card_id"]]) {
-            seriesDataDown[dataAll[i]["card_id"]] = {};
-            seriesDataDown[dataAll[i]["card_id"]]["ip"] = "";
-            seriesDataDown[dataAll[i]["card_id"]]["name"] = "";
-            seriesDataDown[dataAll[i]["card_id"]]["data"] = new Array(xSplit).fill(0);
-          }
-          //网卡丢包率
-          if (!seriesCardLost[dataAll[i]["card_id"]]) {
-            seriesCardLost[dataAll[i]["card_id"]] = {};
-            seriesCardLost[dataAll[i]["card_id"]]["data"] = new Array(xSplit).fill(0);
-          }
-          //给网卡上行速率，下行速率，丢包率数据赋值
-          seriesDataUp[dataAll[i]["card_id"]]["ip"] = dataAll[i]["card_ip"];
-          seriesDataUp[dataAll[i]["card_id"]]["name"] = dataAll[i]["card_name"];
-          seriesDataUp[dataAll[i]["card_id"]]["operator"] = dataAll[i]["operator"];
-          seriesDataUp[dataAll[i]["card_id"]]["data"].unshift(dataAll[i]["send_br"]);
-          seriesDataUp[dataAll[i]["card_id"]]["data"].pop();
-          seriesDataDown[dataAll[i]["card_id"]]["ip"] = dataAll[i]["card_ip"];
-          seriesDataDown[dataAll[i]["card_id"]]["name"] = dataAll[i]["card_name"];
-          seriesDataDown[dataAll[i]["card_id"]]["data"].unshift(dataAll[i]["receive_br_10"]);
-          seriesDataDown[dataAll[i]["card_id"]]["data"].pop();
-          seriesCardLost[dataAll[i]["card_id"]]["data"].unshift(dataAll[i]["card_lost_br"]);
-          seriesCardLost[dataAll[i]["card_id"]]["data"].pop();
-        }
-        //dataAll里没有的，多余的网卡从seriesDataUp里删除
-        for (var keys in seriesDataUp){
-          var bFind = false;
-          for(var i=0; i<dataAll.length; i++){
-            if(dataAll[i].card_id == keys){
-              bFind = true;
+          var curChartDevRcvBoard = "";//当前设备的 devsn/rcvsn/boardid
+          for (var i = 0; i < keyArr.length; i++) {
+            if (keyArr[i].split("/")[0] == key) {
+              curChartDevRcvBoard = keyArr[i];
             }
           }
-          if(!bFind){
-            delete seriesDataUp[keys];
-            delete seriesDataDown[keys];
-            delete seriesCardLost[keys];
+          //allChartData中缺少curChart数据
+          if(!allChartData.hasOwnProperty(curChartDevRcvBoard)){
+            //删除chartKey
+            var chartKey = JSON.parse(localStorage.getItem("chartKey"));
+            var newChartKey = [];
+            var delSn = curChartDevRcvBoard.split('/')[0]; //要删除的背包序列号
+            for(var m=0; m<chartKey.length; m++){
+              if(chartKey[m].split('/')[0] != delSn){
+                newChartKey.push(chartKey[m]);
+              }
+            }
+            localStorage.setItem('chartKey',JSON.stringify(newChartKey));
+            return;
           }
-        }
-        //过滤出不是全0的数据，备份6张网卡的默认值
-        var validSeriesDataUp = {};
-        var validSeriesDataDown = {};
-        var validSeriesCardLost = {};
-        var defaultDataUp = {};
-        var defaultDataDown = {};
-        var defaultDataLost = {};
-        for (var key1 in seriesDataUp) {
-          //备份6张网卡的默认值
-          if(key1 == 'lte1' || key1 == 'lte2' || key1 == 'lte3' 
-            || key1 == 'lte4' || key1 == 'lte5' || key1 == 'lte6'){
-            defaultDataUp[key1] = {};
-            defaultDataUp[key1]["ip"] = seriesDataUp[key1]["ip"];
-            defaultDataUp[key1]["name"] = seriesDataUp[key1]["name"];
-            defaultDataUp[key1]["data"] = seriesDataUp[key1]["data"];
-            defaultDataUp[key1]["operator"] = seriesDataUp[key1]["operator"];
-            defaultDataDown[key1] = {};
-            defaultDataDown[key1]["ip"] = seriesDataDown[key1]["ip"];
-            defaultDataDown[key1]["name"] = seriesDataDown[key1]["name"];
-            defaultDataDown[key1]["data"] = seriesDataDown[key1]["data"];
-            defaultDataLost[key1] = {};
-            defaultDataLost[key1]["data"] = seriesCardLost[key1]["data"];
+          var seriesDataUp = allChartData[curChartDevRcvBoard].seriesDataUp;
+          var seriesDataDown = allChartData[curChartDevRcvBoard].seriesDataDown;
+          var seriesCardLost = allChartData[curChartDevRcvBoard].seriesCardLost;
+          var seriesDataDev = allChartData[curChartDevRcvBoard].seriesDataDev;
+          var seriesDataRcv = allChartData[curChartDevRcvBoard].seriesDataRcv;
+          var seriesDevLost = allChartData[curChartDevRcvBoard].seriesDevLost;
+          var seriesTotalLoss = allChartData[curChartDevRcvBoard].seriesTotalLoss;
+          var seriesAVBR = allChartData[curChartDevRcvBoard].seriesAVBR;
+          var seriesVInput = allChartData[curChartDevRcvBoard].seriesVInput;
+          var seriesSrt = allChartData[curChartDevRcvBoard].seriesSrt;
+          for (var i = 0; i < dataAll.length; i++) {
+            if (that.cardIdArr.indexOf(dataAll[i]['card_id']) == -1) {
+              continue;
+            }
+            //如果当前网卡没有存过数据，则将该网卡初始化
+            //网卡上行速率
+            if (!seriesDataUp[dataAll[i]["card_id"]]) {
+              seriesDataUp[dataAll[i]["card_id"]] = {};
+              seriesDataUp[dataAll[i]["card_id"]]["ip"] = "";
+              seriesDataUp[dataAll[i]["card_id"]]["name"] = "";
+              seriesDataUp[dataAll[i]["card_id"]]["operator"] = "";
+              seriesDataUp[dataAll[i]["card_id"]]["data"] = new Array(xSplit).fill(0);
+            }
+            //网卡下行速率
+            if (!seriesDataDown[dataAll[i]["card_id"]]) {
+              seriesDataDown[dataAll[i]["card_id"]] = {};
+              seriesDataDown[dataAll[i]["card_id"]]["ip"] = "";
+              seriesDataDown[dataAll[i]["card_id"]]["name"] = "";
+              seriesDataDown[dataAll[i]["card_id"]]["data"] = new Array(xSplit).fill(0);
+            }
+            //网卡丢包率
+            if (!seriesCardLost[dataAll[i]["card_id"]]) {
+              seriesCardLost[dataAll[i]["card_id"]] = {};
+              seriesCardLost[dataAll[i]["card_id"]]["data"] = new Array(xSplit).fill(0);
+            }
+            //给网卡上行速率，下行速率，丢包率数据赋值
+            seriesDataUp[dataAll[i]["card_id"]]["ip"] = dataAll[i]["card_ip"];
+            seriesDataUp[dataAll[i]["card_id"]]["name"] = dataAll[i]["card_name"];
+            seriesDataUp[dataAll[i]["card_id"]]["operator"] = dataAll[i]["operator"];
+            seriesDataUp[dataAll[i]["card_id"]]["data"].unshift(dataAll[i]["send_br"]);
+            seriesDataUp[dataAll[i]["card_id"]]["data"].pop();
+            seriesDataDown[dataAll[i]["card_id"]]["ip"] = dataAll[i]["card_ip"];
+            seriesDataDown[dataAll[i]["card_id"]]["name"] = dataAll[i]["card_name"];
+            seriesDataDown[dataAll[i]["card_id"]]["data"].unshift(dataAll[i]["receive_br_10"]);
+            seriesDataDown[dataAll[i]["card_id"]]["data"].pop();
+            seriesCardLost[dataAll[i]["card_id"]]["data"].unshift(dataAll[i]["card_lost_br"]);
+            seriesCardLost[dataAll[i]["card_id"]]["data"].pop();
           }
-          //过滤出不是全0的数据
-          var dataValid = seriesDataUp[key1]["data"];
-          for (var i = 0; i < dataValid.length; i++) {
-            if (dataValid[i] != 0 && dataValid[i] != null) {
-              validSeriesDataUp[key1] = {};
-              validSeriesDataUp[key1]["ip"] = seriesDataUp[key1]["ip"];
-              validSeriesDataUp[key1]["name"] = seriesDataUp[key1]["name"];
-              validSeriesDataUp[key1]["data"] = seriesDataUp[key1]["data"];
-              validSeriesDataUp[key1]["operator"] = seriesDataUp[key1]["operator"];
+          //dataAll里没有的，多余的网卡从seriesDataUp里删除
+          for (var keys in seriesDataUp){
+            var bFind = false;
+            for(var i=0; i<dataAll.length; i++){
+              if(dataAll[i].card_id == keys){
+                bFind = true;
+              }
+            }
+            if(!bFind){
+              delete seriesDataUp[keys];
+              delete seriesDataDown[keys];
+              delete seriesCardLost[keys];
             }
           }
-        }
-        for (var key2 in seriesDataDown) {
-          var data2 = seriesDataDown[key2]["data"];
-          for (var i = 0; i < data2.length; i++) {
-            if (data2[i] != 0 && data2[i] != null) {
-              validSeriesDataDown[key2] = {};
-              validSeriesDataDown[key2]["ip"] = seriesDataDown[key2]["ip"];
-              validSeriesDataDown[key2]["name"] = seriesDataDown[key2]["name"];
-              validSeriesDataDown[key2]["data"] = seriesDataDown[key2]["data"];
+          //过滤出不是全0的数据，备份6张网卡的默认值
+          var validSeriesDataUp = {};
+          var validSeriesDataDown = {};
+          var validSeriesCardLost = {};
+          var defaultDataUp = {};
+          var defaultDataDown = {};
+          var defaultDataLost = {};
+          for (var key1 in seriesDataUp) {
+            //备份6张网卡的默认值
+            if(key1 == 'lte1' || key1 == 'lte2' || key1 == 'lte3' 
+              || key1 == 'lte4' || key1 == 'lte5' || key1 == 'lte6'){
+              defaultDataUp[key1] = {};
+              defaultDataUp[key1]["ip"] = seriesDataUp[key1]["ip"];
+              defaultDataUp[key1]["name"] = seriesDataUp[key1]["name"];
+              defaultDataUp[key1]["data"] = seriesDataUp[key1]["data"];
+              defaultDataUp[key1]["operator"] = seriesDataUp[key1]["operator"];
+              defaultDataDown[key1] = {};
+              defaultDataDown[key1]["ip"] = seriesDataDown[key1]["ip"];
+              defaultDataDown[key1]["name"] = seriesDataDown[key1]["name"];
+              defaultDataDown[key1]["data"] = seriesDataDown[key1]["data"];
+              defaultDataLost[key1] = {};
+              defaultDataLost[key1]["data"] = seriesCardLost[key1]["data"];
+            }
+            //过滤出不是全0的数据
+            var dataValid = seriesDataUp[key1]["data"];
+            for (var i = 0; i < dataValid.length; i++) {
+              if (dataValid[i] != 0 && dataValid[i] != null) {
+                validSeriesDataUp[key1] = {};
+                validSeriesDataUp[key1]["ip"] = seriesDataUp[key1]["ip"];
+                validSeriesDataUp[key1]["name"] = seriesDataUp[key1]["name"];
+                validSeriesDataUp[key1]["data"] = seriesDataUp[key1]["data"];
+                validSeriesDataUp[key1]["operator"] = seriesDataUp[key1]["operator"];
+              }
             }
           }
-        }
-        for (var key3 in seriesCardLost) {
-          var data3 = seriesCardLost[key3]["data"];
-          for (var i = 0; i < data3.length; i++) {
-            if (data3[i] != 0 && data3[i] != null) {
-              validSeriesCardLost[key3] = {};
-              validSeriesCardLost[key3]["data"] = seriesCardLost[key3]["data"];
+          for (var key2 in seriesDataDown) {
+            var data2 = seriesDataDown[key2]["data"];
+            for (var i = 0; i < data2.length; i++) {
+              if (data2[i] != 0 && data2[i] != null) {
+                validSeriesDataDown[key2] = {};
+                validSeriesDataDown[key2]["ip"] = seriesDataDown[key2]["ip"];
+                validSeriesDataDown[key2]["name"] = seriesDataDown[key2]["name"];
+                validSeriesDataDown[key2]["data"] = seriesDataDown[key2]["data"];
+              }
             }
           }
-        }
-        seriesDataDev.unshift(dataDev);
-        seriesDataDev.pop();
-        seriesDataRcv.unshift(dataRcv);
-        seriesDataRcv.pop();
-        seriesTotalLoss.unshift(dataDownLoss);
-        seriesTotalLoss.pop();
-        seriesDevLost.unshift(dataUpLoss);
-        seriesDevLost.pop();
-        seriesAVBR.unshift(dataAVBR);
-        seriesAVBR.pop();   
-        seriesVInput.unshift(dataVInput);
-        seriesVInput.pop();
-        //if(this.curDevSeries == "4000" && seriesSrt){
+          for (var key3 in seriesCardLost) {
+            var data3 = seriesCardLost[key3]["data"];
+            for (var i = 0; i < data3.length; i++) {
+              if (data3[i] != 0 && data3[i] != null) {
+                validSeriesCardLost[key3] = {};
+                validSeriesCardLost[key3]["data"] = seriesCardLost[key3]["data"];
+              }
+            }
+          }
+          seriesDataDev.unshift(dataDev);
+          seriesDataDev.pop();
+          seriesDataRcv.unshift(dataRcv);
+          seriesDataRcv.pop();
+          seriesTotalLoss.unshift(dataDownLoss);
+          seriesTotalLoss.pop();
+          seriesDevLost.unshift(dataUpLoss);
+          seriesDevLost.pop();
+          seriesAVBR.unshift(dataAVBR);
+          seriesAVBR.pop();   
+          seriesVInput.unshift(dataVInput);
+          seriesVInput.pop();
           seriesSrt.unshift(dataSrt);
           seriesSrt.pop();  
-        //}
-
-        if($.isEmptyObject(validSeriesDataUp) && $.isEmptyObject(validSeriesDataDown) &&
-          $.isEmptyObject(validSeriesCardLost)){
-          allChartData[curChartDevRcvBoard].seriesDataUp = defaultDataUp;
-          allChartData[curChartDevRcvBoard].seriesDataDown = defaultDataDown;
-          allChartData[curChartDevRcvBoard].seriesCardLost = defaultDataLost;
-        } else{
-          allChartData[curChartDevRcvBoard].seriesDataUp = validSeriesDataUp;
-          allChartData[curChartDevRcvBoard].seriesDataDown = validSeriesDataDown;
-          allChartData[curChartDevRcvBoard].seriesCardLost = validSeriesCardLost;
-        }
-        allChartData[curChartDevRcvBoard].seriesDataDev = seriesDataDev;
-        allChartData[curChartDevRcvBoard].seriesDataRcv = seriesDataRcv;
-        allChartData[curChartDevRcvBoard].seriesDevLost = seriesDevLost;
-        allChartData[curChartDevRcvBoard].seriesTotalLoss = seriesTotalLoss;
-        allChartData[curChartDevRcvBoard].seriesAVBR = seriesAVBR;
-        allChartData[curChartDevRcvBoard].seriesVInput = seriesVInput;
-        allChartData[curChartDevRcvBoard].TotalSendPktStr = TotalPktStr;
-        //if(that.curDevSeries == "4000"){
-          allChartData[curChartDevRcvBoard].seriesSrt = seriesSrt;  
-        //}
-        localStorage.allChartData = JSON.stringify(allChartData);
-        if (curChart.split("/")[0] == key) { //当前要显示的放在sessionStorage.cardData中
-          if(that.avbrFlag == "false"){
-            //allChartData[curChart]["seriesAVBR"] = new Array(xSplit).fill(0);
+          
+          if($.isEmptyObject(validSeriesDataUp) && $.isEmptyObject(validSeriesDataDown) &&
+            $.isEmptyObject(validSeriesCardLost)){
+            allChartData[curChartDevRcvBoard].seriesDataUp = defaultDataUp;
+            allChartData[curChartDevRcvBoard].seriesDataDown = defaultDataDown;
+            allChartData[curChartDevRcvBoard].seriesCardLost = defaultDataLost;
+          } else{
+            allChartData[curChartDevRcvBoard].seriesDataUp = validSeriesDataUp;
+            allChartData[curChartDevRcvBoard].seriesDataDown = validSeriesDataDown;
+            allChartData[curChartDevRcvBoard].seriesCardLost = validSeriesCardLost;
           }
-          localStorage.cardData = JSON.stringify(allChartData[curChart]);
+          allChartData[curChartDevRcvBoard].seriesDataDev = seriesDataDev;
+          allChartData[curChartDevRcvBoard].seriesDataRcv = seriesDataRcv;
+          allChartData[curChartDevRcvBoard].seriesDevLost = seriesDevLost;
+          allChartData[curChartDevRcvBoard].seriesTotalLoss = seriesTotalLoss;
+          allChartData[curChartDevRcvBoard].seriesAVBR = seriesAVBR;
+          allChartData[curChartDevRcvBoard].seriesVInput = seriesVInput;
+          allChartData[curChartDevRcvBoard].TotalSendPktStr = TotalPktStr;
+          allChartData[curChartDevRcvBoard].seriesSrt = seriesSrt;  
+          localStorage.allChartData = JSON.stringify(allChartData);
+          if (curChart.split("/")[0] == key) { //当前要显示的放在sessionStorage.cardData中
+            if(that.avbrFlag == "false"){
+              //allChartData[curChart]["seriesAVBR"] = new Array(xSplit).fill(0);
+            }
+            localStorage.cardData = JSON.stringify(allChartData[curChart]);
+          }
+        }else{//拉流的接收机
+          if(!data[key] || data[key] < 2){
+            continue;
+          }
+          var dataRcv = data[key][2] ? data[key][2]["rcv_br"] : 0; //下行速率
+          var curChartDevRcvBoard = "";//当前设备的 devsn/rcvsn/boardid
+          for (var i = 0; i < keyArr.length; i++) {
+            if (keyArr[i].split("/")[1]+"-"+keyArr[i].split("/")[2] == key) {
+              curChartDevRcvBoard = keyArr[i];
+            }
+          }
+          //allChartData中缺少curChart数据
+          if(!allChartData.hasOwnProperty(curChartDevRcvBoard)){
+            //删除chartKey
+            var chartKey = JSON.parse(localStorage.getItem("chartKey"));
+            var newChartKey = [];
+            var rcvSn = curChartDevRcvBoard.split('/')[1]+"-"+curChartDevRcvBoard.split('/')[2]; //要删除的接收机序列号
+            for(var m=0; m<chartKey.length; m++){
+              if(chartKey[m].split('/')[1]+"-"+chartKey[m].split('/')[2] != rcvSn){
+                newChartKey.push(chartKey[m]);
+              }
+            }
+            localStorage.setItem('chartKey',JSON.stringify(newChartKey));
+            return;
+          }
+          var seriesDataRcv = allChartData[curChartDevRcvBoard].seriesDataRcv;
+          seriesDataRcv.unshift(dataRcv);
+          seriesDataRcv.pop();
+          allChartData[curChartDevRcvBoard].seriesDataRcv = seriesDataRcv;
+          localStorage.allChartData = JSON.stringify(allChartData);
+          if (curChart.split("/")[1]+"-"+curChart.split("/")[2] == key) { //当前要显示的放在sessionStorage.cardData中
+            localStorage.cardData = JSON.stringify(allChartData[curChart]);
+          }
         }
       }
     },
@@ -1962,6 +2066,28 @@ export default {
         this.showDevSrt = false;
       }
     },
+    //是否显示SRT拉流曲线
+    ifShowSrtLine(){
+      var devSn = this.ActiveDevice.dev_sn;
+      var devSeries = this.$global.getDevSeries(devSn);
+      var rcvSn = this.ActiveDevice.rcv_sn;
+      var rcvMode =this.$global.getRcvMode(rcvSn.substr(-4));
+      var showSrt = false;
+      if(devSeries === "4000"){
+        //背包是否显示SRT拉流曲线
+        var bShow = false;
+        if(rcvMode == 'DV4004R' || rcvMode == 'CM-IR6000T' || rcvMode == 'DV4013R'){
+          bShow = true;
+        }
+        if(bShow && this.InteractiveMode == 1){
+          showSrt = true;
+        }
+      }
+      else if(devSeries === "1080_gjf"){
+        showSrt = true;
+      }
+      return showSrt;
+    },
     initChartTotal(cardData) {
       var that = this;
       var rateMax = 1.5;
@@ -1974,6 +2100,7 @@ export default {
       var chartInterval = that.ChartConf.unit.chartInterval;
       var chartMax = that.ChartConf.unit.chartMax;
       var speedInput = that.ChartConf.unit.speedInput;
+      var showDevSrt = that.ifShowSrtLine();
       if (chartAuto == "1") {
         maxYaxis = Math.ceil(speedInput * rateMax);
         maxYaxis = maxYaxis + 5 - maxYaxis % 5;
@@ -1994,7 +2121,19 @@ export default {
       var transShow = that.chartGeneralView.trans.map(function(item){if(item==""){return ""};return item+"传输丢包";});
       var bussShow = that.chartGeneralView.buss.map(function(item){if(item==""){return ""};return item+"业务丢包";});
       var srtShow = that.chartGeneralView.srt.map(function(item){if(item==""){return ""};return item+"拉流速率";});
-      var legendName = upShow.concat(downShow).concat(avbrShow).concat(srtShow).concat(transShow).concat(bussShow).filter(function (el) {return el !== '';});
+      var legendName = "";
+      if(showDevSrt){
+        legendName = upShow.concat(downShow).concat(avbrShow).concat(srtShow).concat(transShow).concat(bussShow).filter(function (el) {return el !== '';});
+      }else{
+        if(this.WorkMode == 1){
+          if(srtShow.length == 1 && srtShow[0] == ''){
+            srtShow = ["Total拉流速率"];
+          }
+          legendName = srtShow;
+        }else{
+          legendName = upShow.concat(downShow).concat(avbrShow).concat(transShow).concat(bussShow).filter(function (el) {return el !== '';});
+        }
+      }
       var dataAll = {};
       var maxDevLoss = 0;
       var maxRcvLoss = 0;
@@ -2169,6 +2308,12 @@ export default {
         }else{
           name = legendName[m];
         }
+        var yIndex = 0;
+        if(name.indexOf("丢包")!=-1){
+          yIndex = 1;
+        }else if(showDevSrt && name.indexOf("拉流")!=-1){
+          yIndex = 2;
+        }
         series.push({
           name: name,
           type: "line",
@@ -2176,7 +2321,7 @@ export default {
           symbol: 'circle',
           smooth: true,
           showSymbol: false,
-          yAxisIndex: legendName[m].indexOf("丢包")!=-1?1:0,
+          yAxisIndex: yIndex,//legendName[m].indexOf("丢包")!=-1?1:0,
           itemStyle: {
             normal: {
               color: colorGV[name],
@@ -2243,7 +2388,7 @@ export default {
         series: series,
         animation: false
       };
-      option.title[0].text = "概览" + cardData.TotalSendPktStr;
+      option.title[0].text = that.$t('status.102011')/*"概览"*/ + cardData.TotalSendPktStr;
       option.grid.top = '70';
       option.legend.top = 20;
       var title = "";
@@ -2315,6 +2460,158 @@ export default {
           option.legend.data.push("SRT拉流");
         }
       }*/
+      that.myChartTotal.setOption(option, true);
+    },
+    initChartTotalRcv(cardData) {
+      var that = this;
+      var rateMax = 1.5;
+      var rateMin = 0.5;
+      var splitNumber = 5;
+      var maxYaxis = 0;
+      var minYaxis = 0;
+      var interval = 0;
+      var chartAuto = that.ChartConf.unit.chartAuto;
+      var chartInterval = that.ChartConf.unit.chartInterval;
+      var chartMax = that.ChartConf.unit.chartMax;
+      var speedInput = that.ChartConf.unit.speedInput;
+      if (chartAuto == "1") {
+        maxYaxis = Math.ceil(speedInput * rateMax);
+        maxYaxis = maxYaxis + 5 - maxYaxis % 5;
+        minYaxis = Math.floor(speedInput * rateMin);
+        minYaxis = minYaxis - minYaxis % 5;
+      } else {
+        interval = chartInterval;
+        maxYaxis = chartMax;
+        minYaxis = (chartMax - chartInterval * 5) > 0 ? (chartMax - chartInterval * 5) : 0;
+      }
+      if (!that.myChartTotal) {
+        that.myChartTotal = echarts.init(document.getElementById('totalChart'));
+      }
+      var legendName = ["Total↓"];
+      var dataAll = {};
+      var maxDevLoss = 0;
+      var maxRcvLoss = 0;
+      var maxLoss = 0;
+      for(var k=0; k<legendName.length; k++){
+        if(legendName[k].indexOf("↓") != -1){//下行
+          if(legendName[k].split("↓")[0] == that.chartLegendArr[0]){//total
+            dataAll[legendName[k]] = cardData.seriesDataRcv.map(function(x){return (x/1000).toFixed(3)*1});  
+          }
+        }
+      }
+      var series = [];
+      for(var m=0; m<legendName.length; m++){
+        var name = "";
+        if(legendName[m] == "Total↓"){
+          name = "接收速率";
+        }else{
+          name = legendName[m];
+        }
+        series.push({
+          name: name,
+          type: "line",
+          symbolSize: 3,
+          symbol: 'circle',
+          smooth: true,
+          showSymbol: false,
+          yAxisIndex: legendName[m].indexOf("丢包")!=-1?1:0,
+          itemStyle: {
+            normal: {
+              color: colorGV[name],
+              lineStyle: that.lineStyle,
+              borderColor: colorGV[name], //图形的描边颜色。支持的格式同 color
+              borderWidth: 8, //描边线宽。为 0 时无描边。[ default: 0 ] 
+              barBorderRadius: 0,
+              label: {
+                show: false
+              },
+              opacity: 0.5
+            }
+          },
+          areaStyle: {
+            show:legendName[m].indexOf("丢包")!=-1?false:true,
+            normal: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                offset: 0,
+                color: colorGV[name]
+              }, {
+                offset: 0.8,
+                color: 'rgba(255,255,255,0)'
+              }], false),
+              shadowBlur: 10,
+              opacity: 0.3
+            }
+          },
+          data: dataAll[legendName[m]]
+        })
+      }
+      var xAxisOption = {};
+      var yAxisOption1 = that.copy(that.commonOptionYAxis1);
+      var option = {
+        title: that.commonOptionTitle,
+        legend: {
+          show:false,
+          type: 'scroll',
+          pageTextStyle: {
+            color: '#ccc'
+          },
+          pageIconColor: '#337ab7',
+          pageIconInactiveColor: "#B4B5B7",
+          top: this.legendTop,
+          itemGap: 5,
+          itemWidth: 5,
+          textStyle: {
+            color: '#DDD',
+            fontSize: '10'
+          },
+          tooltip: {
+            show: true
+          },
+          data: legendName
+        },
+        grid: that.commonOptionGrid,
+        tooltip: that.commonOptionTooltipFalse,
+        xAxis: Object.assign(that.commonOptionXAxis[0], {data: that.xData}),
+        yAxis: yAxisOption1,
+        series: series,
+        animation: false
+      };
+      option.title[0].text = that.$t('status.102011')/*"概览"*/ + cardData.TotalSendPktStr;
+      option.grid.top = '70';
+      option.legend.top = 20;
+      var title = "";
+      for(var n=0; n<legendName.length; n++){
+        var name = "";
+        if(legendName[n] == "Total↓"){
+          name = "接收速率";
+        }else{
+          name = legendName[n];
+        }
+        if(legendName[n].indexOf("丢包") == -1){
+          title += ['{'+colorObj[name]+'|' + dataAll[legendName[n]][0] + '}Mbps'].join("");
+        }else{
+          if(dataAll[legendName[n]]){
+            title += ['{'+colorObj[name]+'|' + dataAll[legendName[n]][0] + '}%'].join("");
+          }
+        }
+      }
+      option.title[1].text = title;
+
+      //文件回传且Y轴选自适应,图像的Y轴不设置yAxis，其他情况设置yAxis
+      if(!(chartAuto == "1" && true)){
+        option.yAxis[0].min = minYaxis;
+        option.yAxis[0].max = maxYaxis;
+      }
+      if (interval) {
+        option.yAxis[0].interval = interval * 1;
+      }
+      option.legend.data = legendName.map(function(x){
+                              if(x == "Total↓"){
+                                return "接收速率";
+                              }else {
+                                return x;
+                              }
+                          });
       that.myChartTotal.setOption(option, true);
     },
     initChartCards(cardData){
@@ -2601,7 +2898,7 @@ export default {
         })],
         yAxis: [{
           type: 'value',
-          name: '速率(Mbps)',
+          name: that.$t('status.102001')/*'速率(Mbps)'*/,
           /*min:0,
           max:80,*/
           nameTextStyle: {
@@ -2689,6 +2986,7 @@ export default {
         if(res.res.success){
           var data = res.data[0];
           that.$global.getDeviceParam(function(dataDev){
+            that.WorkMode = dataDev['WorkMode'];
             var rcvSn = that.ActiveDevice.rcv_sn;
             var rcvMode =that.$global.getRcvMode(rcvSn.substr(-4));
             var act4000 = false;
@@ -2725,26 +3023,14 @@ export default {
               that.chartGeneralView["srt"] = [];
               that.chartGeneralView["trans"] = data["lossDev"].split(",").map(function(x){return that.formatCardShow(x)});//传输丢包
               that.chartGeneralView["buss"] = data["lossRcv"].split(",").map(function(x){return that.formatCardShow(x)});//业务丢包
-/*
-              that.avbrFlag = data['bitrate_mode'] == 1 ? true : false;
-              that.show.avbrShowFlg = that.avbrFlag;
-              that.show.upShowFlg = true;
-              that.show.downShowFlg = true;
-              that.show.srtShowFlg = false;
-              that.show.transShowFlg = true;
-              that.show.bussShowFlg = true;*/
             }
+            if(dataDev['WorkMode'] == 1){//1080拉流不显示网卡图
+              that.showCardsChart = false;
+            }else{
+              that.showCardsChart = true;
+            }
+            that.InteractiveMode = dataDev["InteractiveMode"];
           });
-
-          /*that.chartGeneralView["up"] = data["up"].split(",").map(function(x){return that.formatCardShow(x)});
-          that.chartGeneralView["down"] = data["down"].split(",").map(function(x){return that.formatCardShow(x)});
-          that.chartGeneralView["trans"] = data["lossDev"].split(",").map(function(x){return that.formatCardShow(x)});//传输丢包
-          that.chartGeneralView["buss"] = data["lossRcv"].split(",").map(function(x){return that.formatCardShow(x)});//业务丢包
-          if(that.avbrFlag){
-            that.chartGeneralView["avbr"] = data["avbr"].split(",").map(function(x){return that.formatCardShow(x)});  
-          }else{
-            that.chartGeneralView["avbr"] = [];
-          }*/
           that.getCardChartShowContent(devSn,cardData)
         }else{
           console.log(res)
@@ -2857,16 +3143,16 @@ export default {
       var that = this;
       if(that.showCardNum >= 4){
         var initData = that.initChartData();
-        var devSns = initData.devSns;
-        that.getChartData(devSns);
+        //var devSns = initData.devSns;
+        that.getChartData(initData);
         that.bigChartShow = true;
       }
     },
     closeBigChart(){
       var that = this;
       var initData = that.initChartData();
-      var devSns = initData.devSns;
-      that.getChartData(devSns);
+      //var devSns = initData.devSns;
+      that.getChartData(initData);
       that.bigChartShow=false;
     },
     //深拷贝对象

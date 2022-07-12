@@ -154,7 +154,7 @@
       <div class="Group">
         <div class="GroupItem">
           <div class="GroupItemField">
-            <div class="GroupItemTitle">HDMI输出</div>
+            <div class="GroupItemTitle">HDMI视频输出</div>
             <div class="GroupItemValue">
               <select class="ItemSelect" v-model="common.PullMHdmiOut" @change="changePullMHdmiOut"  :disabled="dis.PullMHdmiOut">
                 <template v-for="item in OPTIONS_PULL_MHDMIOUT_1080">
@@ -178,7 +178,7 @@
         </div>
         <div class="GroupItem">
           <div class="GroupItemField">
-            <div class="GroupItemTitle">网卡选择</div>
+            <div class="GroupItemTitle">传输通道</div>
             <div class="GroupItemValue">
               <select class="ItemSelect" v-model="common.PullTsNet" @change="changePullCard"  :disabled="dis.PullTsNet">
                 <template v-for="item in OPTIONS_TRANS_PULL_CARD">
@@ -191,7 +191,7 @@
         <div class="GroupItem">
           <div class="GroupItemField">
             <div class="GroupItemTitle">传输开关</div>
-            <div class="GroupItemValue">
+            <div class="GroupItemValue" style="width:auto">
               <mt-switch v-model="common.PullTsOpen" @change="changePullOpen" :disabled="dis.PullTsOpen"></mt-switch>
             </div>
           </div>
@@ -406,11 +406,11 @@
         OPTIONS_PULL_HDMIOUT_1080: [{text: "开",value: "1"}, 
                                     {text: "关",value: "0"}],
         //HDMI输出
-        OPTIONS_PULL_MHDMIOUT_1080: [{text: "1080I50",value: "0"}, 
-                                    {text: "1080P25",value: "1"}, 
-                                    {text: "1080P30",value: "2"}, 
-                                    {text: "1080P50",value: "3"}, 
-                                    {text: "1080P60",value: "4"}],
+        OPTIONS_PULL_MHDMIOUT_1080: [{text: "1080i50",value: "0"}, 
+                                    {text: "1080p25",value: "1"}, 
+                                    {text: "1080p30",value: "2"}, 
+                                    {text: "1080p50",value: "3"}, 
+                                    {text: "1080p60",value: "4"}],
         transErrReason:"",
         common:{
           dev_push_enable:"0",
@@ -561,23 +561,25 @@
         immediate: true,
         handler(val) {
           var that = this;
-          this.controlShow();
-          this.getNetBoard(function(data){
-            that.netBoard = that.formatNetBoard(data); 
-          });//获取网卡数据
-          //this.getDevList();
-          this.getDevListforAct();
-          this.initDeviceParam();
-          this.getDeviceControlParam(true);
-          clearInterval(localStorage.getControlParam);
-          localStorage.getControlParam = setInterval(function(){
-            that.getNetBoard(function(data){
+          if(this.$route.fullPath == "/control"){
+            this.controlShow();
+            this.getNetBoard(function(data){
               that.netBoard = that.formatNetBoard(data); 
-            });
-            var initParam = false;
-            that.getDeviceControlParam(initParam)
-            //that.$global.getPushUrls(that, that.formatPushUrlState);
-          },500)
+            });//获取网卡数据
+            //this.getDevList();
+            this.getDevListforAct();
+            this.initDeviceParam();
+            this.getDeviceControlParam(true);
+            clearInterval(localStorage.getControlParam);
+            localStorage.getControlParam = setInterval(function(){
+              that.getNetBoard(function(data){
+                that.netBoard = that.formatNetBoard(data); 
+              });
+              var initParam = false;
+              that.getDeviceControlParam(initParam)
+              //that.$global.getPushUrls(that, that.formatPushUrlState);
+            },500)
+          }
         }
       }
     },
@@ -1247,8 +1249,8 @@
         var hasRights = that.$global.judgeUserHasDevRights();//用户权限
         var isOnline = (data['online'] == '0')?false:true;//判断在线
         if((data['param_lock_ack'] == '1' && data['param_lock'] == '1') //解锁
-            && (that.lockUserId == that.user.id || that.lockUserId == "") //web解锁用户为当前用户
-            && hasRights && isOnline){//解锁，在线且有权限
+          && (that.lockUserId == that.user.id || that.lockUserId == "") //web解锁用户为当前用户
+          && hasRights && isOnline){//解锁，在线且有权限
           that.pageLock = false;//锁显示：unlock
           
           if(initFlag){//初始化参数
@@ -1268,7 +1270,6 @@
           }
         }else{//解锁，在线，有权限有一个不满足--显示lock
           that.pageLock = true;//锁显示：lock
-          
           that.updateParam(data);
           that.setBtnDisabled(true);//插件disable
         }
@@ -1531,7 +1532,7 @@
             this.dis.PushTsType = dis;//传输模式
             this.dis.PushCard = dis;//网卡选择
           }
-          if(this.common.dev_push_enable){//拉流
+          if(this.common.PullTsOpen){//拉流
             /*//推流 
             this.dis.PushTsType = true;//传输模式
             this.dis.PushCard = true;//网卡选择*/
@@ -1583,6 +1584,12 @@
           //$('#pullOpen').bootstrapSwitch('disabled', disabled);//拉流的传输开关
           this.dis.PullTsOpen = dis;//拉流--传输开关
         }else if(this.curDevSeries == "4000"){
+          //通用
+          this.dis.dev_push_enable = dis;//传输开关
+          this.dis.dev_delayVal_range = dis;//延时range
+          this.dis.dev_delayVal_input = dis;//延时input
+          this.dis.dev_srVal_range = dis;//视频比特率range
+          this.dis.dev_srVal_input = dis;//视频比特率input
           //互动接收机
           //文件
           //*4000的互动接收机
@@ -1627,6 +1634,7 @@
               that.SET_DEVICE_MODE_SELECT(that.common.WorkMode);
               that.setDeviceParam('WorkMode',that.common.WorkMode);
               that.changeWorkModePage();
+              that.getDeviceControlParam(true);//切换模式后，重新获取一遍组件值
             }else{
               that.common.WorkMode = that.common.WorkModeOri;
               that.$toast({
@@ -1972,13 +1980,17 @@
                 return;
               }else{
                 this.setDeviceParam('dev_push_enable',1);
-                this.dis.PullTsNet = true;//传输开关打开后，传输通道不能修改
+                /*this.dis.PullTsNet = true;//传输开关打开后，传输通道不能修改
+                this.dis.PullMHdmiOut = true;
+                this.dis.PullMHdmiAS = true;*/
               }
             }
           }
         } else {
           this.setDeviceParam('dev_push_enable',0);
-          this.dis.PullTsNet = false;//传输开关关闭后，传输通道可以修改
+          /*this.dis.PullTsNet = false;//传输开关关闭后，传输通道可以修改
+          this.dis.PullMHdmiOut = false;
+          this.dis.PullMHdmiAS = false;*/
         }
       },
       changePullMHdmiOut(){

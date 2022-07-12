@@ -33,11 +33,11 @@
                 ]">
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">接收机名称</span>
-                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.rcv_name }}</span>
+                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='1'?'onlineStyle':(item.online=='2'?'onBoardStyle':'')]">{{ item.rcv_name }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">状态</span>
-                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.online }}</span>
+                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='1'?'onlineStyle':(item.online=='2'?'onBoardStyle':'')]">{{ onLineStr[item.online] }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">序列号</span>
@@ -235,9 +235,9 @@
                   </div>
                 </div>
               </div>
-              <div class="GroupItem"><!-- 工作模式 -->
+              <div class="GroupItem"><!-- 服务器类型 -->
                 <div class="GroupItemField">
-                  <div class="GroupItemTitle">工作模式</div>
+                  <div class="GroupItemTitle">服务器类型</div>
                   <div class="GroupItemValue">
                     <select class="ItemSelectBlack" v-model="curBoard.transmode" @change="changeTransMode">
                       <template v-for="item in $global.OPTION_TRANSMODE">
@@ -252,7 +252,9 @@
                   <div class="GroupItemField">
                     <div class="GroupItemTitle">SRT推流地址</div>
                     <div class="GroupItemValue">
-                      <input type="text" class="ItemIpt" v-model="curBoard.srt_send_pushUrl">
+                    	<mt-field label="" placeholder="" class="ItemTextArea" type="textarea" rows="5" v-model="curBoard.srt_send_pushUrl"></mt-field>
+              	
+                      <!--<input type="text" class="ItemIpt" v-model="curBoard.srt_send_pushUrl">-->
                     </div>
                   </div>
                 </div>
@@ -260,7 +262,8 @@
                   <div class="GroupItemField">
                     <div class="GroupItemTitle">SRT拉流地址</div>
                     <div class="GroupItemValue">
-                      <input type="text" class="ItemIpt" v-model="curBoard.srt_send_pullUrl">
+                      <mt-field label="" placeholder="" class="ItemTextArea" type="textarea" rows="5" v-model="curBoard.srt_send_pullUrl"></mt-field>
+              	<!--<input type="text" class="ItemIpt" v-model="curBoard.srt_send_pullUrl">-->
                     </div>
                   </div>
                 </div>
@@ -444,7 +447,7 @@
               </div>
             </div>
             <div class="fGrp">
-              <div class="tl">本地IP</div>
+              <div class="tl">内网IP</div>
               <div class="vl">
                 <input type="text" class="ItemInput" v-model="ipSetting.localIp" placeholder="本地IP" :disabled="ipConfigDis">
               </div>
@@ -717,6 +720,7 @@
         receiverShowList:[],
         receiverConfigVisible:false,
         receiverConfigType:'add',
+        onLineStr: ["离线","在线","直播"],
         options:{
           searchRcv:"",
           userId:"",
@@ -886,6 +890,7 @@
       showBoardInfo(item){
         var that = this;
         this.boardInfoVisible = true;
+        this.selected = '1';
         this.getDecodeTableData(item);//状态 - 解码卡
         this.getEncodeTableData(item);//状态 - 编码卡
         this.getEncodeParam(item.rcv_sn);//编码板板卡信息
@@ -1109,8 +1114,8 @@
         var transDelay = this.curBoard.transDelay*1000;
         var srt_pushUrl = this.curBoard.srt_send_pushUrl;
         var srt_pullUrl = this.curBoard.srt_send_pullUrl;
-        var srt_send_pushUrl = this.curBoard.srt_pushUrl;
-        var srt_send_pullUrl = this.curBoard.srt_pullUrl;
+        var srt_send_pushUrl = this.curBoard.srt_send_pushUrl;
+        var srt_send_pullUrl = this.curBoard.srt_send_pullUrl;
           
         if(typeof Encvbr === 'number' && !isNaN(Encvbr)){
           if(Encvbr <500 || Encvbr> 20000){
@@ -1287,7 +1292,7 @@
             }
             var mapArr = {"直播":1,"在线":2,"离线":3};
             that.receiverList = data.sort(function(a, b){
-              return (mapArr[a.online] - mapArr[b.online])
+              return (b.online - a.online)
             });
             that.searchRcvByFilter();
           }else{
@@ -2609,5 +2614,11 @@
   }
   .leftvl input{
     width:30% !important;
+  }
+  textarea{
+  	font-size: .14rem !importantmportant;
+    padding: 0;
+    background-color: #353535;
+    color: #fff;
   }
 </style>

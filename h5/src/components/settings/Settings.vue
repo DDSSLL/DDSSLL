@@ -44,7 +44,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="options.WorkMode != '拉流'"><!-- 录制存储 -->
+          <div class="GroupItem" v-if="dev1080Show && options.WorkMode != '拉流'"><!-- 录制存储 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">录制存储</div>
               <div class="GroupItemValue">
@@ -351,7 +351,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">切换</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.SrtAudioIdx" @change="changeSrtAudioIdx" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.SrtAudioIdx" @change="changeSrtAudioIdx" :disabled="dis.SrtAudioIdx">
                   <template v-for="item in OPTIONS_SRT_AUDIO_SWITCH_4000">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -363,7 +363,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">全屏</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.SrtFullSwitch" @change="changeSrtFullSwitch" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.SrtFullSwitch" @change="changeSrtFullSwitch" :disabled="dis.SrtFullSwitch">
                 </mt-switch>
               </div>
             </div>
@@ -372,7 +372,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">传输通道</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.SrtTransIf" @change="$global.setDeviceParam('SrtTransIf',options.SrtTransIf)"  :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.SrtTransIf" @change="$global.setDeviceParam('SrtTransIf',options.SrtTransIf)"  :disabled="dis.SrtTransIf">
                   <template v-for="item in OPTIONS_SRT_TRANSPORT_PARAMS">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -384,7 +384,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">音频模式</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.AudioMode" @change="changeAudioMode" :disabled="!pageLock?false:true">
+                <select class="ItemSelect" v-model="options.AudioMode" @change="changeAudioMode" :disabled="dis.AudioMode">
                   <template v-for="item in OPTIONS_SRT_AUDIO_MODE_SWITCH_4000">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -468,7 +468,7 @@
           <div class="GroupItem"><!-- 回传开关 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">回传</div>
-              <div class="GroupItemValue">
+              <div class="GroupItemValue" style="width:auto" v-if="show.offLinePush">
                 <mt-switch v-model="options.OffLinePushEnable" @change="changeBackEnable" :disabled="!pageLock?false:true">
                 </mt-switch>
               </div>
@@ -742,6 +742,7 @@
           fileListPop:false,//文件列表pop
           recordingFileListPop:false,//录制中的文件Pop
           refreshFileList:false,//刷新图标
+          offLinePush:true,//离线回传
         },
         dis:{
           SEI:false,//SEI
@@ -763,6 +764,11 @@
           WiFiSwitch:false,//WiFi/热点
           DevAliasSwitch:false,//显示别名
           DevAlias:false,//别名
+
+          SrtAudioIdx:false,//切换
+          SrtFullSwitch:false,//全屏
+          SrtTransIf:false,//传输通道
+          AudioMode:false,//音频模式
         },
         fileList:[],//文件列表
         recordFileList:[],//录制中的文件
@@ -782,8 +788,8 @@
         handler(val) {
           if(this.$route.fullPath == "/settings"){
             this.ActiveDevice = val;
-            this.getLockStates();
             this.updateDevFileAll();
+            this.getLockStates();
           }
         }
       },
@@ -791,6 +797,7 @@
         immediate: true,
         handler(val) {
           if(this.$route.fullPath == "/settings"){
+            var that = this;
             var that=this;
             this.options.devFileUpFlag = 0;//文件列表
             //1080-4000显示初始化
@@ -804,6 +811,26 @@
               this.changeFileShow();
               this.changeRecordingFileShow();
             }
+          }
+        }
+      },
+      '$store.state.ActiveDevice.rcv_sn': {
+        immediate: true,
+        handler(val) {
+          if(this.$route.fullPath == "/settings"){
+            var that=this;
+            this.$global.getRcvList(that.formatRcvListData);
+            this.showDevSrt();
+            this.curRcvSeries = this.$global.getRcvSeries(that.ActiveDevice.rcv_sn);
+          }
+        }
+      },
+      '$store.state.ActiveDevice.rcv_online': {
+        immediate: true,
+        handler(val) {
+          if(this.$route.fullPath == "/settings"){
+            var that=this;
+            this.$global.getRcvList(that.formatRcvListData);
           }
         }
       },
@@ -971,20 +998,25 @@
         }
 
         //获取当前所选的接收机的板卡
-        bFind = false;
-        for (var i = 0; i < result.length; i++) {
-          if (result[i]['value'] == curRcvSn) {
-            that.options.matchRcv = result[i]['value'];
-            //that.options.matchRcvBak = result[i]['value'];
-            //$('#edit_rcv_sel').selectpicker('val', result[i]['value']);
-            //$('#edit_rcv_sel').attr("oVal", result[i]['value']);
-            that.$global.getUnusedBoard(result[i]['value'],"",that.formatUnusedBoard);
-            bFind = true;
-            break;
+        if(curRcvSn == ""){
+          that.options.matchRcv = "";
+          that.options.matchBoard = "";
+        }else{
+          bFind = false;
+          for (var i = 0; i < result.length; i++) {
+            if (result[i]['value'] == curRcvSn) {
+              that.options.matchRcv = result[i]['value'];
+              //that.options.matchRcvBak = result[i]['value'];
+              //$('#edit_rcv_sel').selectpicker('val', result[i]['value']);
+              //$('#edit_rcv_sel').attr("oVal", result[i]['value']);
+              that.$global.getUnusedBoard(result[i]['value'],"",that.formatUnusedBoard);
+              bFind = true;
+              break;
+            }
           }
-        }
-        if (!bFind && result.length != 0) {
-          that.$global.getUnusedBoard(result[0]['value'],"",that.formatUnusedBoard);
+          if (!bFind && result.length != 0) {
+            that.$global.getUnusedBoard(result[0]['value'],"",that.formatUnusedBoard);
+          }
         }
         if(that.options.matchRcv != ""){
           that.unbindBtnShow = true;
@@ -1083,7 +1115,7 @@
           that.OPTIONS_VIDEOENCODE = that.$global.OPTIONS_VIDEOENCODE_1080;//视频编码
           that.OPTIONS_AUDIO_ENCODE = that.$global.OPTIONS_AUDIO_ENCODE_1080;//音频编码
           that.OPTIONS_AUDIO_BR = that.$global.OPTIONS_AUDIO_BR;//音频比特率
-          that.OPTIONS_BITRATEMODE = that.$global.getDevParamRange(dev_sn, userPrefix, 'bitrate_mode');//码率控制that.$global.OPTIONS_BITRATEMODE;
+          that.OPTIONS_BITRATEMODE = that.$global.getDevParamRange(dev_sn, userPrefix, 'bitrate_mode',that.options.PushTsType);//码率控制that.$global.OPTIONS_BITRATEMODE;
           that.OPTIONS_HDMI_FORMAT = that.$global.getDevParamRange(dev_sn,"",'HdmiTransFormat',that.options.workModeVal);;//编码分辨率
           
         }else if(this.curDevSeries == "4000"){
@@ -1221,7 +1253,17 @@
         }*/else{
           this.setEncodeParamDisabled(dis);
         }
-        
+        if(this.options.SrtSwitch){
+          this.dis.SrtAudioIdx = dis;//切换
+          this.dis.SrtFullSwitch = dis;//全屏
+          this.dis.SrtTransIf = dis;//传输通道
+          this.dis.AudioMode = dis;//音频模式*/
+        }else{
+          this.dis.SrtAudioIdx = true;//切换
+          this.dis.SrtFullSwitch = true;//全屏
+          this.dis.SrtTransIf = true;//传输通道
+          this.dis.AudioMode = true;//音频模式*/
+        }
       },
       //输入编码下的参数按钮置disabled
       setEncodeParamDisabled(disabled){
@@ -1269,6 +1311,8 @@
       formatData(data){
         var that = this;
         that.options.workModeVal = data["WorkMode"];
+        //传输模式
+        that.options.PushTsType = data['PushTsType'];
         this.getSelectOptions(data);
         that.options.online = data["online"];
         that.options.dev_push_status = data["dev_push_status"];
@@ -1279,8 +1323,8 @@
         that.options.WorkMode = devTypeArr[data["WorkMode"]];
         that.WorkMode = devTypeArr[data["WorkMode"]];
         that.PushTsType = data['PushTsType'];
-        //传输模式
-        that.options.PushTsType = data['PushTsType'];
+        /*//传输模式
+        that.options.PushTsType = data['PushTsType'];*/
         /*------------------------传输控制------------------------*/
         that.options.dev_push_ip = data['dev_push_ip']=="1"?"1":"0";//传输IP
         //that.options.record = (data['record'] == '1' ? true : false);
@@ -1314,7 +1358,12 @@
         //音频比特率
         that.options.AudioBitrate = data['AudioBitrate'];
         //码率控制
-        that.options.bitrate_mode = data['bitrate_mode'];
+        if(that.options.PushTsType == 1){//单卡推流
+          that.options.bitrate_mode = 0;
+          that.$global.setDeviceParam('bitrate_mode',0)
+        }else{
+          that.options.bitrate_mode = data['bitrate_mode'];
+        }
         //编码分辨率
         that.options.HdmiTransFormat = data['HdmiTransFormat'];
         //日志等级
@@ -1395,6 +1444,7 @@
           var dev_interactive_mode_switch_state = "";
           if (data['InteractiveMode'] == '1') {
             that.options.InteractiveMode = true;
+            that.devFileShow = false;
             that.getSrtTransPortList(that.ActiveDevice.dev_sn);//传输通道
             /*//互动模式不支持HDMI H.264
             var options = that.OPTIONS_VIDEOINPUT;
@@ -1466,7 +1516,17 @@
             that.audioEncShow = false;//HDMI隐藏音频编码
             that.hdrShow = false;//HDMI隐藏HDR
           }else{
-            if(data['InteractiveMode'] == '1'){
+            if(this.curRcvSeries == R1080_RCV){//2010R
+              that.OPTIONS_VIDEOENCODE = video_encode_option.filter(function(item){
+                return (item.value == '0' || item.value == '1');
+              })
+              if(data["video_encode"] == '0' || data["video_encode"] == '1' ){
+                that.options.video_encode = data["video_encode"];
+              }else{
+                that.options.video_encode = 0;
+              }
+              
+            }else if(data['InteractiveMode'] == '1'){//4000的互动模式
               var options = "";//视频编码
               options = video_encode_option.filter(function(item){
                 return item.value!=4;
@@ -1475,11 +1535,12 @@
             }else{
               that.OPTIONS_VIDEOENCODE = video_encode_option;
             }
-            if(data["video_encode"]){
+            that.$global.setDeviceParam('video_encode', that.options.video_encode);
+            /*if(data["video_encode"]){
               that.options.video_encode = data["video_encode"];
             }else{
               that.options.video_encode = 0;
-            }
+            }*/
             that.audioEncShow = true;//非HDMI显示音频编码
             that.hdrShow = true;//非HDMI显示HDR
           }
@@ -1503,7 +1564,7 @@
           if( !this.curRcvSeries ){//非法接收机序列号，当前接收机类型设为虚拟接收机
             this.curRcvSeries = VIR_RCV;
           }
-          if(this.curRcvSeries == VIR_RCV){//配对接收机为虚拟接收机。时延模式只有“标准延时”
+          if(this.curRcvSeries == VIR_RCV || this.curRcvSeries == R1080_RCV){//配对接收机为虚拟接收机或2010R。时延模式只有“标准延时”
             this.OPTIONS_LATENCY = this.$global.OPTIONS_LATENCY2;
           }else{//实体接收机
             if(this.options.video_encode == "4"){//视频编码为264,时延模式只有“标准延时”
@@ -1537,6 +1598,10 @@
         that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT_4000
         //HDR
         that.OPTIONS_HDR = that.$global.OPTIONS_HDR_1080;//h.264只显示SDR
+        if(that.options.hdr == 1){
+          that.options.hdr = 0;
+          that.$global.setDeviceParam('hdr',that.options.hdr);
+        }
         //赋值上次对应参数
         //视频输入
         /*that.options.audio_input = that.options_old_264.audio_input;
@@ -1573,6 +1638,11 @@
         that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT_4000.filter(function(item){
           return (item.value == 0)
         });
+        if(that.options.HdmiTransFormat != 0){
+          that.options.HdmiTransFormat = 0;
+          that.$global.setDeviceParam('HdmiTransFormat',0);
+        }
+
         that.OPTIONS_HDR = that.$global.getDevParamRange(that.ActiveDevice.dev_sn,that.user.prefix,"hdr");//HDR设置
         //码率控制
         //that.OPTIONS_BITRATEMODE = that.$global.OPTIONS_BITRATEMODE;
@@ -1614,6 +1684,11 @@
               } 
             );
           }else if(this.options.WorkMode == '拉流'){//拉流模式不支持录制
+            this.$toast({
+              message: '当前模式不支持录制功能！',
+              position: 'middle',
+              duration: 2000
+            }); 
             setTimeout(function(){
               this.options.record = false;
             },500)
@@ -1623,7 +1698,12 @@
           }
         } else {
           //setDevParam('record', 0, switchId);
-          that.$global.setDeviceParam('record','0')
+          that.$global.setDeviceParam('record','0', function(){
+            //关录制刷新文件列表
+            setTimeout(function(){
+              that.clickFileRefreshIcon()
+            },1000)
+          })
           this.dis.StorageDev = false;//开始录制以后,存储设备不能修改
         }
         /*this.$global.setDeviceParam('record',this.options.record?'1':'0')
@@ -1776,10 +1856,13 @@
         
         //是否是虚拟接收机
         var DV4000RV = false;
+        var rcvSeries = this.$global.getRcvSeries(rcv);
         if (sub == VIR_RCV) {//虚拟接收机
           DV4000RV = true;
           board = that.ActiveDevice.dev_sn;
-        } else {//实体接收机
+        } else if(rcvSeries == R1080_RCV){//2010R
+          DV4000RV = true;
+        }else {//实体接收机
           //无可用板卡
           if (board == '' || board == '-1' && !DV4000RV) {
             return;
@@ -1795,6 +1878,8 @@
               that.latencyChange(DV4000RV);
               that.changeFileFlgShow(rcv);
               that.$global.getDeviceParam(that.formatData);
+              that.ActiveDevice.rcv_sn = rcv;
+              that.ActiveDevice.board_id = board;
             });
           }else if(data == 'norcv_push_difPrefix'){//无配对，背包、接收机要跨组配对
             text = '是否进行背包和接收机跨组配对？';
@@ -1805,6 +1890,8 @@
                   that.latencyChange(DV4000RV);
                   that.changeFileFlgShow(rcv);
                   that.$global.getDeviceParam(that.formatData);
+                  that.ActiveDevice.rcv_sn = rcv;
+                  that.ActiveDevice.board_id = board;
                 });
               } 
             );
@@ -1823,6 +1910,8 @@
                   that.latencyChange(DV4000RV);
                   that.changeFileFlgShow(rcv);
                   that.$global.getDeviceParam(that.formatData);
+                  that.ActiveDevice.rcv_sn = rcv;
+                  that.ActiveDevice.board_id = board;
                 });
               } 
             );
@@ -1949,6 +2038,7 @@
           }
         }else{
           this.clickBackStopBtn();
+          this.show.offLinePush = false;
         }
       },
       //点击回传按钮
@@ -2263,6 +2353,7 @@
                 if (!that.options.devFileUpFlag) {
                   that.show.refreshFileList = true;
                 }
+                that.show.offLinePush = true;
               });
             }else if(data.FileUpFlag == "1"){
               that.fileList = [];
@@ -2455,7 +2546,7 @@
         var that = this;
         this.$global.setDeviceParam('OpenfecMode',that.options.OpenfecMode?'1':'0');
         if(that.options.OpenfecMode){
-          this.show.OpenfecLevel = true;
+          this.show.OpenfecLevel = false;
         }else{
           this.show.OpenfecLevel = false;
         }
@@ -2483,8 +2574,10 @@
           action => {
             if(that.options.InteractiveMode){
               that.$global.setDeviceParam('InteractiveMode', 1);  
+              that.devFileShow = false;
             }else{
               that.$global.setDeviceParam('InteractiveMode', 0);  
+              that.devFileShow = true;
             }
           },
           action => {
@@ -2493,11 +2586,12 @@
             }else{
               that.options.InteractiveMode = true;
             }
-            that.options.InteractiveMode
             if(that.options.InteractiveMode){
               that.$global.setDeviceParam('InteractiveMode', 1);  
+              that.devFileShow = false;
             }else{
               that.$global.setDeviceParam('InteractiveMode', 0);  
+              that.devFileShow = true;
             }
           },
         );
@@ -2518,7 +2612,7 @@
       //全屏
       changeSrtFullSwitch(){
         if (this.options.SrtFullSwitch) {
-          this.show.OpenfecLevel = true;
+          this.show.OpenfecLevel = false;
           this.$global.setDeviceParam('SrtFullSwitch', 1);
         } else {
           this.show.OpenfecLevel = false;
@@ -2548,7 +2642,45 @@
             var jIndex = 0;
             var options = [];
             for (var i = 0; i < data.length; i++) {//传输通道，定时刷新获取在线的网卡
-              if (data[i]["online"] != "0") {//获取在线的网卡
+              options[jIndex]={};
+              if(data[i]["card_id"].indexOf("lte")!=-1 || data[i]["card_id"]=="eth0"){
+                if(data[i]["online"] != "0"){
+                  options[jIndex]['text'] = "在线:"+data[i]["card_name"];    
+                }else{
+                  options[jIndex]['text'] = data[i]["card_name"];    
+                }
+                var transportValue = "";
+                switch (data[i]["card_id"]){
+                  case "eth0":
+                    transportValue = 0;
+                    break;
+                  case "lte1":
+                    transportValue = 2;
+                    break;
+                  case "lte2":
+                    transportValue = 3;
+                    break;
+                  case "lte3":
+                    transportValue = 4;
+                    break;
+                  case "lte4":
+                    transportValue = 5;
+                    break;
+                  case "lte5":
+                    transportValue = 6;
+                    break;
+                  case "lte6":
+                    transportValue = 7;
+                    break;
+                  default:
+                    transportValue = '';
+                    break;
+                }
+                options[jIndex]['value'] = transportValue;
+                jIndex++;
+              }
+              
+              /*if (data[i]["online"] != "0") {//获取在线的网卡
                 options[jIndex]={};
                 options[jIndex]['text'] = data[i]["card_name"];
                 var transportValue = '';
@@ -2592,7 +2724,7 @@
                 }
                 options[jIndex]['value'] = transportValue;
                 jIndex++;
-              }
+              }*/
             }
             that.OPTIONS_SRT_TRANSPORT_PARAMS = options;
             that.getSrtTransPortParam(devSN);
@@ -2720,6 +2852,8 @@
       border-radius: 5px;
       font-size: .13rem;
       padding: 0px;
+      background-color:#2b2e33;
+      color:#fff;
     }
     .x2Ipt{
         width: 1.2rem;

@@ -14,7 +14,6 @@ import md5 from 'md5'
 import 'font-awesome/css/font-awesome.min.css'
 import global from './global/global'
 import './assets/css/global.css'
-
 Vue.use(MintUI)
 Vue.use(VueI18n)
 Vue.use(VueCordova)
@@ -29,7 +28,6 @@ Vue.use(VueCordova)
     default:
         break
 }*/
-
 Vue.prototype.$Config = Config
 Vue.prototype.$axios = axios
 Vue.prototype.$qs = qs

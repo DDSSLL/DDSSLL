@@ -5,21 +5,24 @@
         <LoginSetBtn v-if="hidShow" v-bind:content="title" v-on:msgToParent="msgToParent"></LoginSetBtn>
       </h1>
       <div v-if="show.loginPageShow">
+        <!-- <div class="form-item">
+          <span @click="changeLanguage">{{languageType}}</span>
+        </div> -->
         <div class="form-item">
-          <input type="text" autocomplete="false" class="loginIpt" v-model="user.login_name" placeholder="登录账号">
+          <input type="text" autocomplete="false" class="loginIpt" v-model="user.login_name" :placeholder="$t('login.101001')"><!-- 登录账号 -->
         </div>
         <div class="form-item">
-          <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" placeholder="登录密码">
+          <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" :placeholder="$t('login.101002')"><!-- 登录密码 -->
         </div>
         <div class="form-item">
-          <input type="text" autocomplete="false" class="loginIpt" v-model="checkCode" style="width: 50%;display: inline-block !important;" placeholder="输入验证码" @blur="changeCheckCode">
+          <input type="text" autocomplete="false" class="loginIpt" v-model="checkCode" style="width: 50%;display: inline-block !important;" :placeholder="$t('login.101003')" @blur="changeCheckCode"><!-- 输入验证码 -->
           <img :src="vImg" id="checkImg" class="loginIpt" style="width: 30%;display: inline-block;vertical-align: bottom;border: 2px solid #fff;" @click="changeCheckImg">
           <i class="fa fa-check fa-lg" v-show="show.devCode_pass" style="color: #2fb62f"></i>
           <i class="fa fa-times fa-lg" v-show="show.devCode_fail" style="color: #ff2e2a"></i>
         </div>
         <div class="form-item" style="text-align: right;padding-right: .2rem;margin-bottom:0;">
           <input type="checkbox" style="vertical-align:bottom;" v-model="user.saveMe_1080">
-          <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">记住我</span>
+          <span style="margin-left:5px;vertical-align:top;margin-top:0.03rem;display:inline-block;">{{ $t( 'login.101000' ) }}<!-- 记住我 --></span>
         </div>
         <div class="form-item" style="overflow: hidden;">
           <mt-button class="loginBtn" size="large" @click.native="login" v-if="loginBtnShow">{{ $t( 'basic.login' ) }}</mt-button>
@@ -28,45 +31,45 @@
         <div class="form-item">
           <!-- <span class="forgetPwd">忘记密码了?</span>
           <span style="float: left;width:4%;text-align: center;margin-top:0.05rem;">|</span> -->
-          <span class="registerBtn" @click="registerNew">注册一个新账号</span>
+          <span class="registerBtn" @click="registerNew">{{ $t( 'login.101004' ) }}</span><!-- 立即注册 -->
         </div>
         <!-- <appVersion v-if="hidShow"></appVersion> -->
         
       </div>  
       <div v-if="show.registerPageShow">
         <div class="form-item">
-          <input type="text" autocomplete="false" class="rigisterIpt" v-model="register.userName" placeholder="请输入用户名" @blur="judgeUserName">
+          <input type="text" autocomplete="false" class="rigisterIpt" v-model="register.userName" :placeholder="$t('login.101007')" @blur="judgeUserName"><!-- 请输入用户名 -->
           <i class="fa fa-check fa-lg pass tips" v-if="show.passName"></i>
           <i class="fa fa-exclamation-circle fa-lg fail tips" v-if="show.failName"></i>
         </div>
         <div class="form-item">
-          <input type="password" autocomplete="false" class="rigisterIpt" v-model="register.pwd" placeholder="请输入密码" @blur="judgePwd">
+          <input type="password" autocomplete="false" class="rigisterIpt" v-model="register.pwd" :placeholder="$t('login.101008')" @blur="judgePwd"><!-- 请输入密码 -->
           <i class="fa fa-check fa-lg pass tips" id="_pass" v-if="show.passPwd"></i>
           <i class="fa fa-exclamation-circle fa-lg fail tips" v-if="show.failPwd"></i>
         </div>
         <div class="form-item">
-          <input type="password" autocomplete="false" class="rigisterIpt" v-model="register.pwd2" placeholder="请再次输入密码" @blur="judgePwd2">
+          <input type="password" autocomplete="false" class="rigisterIpt" v-model="register.pwd2" :placeholder="$t('login.101009')" @blur="judgePwd2"><!-- 请再次输入密码 -->
           <i class="fa fa-check fa-lg pass tips" v-if="show.passPwd2"></i>
           <i class="fa fa-exclamation-circle fa-lg fail tips" v-if="show.failPwd2"></i>
         </div>
         <div class="form-item">
-          <input type="text" autocomplete="false" class="rigisterIpt" v-model="register.devSn" placeholder="请输入背包序列号" @blur="judgeDevSn">
+          <input type="text" autocomplete="false" class="rigisterIpt" v-model="register.devSn" :placeholder="$t('login.101010')" @blur="judgeDevSn"><!-- 请输入背包序列号 -->
           <i class="fa fa-check fa-lg pass tips" v-if="show.passDevSn"></i>
           <i class="fa fa-exclamation-circle fa-lg fail tips" v-if="show.failDevSn"></i>
         </div>
         <div class="form-item">
-          <input type="text" autocomplete="false" class="rigisterIpt" v-model="register.devCode" placeholder="请输入背包注册ID" @blur="judgeDevCode">
+          <input type="text" autocomplete="false" class="rigisterIpt" v-model="register.devCode" :placeholder="$t('login.101011')" @blur="judgeDevCode"><!-- 请输入背包注册ID -->
           <i class="fa fa-check fa-lg pass tips" v-if="show.passDevCode"></i>
           <i class="fa fa-exclamation-circle fa-lg fail tips" v-if="show.failDevCode"></i>
         </div>
         <div class="form-item" style="overflow: hidden;">
-          <mt-button class="loginBtn" size="large" @click.native="clickRegisterBtn">注 册</mt-button>
+          <mt-button class="loginBtn" size="large" @click.native="clickRegisterBtn">{{ $t( 'login.101005' ) }}</mt-button><!-- 注 册 -->
         </div>
         <!-- 
           <button class="btn m-b" id="registerBtn" style="margin-top: 1em;">注 册</button>
         </div>-->
         <p class="text-muted text-center login_p registerBtn" style="font-size: 14px">
-          <span style="color:#fff">已经有账户了？</span><a  @click="changeToLogin">点此登录</a>
+          <!-- <span style="color:#fff">已经有账户了？</span> --><a  @click="changeToLogin">{{ $t( 'login.101006' ) }}</a><!-- 点此登录 -->
         </p>
       </div>
     </div>
@@ -78,18 +81,19 @@
   /*import appVersion from '../common/appVersion';*/
   import md5 from 'md5';
   import { mapState, mapMutations } from 'vuex';
-  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE,SET_ACTIVE_DEVICE_TYPE } from '../../store/mutation-types';
+  import { SET_USER,SET_NAV_STATUS,SET_ACTIVE_DEVICE,SET_ACTIVE_DEVICE_TYPE,SET_DEVICE_TYPE_SELECT,SET_DEVICE_MODE_SELECT,SET_DEVICE_PREFIX_SELECT } from '../../store/mutation-types';
   export default {
     name: "Login",
     data(){
       return {
+        languageType:"切换为英文",
         baseURL:"",
         //title : "HDXpress",
         appVersion:"",//"1.02.02",
         lastestVersion:"",
         loginBtnShow:true,
         updateBtnShow:false,
-        updateText:"请下载最新软件",
+        updateText:this.$t( 'login.101009' ),//"请下载最新软件",
         title : "DController",
         user:{
           login_name:'',
@@ -168,6 +172,12 @@
       }
     },
     created(){
+      this.SET_USER(null);
+      this.SET_NAV_STATUS(true);
+      this.SET_ACTIVE_DEVICE(null);
+      this.SET_DEVICE_TYPE_SELECT(1);
+      this.SET_DEVICE_MODE_SELECT(0);
+      this.SET_DEVICE_PREFIX_SELECT("all");
       //初始化验证码
       this.sessionId = md5(Math.random());
       this.vImg = this.DStreamer_BUILD+"/login/ValidationCode.class.php?num="+this.sessionId;
@@ -200,8 +210,20 @@
         SET_USER,
         SET_NAV_STATUS,
         SET_ACTIVE_DEVICE,
-        SET_ACTIVE_DEVICE_TYPE
+        SET_ACTIVE_DEVICE_TYPE,
+        SET_DEVICE_TYPE_SELECT,
+        SET_DEVICE_MODE_SELECT,
+        SET_DEVICE_PREFIX_SELECT,
       }),
+      changeLanguage(){
+        if(this.languageType == "切换为英文"){
+          this.languageType = "Chinese";
+          this.$i18n.locale = 'en';
+        }else{
+          this.languageType = "切换为英文";
+          this.$i18n.locale = 'zh';
+        }
+      },
       changeCheckCode(){
         /*var that = this;
         var xhr = new XMLHttpRequest();
@@ -341,14 +363,14 @@
       },
       downloadAppNew(){
         var that = this;
-        this.updateText = "正在下载,请稍后...";
+        this.updateText = this.$t( 'login.101013' );//"正在下载,请稍后...";
         document.addEventListener("deviceready", onDeviceReady, false);
         function onDeviceReady() {
           window.requestFileSystem(LocalFileSystem.PERSISTENT, 10*1024*1024,
             function (fs) {
               
               //let url = 'http://www.uhdxpress.com/data/app/DStreamer.apk';
-              let url = 'http://139.129.91.106/upload/APP/DStreamer.apk';
+              let url = 'http://139.129.91.106/upload/APP/DController.apk';
               fs.root.getFile('DStreamer.apk', { create: true, exclusive: false }, 
                 function(fileEntry) {
                   download(fileEntry, url)
@@ -427,7 +449,7 @@
         var string = this.register.userName;
         if(!this.nameCheckType3(string)){
           this.$toast({
-            message: '长度1~15，仅支持字母,数字,+,_,@,()',
+            message: this.$t( 'login.101014' ),//'长度1~15，仅支持字母,数字,+,_,@,()',
             position: 'middle',
             duration: 3000
           })
@@ -460,7 +482,7 @@
         }
         else{
           this.$toast({
-            message: '6-16位，至少包含一个数字一个字母',
+            message: this.$t( 'login.101015' ),//'6-16位，至少包含一个数字一个字母',
             position: 'middle',
             duration: 3000
           })
@@ -483,7 +505,7 @@
         var string2 = this.register.pwd2;
         if(string != string2){
           this.$toast({
-            message: '两次密码不一致',
+            message: this.$t( 'login.101016' ),//'两次密码不一致',
             position: 'middle',
             duration: 3000
           })
@@ -505,7 +527,7 @@
         var string = this.register.devSn;
         if(!this.$global.isValidSn(string)){
           this.$toast({
-            message: '请输入10位背包序列号',
+            message: this.$t( 'login.101017' ),//'请输入10位背包序列号',
             position: 'middle',
             duration: 3000
           })
@@ -537,7 +559,7 @@
           this.show.failDevCode = false;
         }else{
           this.$toast({
-            message: '请输入8位背包激活码',
+            message: this.$t( 'login.101018' ),//'请输入8位背包激活码',
             position: 'middle',
             duration: 3000
           });
@@ -625,7 +647,7 @@
         var that = this;
         if (this.user.login_name == '') {
           that.$toast({
-            message: '请输入登录账号！',
+            message: this.$t( 'login.101019' ),//'请输入登录账号！',
             position: 'middle',
             duration: 3000
           })
@@ -633,7 +655,7 @@
         }
         if (this.user.password == '') {
           that.$toast({
-            message: '请输入登录密码！',
+            message: this.$t( 'login.101020' ),//'请输入登录密码！',
             position: 'middle',
             duration: 3000
           })
@@ -642,7 +664,7 @@
         //验证码
         if(this.checkCode === ''){
           that.$toast({
-            message: '请输入验证码！',
+            message: this.$t( 'login.101021' ),//'请输入验证码！',
             position: 'middle',
             duration: 3000
           })
@@ -669,6 +691,7 @@
               that.$router.push("/status");
               that.SET_NAV_STATUS(false);
               var data = res.res.data;
+              //that.$global.setCookie('uhd_loginId', data['id']);
               data.pwd = md5(data['pwd'])
               that.SET_USER(res.res.data);
               data.oId = data.id;
@@ -710,7 +733,7 @@
         .catch(function (error) {
           console.log(error)
           that.$toast({
-            message: "登录失败",
+            message: that.$t( 'login.101022' ),//"登录失败",
             position: 'middle',
             duration: 3000
           })

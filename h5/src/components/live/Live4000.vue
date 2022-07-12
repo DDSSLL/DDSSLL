@@ -173,10 +173,12 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">{{"板卡"+options.boardName+"拉流地址"}}</div>
               <div class="GroupItemValue" style="padding-top:7px" v-if="rcvParamLock">
-                <span :style="{color:options.boardColor}" style="word-break: break-all;">{{ options.boardUrl }}</span>
+                <span :style="{color:options.boardColor}" style="word-break: break-all;line-height: .2rem;">{{ options.boardUrl }}</span>
               </div>
               <div class="GroupItemValue" v-if="!rcvParamLock">
-                <input type="text" class="ItemIpt byteIpt" v-model="options.boardUrl" @blur="changeBoardUrl" style="width:96%">
+              	<mt-field label="" placeholder="" class="ItemTextArea" type="textarea" rows="5" v-model="options.boardUrl" @blur="changeBoardUrl"></mt-field>
+              	<!--<textarea class="ItemIpt byteIpt" rows="4"  v-model=""></textarea>-->
+                <!--<textarea type="text" class="ItemIpt byteIpt" v-model="options.boardUrl" @blur="changeBoardUrl" style="width:95%">-->
               </div>
             </div>
           </div>
@@ -347,6 +349,7 @@
         dev_options:{
           video_encode:"",
           latency:"",
+          dev_push_status:"",
         },
         options:{
           urlId:"",
@@ -571,7 +574,11 @@
             },500)
             return;
           }
-          text = "是否开启板卡"+that.options.boardName+"的拉流模式？"
+          if(this.dev_options.dev_push_status == 1){
+            text = "当前背包正在推流，开启拉流将停止背包推流，是否开启板卡"+that.options.boardName+"的拉流模式？"  
+          }else{
+            text = "是否开启板卡"+that.options.boardName+"的拉流模式？"
+          }
         }else{
           text = "是否关闭板卡"+that.options.boardName+"的拉流模式？"
         }
@@ -580,6 +587,10 @@
             that.setBoardParam(that.ActiveDevice.rcv_sn,that.options.boardName-1,that.options.boardSwitch);
             //更新颜色
             that.updateBoardPullStatus();
+            //背包停止推流
+            if(that.dev_options.dev_push_status == 1){
+              that.$global.setDevParamList(['dev_push_enable'],[0],'')
+            }
           },
           action => {
             setTimeout(function(){
@@ -742,6 +753,7 @@
         var that = this;
         that.dev_options.video_encode = data["video_encode"];
         that.dev_options.latency = data["latency"];
+        that.dev_options.dev_push_status = data["dev_push_status"];
       },
       //获取背包状态参数，用于显示源1
       getDevState(){
@@ -2181,6 +2193,15 @@
         border-radius: 5px;
         font-size: .12rem;
     }
+    .ItemTextArea, .mint-field-core, textarea{
+    	  outline: none;
+        border: 1px solid #3d81f1;
+        border-radius: 5px;
+        font-size: .12rem;
+		    padding: 0;
+		    background-color: #2b2e33;
+		    color: #fff;
+    }
     .ItemSel{
         width: 35%;
         height: .3rem;
@@ -2375,6 +2396,8 @@
   }
   .formItemVal textarea{
     font-size:.13rem;
+    background-color: #FFFFFF !important;
+    color: #888 !important;
   }
   .titleIcon{
     width: .2rem;
@@ -2383,5 +2406,11 @@
     color:#B7B7B7;
     vertical-align: text-top;
     margin-top: 2px;
+  }
+  textarea{
+  	font-size: .14rem !importantmportant;
+    padding: 0;
+    background-color: #353535;
+    color: #fff;
   }
 </style>

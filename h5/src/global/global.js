@@ -49,7 +49,7 @@ window.MBPS_MAX = 8;
 window.MBPS_MAX2 = 80;
 window.MBPS_MIN = 0.5;
 window.DStreamer_BUILD = "http://www.uhdxpress.com/";//4000运营平台
-window.DStreamer_SERVE = "http://111.160.79.84:8088";//测试平台
+window.DStreamer_SERVE = "http://111.160.79.83:8088";//测试平台
 //window.DStreamer_BUILD = "http://4000.uhdxpress.com:8088/";//4000一级域名:117.131.178.104:8088
 //window.DStreamer_BUILD = "http://117.131.178.104:8088/";//4000一级域名:117.131.178.104:8088
 //window.DStreamer_SERVE = "http://192.168.100.110:8088/";//4000二级域名
@@ -184,9 +184,10 @@ export default {
                               {value: "4",text: "H.264"}],                 
   OPTIONS_BITRATEMODE : [{value: "0",text: "CBR"}, 
                           {value: "1",text: "AVBR"}],
+  OPTIONS_BITRATEMODE2 : [{value: "0",text: "CBR"}],
   OPTIONS_BITRATEMODE_1080 : [{value: "0",text: "固定码率"}, 
                               {value: "1",text: "可变码率"}],
-  OPTIONS_BITRATEMODE2 : [{value: "0",text: "CBR"}],
+  OPTIONS_BITRATEMODE_1080_2 : [{value: "0",text: "固定码率"}],
   OPTIONS_HDR_4000 : [{text: "SDR",value: "0"}, 
                 {text: "HLG",value: "1"}],
   OPTIONS_HDR_1080 : [{text: "SDR",value: "0"}],
@@ -294,8 +295,8 @@ export default {
                             {text: "1080i",value: "2"}, 
                             {text: "720p",value: "3"}],
   //接收机板卡相关参数--start
-  OPTION_TRANSMODE:[{text: "SRT (Caller)",value: "SRT SEND"},
-                    {text: "SRT (Listener)",value: "SRT SERVER"}/*,
+  OPTION_TRANSMODE:[{text: "第三方",value: "SRT SEND"},
+                    {text: "本机",value: "SRT SERVER"}/*,
                     {text: "UDPLIVE",value: "UDPLIVE"}*/],
   OPTION_ENCINPUT : [{text: "SDI",value: "SDI"},
                     {text: "HDMI",value: "HDMI"}],
@@ -824,7 +825,11 @@ export default {
     }
     else if (param === 'bitrate_mode') {
       if(devSeries === "1080"){
-        res = that.OPTIONS_BITRATEMODE_1080;  
+        if(extraParam == 1){//单卡直推
+          res = that.OPTIONS_BITRATEMODE_1080_2;  
+        }else{
+          res = that.OPTIONS_BITRATEMODE_1080;  
+        }
       }else{
         res = that.OPTIONS_BITRATEMODE;
       }
@@ -1699,11 +1704,11 @@ export default {
       cb(value)
     }
   },
-  /*************************
-  *描述：获取背包属于哪个系列
-  * 输入：背包序列号
-  * 输出：‘4000’ ‘1080’
-  ************************/
+/*************************
+ *描述：获取背包属于哪个系列
+ * 输入：背包序列号
+ * 输出：‘4000’ ‘1080’ ‘1080_gjf’
+ ************************/
   getDevSeries(devSn){
     if(!this.isValidSn(devSn)){
       return false;
@@ -1716,8 +1721,12 @@ export default {
       return '4000';
     }
     //DV1080,QUK100,DV1080P,ICBT-201
-    else if(sn_4 == 2146 || sn_4 == 2150 || sn_4 == 7189 || sn_4 == 7207 || sn_4 == 2157 || sn_4 == 2161){
+    else if(sn_4 == 2146 || sn_4 == 2150 || sn_4 == 7189 || sn_4 == 7207 || sn_4 == 2157){
       return '1080';
+    }
+    //公检法背包
+    else if(sn_4 === 2161 || sn_4 === 2169){
+      return '1080_gjf';
     }
     else{
       return false;
@@ -1737,13 +1746,12 @@ export default {
     if(sn_4 === 2999){
       return VIR_RCV;
     }
-    else if(sn_4 === 2154 || sn_4 === 2156){
+    else if(sn_4 === 2154 || sn_4 === 2156 || sn_4 === 2162 || sn_4 === 2165 || sn_4 === 2164){
       return R1080_RCV;
     }
     else {
       return PRA_RCV;
     }
-
   },
   //判断URL合法性
   checkUrl(url) {
@@ -1921,5 +1929,13 @@ export default {
         res = '001-admin';
     }
     return res;
+  },
+  // 设置cookie的信息
+  setCookie(cookieName, cookieValue, seconds, path, domain, secure) {
+    var expires = new Date();
+    seconds = seconds ? seconds : 630720000;
+    expires.setTime(expires.getTime() + seconds * 1000);
+    document.cookie = encodeURIComponent(cookieName) + '=' + encodeURIComponent(cookieValue) + (expires ? ';expires=' + expires.toGMTString() : '') +
+        (path ? ';path=' + path : ';path=/') + (domain ? ';domain=' + domain : '') + (secure ? ';secure' : '');
   }
 }

@@ -33,11 +33,11 @@
                 ]">
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">背包名称</span>
-                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.dev_name }}</span>
+                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='1'?'onlineStyle':(item.online=='2'?'onBoardStyle':'')]">{{ item.dev_name }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">状态</span>
-                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.online }}</span>
+                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='1'?'onlineStyle':(item.online=='2'?'onBoardStyle':'')]">{{ onLineStr[item.online] }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">序列号</span>
@@ -262,6 +262,7 @@
         devOnline:"",
         deviceConfigVisible:false,
         deviceConfigType:'add',
+        onLineStr: ["离线","在线","直播"],
         options:{
           devName:"",
           editDev:"",
@@ -585,7 +586,7 @@
             }
             var mapArr = {"直播":1,"在线":2,"离线":3};
             that.deviceList = data.sort(function(a, b){
-              return (mapArr[a.online] - mapArr[b.online])
+              return ( b.online - a.online)
             });
 
             that.searchDevByFilter();

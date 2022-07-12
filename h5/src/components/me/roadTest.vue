@@ -390,6 +390,7 @@
                   {label: "SIM6",value: "6"}],
         downloadData:"",
         mapHeight:"",
+        restPos:false,
       }
     },
     computed: {
@@ -424,7 +425,8 @@
           
       }),
       backToRoadConfig(){
-        this.roadTestMapVisible = false;
+        var that = this;
+        console.log("backToRoadConfig")
         if(this.importEvent){//导入后返回
           this.importEvent = false;
           this.show.dataType = false;
@@ -433,7 +435,19 @@
           this.show.card5G = false;
           this.show.dotsCount = false;
           this.show.mapShowBtn = false;
+          this.roadTestMapVisible = false;
         }else if(this.testEvent){//正在测试中返回
+          var text = '返回将终止路测，确认返回？';
+          //询问
+          this.$messagebox.confirm(text).then(
+            action => {
+              that.stopRoadTest();
+              that.roadTestMapVisible = false;
+            },
+            action => {
+              that.roadTestMapVisible = true;
+            } 
+          );
           this.show.mapShowBtn = true;
         }else{//测试结束后返回
           this.roadTestDevText = "";
@@ -441,6 +455,7 @@
           this.show.dataType = false;
           this.show.dotsCount = false;
           this.show.mapShowBtn = false;
+          this.roadTestMapVisible = false;
         }
       },
       changeRoadTestShow(){//显示路测参数页面
@@ -501,7 +516,7 @@
           this.dataType = 1;
           this.show.bitRateRange = false;//码率范围
           this.show.speedRateRange = false;//速率范围
-          this.show.dotsCount = true;//显示点数
+          this.show.dotsCount = false;//显示点数 实时路测不能选点数，默认200
           this.showPoint = 200;
           this.show.mapShowBtn = true;//btn
           this.getBitRateRange(that.roadTestDevSel[0]);
@@ -1042,9 +1057,11 @@
         })
       },
       //开始路测：过滤拖拽或缩放后在页面显示范围内的200个点
-      refreshTestMapList(){
+      refreshTestMapList(followPoint){
         var that = this;
-        localStorage.mapCenter = JSON.stringify(that.testMap.getBounds().getCenter());
+        if(!followPoint){
+          localStorage.mapCenter = JSON.stringify(that.testMap.getBounds().getCenter());
+        }
         that.ajaxTestData(function(res){ //获取之前所有记录的点
           var data1 = res.data;
           that.formatCsvData(data1, function(oData){
@@ -1272,7 +1289,7 @@
           testData[objSn]["SIM1"] = sim1Arr;
           testData[objSn]["SIM2"] = sim2Arr;
           testData[objSn]["SIM3"] = sim3Arr;
-          if(this.devSeries == "4000"){
+          if(devSeries == "4000"){
             testData[objSn]["SIM4"] = sim4Arr;
             testData[objSn]["SIM5"] = sim5Arr;
             testData[objSn]["SIM6"] = sim6Arr;
@@ -1578,6 +1595,7 @@
       },
       followDevChange(){
         localStorage.followPoint = this.followDev;
+        this.restPos = true;
       },
       //显示全路径下拉列表内容更改时，调用页面缩放方法
       zoomDevChange(){
@@ -2102,11 +2120,10 @@
       },
       //画所有的点
       drawDotts(GPSListObj, key){
-        console.log("drawDotts")
+        //console.log("drawDotts")
         var that = this;
         var data = GPSListObj[key];
         data["card5G"] = [];
-        console.log(data)
         var RealLongitude = data["RealLongitude"];
         var RealLatitude = data["RealLatitude"];
         var total = RealLongitude.length;
@@ -2276,7 +2293,6 @@
             }
           }
         }
-
         /*if (img.substr(img.length-6) == "10.png") {
           IMGSIZE = 10;
         }else{
@@ -2303,7 +2319,8 @@
             var realLong= datas["RealLongitude"];
             var realLat= datas["RealLatitude"];
             var infoHeight = 220;
-            if(that.devSeries == "4000"){
+            var devSeries = that.$global.getDevSeries(key);
+            if(devSeries == "4000"){
               infoHeight = 280;
             }
             var opts = {
@@ -2391,7 +2408,7 @@
                 } 
                   
                 var point = new BMap.Point(lng, lat);
-                var loss = datas["TotalLossRate"][showData]=="--"?datas["TotalLossRate"][showData]:datas["TotalLossRate"][showData]+"%";
+                var loss = datas["TotalLossRate"][showData]=="--"?datas["TotalLossRate"][showData]:(datas["TotalLossRate"][showData]/10).toFixed(1)+"%";
                 var speed = datas["gpsSpeed"][showData]=="--"?datas["gpsSpeed"][showData]:datas["gpsSpeed"][showData]+"km/h";
                 var delay= datas["dev_delay"][showData]=="--"?datas["dev_delay"][showData]:datas["dev_delay"][showData]/1000+"s";
                 var dev_sr= datas["dev_sr"][showData]=="--"?datas["dev_sr"][showData]:datas["dev_sr"][showData]/1000+"Mbps";
@@ -2409,7 +2426,7 @@
                                 "SIM2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM2"][showData]+"<br/>"+
                                 "SIM3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM3"][showData]+"<br/>";
                 var infoStr = infoStrCom;
-                if(that.devSeries == "4000"){
+                if(devSeries == "4000"){
                   infoStr += "SIM4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM4"][showData]+"<br/>"+
                             "SIM5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM5"][showData]+"<br/>"+
                             "SIM6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: "+datas["SIM6"][showData]+"<br/>";
@@ -2525,29 +2542,36 @@
             mapSize[key]['lat']['max'] = mapSize[key]['lat']['max'] > RealLatitude[0] ?  mapSize[key]['lat']['max'] : RealLatitude[0];
             mapSize[key]['lat']['min'] = (mapSize[key]['lat']['min'] < RealLatitude[0] && mapSize[key]['lat']['min'] != 0) ?  mapSize[key]['lat']['min'] : RealLatitude[0];
             var mapBorder = JSON.parse(localStorage.mapBorder);
+            var point = "";
             if(mapSize[followPoint]['lng']['max'] > mapBorder['lng']['max']){
-              var point = new BMap.Point(RealLongitude[0], RealLatitude[0]);
+              point = new BMap.Point(RealLongitude[0], RealLatitude[0]);
               testMap.centerAndZoom(point, mapZoom);
               mapBorder = that.getMapBorder(testMap,true);
               mapSize[key]['lng']['min'] = mapBorder.lng.min;
             }else if(mapSize[followPoint]['lng']['min'] < mapBorder['lng']['min']){
-              var point = new BMap.Point(RealLongitude[0], RealLatitude[0]);
+              point = new BMap.Point(RealLongitude[0], RealLatitude[0]);
               testMap.centerAndZoom(point, mapZoom);
               mapBorder = that.getMapBorder(testMap,true);
               mapSize[key]['lng']['max'] = mapBorder.lng.max;
             }else if(mapSize[followPoint]['lat']['max'] > mapBorder['lat']['max']){
-              var point = new BMap.Point(RealLongitude[0], RealLatitude[0]);
+              point = new BMap.Point(RealLongitude[0], RealLatitude[0]);
               testMap.centerAndZoom(point, mapZoom);
               mapBorder = that.getMapBorder(testMap,true);
               mapSize[key]['lat']['min'] = mapBorder.lat.min;
             }else if(mapSize[followPoint]['lat']['min'] < mapBorder['lat']['min']){
-              var point = new BMap.Point(RealLongitude[0], RealLatitude[0]);
+              point = new BMap.Point(RealLongitude[0], RealLatitude[0]);
               testMap.centerAndZoom(point, mapZoom);
               mapBorder = that.getMapBorder(testMap,true);
               mapSize[key]['lat']['max'] = mapBorder.lat.max;
             }
             localStorage.mapSize = JSON.stringify(mapSize);  
             localStorage.mapBorder = JSON.stringify(mapBorder);  
+            if(this.restPos){
+              localStorage.mapCenter = JSON.stringify({"lng":point.lng,"lat":point.lat});
+              this.refreshTestMapList(true);//当跟踪开启时，参数为true
+              this.restPos = false;  
+            }
+            
           }
           if(localStorage.wholeRoad != ""){
             that.setMapNewZoom();
@@ -2792,44 +2816,44 @@
     margin-top:3px;
   }
   .navTitle{
-  	text-align:center;
-  	display:inline-block;
-  	width:100%;
+    text-align:center;
+    display:inline-block;
+    width:100%;
   }
   .wholePagePop{
-  	background-color:#212227;
-  	font-size:.14rem;
-  	color:#fff;
-  	width: 100% !important;
+    background-color:#212227;
+    font-size:.14rem;
+    color:#fff;
+    width: 100% !important;
     height: 100%;
     max-height: 100% !important;
   }
   .wholePagePop .page-title{
-  	font-size:.16rem;
-  	color:#fff;
-  	padding:10px;
+    font-size:.16rem;
+    color:#fff;
+    padding:10px;
   }
   .mint-switch{
     transform: scale(.7);
     transform-origin: left;
-	}
-	.tableHead, .tableBody{
-		display: flex;
+  }
+  .tableHead, .tableBody{
+    display: flex;
     font-size: .14rem;
     padding: 5px 10px;
     text-align:center;
-	}
-	.tableHead>div, .tableBody>div{
-		flex:1
-	}
-	.tableHead>div:nth-child(1),
-	.tableBody>div:nth-child(1){
-		text-align:left;
-	}
-	.tableHead>div:nth-child(4),
-	.tableBody>div:nth-child(4){
-		text-align:right;
-	}
+  }
+  .tableHead>div, .tableBody>div{
+    flex:1
+  }
+  .tableHead>div:nth-child(1),
+  .tableBody>div:nth-child(1){
+    text-align:left;
+  }
+  .tableHead>div:nth-child(4),
+  .tableBody>div:nth-child(4){
+    text-align:right;
+  }
 </style>
 <style>
   .DevMan .mint-checkbox-label {

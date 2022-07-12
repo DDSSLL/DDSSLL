@@ -139,6 +139,7 @@
         SUPER:SUPER,
         ADMIN:ADMIN,
         PRA_RCV:PRA_RCV,
+        VIR_RCV:VIR_RCV,
         R1080_RCV:R1080_RCV,
         workMode:"",
         URL_MAX:5,
@@ -229,8 +230,16 @@
             localStorage.removeItem('getPushUrl');
             localStorage.removeItem('getPullUrl');
             that.curDevSeries = that.$global.getDevSeries(that.ActiveDevice.dev_sn);
+            that.curRcvSeries = that.$global.getRcvSeries(that.ActiveDevice.rcv_sn);
             that.getURL();
           })
+        }
+      },
+      '$store.state.ActiveDevice.rcv_sn': {
+        immediate: true,
+        handler(val) {
+          var that = this;
+          that.curRcvSeries = that.$global.getRcvSeries(that.ActiveDevice.rcv_sn);
         }
       }
     },
@@ -564,7 +573,8 @@
             } else{//多卡汇聚
               this.editUrl(item.id, 'push_sel', '1');
             }  
-          }else if(this.curDevSeries=="4000"){
+          }
+          if(this.curRcvSeries != VIR_RCV && this.ActiveDevice.rcv_sn.substr(-4) != 2162){//实体接收机且不是公检法
             //srt只能生效一个
             var datas = this.address;
             var srt = 0;
@@ -587,12 +597,12 @@
               },500)
               return;
             }
-            //开启
-            this.editUrl(item.id, 'push_sel', 1);//push_sel:1
-            //刷新表格
-            item.push_sel = 1;
-            item.push_status = '';
           }
+          //开启
+          this.editUrl(item.id, 'push_sel', 1);//push_sel:1
+          //刷新表格
+          item.push_sel = 1;
+          item.push_status = '';
         }else{//uncheck
           if(this.dev_push_enable == true){
             var text = '正在推流中，确认需要取消推流地址吗？';

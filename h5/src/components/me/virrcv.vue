@@ -33,11 +33,11 @@
                 ]">
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">服务器名称</span>
-                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.rcv_name }}</span>
+                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='1'?'onlineStyle':(item.online=='2'?'onBoardStyle':'')]">{{ item.rcv_name }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">状态</span>
-                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.online }}</span>
+                  <span class="cellName cellValue" style="float: right;" :class="[item.online=='1'?'onlineStyle':(item.online=='2'?'onBoardStyle':'')]">{{ onLineStr[item.online] }}</span>
                 </div>
                 <div class="cellItem">
                   <span class="cellName cellLabel" style="float: left;">序列号</span>
@@ -56,11 +56,11 @@
                   <span class="cellName cellValue" style="float: right;">{{ item.user_name }}</span>
                 </div>
                 <div class="cellItem">
-                  <span class="cellName cellLabel" style="float: left;">映射IP</span>
+                  <span class="cellName cellLabel" style="float: left;">公网IP</span>
                   <span class="cellName cellValue" style="float: right;">{{ item.rcv_ip }}</span>
                 </div>
                 <div class="cellItem">
-                  <span class="cellName cellLabel" style="float: left;">本地IP</span>
+                  <span class="cellName cellLabel" style="float: left;">内网IP</span>
                   <span class="cellName cellValue" style="float: right;">{{ item.rcv_ownIP }}</span>
                 </div>
                 <div class="cellItem">
@@ -117,6 +117,18 @@
             <div class="cellItem">
               <span class="cellName cellLabel" style="float: left;">状态</span>
               <span class="cellName cellValue" style="float: right;" :class="[item.online=='在线'?'onlineStyle':(item.online=='直播'?'onBoardStyle':'')]">{{ item.online }}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">TCP端口</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.tcpPort }}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">UDP起始端口</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.udpPortStart }}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">UDP终止端口</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.udpPortEnd }}</span>
             </div>
           </div>
         </template>
@@ -221,6 +233,7 @@
         receiverShowList:[],
         receiverConfigVisible:false,
         receiverConfigType:'add',
+        onLineStr: ["离线","在线","直播"],
         options:{
           searchVirRcv:"",
           userId:"",
@@ -415,7 +428,7 @@
             }
             var mapArr = {"直播":1,"在线":2,"离线":3};
             that.receiverList = data.sort(function(a, b){
-              return (mapArr[a.online] - mapArr[b.online])
+              return (b.online - a.online)
             });
             that.searchVirRcvByFilter();
           }else{

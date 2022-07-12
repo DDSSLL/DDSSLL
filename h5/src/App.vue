@@ -15,7 +15,6 @@
         <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab == 'settings' }"></i>
         {{ $t('basic.settings') }}
       </mt-tab-item>
-      <!-- $)AC;SPEd6T;rU_EdAKPiDb=SJU;z2;OTJ>=SJU;zR3Cf,<4V;SPJ5Le=SJU;zOTJ>=SJU;zR3Cf -->
       <mt-tab-item id="live" v-show="rcvTabShowFlg">
         <i class="tab tab-live" v-bind:class="{ 'tab-live-active': activeTab == 'live' }"></i>
         <span>{{ $t('basic.live4000') }}</span>

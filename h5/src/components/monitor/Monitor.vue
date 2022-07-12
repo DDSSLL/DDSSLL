@@ -1,73 +1,75 @@
 <template>
   <div class="monitor mainPage" >
     <keep-alive>
-      <Device page='dev'></Device>
+      <Device page='monitor'></Device>
     </keep-alive>
-    <video id="video-webrtc" autoplay style="width: 100%;height:300px; background-color: #000;" :muted="options.muted"></video>
-    <div id="controlBtn" style="background-color: transparent;font-size: 40px;line-height: 40px;margin-left: .2rem;padding: 10px 0;">
-      <i class="fa fa-play" aria-hidden="true" style="color: #bfbfbf;" id="playControl" @click="playOrPause"></i>
-    </div>
-    <input v-model="rtcUrl" disabled style="display: none"/>
-    <div class="Group">
-      <div class="GroupItem"><!-- 推拉流 -->
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">推拉流</div>
-          <div class="GroupItemValue">
-            <mt-radio
-              title=""
-              v-model="options.monitorType"
-              :options="OPTIONS_MONITOR_TYPE"
-              @change="changeMonitorType">
-            </mt-radio>
-          </div>
-        </div>
+    <div v-if="monitorFlg">
+      <video id="video-webrtc" autoplay style="width: 100%;height:300px; background-color: #000;" :muted="options.muted"></video>
+      <div id="controlBtn" style="background-color: transparent;font-size: 40px;line-height: 40px;margin-left: .2rem;padding: 10px 0;">
+        <i class="fa fa-play" aria-hidden="true" style="color: #bfbfbf;" id="playControl" @click="playOrPause"></i>
       </div>
-      <div class="GroupItem" v-if="show.customType"><!-- 内网IP -->
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">内网IP</div>
-          <div class="GroupItemValue">
-            <input class="ItemInput" v-model="options.rtmp_ip" type="text" @change="">
+      <input v-model="rtcUrl" disabled style="display: none"/>
+      <div class="Group">
+        <div class="GroupItem"><!-- 推拉流 -->
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">推拉流</div>
+            <div class="GroupItemValue">
+              <mt-radio
+                title=""
+                v-model="options.monitorType"
+                :options="OPTIONS_MONITOR_TYPE"
+                @change="changeMonitorType">
+              </mt-radio>
+            </div>
           </div>
         </div>
-      </div>  
-      <div class="GroupItem" v-if="show.customType"><!-- 公网IP -->
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">公网IP</div>
-          <div class="GroupItemValue">
-            <input class="ItemInput" v-model="options.rtmp_ipMapping" type="text" @change="">
+        <div class="GroupItem" v-if="show.customType"><!-- 内网IP -->
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">内网IP</div>
+            <div class="GroupItemValue">
+              <input class="ItemInput" v-model="options.rtmp_ip" type="text">
+            </div>
+          </div>
+        </div>  
+        <div class="GroupItem" v-if="show.customType"><!-- 公网IP -->
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">公网IP</div>
+            <div class="GroupItemValue">
+              <input class="ItemInput" v-model="options.rtmp_ipMapping" type="text">
+            </div>
+          </div>
+        </div>    
+        <div class="GroupItem" v-if="show.customType"><!-- 推流IP -->
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">推流IP</div>
+            <div class="GroupItemValue">
+              <select class="ItemSelect" v-model="options.pushIp_sel">
+                <template v-for="item in OPTIONS_IP_TYPE">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
+            </div>
           </div>
         </div>
-      </div>    
-      <div class="GroupItem" v-if="show.customType"><!-- 推流IP -->
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">推流IP</div>
-          <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.pushIp_sel" @change="">
-              <template v-for="item in OPTIONS_IP_TYPE">
-                <option :value="item.value">{{ item.text }}</option>
-              </template>
-            </select>
+        <div class="GroupItem" v-if="show.customType"><!-- 拉流IP -->
+          <div class="GroupItemField">
+            <div class="GroupItemTitle">拉流IP</div>
+            <div class="GroupItemValue">
+              <select class="ItemSelect" v-model="options.pullIp_sel">
+                <template v-for="item in OPTIONS_IP_TYPE">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="GroupItem" v-if="show.customType"><!-- 拉流IP -->
-        <div class="GroupItemField">
-          <div class="GroupItemTitle">拉流IP</div>
-          <div class="GroupItemValue">
-            <select class="ItemSelect" v-model="options.pullIp_sel" @change="">
-              <template v-for="item in OPTIONS_IP_TYPE">
-                <option :value="item.value">{{ item.text }}</option>
-              </template>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="GroupItem"  v-if="show.customType"><!-- 按钮 -->
-        <div class="GroupItemField">
-          <div class="GroupItemTitle"></div>
-          <div class="GroupItemValue" style="float:right">
-            <mt-button class="ItemBtn" type="primary" @click="saveCustom">保存</mt-button>
-            <mt-button class="ItemBtn" style="margin-left:10px;" @click="">清空</mt-button>
+        <div class="GroupItem"  v-if="show.customType"><!-- 按钮 -->
+          <div class="GroupItemField">
+            <div class="GroupItemTitle"></div>
+            <div class="GroupItemValue" style="float:right">
+              <mt-button class="ItemBtn" type="primary" @click="saveCustom">保存</mt-button>
+              <!-- <mt-button class="ItemBtn" style="margin-left:10px;" @click="">清空</mt-button> -->
+            </div>
           </div>
         </div>
       </div>
@@ -108,7 +110,7 @@
       }
     },
     computed: {
-      ...mapState(['user','paramLockAck','lockUserId','ActiveDevice'])//"ActiveDeviceType",
+      ...mapState(['user','paramLockAck','lockUserId','ActiveDevice','monitorFlg'])//"ActiveDeviceType",
     },
     components: {
       Device
@@ -131,7 +133,7 @@
           this.showMonitorParam();
           this.webrtcClose();
           $("#playControl").removeClass("fa-pause").addClass("fa-play");
-          this.updateBoardPushSel(0,devSn, rcvSn, boardId);
+          //this.updateBoardPushSel(0,devSn, rcvSn, boardId);
           this.options.status = "pause";
         }
       }
@@ -142,7 +144,7 @@
       this.showMonitorParam();
       this.webrtcClose();
       $("#playControl").removeClass("fa-pause").addClass("fa-play");
-      this.updateBoardPushSel(0,devSn, rcvSn, boardId);
+      //this.updateBoardPushSel(0,devSn, rcvSn, boardId);
       this.options.status = "pause";
     },
     deactivated(){   //生命周期-缓存页面失活
@@ -166,7 +168,7 @@
           data:this.$qs.stringify({
             getMonitorParam: true,
             rcvSn: that.ActiveDevice.rcv_sn,
-            boardId: that.ActiveDevice.board_id,
+            devSn: that.ActiveDevice.dev_sn,
           }),
           Api:"getMonitorParam",
           AppId:"android",
@@ -186,8 +188,8 @@
             that.options.monitorType = data.monitorType;
             that.options.rtmp_ip = data.rtmp_ip;
             that.options.rtmp_ipMapping = data.rtmp_ipMapping;
-            that.options.push_sel = data.push_sel;
-            that.options.pull_sel = data.pull_sel;
+            that.options.pushIp_sel = data.push_sel;
+            that.options.pullIp_sel = data.pull_sel;
             if(cb){
               cb(data);
             }
@@ -215,7 +217,7 @@
             setMonitorType: true,
             monitorType: type,
             rcvSn: that.ActiveDevice.rcv_sn,
-            boardId: that.ActiveDevice.board_id,
+            devSn: that.ActiveDevice.dev_sn,
           }),
           Api:"setRtmpParam",
           AppId:"android",
@@ -231,10 +233,12 @@
         })
       },
       saveCustom(){
-        this.setRtmpParam();
-        this.getMonitorParam(this.initVideo);
+        var that = this;
+        this.setRtmpParam(function(){
+          that.getMonitorParam(that.initVideo);
+        });
       },
-      setRtmpParam() {
+      setRtmpParam(cb) {
         var rtmpIp = this.options.rtmp_ip;
         var mappingIp = this.options.rtmp_ipMapping;
         var pullIpSel = this.options.pullIp_sel;
@@ -270,7 +274,7 @@
           data:this.$qs.stringify({    
             setRtmpParam: true,
             rcvSn: that.ActiveDevice.rcv_sn,
-            boardId: that.ActiveDevice.board_id,
+            devSn: that.ActiveDevice.dev_sn,
             rtmpIp: rtmpIp,
             mappingIp: mappingIp,
             pullIpSel: pullIpSel,
@@ -286,6 +290,9 @@
             that.$toast({
               message: '保存成功'
             });
+            if(typeof(cb) == "function"){
+              cb();
+            }
           }
         })
         .catch(function (error) {
@@ -331,6 +338,10 @@
         if(monitorType == 0){//本机
           pushIp = "192.168.253.100";
           pullIp = data.rcv_ip;
+          //汇聚的话推本机用127.0.0.1
+          if(boardId === devSn){
+            pushIp = "127.0.0.1";
+          }
         }else{
           if(data.push_sel == 0){//推流IP为内网IP
             pushIp = data.rtmp_ip;

@@ -36,7 +36,7 @@
             </span>
             <span class="R" v-if="this.ActiveDevice.WorkMode == 2">
               <span class="RCircle" :class="[this.ActiveDevice.actDevOnline == 1 ? (this.ActiveDevice.actDevPush != '0' ? 'red' : 'green') : 'gray']"></span>
-              互动: {{ this.ActiveDevice.actDevName }}
+              {{ $t( 'device.103000' ) }}<!-- 互动 -->: {{ this.ActiveDevice.actDevName }}
             </span>
             <span v-else>
               <span class="R">
@@ -58,7 +58,7 @@
             <i class="fa fa-2x" id="lockIcon" aria-hidden="true" @click.stop="changeLockState" :disabled="lockDisable"></i>
           </div>
           <div class="stateInfo" v-if="ActiveDevice.infoStatus == 'infoRed'">
-            <i class="fa fa-2x fa-exclamation-circle" aria-hidden="true"></i>
+            <img src="../../assets/img/battery_low.png" width="24px" height="24px" />
           </div>  
         </div>
       </div>
@@ -81,7 +81,7 @@
           </div>
           <div class="deviceListDiv">
             <template v-for="(item,i) in deviceListShow">
-              <div class="listChannel" @click="changeActiveDevice(item)" :class="[!!ActiveDevice?(ActiveDevice.dev_name == item.dev_name ? 'activeChanel' : ''):'']">
+              <div class="listChannel" @click="changeActiveDevice(item)" :class="[!!ActiveDevice?(ActiveDevice.dev_name == item.dev_name && ActiveDevice.rcv_name == item.rcv_name && ActiveDevice.board_id == item.board_id ? 'activeChanel' : ''):'']">
                 <div class="status">
                   <span class="statusCircle" :class="[item.statusCircle]">
                     <span class="sk-bounce1"></span>
@@ -116,7 +116,7 @@
                     </span>
                     <span class="R" v-if="item.WorkMode == 2">
                       <span class="RCircle" :class="[item.actDevOnline == 1 ? (item.actDevPush != '0' ? 'red' : 'green') : 'gray']"></span>
-                      互动: {{ item.actDevName }}
+                      {{ $t( 'device.103000' ) }}<!-- 互动 -->: {{ item.actDevName }}
                     </span>
                     <span v-else>
                       <span class="R">
@@ -171,58 +171,58 @@
       <mt-popup v-model="popupTagsVisible" position="right" popup-transition="popup-slide">
         <div class="back" @click="closeDevStatus">
           <i class="fa fa-arrow-left" aria-hidden="true"></i>
-          背包状态
+          {{$t('device.103001')}}<!-- 背包状态 -->
         </div>
         <div class="devStatusDiv">
-          <mt-cell title="序列号">
+          <mt-cell :title="$t('device.103001')"><!-- 序列号 -->
             <span>{{status.devSn_str}}</span>
           </mt-cell>
-          <mt-cell title="温度">
+          <mt-cell :title="$t('device.103002')"><!-- 温度 -->
             <span>{{status.IntTemp}}</span>
           </mt-cell>
-          <mt-cell title="内部电池">
+          <mt-cell :title="$t('device.103003')"><!-- 内部电池 -->
             <span :class="status.battery1"></span>
           </mt-cell>
-          <mt-cell title="外部电池" v-if="show.extBattery">
+          <mt-cell :title="$t('device.103004')" v-if="show.extBattery"><!-- 外部电池 -->
             <span :class="status.battery2"></span>
           </mt-cell>
-          <mt-cell title="GPS锁定">
+          <mt-cell :title="$t('device.103005')"><!-- GPS锁定 -->
             <span>{{status.gpsStatus}}</span>
           </mt-cell>
-          <mt-cell title="输入分辨率">
+          <mt-cell :title="$t('device.103006')"><!-- 输入分辨率 -->
             <span>{{status.resolution_str}}</span>
           </mt-cell>
-          <mt-cell title="输出分辨率">
+          <mt-cell :title="$t('device.103007')"><!-- 输出分辨率 -->
             <span>{{status.OutputFormat}}</span>
           </mt-cell>
-          <mt-cell title="工作状态">
+          <mt-cell :title="$t('device.103008')"><!-- 工作状态 -->
             <span :style="{color:status.work_str_style}">{{status.work_str}}</span>
           </mt-cell>
-          <mt-cell title="延时(s)">
+          <mt-cell :title="$t('device.103009')"><!-- 延时(s) -->
             <span>{{status.delay_str}}</span>
           </mt-cell>
-          <mt-cell title="视频输入">
+          <mt-cell :title="$t('device.103010')"><!-- 视频输入 -->
             <span>{{status.videoInput_str}}</span>
           </mt-cell>
-          <mt-cell title="视频比特率">
+          <mt-cell :title="$t('device.103011')"><!-- 视频比特率 -->
             <span>{{status.videoBr_str}}</span>
           </mt-cell>
-          <mt-cell title="视频编码">
+          <mt-cell :title="$t('device.103012')"><!-- 视频编码 -->
             <span>{{status.videoEnc_str}}</span>
           </mt-cell>
-          <mt-cell title="音频输入">
+          <mt-cell :title="$t('device.103013')"><!-- 音频输入 -->
             <span>{{status.audioInput_str}}</span>
           </mt-cell>
-          <mt-cell title="音频编码">
+          <mt-cell :title="$t('device.103014')"><!-- 音频编码 -->
             <span>{{status.audioEnc_str}}</span>
           </mt-cell>
-          <mt-cell title="音频比特率">
+          <mt-cell :title="$t('device.103015')"><!-- 音频比特率 -->
             <span>{{status.audioBitrate_str}}</span>
           </mt-cell>
-          <mt-cell title="码率控制">
+          <mt-cell :title="$t('device.103016')"><!-- 码率控制 -->
             <span>{{status.bitrateMode_str}}</span>
           </mt-cell>
-          <mt-cell title="流量总计">
+          <mt-cell :title="$t('device.103017')"><!-- 流量总计 -->
             <span>{{status.TotalSendPktStr}}</span>
           </mt-cell>
         </div>
@@ -249,6 +249,7 @@
         popupVisible:false,
         popupTagsVisible:false,
         lockDisable:false,
+        defaultFlg:false, //默认列表过滤状态
         deviceList:[/*{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}*/],
         active:{},
         //当前选中设备的相关参数
@@ -260,24 +261,24 @@
         devicePrefixPop:false,
         allPrefix:[],
         devicePrefix:"",
-        devicePrefixCurName:"用户组",
+        devicePrefixCurName:this.$t('device.103019')/*"用户组"*/,
         //设备在线类型
         deviceTypePop: false,
         deviceType:"",
         deviceTypeCurName:"",
-        deviceTypeOptions: [{label: '全部背包',value: '1'},
-                            {label: '直播背包',value: '2'},
-                            {label: '在线背包',value: '3'},
-                            {label: '离线背包',value: '4'},
-                            {label: '接收机',value: '5'}],
+        deviceTypeOptions: [{label: this.$t('device.103020'),value: '1'},/*'全部背包'*/
+                            {label: this.$t('device.103021'),value: '2'},/*'直播背包'*/
+                            {label: this.$t('device.103022'),value: '3'},/*'在线背包'*/
+                            {label: this.$t('device.103023'),value: '4'},/*'离线背包'*/
+                            {label: this.$t('device.103024'),value: '5'}],/*'在线接收机'*/
         //背包模式
         deviceModePop:false,
         deviceModeSelect:"allMode",
         deviceModeCurName:"",
-        deviceModeOptions: [{label: '全部模式',value: 'allMode'},
-                            {label: '推流模式',value: '0'},
-                            {label: '拉流模式',value: '1'},
-                            {label: '互动模式',value: '2'}],
+        deviceModeOptions: [{label: this.$t('device.103025'),value: 'allMode'},/*'全部模式'*/
+                            {label: this.$t('device.103026'),value: '0'},/*'推流模式'*/
+                            {label: this.$t('device.103027'),value: '1'},/*'拉流模式'*/
+                            {label: this.$t('device.103028'),value: '2'}],/*'互动模式'*/
         status:{
           devSn_str:"",
           IntTemp:"",
@@ -311,7 +312,6 @@
       ...mapState(['user','ActiveDevice','deviceTypeSelect',/*'deviceModeSelect',*/'devicePrefixSelect','paramLockAck','paramLock','lockUserId','rcvTabShowFlg'])
     },
     activated(){
-      console.log("device activated")
       var that = this;
       that.initFilter();
       if(localStorage.deviceTimer){
@@ -341,7 +341,7 @@
       backToActivePage(){
         if(this.deviceListShow.length == 0){
           this.$toast({
-            message: '请重新选择'
+            message: this.$t('device.103029')/*'请重新选择'*/
           });
         }else{
           this.popupVisible=false;
@@ -494,28 +494,28 @@
         var workStr = '';
         var workStrColor = '#FFFFFF';
         if(res.data[0]["online"] == '1'){
-          workStr = '待机';
+          workStr = this.$t('device.103030')/*'待机'*/;
           workStrColor = '#00FF00';
           if(res.data[0]["OffLinePushEnable"] == '1'){
-            workStr = '文件离线回传中';
+            workStr = this.$t('device.103031')/*'文件离线回传中'*/;
             workStrColor = '#FF0000';
           }
           else{
             if(res.data[0]["dev_push_status"] == '1'){
-              workStr = '直播中';
+              workStr = this.$t('device.103032')/*'直播中'*/;
               workStrColor = '#FF0000';
               if(res.data[0]["record"] == '1'){
-                workStr += ' 录制中';
+                workStr += this.$t('device.103033')/*' 录制中'*/;
               }
             }
             else if(res.data[0]["record"] == '1'){
-              workStr = '录制中';
+              workStr = this.$t('device.103033')/*'录制中'*/;
               workStrColor = '#00FF00';
             }
           }
         }
         else{
-          workStr = '离线';
+          workStr = this.$t('device.103034')/*'离线'*/;
         }
         this.status.work_str = workStr;
         this.status.work_str_style = workStrColor;
@@ -647,7 +647,7 @@
       },
       formatPrefix(data){
         var that = this;
-        var arr = [{"label":"全部","value":"all"},{"label":"无","value":"none"}];
+        var arr = [{"label":this.$t('global.109000')/*"全部"*/,"value":"all"},{"label":this.$t('global.109001')/*"无"*/,"value":"none"}];
         for(let i=0; i<data.length; i++){
           arr.push({"label":data[i]["prefix_name"],"value":data[i]["prefix"]})
         }
@@ -668,17 +668,28 @@
         var actRcv = this.$global.getRcvMode(datas.rcv_sn.substr(-4)) == 'DV4004R' ? true:false;
         var WorkMode = datas.WorkMode;
         var PushTsType = datas.PushTsType;
-        if(WorkMode != 0){/*拉流互动不显示接收机tab*/
-          this.SET_RCV_TAB_SHOW_FLG(false);
+        if(!curRcvSeries){//没配接收机不显示接收机tab
+        	this.SET_RCV_TAB_SHOW_FLG(false);
         }else{
-          if(curRcvSeries!=false && curRcvSeries!=VIR_RCV){//没有配对或者配了虚拟接收机不显示接收机页面,即只有实体接收机显示接收机页面
-            this.SET_RCV_TAB_SHOW_FLG(true);
-          }else{
-            this.SET_RCV_TAB_SHOW_FLG(false);
-          }
+        	this.SET_RCV_TAB_SHOW_FLG(true);
+        	if(curDevSeries == "1080"){
+        		if(WorkMode != 0){/*拉流互动不显示接收机tab*/
+		          this.SET_RCV_TAB_SHOW_FLG(false);
+		        }else{
+		          if(curRcvSeries!=false && curRcvSeries!=VIR_RCV){//没有配对或者配了虚拟接收机不显示接收机页面,即只有实体接收机显示接收机页面
+		            this.SET_RCV_TAB_SHOW_FLG(true);
+		          }else{
+		            this.SET_RCV_TAB_SHOW_FLG(false);
+		          }
+		        }		
+        	}else if(curDevSeries == "4000"){
+        		this.SET_RCV_TAB_SHOW_FLG(true);
+        	}
         }
-        if(datas.rcv_sn != ""){
-          if(curDevSeries == "4000"){
+        
+        if(datas.rcv_sn != ""){//只要配对了都显示监控
+          this.SET_MONITOR_TAB_SHOW_FLG(true);
+          /*if(curDevSeries == "4000"){
             if(actRcv){//互动接收机不显示监控
               this.SET_MONITOR_TAB_SHOW_FLG(false);
             }else{
@@ -690,7 +701,7 @@
             }else{
               this.SET_MONITOR_TAB_SHOW_FLG(false);
             }
-          }
+          }*/
         }else{//没有配对不显示监控页面
           this.SET_MONITOR_TAB_SHOW_FLG(false);
         }
@@ -705,7 +716,7 @@
             userId: that.user.id,
             userGroup: that.user.userGroup,
             prefixType: that.devicePrefix.join(","),//that.user.prefix
-            fliter: that.getDeviceFliter()
+            fliter: that.getDeviceFliter(that.defaultFlg)
           }),
           Api:"getDevAndMatch",
           AppId:"android",
@@ -729,7 +740,8 @@
               } else {
                 row.statusCircle = 'gray';
               }
-              if(that.ActiveDevice && (row["dev_sn"] == that.ActiveDevice["dev_sn"])){
+              if(that.ActiveDevice 
+                && (row["dev_sn"] == that.ActiveDevice["dev_sn"] && row["dev_sn"]!="")){
                 that.refreshCurDevParam(row);
               }
               //在线且没在充电中，才显示电池电量低
@@ -757,28 +769,32 @@
             }
 
             that.filterDevice();
-            if(!that.ActiveDevice){
-              that.SET_ACTIVE_DEVICE(that.deviceListShow[0]); 
-              //that.deviceModeSelect = that.deviceListShow[0]["WorkMode"];
-            }else{//存了ActiveDevice
-              var devExist = false;
-              for(var i=0; i<that.deviceList.length; i++){
-                if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
-                  devExist = true;
-                  //that.deviceModeSelect = that.deviceList[i]["WorkMode"];
-                }
-              }
-              if(!devExist && that.deviceListShow.length!=0){//ActiveDevice不在设备列表中
+            if(that.deviceList.length == 0){
+              that.defaultFlg = true;
+            }else{
+              if(!that.ActiveDevice){
                 that.SET_ACTIVE_DEVICE(that.deviceListShow[0]); 
                 //that.deviceModeSelect = that.deviceListShow[0]["WorkMode"];
+              }else{//存了ActiveDevice
+                var devExist = false;
+                for(var i=0; i<that.deviceList.length; i++){
+                  if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"] 
+                    && that.deviceList[i]["rcv_sn"] == that.ActiveDevice["rcv_sn"]
+                    && that.deviceList[i]["dev_push_status"] == that.ActiveDevice["dev_push_status"]){
+                    devExist = true;
+                  }
+                }
+                if(!devExist && that.deviceListShow.length!=0){//ActiveDevice不在设备列表中
+                  that.SET_ACTIVE_DEVICE(that.deviceListShow[0]); 
+                }
               }
+              /*for(var i=0; i<that.deviceList.length; i++){
+                if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
+                  that.refreshCurDevParam(that.deviceList[i]);
+                }
+              }*/
+              //that.getDevLockStatus();
             }
-            /*for(var i=0; i<that.deviceList.length; i++){
-              if(that.deviceList[i]["dev_sn"] == that.ActiveDevice["dev_sn"]){
-                that.refreshCurDevParam(that.deviceList[i]);
-              }
-            }*/
-            //that.getDevLockStatus();
           }else{
             that.deviceList = [];
           }
@@ -972,12 +988,25 @@
       * WorkMode:0/1/2
       * dev_push_status:1/2
       * */
-      getDeviceFliter(){
+      getDeviceFliter(defaultFilter){
         var type = this.deviceTypeSelect.toString();;
         var mode = this.deviceModeSelect.toString();
         //var actGrpId = getCookie('uhd-actGrpId');
         var fliter = {device:'dev',online:'',WorkMode:'',dev_push_status:'',interact_grpid:''};
-
+        if(defaultFilter){//默认状态
+          this.deviceModeSelect = 'allMode';
+          this.deviceTypeCurName = this.$t('device.103020')/*'全部背包'*/;
+          mode = 'allMode';
+          this.deviceType = 1;
+          this.SET_DEVICE_TYPE_SELECT(this.deviceType);
+          type = 1;
+          this.deviceModeCurName = this.$t('device.103025')/*'全部模式'*/;
+          
+          /*fliter['online'] = '';
+          fliter['device'] = 'dev';
+          fliter['WorkMode'] = '';
+          return filter;*/
+        }
         if(type == '5'){
           //实体接收机
           fliter['online'] = '1';

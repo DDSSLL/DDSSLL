@@ -1543,6 +1543,12 @@
               if(res.res.success){
                 that.prefixDelVisible = false;
                 that.getPrefixList(that.formatPrefixData)
+              }else{
+                that.$toast({
+                  message: res.res.reason,
+                  position: 'middle',
+                  duration: 2000
+                });
               }
             })
             .catch(function (error) {
