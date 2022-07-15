@@ -8145,7 +8145,7 @@ function spectrogramLine(canvasid){
     me.axisX.setSpan(startx, stopx);
     me.axisX.setUnit('MHz');
     me.axisX.setLineVisible(false);
-    me.axisX.setSplit(1);
+    me.axisX.setSplit(2);
     me.axisX.setLabelPrecision(3);
     me.axisX.setLabelFont("12px normal");
     me.axisX.setLabelColor(me.colorSet['AXIS_LABEL']);

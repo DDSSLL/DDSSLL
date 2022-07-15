@@ -168,10 +168,12 @@
           console.log("res")
           console.log(res)
           if(res.code == "0000"){
-            that.$router.push("/homePage");
+            //that.$router.push("/homePage");
+            that.$router.push("/monitorPage");
             that.SET_USER({id:that.user.login_name, level:res.data.UserLevel,name:res.data.UserName});
             that.SET_LOGIN_STATUS(false);
-            that.SET_ACTIVE_TAB('/homePage');
+            //that.SET_ACTIVE_TAB('/homePage');
+            that.SET_ACTIVE_TAB('/monitorPage');
             that.GetParamValueRange();
             localStorage.loginTimer = setInterval(function(){
               that.CheckLogged(res.data,that.user.password)

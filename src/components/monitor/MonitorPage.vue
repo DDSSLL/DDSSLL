@@ -22,23 +22,28 @@
             </el-select>
             <el-row>
               <el-col :span="12">
-                <div style="text-align: left;"  class="input_dark" >
-                  <div style="margin-top: 10px;display: inline-block;">
-                    放大器
-                    <el-select class="input_dark" v-model="amplifier" @change="changeAMP" size="mini" style="width:60%">
-                      <el-option
-                        v-for="item in AMP_OPTION"
-                        :key="item.value"
-                        :label="item.text"
-                        :value="item.value">
-                      </el-option>
-                    </el-select>
+                <div style="display: flex;flex-direction: row;align-items: center;">
+                  <div style="text-align: left;width:70%"  class="input_dark" >
+                    <div style="margin-top: 10px;display: inline-block;">
+                      放大器
+                      <el-select class="input_dark" v-model="amplifier" @change="" size="mini" style="width:60%">
+                        <el-option
+                          v-for="item in AMP_OPTION"
+                          :key="item.value"
+                          :label="item.text"
+                          :value="item.value">
+                        </el-option>
+                      </el-select>
+                    </div>
+                    <div style="margin-top: 10px;display: inline-block;float:right;">
+                      衰减器
+                      <el-input v-model="attenuator" autocomplete="off" size="mini" class="inputmstyle" @blur=""  :placeholder="range_ATT.min+'-'+range_ATT.max" style="width:60%">
+                        <template slot="append">dB</template>
+                      </el-input>
+                    </div>
                   </div>
-                  <div style="margin-top: 10px;display: inline-block;float:right;">
-                    衰减器
-                    <el-input v-model="attenuator" autocomplete="off" size="mini" class="inputmstyle" @blur="changeATT"  :placeholder="range_ATT.min+'-'+range_ATT.max" style="width:60%">
-                      <template slot="append">dB</template>
-                    </el-input>
+                  <div style="width:30%;padding:0 5px;margin-top:10px;">
+                    <el-button type="primary" size="mini" style="height:63px;" @click="setParam">确定</el-button>
                   </div>
                 </div>
               </el-col>
@@ -84,7 +89,7 @@
                     <el-button @click.native.prevent="startPlay(scope.$index, channelData)" type="text" size="mini" v-if="getIcon(scope.$index, scope.row)">
                       <i class="el-icon-headset"></i>
                     </el-button>
-                    <el-button @click.native.prevent="stopPlay(scope.$index, channelData)" type="text" size="mini" v-if="!getIcon(scope.$index, scope.row)">
+                    <el-button @click.native.prevent.stop="stopPlay(scope.$index, channelData)" type="text" size="mini" v-if="!getIcon(scope.$index, scope.row)">
                       <i class="fa fa-pause"></i>
                     </el-button>
                   </template>
@@ -336,8 +341,8 @@
             "max":108,
           },
           "y":{
-            "min":-120,
-            "max":20,
+            "min":-100,
+            "max":-20,
           },
         },
       }
@@ -348,14 +353,6 @@
     components: {
       
     },
-    /*watch:{   //监听当前设备值变化
-      '$store.state.ActiveDevice': {
-        immediate: true,
-        handler(val) {
-          this.ActiveDevice = val;
-        }
-      }
-    },*/
     mounted(){
       var that = this;
       this.initPageEle();
@@ -378,23 +375,29 @@
       console.log("activated")
       //this.levelChartDatas = localStorage.levelChartDatas?JSON.parse(localStorage.levelChartDatas):{};
     },
-    deactivated(){   //生命周期-缓存页面失活
-
+    destroyed(){   //生命周期-缓存页面失活
+      this.stopPlay();
     },
     methods:{
       ...mapMutations({
         
       }),
+      setParam(){
+        var paramName = ['RealAMP','RealATT'];
+        var paramValue = [this.amplifier, this.attenuator];
+        var that = this;
+        this.setRcvParams(paramName, paramValue)
+      },
       changeChartWidth(){
         this.fullLen = !this.fullLen;
         if(this.fullLen){
           $("#specCanvas").width("100%");
           $("#crvCanvas").width("100%");
-          $("#crvCanvas").css({"position":"absolute","left":"0px","top":"0px"});
+          $("#specCanvas").css({"position":"absolute","left":"0px","top":"0px"});
         }else{
           $("#specCanvas").width("50%");
           $("#crvCanvas").width("50%");
-          $("#crvCanvas").css({"position":"relative"});
+          $("#specCanvas").css({"position":"relative"});
         }
         this.initOptical("crvCanvas", this.crvParam);
       },
@@ -634,16 +637,14 @@
         //console.log("formatTable")
         this.channelData = data.map(item => {item.freq = (item.Freq/1000000).toFixed(3); return item});
         //console.log(this.channelData)
-        if(this.currentRow){
+        /*if(this.currentRow){
           this.setCurrent(this.currentRow)
-        }
+        }*/
       },
       tableRowClassName({row, rowIndex}) {
         row.row_index = rowIndex;
       },
       setCurrent(row) {
-        console.log("setCurrent")
-        console.log(row)
         var currentRowIndex = row.row_index;
         this.$refs.channelTable.setCurrentRow(this.channelData[currentRowIndex]);
       },
@@ -651,9 +652,7 @@
       handleCurrentChange(val) {
         console.log("handleCurrentChange")
         this.currentRow = val;
-        console.log(this.currentRow)
         var index = this.currentRow["row_index"];
-        console.log("index:"+index)
         if(index || index==0){
             this.currentFreq = this.currentRow.freq;
             for(var i=0; i<this.total; i++){
@@ -890,6 +889,9 @@
         this.initVoltage(chartId);
         this.drawVoltage(LevelData,ModulationData,CNRDatas)
         //频谱
+        var spectData = data['Spect'];
+        var spectMin = Math.min.apply(null, spectData);
+        var spectMax = Math.max.apply(null, spectData);
         var param={
           "margin":{
             "left":10,
@@ -902,8 +904,8 @@
             "max":data.Points,
           },
           "y":{
-            "min":-120,
-            "max":20,
+            "min":spectMin-10,//-100,
+            "max":spectMax+10,//-20,
           },
           "xLabelShow":false,
           "yLabelShow":false,
@@ -920,8 +922,8 @@
             "max":data.Points,
           },
           "y":{
-            "min":-120,
-            "max":20,
+            "min":-100,
+            "max":-20,
           },
         };
         if(!this.show["sw"][index]){
@@ -1468,6 +1470,7 @@
       startPlay(index, datas){
         var that = this;
         var switchFlg = "1"
+        this.currentFreq = datas[index]["Freq"];//(datas[index]["Freq"]/1000000).toFixed(3);
         this.SetAudioMonitor(index, datas, switchFlg, function(res){
           that.PullUrl = res.data[0]["PullUrl"];
           that.webrtcClose();
@@ -1488,13 +1491,19 @@
         var that = this;
         var DeviceSN = this.rcv_board.split("_")[0];
         var BoardId = this.rcv_board.split("_")[1];
+        var freq = "";
+        if(index){
+          freq = datas[index]["Freq"];
+        }else{
+          freq = this.currentFreq
+        }
         this.$axios({
           url:"/protocol/index.php",//"/testJson/GetChannelInfo.json",
           data:this.$qs.stringify({
             SetAudioMonitor: "1",
             DeviceSN:DeviceSN,          //10位序列号
             BoardId:BoardId,          //板卡号
-            Freq:datas[index]["Freq"],               //频率,Hz
+            Freq:freq,               //频率,Hz
             Switch:switchFlg,           //开关,0:停止 1:开启
             Record:that.audio.Record,           //是否录音,0:不录制 1:录制
           }),

@@ -85,13 +85,13 @@
                       <span>频率:</span><span>{{chartInfo?chartInfo["freq"]:""}}</span>
                     </span>
                     <span style="display:inline-block; padding:0 5px">
-                      <span>电平:</span><span>{{chartInfo?chartInfo["Level"]:""}}</span>
+                      <span>电平:</span><span :style="{color:color['电平']}">{{chartInfo?chartInfo["Level"]:""}}</span>
                     </span>
                     <span style="display:inline-block; padding:0 5px">
-                      <span>调制度:</span><span>{{chartInfo?chartInfo["Modulation"]:""}}</span>
+                      <span>调制度:</span><span :style="{color:color['调制度']}">{{chartInfo?chartInfo["Modulation"]:""}}</span>
                     </span>
                     <span style="display:inline-block; padding:0 5px">
-                      <span>载噪比:</span><span>{{chartInfo?chartInfo["CNR"]:""}}</span>
+                      <span>载噪比:</span><span :style="{color:color['载噪比']}">{{chartInfo?chartInfo["CNR"]:""}}</span>
                     </span>
                     <!-- <span style="display:inline-block; padding:0 5px">
                       <span>频偏:</span><span>{{chartInfo?chartInfo["Offset"]:""}}</span>
@@ -762,8 +762,8 @@
               that.freq1_count = 0;
             }*/
             that.allData = data;
-            that.xAxisMin = 0;
-            that.xAxisMax = data["Points"]-1;
+            that.xAxisMin = (Freq-6000)/1000000;
+            that.xAxisMax = (Freq*1+6000)/1000000;
             that.xAxisNum = data["Points"];
             that.xAxisData = [];
 
@@ -801,7 +801,7 @@
         Handler.drawFrame();
         //XY轴标注
         //console.log("xAxisMax:"+this.xAxisMax)
-        Handler.setXYAxis(this.xAxisMin,this.xAxisMax, -120, 20, false, true);
+        Handler.setXYAxis(this.xAxisMin,this.xAxisMax, -120, 20, true, true);
         //音量图
         Handler.drawSpectFig();
         /*GDI.removeAllFigure();
@@ -987,7 +987,7 @@
         //边距
         Handler.setMargin(50,10,20,40);
         //XY坐标轴
-        Handler.drawXYAxis(87, 108, -120, 0, true);
+        Handler.drawXYAxis(87, 108, -100, -20, true);
         GDI.removeAllFigure();
         GDI.removeAllText();
         GDI.draw();

@@ -22,7 +22,7 @@
                 text-color="#fff"
                 active-text-color="#7BB5EA"
                 :router="true">
-                <el-menu-item index="/homePage">首页</el-menu-item>
+                <!-- <el-menu-item index="/homePage">首页</el-menu-item> -->
                 <el-menu-item index="/monitorPage">实时监测</el-menu-item>
                 <el-menu-item index="/deviceMan">接收机管理</el-menu-item>
                 <el-menu-item index="/taskMan">运行图管理</el-menu-item>
@@ -105,9 +105,9 @@ export default {
       console.log(key, keyPath);
     },
     initMenuActive(routePath){
-      if(routePath == '/homePage'){
+      /*if(routePath == '/homePage'){
         this.activeIndex = '/homePage'
-      }else if(routePath == '/monitorPage'){
+      }else*/ if(routePath == '/monitorPage'){
         this.activeIndex = '/monitorPage'
       }else if(routePath == '/deviceMan'){
         this.activeIndex = '/deviceMan'
