@@ -575,10 +575,10 @@ export default {
       var dataRcvLoss = cardData.seriesTotalLoss;
       var dataAVBR = cardData.seriesAVBR;
       var dataVInput = cardData.seriesVInput;
-      var dataSrt = "";
-      if(this.curDevSeries == "4000"){
+      var dataSrt = dataSrt = cardData.seriesSrt; 
+      /*if(this.curDevSeries == "4000"){
         dataSrt = cardData.seriesSrt; 
-      }
+      }*/
       
 
       for (var key in dataUpLoss) {
@@ -614,12 +614,10 @@ export default {
       dataVInput = dataVInput.map(function(item) {
         return 0;
       });
-      if(this.curDevSeries == "4000"){
-        dataSrt = dataSrt.map(function(item) {
-          return 0;
-        });  
-      }
-      
+      dataSrt = dataSrt.map(function(item) {
+        return 0;
+      });  
+    
 
       cardData.seriesCardLost = dataUpLoss;
       cardData.seriesDataDev = dataDev;
@@ -629,9 +627,11 @@ export default {
       cardData.seriesDevLost = dataDevLoss;
       cardData.seriesTotalLoss = dataRcvLoss;
       cardData.seriesAVBR = dataAVBR;
-      cardData.dataVInput = dataVInput;
-      cardData.dataSrt = dataSrt;
+      //cardData.dataVInput = dataVInput;
+      cardData.seriesVInput = dataVInput;
+      //cardData.dataSrt = dataSrt;
       cardData.seriesSrt = dataSrt;
+      cardData.TotalSendPktStr = '';
       localStorage.cardData = JSON.stringify(cardData);
       allChartData[curChart] = null;
       allChartData[curChart] = cardData;
@@ -1804,7 +1804,7 @@ export default {
           var dataUpLoss = data[key][4]["dev_lost_br"]; //上行总丢包
           var TotalPktStr = data[key][1]["TotalSendPktStr"];
           var dataSrt = "";
-          if(that.curDevSeries == "4000"){
+          if(that.curDevSeries == "4000" || that.curDevSeries === "1080_gjf"){
             dataSrt = data[key][5] ? data[key][5]["SrtKbps"] : 0; //srt拉流速率
           }else{
             dataSrt = data[key][1] ? data[key][1]["SrtKbps"] : 0;
@@ -1840,7 +1840,8 @@ export default {
           var seriesVInput = allChartData[curChartDevRcvBoard].seriesVInput;
           var seriesSrt = allChartData[curChartDevRcvBoard].seriesSrt;
           for (var i = 0; i < dataAll.length; i++) {
-            if (that.cardIdArr.indexOf(dataAll[i]['card_id']) == -1) {
+            if (that.cardIdArr.indexOf(dataAll[i]['card_id']) == -1
+               && dataAll[i]['card_id'].indexOf('lte') == -1) {
               continue;
             }
             //如果当前网卡没有存过数据，则将该网卡初始化
@@ -1955,11 +1956,11 @@ export default {
           seriesDevLost.unshift(dataUpLoss);
           seriesDevLost.pop();
           seriesAVBR.unshift(dataAVBR);
-          seriesAVBR.pop();   
+          seriesAVBR.pop();  
           seriesVInput.unshift(dataVInput);
           seriesVInput.pop();
           seriesSrt.unshift(dataSrt);
-          seriesSrt.pop();  
+          seriesSrt.pop();    
           
           if($.isEmptyObject(validSeriesDataUp) && $.isEmptyObject(validSeriesDataDown) &&
             $.isEmptyObject(validSeriesCardLost)){

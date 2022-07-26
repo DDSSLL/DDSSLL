@@ -48,7 +48,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">录制存储</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.StorageDev" @change="$global.setDeviceParam('StorageDev', options.StorageDev)"  :disabled="dis.StorageDev">
+                <select class="ItemSelect" v-model="options.StorageDev" @change="$global.setDeviceParam('StorageDev', options.StorageDev)" :disabled="dis.StorageDev">
                   <template v-for="item in OPTIONS_STORAGE_DEV_1080">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -1531,9 +1531,13 @@
               options = video_encode_option.filter(function(item){
                 return item.value!=4;
               })
+              var oldVideoEncode = data["video_encode"];
               that.OPTIONS_VIDEOENCODE = options;
+              that.options.video_encode = oldVideoEncode;
             }else{
+              var oldVideoEncode = data["video_encode"];
               that.OPTIONS_VIDEOENCODE = video_encode_option;
+              that.options.video_encode = oldVideoEncode;
             }
             that.$global.setDeviceParam('video_encode', that.options.video_encode);
             /*if(data["video_encode"]){
