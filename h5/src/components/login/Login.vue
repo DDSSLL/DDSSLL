@@ -11,8 +11,12 @@
         <div class="form-item">
           <input type="text" autocomplete="false" class="loginIpt" v-model="user.login_name" :placeholder="$t('login.101001')"><!-- 登录账号 -->
         </div>
-        <div class="form-item">
-          <input type="password" autocomplete="false" class="loginIpt" v-model="user.password" :placeholder="$t('login.101002')"><!-- 登录密码 -->
+        <div class="form-item" style="position: relative;">
+          <input :type="passwordType" autocomplete="false" class="loginIpt" v-model="user.password" :placeholder="$t('login.101002')"><!-- 登录密码 -->
+          <span style="position: absolute;top: 15px;right: 5px;color: #3D81F1;">
+            <i class="fa fa-eye-slash" aria-hidden="true" v-show="passwordType=='password'" @click="passwordType='input'"></i>
+            <i class="fa fa-eye" aria-hidden="true" v-show="passwordType=='input'" @click="passwordType='password'"></i>
+          </span>
         </div>
         <div class="form-item">
           <input type="text" autocomplete="false" class="loginIpt" v-model="checkCode" style="width: 50%;display: inline-block !important;" :placeholder="$t('login.101003')" @blur="changeCheckCode"><!-- 输入验证码 -->
@@ -133,6 +137,7 @@
         sessionId:"",
         checkCode:"",
         vImg:"",
+        passwordType:"password",
       }
     },
     computed: {

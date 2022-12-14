@@ -123,8 +123,12 @@
           </div>
           <div class="fGrp" v-if="curUser.userEditType == 'add'">
             <div class="tl">登录密码<span class="redText">*</span></div>
-            <div class="vl">
-              <input type="password" class="ItemInput" v-model="curUser.pwd" required/> 
+            <div class="vl" style="position:relative">
+              <input :type="passwordType" class="ItemInput" v-model="curUser.pwd" required/> 
+              <span style="position: absolute;top: 10px;right: 5px;color: #3D81F1;">
+                <i class="fa fa-eye-slash" aria-hidden="true" v-show="passwordType=='password'" @click="passwordType='input'"></i>
+                <i class="fa fa-eye" aria-hidden="true" v-show="passwordType=='input'" @click="passwordType='password'"></i>
+              </span>
               <p style="font-size: 12px;color: #666;text-align: left;margin-top:5px;"><!-- pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_@]{6,16}$" -->
                 6~16位字母,数字,下划线和@组合
               </p>
@@ -132,8 +136,12 @@
           </div>
           <div class="fGrp" v-if="curUser.userEditType == 'add'">
             <div class="tl">确认密码<span class="redText">*</span></div>
-            <div class="vl">
-              <input type="password" class="ItemInput" v-model="curUser.pwd2" required clearable autocomplete="off" />
+            <div class="vl" style="position:relative"> 
+              <input :type="passwordTypeConfirm" class="ItemInput" v-model="curUser.pwd2" required clearable autocomplete="off" />
+              <span style="position: absolute;top: 10px;right: 5px;color: #3D81F1;">
+                <i class="fa fa-eye-slash" aria-hidden="true" v-show="passwordTypeConfirm=='password'" @click="passwordTypeConfirm='input'"></i>
+                <i class="fa fa-eye" aria-hidden="true" v-show="passwordTypeConfirm=='input'" @click="passwordTypeConfirm='password'"></i>
+              </span>
             </div>
           </div>
           <div class="fGrp">
@@ -310,6 +318,8 @@
         selectPrefix:[],//选中的用户组
         selectPrefixName:[],//显示过滤组的名称
         userPrefixPop:false,//用户组pop的show
+        passwordType:'password',
+        passwordTypeConfirm:'password',
       }
     },
     computed: {
