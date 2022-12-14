@@ -8,12 +8,18 @@ var DEV_MODE = [{sn: 2140,name: 'DV4000T'},
                 {sn: 7189,name: 'DV1080P'}, 
                 {sn: 7207,name: 'ICBT-201'}, 
                 {sn: 2153,name: 'DV5000T'}, 
-                {sn: 2155,name: 'CM-T5G 1000'},
-                {sn: "",name: 'MH5000-31'}, //华为5G
-                {sn: "",name: 'EC200T'},    //高通4G
-                {sn: "",name: 'RG500QEA'},   //高通5G
                 {sn: 2157,name: 'DV2010T'},
-                {sn: 2161,name: 'CM-T5G 2100'},
+                {sn: 2158,name: 'DV6000'},
+                {sn: 2155,name: 'CM-T5G 1000'},
+                {sn: 2160,name: 'DV4000T-1RU'},
+                {sn: 2161,name: '1223456'},
+                {sn: 2169,name: 'CM-T5G 2100'}, 
+                {sn: 7227,name: 'DV1080-DX'}, 
+                {sn: 2170,name: 'quk100mini'}, 
+                {sn: 2172,name: 'DV3000T PRO'}, 
+                {sn: "",  name: 'MH5000-31'}, //华为5G
+                {sn: "",  name: 'EC200T'}, //高通4G
+                {sn: "",  name: 'RG500QEA'}//高通5G
               ];
 var RCV_MODE = [{sn: 2141,name: 'DV4000R'}, 
                 {sn: 2143,name: 'DV4001R'}, 
@@ -30,7 +36,10 @@ var RCV_MODE = [{sn: 2141,name: 'DV4000R'},
 		            {sn: 2162,name: 'CM-IR5100T'}, 
                 {sn: 2164,name: 'DV2004R'}, 
                 {sn: 2165,name: 'DV2000R'}, 
-                {sn: 2167,name: 'DV4013R'}];
+                {sn: 2167,name: 'DV4013R'},
+                {sn: 2171,name: 'DV2002R'}, 
+                {sn: 2173,name: 'DV6000R'}
+              ];
 window.xSplit = 300;
 
 window.DEBUG_USER = 'debug';//debug用户
@@ -1716,13 +1725,13 @@ export default {
     var sn_4 = devSn.substr(-4);
     sn_4 = +sn_4;
     //DV4000T,DV3000T,DV406,CM-T5G 2000, DV5000
-    if(sn_4 == 2140 || sn_4 == 2142 || sn_4 == 2147 || sn_4 == 2148 || sn_4 === 2153 || sn_4 === 2155 
-      || sn_4 == 2158 ||sn_4 == 2160 || sn_4 == 2151){
-      return '4000';
+    if(sn_4 === 2140 || sn_4 === 2142 || sn_4 === 2147 || sn_4 === 2148 || sn_4 === 2153 || sn_4 === 2155||sn_4 === 2158
+      ||sn_4 === 2160||sn_4 === 2151||sn_4 === 2172){
+        return '4000';
     }
     //DV1080,QUK100,DV1080P,ICBT-201
-    else if(sn_4 == 2146 || sn_4 == 2150 || sn_4 == 7189 || sn_4 == 7207 || sn_4 == 2157){
-      return '1080';
+    else if(sn_4 === 2146 || sn_4 === 2150 || sn_4 === 7189 || sn_4 === 7207 || sn_4 === 2157|| sn_4 === 7227|| sn_4 === 2170){
+        return '1080';
     }
     //公检法背包
     else if(sn_4 === 2161 || sn_4 === 2169){
@@ -1746,8 +1755,8 @@ export default {
     if(sn_4 === 2999){
       return VIR_RCV;
     }
-    else if(sn_4 === 2154 || sn_4 === 2156 || sn_4 === 2162 || sn_4 === 2165 || sn_4 === 2164){
-      return R1080_RCV;
+    else if(sn_4 === 2154 || sn_4 === 2156 || sn_4 === 2162 || sn_4 === 2165 || sn_4 === 2164 || sn_4 === 2171|| sn_4 === 2173){
+      return R1080_RCV;//2010R
     }
     else {
       return PRA_RCV;
