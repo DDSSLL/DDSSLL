@@ -629,11 +629,11 @@
             var dataLen = data.length;
             for(var i=0; i<dataLen; i++){
               var showStr = data[i]["module_type"];
-              if (that.user.id == SUPER || that.user.id=='debug'){
+              //if (that.user.id == SUPER || that.user.id=='debug'){
                 if(data[i]['IMEI'].length > 1 && data[i]['firmware_ver'].length > 1){
                   showStr += '<br/>'+data[i]['IMEI']+"<br/>"+data[i]['firmware_ver'];
                 }
-              }
+              //}
               data[i]["module_type"] = showStr;
             }
             that.deviceCardList = res.data;
