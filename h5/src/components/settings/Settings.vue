@@ -329,7 +329,7 @@
       </div>
       <transition name="slide-fade">
         <div v-show="show.act4000Show">
-          <div class="GroupItem"><!-- 互动模式 -->
+          <div class="GroupItem" v-show="false"><!-- 互动模式 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">互动模式</div>
               <div class="GroupItemValue">
@@ -338,7 +338,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 互动开关 -->
+          <div class="GroupItem"><!-- 互动开关 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">互动开关</div>
               <div class="GroupItemValue">
@@ -347,7 +347,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 切换 -->
+          <div class="GroupItem"><!-- 切换 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">切换</div>
               <div class="GroupItemValue">
@@ -359,7 +359,7 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 全屏 -->
+          <div class="GroupItem"><!-- 全屏 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">全屏</div>
               <div class="GroupItemValue">
@@ -368,11 +368,11 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 传输通道 -->
+          <div class="GroupItem"><!-- 传输通道 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">传输通道</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.SrtTransIf" @change="$global.setDeviceParam('SrtTransIf',options.SrtTransIf)"  :disabled="dis.SrtTransIf">
+                <select class="ItemSelect" v-model="options.SrtTransIf" @change="$global.setDeviceParam('SrtTransIf',options.SrtTransIf)"  :disabled="dis.SrtTransIf"  @click="getSrtTransPortList">
                   <template v-for="item in OPTIONS_SRT_TRANSPORT_PARAMS">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -380,12 +380,12 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem" v-if="options.InteractiveMode"><!-- 音频模式 -->
+          <div class="GroupItem"><!-- 耳机输出 -->
             <div class="GroupItemField">
-              <div class="GroupItemTitle">音频模式</div>
+              <div class="GroupItemTitle">耳机输出</div>
               <div class="GroupItemValue">
                 <select class="ItemSelect" v-model="options.AudioMode" @change="changeAudioMode" :disabled="dis.AudioMode">
-                  <template v-for="item in OPTIONS_SRT_AUDIO_MODE_SWITCH_4000">
+                  <template v-for="item in OPTIONS_ACT_AUDIOOUT_1080">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
                 </select>
@@ -653,8 +653,10 @@
         //4000互动  切换
         OPTIONS_SRT_AUDIO_SWITCH_4000: [{text: "本地",value: "0"}, 
                                         {text: "远端",value: "1"}],
-        OPTIONS_SRT_AUDIO_MODE_SWITCH_4000: [{text: "跟随",value: "0"}, 
-                                            {text: "混音",value: "1"}],
+        /*OPTIONS_SRT_AUDIO_MODE_SWITCH_4000: [{text: "跟随",value: "0"}, 
+                                            {text: "混音",value: "1"}],*/
+        OPTIONS_ACT_AUDIOOUT_1080: [{text: "本地",value: "0"}, 
+                                    {text: "远端",value: "1"}],
         OPTIONS_SRT_TRANSPORT_PARAMS:[],//传输通道
         options_old_264:{
           audio_input : "",
@@ -805,7 +807,7 @@
             //this.getSelectOptions();
             this.$global.getDeviceParam(that.formatData);
             this.initDevMatch();//背包配对的接收机
-            this.showDevSrt(this.ActiveDevice.dev_sn); //根据配对接收机判断是否显示互动功能(4000的互动)
+            //this.showDevSrt(this.ActiveDevice.dev_sn); //根据配对接收机判断是否显示互动功能(4000的互动)
             this.$global.getRcvList(that.formatRcvListData);
             if(this.fileShow){
               this.changeFileShow();
@@ -1310,6 +1312,7 @@
       },
       formatData(data){
         var that = this;
+        this.showDevSrt(data["InteractOption"]);//根据配对接收机判断是否显示互动功能(4000的互动)
         that.options.workModeVal = data["WorkMode"];
         //传输模式
         that.options.PushTsType = data['PushTsType'];
@@ -1445,7 +1448,7 @@
           if (data['InteractiveMode'] == '1') {
             that.options.InteractiveMode = true;
             that.devFileShow = false;
-            that.getSrtTransPortList(that.ActiveDevice.dev_sn);//传输通道
+            that.getSrtTransPortList(/*that.ActiveDevice.dev_sn*/);//传输通道
             /*//互动模式不支持HDMI H.264
             var options = that.OPTIONS_VIDEOINPUT;
             options = options.filter(function(item){
@@ -2556,16 +2559,20 @@
         }
       },
       //4000的互动
-      showDevSrt(){
+      showDevSrt(showInteract){
         var bShow = false;
         var rcvSn = this.ActiveDevice.rcv_sn;
         var rcvMode =this.$global.getRcvMode(rcvSn.substr(-4));
         if(rcvMode == 'DV4004R' || rcvMode == 'CM-IR6000T' || rcvMode == 'DV4013R'){
           bShow = true;
         }
-        //bShow = true;
         if(bShow){
-          this.show.act4000 = true;
+          if(showInteract==1){
+            this.show.act4000 = true;
+            this.getSrtTransPortList();
+          }else{
+            this.show.act4000 = false;
+          }
         } else {
           this.show.act4000 = false;
         }
@@ -2624,7 +2631,8 @@
         }
       },
       //获取在线网卡
-      getSrtTransPortList(devSN){
+      getSrtTransPortList(){
+        var devSN = this.ActiveDevice.dev_sn;
         var that = this;
         this.$axios({
           method: 'post',
@@ -2683,52 +2691,6 @@
                 options[jIndex]['value'] = transportValue;
                 jIndex++;
               }
-              
-              /*if (data[i]["online"] != "0") {//获取在线的网卡
-                options[jIndex]={};
-                options[jIndex]['text'] = data[i]["card_name"];
-                var transportValue = '';
-                switch (data[i]["card_id"]){
-                  case "eth0":
-                    transportValue = 0;
-                    break;
-                  case "wifi":
-                    transportValue = 1;
-                    break;
-                  case "lte1":
-                    transportValue = 2;
-                    break;
-                  case "lte2":
-                    transportValue = 3;
-                    break;
-                  case "lte3":
-                    transportValue = 4;
-                    break;
-                  case "lte4":
-                    transportValue = 5;
-                    break;
-                  case "lte5":
-                    transportValue = 6;
-                    break;
-                  case "lte6":
-                    transportValue = 7;
-                    break;
-                  case "usb-lan":
-                    transportValue = 8;
-                    break;
-                  case "usb-5g1":
-                    transportValue = 9;
-                    break;
-                  case "usb-5g2":
-                    transportValue = 10;
-                    break;
-                  default:
-                    transportValue = '';
-                    break;
-                }
-                options[jIndex]['value'] = transportValue;
-                jIndex++;
-              }*/
             }
             that.OPTIONS_SRT_TRANSPORT_PARAMS = options;
             that.getSrtTransPortParam(devSN);
