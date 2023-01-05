@@ -119,7 +119,7 @@
                     <th>上传<br>Mbps</th>
                     <th>RTT<br>ms</th>
                     <th>强度<br>dBm</th>
-                    <th>运营商</th>
+                    <th>复位</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -140,7 +140,9 @@
                       <td class="td">{{ item.send_br }}</td>
                       <td class="td">{{ item.card_rtt }}</td>
                       <td class="td">{{ item.rssi }}</td>
-                      <td class="td">{{ transOperator(item.operator) }}</td>
+                      <td class="td" v-if="showMode[item.card_id]" @click="clickSimReset(item.card_id,item.disable)">
+                        <i class="fa fa-refresh" :class="spinClass[item.card_id]"></i>
+                      </td>
                     </tr>
                   </template>
                 </tbody>
@@ -539,6 +541,7 @@
                       {text: "WiFi",value: "wifi"}],
         OPTIONS_TRANS_SRT:[],
         devType:{1:"all",2:"pushing",3:"online",4:"offline"},
+        spinClass:{},
       }
     },
     computed: {
@@ -1097,7 +1100,7 @@
           netBoardObj.send_br = defaultText;
           netBoardObj.card_rtt = defaultText;
           netBoardObj.rssi = defaultText;
-          netBoardObj.operator = defaultText;
+          //netBoardObj.operator = defaultText;
 
           //判断权限
           var hasRights = that.$global.judgeUserHasDevRights();
@@ -1108,7 +1111,7 @@
             netBoardObj.send_br = (data[i]["send_br"] / 1000.0).toFixed(1);//上传
             netBoardObj.card_rtt = (data[i]["card_rtt"]*1>999)?'>999':data[i]["card_rtt"];////rtt
             netBoardObj.rssi = data[i]["rssi"].split('dBm')[0];//信号强度
-            netBoardObj.operator = that.transOperator(data[i]["operator"]);//运营商
+            //netBoardObj.operator = that.transOperator(data[i]["operator"]);//运营商
           }
 
           //更新启用和5G模式
@@ -1149,6 +1152,7 @@
           netBoardObj["online"] = data[i]["online"]
           netBoardObj["used"] = data[i]["used"]=="1"?true:false;
           netBoardObj["bShow"] = data[i]["bShow"]
+          that.$set(that.spinClass,data[i]["card_id"],"");
           netBoardArr.push(netBoardObj); 
         }
         return netBoardArr;
@@ -2297,6 +2301,62 @@
         .catch(function (error) {
           console.log(error)
         })
+      },
+      //网卡复位
+      clickSimReset(id, enable){
+        var that = this;
+        if(enable){
+          this.$toast({
+            message: "请先解锁",
+            position: 'middle',
+            duration: 2000
+          });
+          return;
+        }
+        if(this.spinClass[id] == ""){
+          this.setSimCardReset(id,this.ActiveDevice["dev_sn"],1,function(devSn,cardId){
+            that.setViewSimCardReset(id,1);
+          });
+        }else{
+          this.setSimCardReset(id,this.ActiveDevice["dev_sn"],0,function(devSn,cardId){
+            that.setViewSimCardReset(id,0);
+          });
+        }
+      },
+      //设置网卡复位
+      setSimCardReset(cardId, devSN, resetFlag,callback) {
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            setCardReset: true,
+            cardId: cardId,
+            devSN: devSN,
+            reset:resetFlag,
+          }),
+          Api:"setCardReset",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(typeof(callback) === 'function'){
+            callback(res['data']['devSN'],res['data']['cardId']);
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //设置网卡复位按钮的显示
+      setViewSimCardReset(cardId,resetFlag){
+        if(+resetFlag === 1){
+          this.$set(this.spinClass,cardId, 'fa-spin');  
+        } else{
+          this.$set(this.spinClass,cardId, '');  
+        }
+        console.log(this.spinClass)
       }
     }
   }
