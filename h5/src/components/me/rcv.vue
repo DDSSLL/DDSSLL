@@ -1017,22 +1017,27 @@
         if(showFlg == 0){
           that.encodeTabShow = false;
         }else{
-          that.encodeTabShow = true;
-          var boardNums = Object.keys(that.boardEncodeParamList); 
-          var boradNumObj = {};
-          that.boradNumArr = [];
-          for(let i=0; i<boardNums.length; i++){
-            if(boardNums[i].length != 10){
-              boradNumObj.text = boardNums[i]*1+1;
-            }else{
-              boradNumObj.text = boardNums[i];
+          var snStr = that.curBoard.rcvSn.substr(-4);
+          if(snStr == "7188"){
+            that.encodeTabShow = false;  
+          }else{
+            that.encodeTabShow = true;
+            var boardNums = Object.keys(that.boardEncodeParamList); 
+            var boradNumObj = {};
+            that.boradNumArr = [];
+            for(let i=0; i<boardNums.length; i++){
+              if(boardNums[i].length != 10){
+                boradNumObj.text = boardNums[i]*1+1;
+              }else{
+                boradNumObj.text = boardNums[i];
+              }
+              boradNumObj.value = boardNums[i];
+              that.boradNumArr.push(boradNumObj);
+              boradNumObj = {}
             }
-            boradNumObj.value = boardNums[i];
-            that.boradNumArr.push(boradNumObj);
-            boradNumObj = {}
+            that.curBoard.BoardNum = boardNums[0];
+            that.changeBoardNum();
           }
-          that.curBoard.BoardNum = boardNums[0];
-          that.changeBoardNum();
         }
       },
       changeBoardNum(){
