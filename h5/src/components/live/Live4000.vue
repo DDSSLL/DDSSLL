@@ -445,6 +445,7 @@
         //activePushObj:{},
         dev_push_enable:false,
         getPushUrl:"",//获取推流地址的intervalId
+        timerAck:"",
       }
     },
     computed: {
@@ -1429,19 +1430,32 @@
       //更新复位是否完成
       updateEncodeReset() {
         var that = this;
-        var timerAck = setInterval(function() {
+        var timerNumAck = 1;
+        if(this.timerAck !== ''){
+          clearInterval(this.timerAck);
+          timerNumAck = 1;
+        }
+        this.timerAck = setInterval(function() {
           that.getEncodeResetAck(function(data) {
             if(data.length == 0){
-              clearInterval(timerAck);
+              clearInterval(that.timerAck);
               return;
             }
             if (data[0].value14 == '0') {
-              clearInterval(timerAck);
+              clearInterval(that.timerAck);
+              timerNumAck = 1;
               that.options.encodeResetName = "复位";
               that.disable.encodeReset = false;
+            }else{
+              that.options.encodeResetName = ("复位中..."+timerNumAck);
+              timerNumAck++
+            }
+            if(timerNumAck >= 30){
+              clearInterval(that.timerAck);
+              timerNumAck = 1;
             }
           });
-        }, 200);
+        }, 1000);
       },
       //获取编码器复位成功标志
       getEncodeResetAck(callback) {
