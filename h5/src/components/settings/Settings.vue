@@ -256,7 +256,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">编码分辨率</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="$global.setDeviceParam('HdmiTransFormat',options.HdmiTransFormat)" :disabled="dis.HdmiTransFormat">
+                <select class="ItemSelect" v-model="options.HdmiTransFormat" @change="changeHdmiTransFormat" :disabled="dis.HdmiTransFormat">
                   <template v-for="item in OPTIONS_HDMI_FORMAT">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -947,6 +947,36 @@
           }  
         }
       },
+      //HDMI编码分辨率
+      changeHdmiTransFormat(){
+        var that = this;
+        //264编码，推流中不让改
+        var pushStatus = this.options.dev_push_enable;
+        var selText = this.OPTIONS_VIDEOENCODE.filter(item => {
+          if(item.value == that.options.video_encode){
+            return item;
+          }
+        }).map(item => {
+          return item.text;
+        })
+        var videoEncode = selText;
+        if(pushStatus == 1 && videoEncode == 'H.264'){
+          that.$toast({
+            message: '推流中,H.264编码下，不支持修改',
+            position: 'middle',
+            duration: 2000
+          });
+          that.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'HdmiTransFormat', function(data) {
+              that.options.HdmiTransFormat = data.HdmiTransFormat;
+            }
+          )
+        } else {
+          that.$global.setDeviceParam('HdmiTransFormat',that.options.HdmiTransFormat)
+          if(that.options.workModeVal != 2){
+            that.options.pushHDMIFormat = that.options.HdmiTransFormat;
+          }
+        }
+      },
       latencyChange(DV4000RV){
         //时延模式
         var that = this;
@@ -1200,7 +1230,7 @@
           that.OPTIONS_HDR = that.$global.getDevParamRange(dev_sn, '',"hdr");//HDR设置
           //that.OPTIONS_HDR_ORI = that.$global.getDevParamRange(dev_sn,userPrefix,"hdr");//HDR设置
           //that.OPTIONS_LATENCY = that.$global.getDevParamRange(dev_sn,userPrefix,"latency");//时延模式
-          that.OPTIONS_HDMI_FORMAT = that.OPTIONS_HDMI_FORMAT_4000;//编码分辨率
+          that.OPTIONS_HDMI_FORMAT = that.$global.OPTIONS_HDMI_FORMAT_4000;//编码分辨率
           that.initLatency();
         }
       },
@@ -1943,7 +1973,7 @@
             valueArr.push(0);
           } else {
             //H.265 编码分辨率选项只有自动
-            that.OPTIONS_HDMI_FORMAT = [OPTIONS_HDMI_FORMAT_4000[0]];
+            that.OPTIONS_HDMI_FORMAT = [that.$global.OPTIONS_HDMI_FORMAT_4000[0]];
             paramArr.push('HdmiTransFormat');
             valueArr.push(0);
             //音频输入 支持 0-CH
