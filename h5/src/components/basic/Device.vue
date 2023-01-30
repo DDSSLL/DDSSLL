@@ -31,7 +31,7 @@
         <div class="info nowrap" style="width:50%">
           <div style="width:100%">
             <span class="T">
-              <span class="TCircle" :class="[this.ActiveDevice.online== 1 ? (this.ActiveDevice.dev_push_status!=0 ? 'red' : 'green') : 'gray']"></span>
+              <span class="TCircle" :class="TCircleClass"></span>
               <span class="nowrapText">T: {{ this.ActiveDevice.dev_name }}</span>
             </span>
             <span class="R" v-if="this.ActiveDevice.WorkMode == 2">
@@ -111,7 +111,7 @@
                 <div class="info">
                   <div>
                     <span class="T">
-                      <span class="TCircle" :class="[item.online== 1 ? (item.dev_push_status!=0 ? 'red' : 'green') : 'gray']"></span>
+                      <span class="TCircle" :class="item.TCircleClass"></span>
                       T: {{ item.dev_name }}
                     </span>
                     <span class="R" v-if="item.WorkMode == 2">
@@ -250,6 +250,7 @@
         popupTagsVisible:false,
         lockDisable:false,
         defaultFlg:false, //默认列表过滤状态
+        TCircleClass:"",
         deviceList:[/*{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}*/],
         active:{},
         //当前选中设备的相关参数
@@ -740,9 +741,30 @@
               } else {
                 row.statusCircle = 'gray';
               }
+              row.TCircleClass = 'gray';
+              if (row.online == '1') {
+                if (row.videoInput !== 'NO INPUT') {
+                  row.TCircleClass = 'green';
+                }else{
+                  row.TCircleClass = 'noInputColor';
+                }
+                if (row.dev_push_status != '0') {
+                  row.TCircleClass = 'red';
+                }
+              }
               if(that.ActiveDevice 
                 && (row["dev_sn"] == that.ActiveDevice["dev_sn"] && row["dev_sn"]!="")){
                 that.refreshCurDevParam(row);
+                if (row.online == '1') {
+                  if (row.videoInput !== 'NO INPUT') {
+                    that.TCircleClass = 'green';
+                  }else{
+                    that.TCircleClass = 'noInputColor';
+                  }
+                  if (row.dev_push_status != '0') {
+                    that.TCircleClass = 'red';
+                  }
+                }
               }
               //在线且没在充电中，才显示电池电量低
               var online = row.online;
@@ -992,7 +1014,7 @@
         var type = this.deviceTypeSelect.toString();;
         var mode = this.deviceModeSelect.toString();
         //var actGrpId = getCookie('uhd-actGrpId');
-        var fliter = {device:'dev',online:'',WorkMode:'',dev_push_status:'',interact_grpid:''};
+        var fliter = {device:'dev',online:'',WorkMode:'',dev_push_status:'',interact_grpid:'',curDevUpdate:true};
         if(defaultFilter){//默认状态
           this.deviceModeSelect = 'allMode';
           this.deviceTypeCurName = this.$t('device.103020')/*'全部背包'*/;
@@ -1250,6 +1272,7 @@
     .gray{background-color: #B7B7B7;}
     .green{background-color: #28FC2E;}
     .red{background-color: #FC0E1B;}
+    .noInputColor{background-color: #FFFA00;}
     /*右侧弹出窗口(频点列表)*/
     .mint-popup{
         background-color: #212227;
