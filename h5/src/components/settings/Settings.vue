@@ -170,7 +170,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">音频输入</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.audio_input" @change="$global.setDeviceParam('audio_input',options.audio_input)"  :disabled="dis.audio_input">
+                <select class="ItemSelect" v-model="options.audio_input" @change="changeAudioInput"  :disabled="dis.audio_input">
                   <template v-for="item in OPTIONS_AUDIOINPUT">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -268,7 +268,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">音视频输出</div>
               <div class="GroupItemValue">
-                <select class="ItemSelect" v-model="options.PushHdmiOut" @change="" :disabled="dis.PushHdmiOut">
+                <select class="ItemSelect" v-model="options.PushHdmiOut" @change="changePushHdmiOut" :disabled="dis.PushHdmiOut">
                   <template v-for="item in OPTIONS_HDMI_OUT_PUSH">
                     <option :value="item.value">{{ item.text }}</option>
                   </template>
@@ -977,6 +977,24 @@
           }
         }
       },
+      //推流-HDMI输出
+      changePushHdmiOut(){
+        //推流中不能改
+        var pushStatus = this.options.dev_push_enable;
+        if(pushStatus == 1 ){
+          this.$toast({
+            message: '推流中，不支持修改',
+            position: 'middle',
+            duration: 2000
+          });
+          this.$global.getDevOneParam(this.ActiveDevice.dev_sn, 'PushMHdmiOut',function(data){
+            this.options.PushHdmiOut = data.PushMHdmiOut;
+          });
+        }else{
+          var HDMIOut = this.options.PushHdmiOut;
+          this.$global.setDeviceParam('PushMHdmiOut',HDMIOut);
+        }
+      },
       latencyChange(DV4000RV){
         //时延模式
         var that = this;
@@ -1364,6 +1382,7 @@
           this.dis.AudioBitrate = disabled;//音频比特率
           this.dis.bitrate_mode = disabled;//码率控制
           this.dis.HdmiTransFormat = disabled;//编码分辨率
+          this.dis.PushHdmiOut = disabled;//推流-HDMI输出
           if(this.curDevSeries == "1080"){
             this.dis.SEI = disabled;//SEI
           }else{
@@ -1404,7 +1423,6 @@
         var hasRights = that.$global.judgeUserHasDevRights();
         //背包自动输入是否是自动
         var vAuto = data['video_auto_input'];
-        console.log("vAuto:"+vAuto)
         if(that.pageLock){//背包锁定
           //需要判断视频输入是否是自动,自动且选项变化，更新全部参数
           if(vAuto === 1){
@@ -1499,7 +1517,7 @@
               that.OPTIONS_AUDIOINPUT = that.$global.OPTIONS_AUDIOINPUT_HDMI264_4000;
             }
           }
-          that.audio_input = data['audio_input'];
+          that.options.audio_input = data['audio_input'];
           //视频编码
           options = that.$global.getDevParamRange(devSN, '', 'video_encode');
           if(that.curDevSeries.indexOf('1080') >= 0){
@@ -1566,7 +1584,6 @@
           }
           //编码分辨率
           if(that.curDevSeries.indexOf('1080') >= 0){
-            var rowData = getDevTableRow(devSN);
             options = that.$global.getDevParamRange(devSN, '', 'HdmiTransFormat', '', data['WorkMode']);
             that.OPTIONS_HDMI_FORMAT = options;
             that.options.HdmiTransFormat = data['WorkMode']=="2"?3:data['HdmiTransFormat']
@@ -1579,7 +1596,7 @@
             that.options.HdmiTransFormat = data['HdmiTransFormat'];
           }
           //推流-HDMI输出,仅2010T显示
-          that.OPTIONS_PUSH_MHDMIOUT = that.$global.OPTIONS_PUSH_MHDMIOUT;
+          that.OPTIONS_HDMI_OUT_PUSH = that.$global.OPTIONS_PUSH_MHDMIOUT;
           that.options.PushHdmiOut = data['PushMHdmiOut'];
           let isDV2010T = that.$global.sameToDV2010T(devSN);
           if(isDV2010T){
@@ -1772,10 +1789,12 @@
           that.options.video_input = videoOption;
         }
       },
+      //视频输入
       changeVideoInput(data){
         console.log("changeVideoInput")
         console.log(data)
         var that = this;
+        var devSN = this.ActiveDevice.dev_sn;
         let isDV2010T = this.$global.sameToDV2010T(devSN);
         if(isDV2010T){
           var videoInput = this.options.video_input;
@@ -1890,6 +1909,28 @@
           }
         }
       },
+      //音频输入
+      changeAudioInput(data){
+        var audioInput = this.options.audio_input;
+        var workMode = this.options.workModeVal;
+        var videoInput =this.options.video_input;
+        //2010T，推流模式+SDI输入，才支持4声道
+        var devSN = this.ActiveDevice.dev_sn;
+        let isDV2010T = this.$global.sameToDV2010T(devSN);
+        if(isDV2010T){
+          if(audioInput === '2' && (workMode !== '0' || videoInput !== '0')){
+            audioInput = '1';
+            this.$toast({
+              message: '推流模式下，SDI输入才支持4声道',
+              position: 'middle',
+              duration: 2000
+            }); 
+            this.options.audio_input = 1;
+          }
+        }
+        $global.setDeviceParam('audio_input',this.options.audio_input)
+      },
+      //输入自动
       changeVideoAuto(data){
         console.log("changeVideoAuto")
         console.log(data)
