@@ -199,10 +199,17 @@ export default {
   OPTIONS_BITRATEMODE_1080_2 : [{value: "0",text: "固定码率"}],
   OPTIONS_HDR_4000 : [{text: "SDR",value: "0"}, 
                 {text: "HLG",value: "1"}],
+  OPTIONS_HDR_3000 : [{text: "SDR", value: "0"}],
   OPTIONS_HDR_1080 : [{text: "SDR",value: "0"}],
   OPTIONS_LATENCY : [{text: "标准时延",value: "0"}, 
                     {text: "超低时延",value: "1"}],
   OPTIONS_LATENCY2 : [{text: "标准时延",value: "0"}],
+  OPTIONS_LATENCY_1080 : [{text: "标准时延", value: "0"}],
+  OPTIONS_LATENCY_3000 : [{text: "标准时延", value: "0"}, 
+                          {text: "超低时延", value: "1"}],
+  OPTIONS_LATENCY_4000 : [{text: "标准时延", value: "0" }, 
+                          {text: "超低时延", value: "1"}],
+  OPTIONS_LATENCY2_4000 : [{text: "标准时延", value: "0"}],
   OPTIONS_LATENCY_5000 :[{text: "高画质",value: "0"},
                         {text: "低延时",value: "1"}, 
                         {text: "超低延时",value: "2"}],
@@ -247,7 +254,13 @@ export default {
                               {text: "LPCM",value: "1"}, 
                               {text: "AAC",value: "2"}, 
                               {text: "MPEG1L2",value: "3"}],
+  OPTIONS_AUDIOINPUT : [{value: "0", text: "0-CH"}, 
+                        {value: "1", text: "2-CH"}, 
+                        {value: "2", text: "4-CH"}],
   OPTIONS_AUDIOINPUT_1080 : [{value: "1",text: "2-CH"}],
+  OPTIONS_AUDIOINPUT_2010T : [{value: "1", text: "2-CH" }, 
+                              {value: "2", text: "4-CH"}],
+  OPTIONS_AUDIOINPUT_HDMI264_4000 : [{value: "1", text: "2-CH"}],
   OPTIONS_AUDIOINPUT_4000 : [{value: "0",text: "0-CH"}, 
                         {value: "1",text: "2-CH"}, 
                         {value: "2",text: "4-CH"}],
@@ -279,6 +292,15 @@ export default {
   OPTIONS_AUDIO_BR : [{text: "256kbps",value: "256"}, 
                       {text: "128kbps",value: "128"},
                       {text: "64kbps",value: "64"}],
+  OPTIONS_AUDIO_BR_5000 : [{text: "128kbps", value: "0"}],
+  OPTIONS_FEC_LEVEL : [{text: "低", value: "0"}, 
+                      {text: "中", value: "1"}, 
+                      {text: "高", value: "2"}],
+  OPTIONS_LOG_LEVEL : [{text: "OFF", value: "0"}, 
+                      {text: "ERROR", value: "1"}, 
+                      {text: "INFO", value: "2"},
+                      {text: "DEBUG", value: "3"}],
+
   //接收机
   OPTIONS_PUSH_RESULUTION : [{text: "1080p50",value: "1080"}, 
                             {text: "720p50",value: "720"}, 
@@ -328,13 +350,76 @@ export default {
                   {text: "64kbps",value: "64kbps"}],
   OPTIONS_URL_V_ENC : [{text: "H.264",value: "0"}],
   OPTIONS_URL_A_ENC : [{text: "AAC",value: "0"}],
+  OPTIONS_5G_MODE : [{text: "AUTO", value: "0"},
+                    {text: "NSA", value: "1"}, 
+                    {text: "SA", value: "2"}, 
+                    {text: "LTE", value: "3"}],
+  OPTIONS_LTE_MODE : [{text: "LTE", value: "3"}],
+  OPTIONS_WORKMODE_1080 : [{text:"推流", value: "push"},
+                          {text: "拉流", value: "pull"}, 
+                          {text: "互动", value: "act"}],
+  OPTIONS_WORKMODE_4000 : [{text: "推流", value: "push"}],
+  //4000互动  切换
+  OPTIONS_SRT_AUDIO_SWITCH_4000 : [{text: "本地", value: "0"}, 
+                                  {text: "远端", value: "1"}],
+  OPTIONS_URL_SOURCE : [{text: "自动", value: "0"}],
+  OPTIONS_URL_SOURCE1 : [{text: "源1(背包透传)",value: "1"}],
+  OPTIONS_URL_SOURCE2 : [{text: "源1(背包透传)",value: "1"},
+                        {text: "源2(板卡转码)",value: "2"}],
+  OPTIONS_URL_SOURCE3 : [{text: "自动", value: "0"}, 
+                        {text: "源1(背包透传)", value: "1"}, 
+                        {text: "源2(板卡转码)", value: "2"}],
+  //单路音频通道
+  OPTIONS_S_AUDIO_CHANNEL_5000 : [{text: "0-CH", value: "0"}, 
+                                  {text: "2-CH", value: "1"}, 
+                                  {text: "4-CH", value: "2"}, 
+                                  {text: "6-CH", value: "3"}, 
+                                  {text: "8-CH", value: "4"}],
+  //多路音频通道
+  OPTIONS_M_AUDIO_CHANNEL_5000 : [{text: "0-CH", value: "0"}, 
+                                  {text: "2-CH", value: "1"}],
+  OPTIONS_IFRAMEONLY_5000 : [{text: "关", value: "0"}, 
+                            {text: "开", value: "1"}],
+  OPTIONS_CHROMA_5000 : [{text: "420", value: "0"}, 
+                        {text: "422", value: "1"}],
+  OPTIONS_BIT_5000 : [{text: "8", value: "0"}, 
+                      {text: "10", value: "1"}],
+  OPTIONS_ENC_PARAM_SHOW_5000 : [{text: "显示单路编码参数", value: "0"}, 
+                                {text: "显示多路编码参数", value: "1"}],
   //接收机板卡相关参数--end
   /*录机路径*/
   OPTIONS_RECORD_PATH : [{text: "USB",value: "0"}, 
                         {text: "NAS",value: "1"}],
+  OPTIONS_NETMODE_PARAMS : [{text: "NSA", value: "0"}, 
+                            {text: "SA", value: "1"}, 
+                            {text: "LTE ONLY", value: "2"}],
+  OPTIONS_CARD_1080 : [{text: "ETH0", value: "eth0"}, 
+                      {text: "LTE1", value: "lte1"}, 
+                      {text: "LTE2", value: "lte2"},
+                      {text: "LTE3", value: "lte3"},
+                      {text: "USB-LAN1", value: "usb-lan"}, 
+                      {text: "USB-5G1", value: "usb-5g1"}, 
+                      {text: "USB-5G2", value: "usb-5g2"},
+                      {text: "WiFi", value: "wifi"}],     
+  OPTIONS_ETH0_TYPE : [{text: "固定IP地址", value: "0"}, 
+                      {text: "自动获取IP地址", value: "1"}],
   //DV4000 参数---end
   OPTIONS_PBKEYLEN : [{text: "32",value: "32"}, 
                       {text: "16",value: "16"}],
+  OPTIONS_ACT_DISPLAY_1080 : [{text: "本地", value: "0"}, 
+                              {text: "远端", value: "1"}, 
+                              {text: "画中画", value: "2"}],
+  OPTIONS_PULL_MHDMIOUT_1080 : [{text: "1080I50", value: "0"}, 
+                                {text: "1080P25", value: "1"}, 
+                                {text: "1080P30", value: "2"}, 
+                                {text: "1080P50", value: "3"}, 
+                                {text: "1080P60", value: "4"}],
+  //暂时只有2010T支持推流模式下的HDMI输出选项
+  OPTIONS_PUSH_MHDMIOUT : [{text: "1080I50", value: "0"}, 
+                          {text: "1080P25", value: "1"}, 
+                          {text: "1080P30", value: "2"}, 
+                          {text: "1080P50", value: "3"}, 
+                          {text: "1080P60", value: "4"}],
   OPTIONS_RCV_TYPE:[{label: "虚拟服务器", value: "0"}, 
                     {label: "实体接收机", value: "1"}],
   //网卡id转枚举类型
@@ -816,7 +901,7 @@ export default {
     })
   },
   //获取背包参数范围
-  getDevParamRange(devSn, prefix, param, extraParam) {
+  getDevParamRange(devSn, rcvSn, param, related1,related2,related3) {
     var that = this;
     var sn = devSn.substr(-4);
     var devMode = that.getDevMode(sn);
@@ -824,6 +909,10 @@ export default {
     var res = [];
     if(devMode === 'CM-T5G 1000'){
       devMode = 'DV3000T';
+    }
+    let isDV2010T = this.sameToDV2010T(devSn);
+    if(devSeries === '1080_gjf'){
+        devSeries = "1080";
     }
     if (param == 'video_encode') {//视频编码
       if (devMode === 'DV5000T') {
@@ -836,31 +925,42 @@ export default {
     }
     else if (param === 'bitrate_mode') {
       if(devSeries === "1080"){
-        if(extraParam == 1){//单卡直推
-          res = that.OPTIONS_BITRATEMODE_1080_2;  
-        }else{
-          res = that.OPTIONS_BITRATEMODE_1080;  
-        }
+        res = that.OPTIONS_BITRATEMODE_1080;
       }else{
-        res = that.OPTIONS_BITRATEMODE;
+        if(related1*1 === 1){ //超低时延，无AVBR
+          res = that.OPTIONS_BITRATEMODE2;
+        }else{
+          res = that.OPTIONS_BITRATEMODE;
+        }
       }
     }
     else if (param == 'hdr') {
-      if (devMode == 'DV3000T') {
+      if(devSeries === "1080"){
         res = that.OPTIONS_HDR_1080;
-      } else {
+      } else if(devMode === 'DV5000T'){
         res = that.OPTIONS_HDR_4000;
+      } else if(devMode === 'DV3000T'){
+          res = that.OPTIONS_HDR_3000;
+      } else {
+        if(related1 && related1 === '4'){
+          res = that.OPTIONS_HDR_1080;
+        } else{
+          res = that.OPTIONS_HDR_4000;
+        }
       }
     }
     else if (param == 'latency') {
       if (devMode === 'DV5000T') {
         res = that.OPTIONS_LATENCY_5000;
-      }else{
+      }else if(devMode === 'DV3000T'){
+        res = that.OPTIONS_LATENCY_3000;
+      } else{
         //接收机类型
-        if(extraParam){//虚拟接收机
-          res = that.OPTIONS_LATENCY2;
+        var rcvSeries = that.getRcvSeries(rcvSn);
+        if(rcvSeries == VIR_RCV){//虚拟接收机
+          res = that.OPTIONS_LATENCY2_4000;
         }else{
-          res = that.OPTIONS_LATENCY;
+          res = that.OPTIONS_LATENCY_4000;
         }
       }
     }
@@ -873,15 +973,39 @@ export default {
         res = that.OPTIONS_S_VIDEOINPUT_5000;
       }else if(devSeries === '1080'){
         res = that.OPTIONS_VIDEOINPUT_1080;
-      }else if(devSeries === '4000'){
-        res = that.OPTIONS_VIDEOINPUT_4000;
+      }else{
+        //related1:硬件版本
+        if(related1 && related1 >= 1.3){
+          //PCIE
+          res = that.OPTIONS_VIDEOINPUT_PCIE_4000;
+        }else{
+          res = that.OPTIONS_VIDEOINPUT_4000;
+        }
       }
     }
     else if (param == 'audio_encode'){
-      if(prefix == PREFIX){
-        res = that.OPTIONS_AUDIO_ENCODE_4000;
+      if (devMode === 'DV5000T') {
+        res = that.OPTIONS_AUDIO_ENCODE_5000;
       }else{
-        res = that.OPTIONS_AUDIO_ENCODE2_4000;
+        res = (devSeries === '1080')?that.OPTIONS_AUDIO_ENCODE_1080:that.OPTIONS_AUDIO_ENCODE_4000;
+      }
+    }
+    else if (param === 'audio_input'){
+      if(isDV2010T){
+        res = that.OPTIONS_AUDIOINPUT_2010T;
+      }else if(devSeries === '1080'){
+        res = that.OPTIONS_AUDIOINPUT_1080;
+      }else if(devSeries === '4000'){
+        //related1:video_input
+        //related2:video_encode
+        if (related1 === '4') { //视频接口是HDMI
+          res = that.OPTIONS_AUDIOINPUT_HDMI264;
+        } else { //不是HDMI
+          res = that.OPTIONS_AUDIOINPUT_4000;
+        }
+        if(related2 === '4'){ //视频编码是H.264
+          res = that.OPTIONS_AUDIOINPUT_HDMI264;
+        }
       }
     }
     else if(param === 'HdmiTransFormat'){
@@ -889,16 +1013,16 @@ export default {
         /*if(qukanUrlMode == "qukan"){//趣看对接，要求隐藏编码分辨率的1920*1080i50、1920x1080i60
           res = OPTIONS_HDMI_FORMAT_1080_QUKAN;
         }else{*/
-          if(extraParam == '2'){//互动
-              res = that.OPTIONS_HDMI_FORMAT_1080_ACT;
+          if(related2 == '2'){//互动
+            res = that.OPTIONS_HDMI_FORMAT_1080_ACT;
           }else{
-              res = that.OPTIONS_HDMI_FORMAT_1080;    
+            res = that.OPTIONS_HDMI_FORMAT_1080;    
           }
         //}
       }
       else if(devSeries === '4000'){
           //related2：视频编码
-          if(extraParam && extraParam == '4'){
+          if(related2 && related2 == '4'){
               //H.264
               res = that.OPTIONS_HDMI_FORMAT_4000;
           } else{
@@ -1948,5 +2072,14 @@ export default {
     expires.setTime(expires.getTime() + seconds * 1000);
     document.cookie = encodeURIComponent(cookieName) + '=' + encodeURIComponent(cookieValue) + (expires ? ';expires=' + expires.toGMTString() : '') +
         (path ? ';path=' + path : ';path=/') + (domain ? ';domain=' + domain : '') + (secure ? ';secure' : '');
+  },
+  //是否与DV2010T参数相同，支持6卡
+  sameToDV2010T(devSn){
+    let sn_4 = devSn.substr(-4);
+    if(sn_4 === '2157' || sn_4 === '2169' || sn_4 === '2170'){
+      return true;
+    } else {
+      return false;
+    }
   }
 }
