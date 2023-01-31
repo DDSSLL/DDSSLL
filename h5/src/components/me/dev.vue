@@ -927,7 +927,7 @@
         that.options.matchRcvName = item.rcv_name;
         //记录原始配置接收机和板卡信息
         that.options.matchRcvBak = item.rcv_sn;
-        that.options.matchBoardBak = item.board_id?(item.board_id-1):"";
+        that.options.matchBoardBak = item.board_id?(item.board_id):"";
 
         this.getRcvSelectAndVal(function(flag){
           if(!flag){
@@ -935,7 +935,7 @@
           }
           that.options.matchRcv = item.rcv_sn;
           //that.options.matchRcvBak = item.rcv_sn;
-          that.$global.getUnusedBoard(item.rcv_sn,item.board_id-1,function(rcvSn,curBoard,data){
+          that.$global.getUnusedBoard(item.rcv_sn,item.board_id,function(rcvSn,curBoard,data){
             that.formatUnusedBoard(rcvSn,curBoard,data);
             /*if(data.length != 0){
               that.options.matchBoard = curBoard?curBoard:data[0]["value"];

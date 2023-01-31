@@ -1517,7 +1517,7 @@
             var data = res.data;
             var len = data.length;
             for(var i=0; i<len; i++){
-              if(data[i]["online"] != "离线"){
+              if(data[i]["online"] != "0"){
                 newArr.push({
                   label: data[i].dev_name,
                   value: data[i].dev_sn
