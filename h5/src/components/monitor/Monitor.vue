@@ -89,6 +89,7 @@
     name: "Monitor",
     data(){
       return{
+        VIR_RCV:VIR_RCV,
         rtcUrl:"",
         rtcSdk:null,
         options:{
@@ -100,6 +101,7 @@
           muted:false,
           status:"",
         },
+        devBR:"",
         show:{
           customType:false,
         },
@@ -132,6 +134,7 @@
           var boardId = this.ActiveDevice.board_id;
           this.showMonitorParam();
           this.webrtcClose();
+          this.getDeviceParameter();
           $("#playControl").removeClass("fa-pause").addClass("fa-play");
           //this.updateBoardPushSel(0,devSn, rcvSn, boardId);
           this.options.status = "pause";
@@ -143,6 +146,7 @@
       var devSn = this.ActiveDevice.dev_sn;
       this.showMonitorParam();
       this.webrtcClose();
+      this.getDeviceParameter();
       $("#playControl").removeClass("fa-pause").addClass("fa-play");
       //this.updateBoardPushSel(0,devSn, rcvSn, boardId);
       this.options.status = "pause";
@@ -154,6 +158,12 @@
       ...mapMutations({
         SET_DEVICE_MODE_SELECT,
       }),
+      getDeviceParameter(){
+        var that = this;
+        that.$global.getDeviceParam(function(data){
+          that.devBR = data["dev_sr"]/1000;
+        })
+      },
       /*视频监控参数*/
       showMonitorParam(){
         this.getMonitorParam(this.initVideo);
@@ -392,6 +402,7 @@
         })
       },
       playOrPause(){
+        var that = this;
         var devSn = this.ActiveDevice.dev_sn;
         var rcvSn = this.ActiveDevice.rcv_sn;
         var boardId = this.ActiveDevice.board_id;
@@ -428,10 +439,27 @@
               }
             }
           }
-          this.webrtcPlay();
-          $("#playControl").removeClass("fa-play").addClass("fa-pause");
-          this.updateBoardPushSel(1,devSn, rcvSn, boardId);
-          this.options.status = "play";
+          //汇聚，背包视频比特率大于4M，加提示
+          if(that.$global.getRcvSeries(rcvSn) === VIR_RCV && that.devBR >= 4){
+            var text = '当前码率较高，预览图像与直播图像占用相同的流量、带宽和CPU，是否继续？';
+            //询问
+            that.$messagebox.confirm(text).then(
+              action => {
+                that.webrtcPlay();
+                $("#playControl").removeClass("fa-play").addClass("fa-pause");
+                that.updateBoardPushSel(1,devSn, rcvSn, boardId);
+                that.options.status = "play";
+              },
+              action => {
+              } 
+            );
+          }
+          else{
+            that.webrtcPlay();
+            $("#playControl").removeClass("fa-play").addClass("fa-pause");
+            that.updateBoardPushSel(1,devSn, rcvSn, boardId);
+            that.options.status = "play";
+          }
         }else{
           this.webrtcClose();
           $("#playControl").removeClass("fa-pause").addClass("fa-play");
