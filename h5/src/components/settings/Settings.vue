@@ -413,9 +413,9 @@
               </div>
             </div>
           </div>
-          <div class="GroupItem"><!-- 耳机输出 -->
+          <div class="GroupItem"><!-- 耳机音频选择 -->
             <div class="GroupItemField">
-              <div class="GroupItemTitle">耳机输出</div>
+              <div class="GroupItemTitle">耳机音频选择</div>
               <div class="GroupItemValue">
                 <select class="ItemSelect" v-model="options.AudioMode" @change="changeAudioMode" :disabled="dis.AudioMode">
                   <template v-for="item in OPTIONS_ACT_AUDIOOUT_1080">
@@ -814,7 +814,7 @@
           SrtAudioIdx:false,//切换
           SrtFullSwitch:false,//全屏
           SrtTransIf:false,//传输通道
-          AudioMode:false,//耳机输出
+          AudioMode:false,//耳机音频选择
         },
         fileList:[],//文件列表
         recordFileList:[],//录制中的文件
@@ -1322,7 +1322,7 @@
           this.dis.SrtAudioIdx = dis;///切换
           this.dis.SrtFullSwitch = dis;///全屏
           this.dis.SrtTransIf = dis;///传输通道
-          this.dis.AudioMode = dis;///耳机输出
+          this.dis.AudioMode = dis;///耳机音频选择
           //*文件
           /*$('#back_enable').bootstrapSwitch('disabled', disabled);//回传按钮
           setSelectDisabled('#back_sel', disabled);//回传方式  
@@ -1579,7 +1579,7 @@
           if(that.OPTIONS_SRT_TRANSPORT_PARAMS.length == 0){
             that.getSrtTransPortList();
           }
-          //耳机输出
+          //耳机音频选择
           that.OPTIONS_ACT_AUDIOOUT_1080 = that.$global.OPTIONS_ACT_AUDIOOUT_1080;
           that.options.AudioMode = data['AudioMode']
           //文件回传

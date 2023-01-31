@@ -285,6 +285,18 @@
         </div>
         <div class="GroupItem">
           <div class="GroupItemField">
+            <div class="GroupItemTitle">耳机音频选择</div>
+            <div class="GroupItemValue">
+              <select class="ItemSelect" v-model="common.ActMAudioOut" @change="changeActMAudioOut"  :disabled="dis.ActMAudioOut">
+                <template v-for="item in OPTIONS_ACT_AUDIOOUT_1080">
+                  <option :value="item.value">{{ item.text }}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="GroupItem">
+          <div class="GroupItemField">
             <div class="GroupItemTitle">传输通道</div>
             <div class="GroupItemValue">
               <select class="ItemSelect" v-model="common.SrtTransIf" @change="changeSrtTransIf"  :disabled="dis.SrtTransIf">
@@ -439,6 +451,7 @@
           ActDev:"",//互动背包
           ActDisplay:"",//互动显示
           ActHdmiOut:"",//HDMI输出
+          ActMAudioOut:"",//耳机音频选择
           SrtTransIf:"",//传输通道
           netWorkMode:"",//网络模式
           actAddrIp:"",//流媒体内网IP
@@ -477,6 +490,7 @@
           //互动
           ActDev:false,//互动背包
           ActHdmiOut:false,//HDMI输出
+          ActMAudioOut:false,//耳机音频选择
           actAddrIp:false,//流媒体内网IP
           actAddrPort:false,//流媒体服务器端口
           actPushLatency:false,//推流延时
@@ -531,6 +545,7 @@
                               {text: "1080I",value: "1"}],*/
         OPTIONS_ACT_HDMIOUT_1080: [{text: "1080I50",value: "0"}, 
                                   {text: "1080P50",value: "1"}],
+        OPTIONS_ACT_AUDIOOUT_1080:[],
         OPTIONS_CARD: [{text: "ETH0",value: "eth0"}, 
                       {text: "LTE1",value: "lte1"}, 
                       {text: "LTE2",value: "lte2"},
@@ -673,6 +688,8 @@
         this.initSpeedEvent();
         //延时范围
         this.initDelay();
+        //互动耳机音频选择
+        this.OPTIONS_ACT_AUDIOOUT_1080 = this.$global.OPTIONS_ACT_AUDIOOUT_1080;
       },
       initDelay(){
         if(this.curDevSeries == "4000"){
@@ -1407,6 +1424,8 @@
         that.common.ActDisplay = data['ActDisplay'];
         //HDMI输出
         that.common.ActHdmiOut = data['ActHdmiOut'];
+        //耳机音频选择
+        that.common.ActMAudioOut = data['ActMAudioOut'];
         //传输通道
         that.common.SrtTransIf = that.$global.cardEnum2Id(data['SrtTransIf']);
         //网络模式
@@ -1558,6 +1577,7 @@
           this.dis.ActDev = dis; //互动背包
           this.dis.ActDisplay = dis; //切换显示
           this.dis.ActHdmiOut = dis; //HDMI输出
+          this.dis.ActMAudioOut = dis;//耳机音频选择
           if(this.common.dev_srt){//互动的传输开关打开
             this.dis.SrtTransIf = true; //传输通道  
             this.dis.netWorkMode = true; //网络模式  
@@ -2098,6 +2118,10 @@
           //互动关
           this.actModeClose(actDev);
         }
+      },
+      //
+      changeActMAudioOut(){
+        this.setDeviceParam('ActMAudioOut', this.common.ActMAudioOut);
       },
       //修改传输通道
       changeSrtTransIf(){
