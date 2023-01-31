@@ -375,7 +375,7 @@
             <div class="GroupItemField">
               <div class="GroupItemTitle">互动开关</div>
               <div class="GroupItemValue">
-                <mt-switch v-model="options.SrtSwitch" @change="changeSrtSwitch" :disabled="!pageLock?false:true">
+                <mt-switch v-model="options.SrtSwitch" @change="changeSrtSwitch" :disabled="dis.SrtSwitch">
                 </mt-switch>
               </div>
             </div>
@@ -687,12 +687,10 @@
         OPTIONS_BACK : [{text: "实时流", value: "1"}, 
                             {text: "FTP", value: "2"}],
         //4000互动  切换
-        OPTIONS_SRT_AUDIO_SWITCH_4000: [{text: "本地",value: "0"}, 
-                                        {text: "远端",value: "1"}],
+        OPTIONS_SRT_AUDIO_SWITCH_4000: [],
         /*OPTIONS_SRT_AUDIO_MODE_SWITCH_4000: [{text: "跟随",value: "0"}, 
                                             {text: "混音",value: "1"}],*/
-        OPTIONS_ACT_AUDIOOUT_1080: [{text: "本地",value: "0"}, 
-                                    {text: "远端",value: "1"}],
+        OPTIONS_ACT_AUDIOOUT_1080: [],
         OPTIONS_SRT_TRANSPORT_PARAMS:[],//传输通道
         options_old_264:{
           audio_input : "",
@@ -812,13 +810,11 @@
           WiFiSwitch:false,//WiFi/热点
           DevAliasSwitch:false,//显示别名
           DevAlias:false,//别名
-
+          SrtSwitch:false,//互动开关
           SrtAudioIdx:false,//切换
           SrtFullSwitch:false,//全屏
           SrtTransIf:false,//传输通道
-          AudioMode:false,//音频模式
-          PushHdmiOut:false,
-          ActHdmiOut:false,
+          AudioMode:false,//耳机输出
         },
         fileList:[],//文件列表
         recordFileList:[],//录制中的文件
@@ -1318,6 +1314,20 @@
         this.setElementDisable(that.pageLock);
       },
       setElementDisable(dis){
+        if(this.curDevSeries.indexOf('1080') >= 0){
+          
+        }else if(this.curDevSeries == "4000"){
+          //*4000的互动接收机
+          this.dis.SrtSwitch = dis;//互动开关
+          this.dis.SrtAudioIdx = dis;///切换
+          this.dis.SrtFullSwitch = dis;///全屏
+          this.dis.SrtTransIf = dis;///传输通道
+          this.dis.AudioMode = dis;///耳机输出
+          //*文件
+          /*$('#back_enable').bootstrapSwitch('disabled', disabled);//回传按钮
+          setSelectDisabled('#back_sel', disabled);//回传方式  
+          $('#updateFileIcon').attr('disabled', disabled);//刷新文件列表按钮*/
+        }
         this.dis.record = dis;//录制开关
         if(this.options.record == true){//录制开关打开
           this.dis.StorageDev = true;
@@ -1350,17 +1360,6 @@
           transModeDisabled = true;
         }*/else{
           this.setEncodeParamDisabled(dis);
-        }
-        if(this.options.SrtSwitch){
-          this.dis.SrtAudioIdx = dis;//切换
-          this.dis.SrtFullSwitch = dis;//全屏
-          this.dis.SrtTransIf = dis;//传输通道
-          this.dis.AudioMode = dis;//音频模式*/
-        }else{
-          this.dis.SrtAudioIdx = true;//切换
-          this.dis.SrtFullSwitch = true;//全屏
-          this.dis.SrtTransIf = true;//传输通道
-          this.dis.AudioMode = true;//音频模式*/
         }
       },
       //输入编码下的参数按钮置disabled
@@ -1441,20 +1440,22 @@
         }
 
         that.options.workModeVal = data["WorkMode"];
-        //传输模式
-        that.options.PushTsType = data['PushTsType'];
+        /*//传输模式
+        that.options.PushTsType = data['PushTsType'];*/
+        //初始化下拉列表值
         this.getSelectOptions(data);
         that.options.online = data["online"];
         that.options.dev_push_status = data["dev_push_status"];
+        //序列号
         that.options.curDevSn = devSN;
+        //传输开关
         that.options.dev_push_enable = data["dev_push_enable"];
         var devTypeArr = ["推流","拉流","互动"];
-        
         that.options.WorkMode = devTypeArr[data["WorkMode"]];
         that.WorkMode = devTypeArr[data["WorkMode"]];
+        //传输模式
         that.PushTsType = data['PushTsType'];
-        /*//传输模式
-        that.options.PushTsType = data['PushTsType'];*/
+        
         /*------------------------传输控制------------------------*/
         //传输IP
         that.options.dev_push_ip = data['dev_push_ip']=="1"?"1":"0";
@@ -1489,6 +1490,133 @@
         /************************************************************
         *输入编码部分的参数控制，不同系列背包的输入编码参数不同 && 视频比特率
         ************************************************************/
+
+
+        if(this.curDevSeries == "1080"){
+          /*//拉流-HDMI输出
+          $("#PullMHdmiOut_sel").selectpicker('val', res.data[0]['PullMHdmiOut']);
+          //拉流-HDMI音频输出
+          $("#hdmiPull_sel").selectpicker('val', res.data[0]['PullMHdmiAS']);
+          //拉流-网卡选择
+          $cardPull_sel.selectpicker('val', cardEnum2Id(res.data[0]['PullTransIf']));
+          //拉流-传输开关
+          var pullOpen_state = "";
+          if (res.data[0]['dev_push_enable'] == '0') {
+            pullOpen_state = false;
+            $('#urlPull_table').bootstrapTable('showColumn', 'delBtn');
+          } else {
+            pullOpen_state = true;
+            $('#urlPull_table').bootstrapTable('hideColumn', 'delBtn');
+          }
+          $pullOpen.bootstrapSwitch('disabled', false).bootstrapSwitch('state', pullOpen_state, true).bootstrapSwitch('disabled', disabled);
+          
+          if(res.data[0]['ActDev'] == ""){
+            $actDevSn.text('');//当前背包对应的互动背包的值
+          }else{
+            $actDevSn.text(res.data[0]['ActDev']);//当前背包对应的互动背包的值
+          }
+          $actDisplay_sel.selectpicker('val', res.data[0]['ActDisplay']);//切换显示
+          $actHdmiOut_sel.selectpicker('val', res.data[0]['ActHdmiOut']);//互动HDMI输出
+          $actMHdmiOut_sel.selectpicker('val', res.data[0]['ActHdmiOut']);//2010T互动音视频输出
+          actAudioOut_sel.selectpicker('val', res.data[0]['ActMAudioOut']);//互动HDMI输出
+          $srtTransport_sel.selectpicker('val', cardEnum2Id(res.data[0]['SrtTransIf']));//传输通道
+          //网络模式
+          var cardId = cardEnum2Id(res.data[0]['SrtTransIf']);
+          if(cardId.indexOf("lte") != -1){
+            $("#act_net_mode").show();
+            getActNetModeParam(cardId);//网络模式
+          }else{
+            $("#act_net_mode").hide();
+          }
+          //拉流
+          var cardIdPull = cardEnum2Id(res.data[0]['PullTransIf']);
+          console.log("cardId:"+cardIdPull)
+          if(cardIdPull.indexOf("lte") != -1){
+            $("#pull_net_mode").show();
+            getActNetModeParam(cardIdPull);//网络模式
+          }else{
+            $("#pull_net_mode").hide();
+          }
+
+          if($("#srtTransport_sel option[value="+$("#srtTransport_sel").val()+"]").css('color') == 'rgb(255, 255, 255)'){
+            $('#dev_srt').bootstrapSwitch('disabled', true);//互动的传输开关
+            $("#devSrtErr").text($.i18n.prop("mlang--101361"))//"没有可用的网卡"
+          }
+          getActAddr(res.data[0]['ActPushAddr'],res.data[0]['ActPullAddr']);
+          $actAddrPull.val(res.data[0]['ActPullAddr']);//互动拉流地址
+          $actAddrPush.val(res.data[0]['ActPushAddr']);//互动推流地址*/
+        }
+        else if(that.curDevSeries == "4000"){
+          //4000的互动接收机
+          //互动模式
+          var dev_interactive_mode_switch_state = "";
+          if (data['InteractOption'] == '1') {
+            dev_interactive_mode_switch_state = true;
+          } else {
+            dev_interactive_mode_switch_state = false;
+          }
+          that.options.InteractiveMode = dev_interactive_mode_switch_state;
+          //互动开关
+          var dev_srt_switch_state = "";
+          if (data['SrtSwitch'] == '1') {
+              dev_srt_switch_state = true;
+          } else {
+              dev_srt_switch_state = false;
+          }
+          that.options.SrtSwitch = dev_srt_switch_state;
+          //切换
+          that.OPTIONS_SRT_AUDIO_SWITCH_4000 = that.$global.OPTIONS_SRT_AUDIO_SWITCH_4000;
+          that.options.SrtAudioIdx = data['SrtAudioIdx'];
+          //全屏
+          var dev_srt_full_switch_state = "";
+          if (data['SrtFullSwitch'] == '1') {
+              dev_srt_full_switch_state = true;
+          } else {
+              dev_srt_full_switch_state = false;
+          }
+          that.options.SrtFullSwitch = dev_srt_full_switch_state;
+          //传输通道
+          if(that.OPTIONS_SRT_TRANSPORT_PARAMS.length == 0){
+            that.getSrtTransPortList();
+          }
+          //耳机输出
+          that.OPTIONS_ACT_AUDIOOUT_1080 = that.$global.OPTIONS_ACT_AUDIOOUT_1080;
+          that.options.AudioMode = data['AudioMode']
+          //文件回传
+          var back_enable_state = "";
+          if (data['OffLinePushEnable'] == '1') {
+            //回传开启中
+            back_enable_state = true;
+            //回传开启，显示传输状态
+            /*devFileUpFlag = 1;
+            $updateFileIcon.addClass('disabledIcon');*/
+          } else {
+            //回传停止
+            back_enable_state = false;
+            /*devFileUpFlag = 0;
+            $updateFileIcon.removeClass('disabledIcon');*/
+          }
+          that.options.OffLinePushEnable = back_enable_state;
+          //回传方式
+          that.options.back = data['transtype'];
+        }
+        else if(that.curDevSeries === "1080_gjf"){
+          /*$("#delayShow").show();
+          //互动开关
+          var dev_srt_switch_state = "";
+          if (res.data[0]['SrtSwitch'] == '1') {
+            dev_srt_switch_state = true;
+          } else {
+            dev_srt_switch_state = false;
+          }
+          $switch_srt_gjf.bootstrapSwitch('state', dev_srt_switch_state, true).bootstrapSwitch('disabled', disabled);
+          //视频输出
+          $gjfHdmiOut_sel.selectpicker('val', res.data[0]['ActHdmiOut']);*/
+        }
+
+
+
+
         if(devMode != 'DV5000T'){//4000,1080系列背包但不包括5000
           if(that.curDevSeries.indexOf('1080') >= 0){
             //SEI
@@ -3075,10 +3203,10 @@
       //全屏
       changeSrtFullSwitch(){
         if (this.options.SrtFullSwitch) {
-          this.show.OpenfecLevel = false;
+          /*this.show.OpenfecLevel = false;*/
           this.$global.setDeviceParam('SrtFullSwitch', 1);
         } else {
-          this.show.OpenfecLevel = false;
+          /*this.show.OpenfecLevel = false;*/
           this.$global.setDeviceParam('SrtFullSwitch', 0);
         }
       },
