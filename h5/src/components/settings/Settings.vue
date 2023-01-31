@@ -1941,7 +1941,7 @@
           //this.audioEncShow = true;//1080显示音频编码
         }else if(this.curDevSeries == "4000"){
           var paramArr = [],valueArr = [];
-          var video_encode_option =  that.$global.getDevParamRange(devSN, '','video_encode');
+          var options =  that.$global.getDevParamRange(devSN, '','video_encode');
           var oldVal = that.options.video_encode;
           if(that.options.video_input == '4'){//视频输入为HDMI 视频编码只支持H.264
             //设置视频输入
@@ -1952,7 +1952,7 @@
             that.options.latency_old = that.options.latency;
             that.options.video_input_old = 4;
             //HDMI
-            that.OPTIONS_VIDEOENCODE = video_encode_option.filter(function(item){
+            that.OPTIONS_VIDEOENCODE = options.filter(function(item){
               return (item.value == '4');
             })
             if(that.OPTIONS_VIDEOENCODE.length == 0){
