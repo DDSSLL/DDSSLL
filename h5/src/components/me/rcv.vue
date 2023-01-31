@@ -27,6 +27,7 @@
             <template v-for="(item,i) in receiverShowList">
               <mt-cell-swipe
                 :right="[ 
+                {content: '背包',handler:() => showInstListInfo(item)},
                 {content: '板卡',handler:() => showBoardInfo(item)},
                 {content: '编辑',style:{}, handler:() => editReceiver(item)},
                 {content: '删除',style:{display:rcvDelShow?'':'none'}, handler:() => deleteReceiver(item)}
@@ -96,6 +97,39 @@
         :options="selectPrefixOptions"
         @change="changePrefixSelect">
       </mt-checklist>
+    </mt-popup>
+    <!-- 背包信息 -->
+    <mt-popup v-model="instListInfoVisible" popup-transition="popup-fade">
+      <div class="popupContainer">
+        <div class="popupTitle">
+          背包
+          <i class="popupCloseBtn fa fa-times" @click="instListInfoVisible = false"></i>
+        </div>
+        <template v-for="(item,i) in devicePopupList">
+          <div class="deviceItem">
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">背包序列号</span>
+              <span class="cellName cellValue" style="float: right;" :class="[item.online=='online'?'onlineStyle':(item.online=='Live'?'onBoardStyle':'')]">{{ item.dev_sn }}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">板卡</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.board_id }}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">TCP端口</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.tcpPort }}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">UDP起始端口</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.udpPortStart }}</span>
+            </div>
+            <div class="cellItem">
+              <span class="cellName cellLabel" style="float: left;">UDP终止端口</span>
+              <span class="cellName cellValue" style="float: right;">{{ item.udpPortEnd }}</span>
+            </div>
+          </div>
+        </template>
+      </div>
     </mt-popup>
     <!-- 板卡信息 -->
     <mt-popup v-model="boardInfoVisible" position="right" popup-transition="popup-slide" class="wholePagePop">
@@ -747,6 +781,9 @@
         selectPrefixName:[],//显示过滤组的名称
         prefixArr:[],//用户组下拉框数据
         userPrefixPop:false,//用户组pop的show
+        /*背包信息*/
+        instListInfoVisible:false,//背包信息界面显示
+        devicePopupList:[],//背包数据
         /*板卡信息*/
         boardInfoVisible:false,//板卡信息界面显示
         decodeBoardShow:true,//解码卡TAB切换
@@ -887,6 +924,36 @@
           $(".RcvMan").css("height",'100%');
         }
       },*/
+      showInstListInfo(item){
+        var that = this;
+        this.instListInfoVisible = true;
+        this.devicePopupList = [];
+        this.$axios({
+          method: 'post',
+          url:"/page/dev/devData.php",
+          data:this.$qs.stringify({
+            getInstByRcvSn : true,
+            rcvSN : item.rcv_sn,
+          }),
+          Api:"getInstByRcvSn",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          console.log(res)
+          if(res.res.success){
+            that.devicePopupList = res.data;
+          }else{
+            that.devicePopupList = [];
+          }
+          console.log("that.devicePopupList")
+          console.log(that.devicePopupList)
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
       showBoardInfo(item){
         var that = this;
         this.boardInfoVisible = true;

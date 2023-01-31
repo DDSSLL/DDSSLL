@@ -1581,6 +1581,9 @@
     .mint-cell-right .mint-cell-swipe-buttongroup .mint-cell-swipe-button:nth-child(2){
       background-color:#91d5ff;
     }
+    .mint-cell-right .mint-cell-swipe-buttongroup .mint-cell-swipe-button:nth-child(3){
+      background-color:#76C6FF;
+    }
     .cardInfoPop.mint-popup{
 	    width: 90% !important;
 	    max-height: 90% !important;
