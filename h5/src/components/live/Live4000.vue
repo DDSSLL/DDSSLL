@@ -184,7 +184,7 @@
           </div>
           <div class="GroupItem"><!-- 拉流模式 -->
             <div class="GroupItemField">
-              <div class="GroupItemTitle">{{ "板卡"+options.boardName }}</div>
+              <div class="GroupItemTitle">模式</div>
               <div class="GroupItemValue" style="width:auto">
                 <mt-switch v-model="options.boardSwitch" @change="changeBoardSwitch" :disabled="rcvParamLock">
                 </mt-switch>
@@ -512,6 +512,7 @@
     },
     methods:{
       showBoardMode(){
+        var that = this;
         var rcvSn = this.ActiveDevice.rcv_sn;
         if(!this.$global.isValidRcvSn(rcvSn)){
           return;
@@ -519,6 +520,11 @@
         if(this.$global.getRcvSeries(rcvSn) == R1080_RCV){ //2010R
           this.show.showPullParam = true;
           this.getBoardListData(rcvSn);
+          this.getPushUrl = setInterval(function(){
+            if(rcvParamLock){
+              that.getBoardListData(rcvSn);  
+            }
+          },1000)
         }else{
           this.show.showPullParam = false;
         }
@@ -554,6 +560,8 @@
           that.options.boardUrlOri = that.options.boardUrl;
           if(data['pullStart'] == 1){
             that.options.boardSwitch = true;
+          }else{
+            that.options.boardSwitch = false;
           }
         })
         .catch(function (error) {
@@ -575,11 +583,7 @@
             },500)
             return;
           }
-          if(this.dev_options.dev_push_status == 1){
-            text = "当前背包正在推流，开启拉流将停止背包推流，是否开启板卡"+that.options.boardName+"的拉流模式？"  
-          }else{
-            text = "是否开启板卡"+that.options.boardName+"的拉流模式？"
-          }
+          text = "是否开启板卡"+that.options.boardName+"的拉流模式？"
         }else{
           text = "是否关闭板卡"+that.options.boardName+"的拉流模式？"
         }
@@ -588,10 +592,6 @@
             that.setBoardParam(that.ActiveDevice.rcv_sn,that.options.boardName-1,that.options.boardSwitch);
             //更新颜色
             that.updateBoardPullStatus();
-            //背包停止推流
-            if(that.dev_options.dev_push_status == 1){
-              that.$global.setDevParamList(['dev_push_enable'],[0],'')
-            }
           },
           action => {
             setTimeout(function(){

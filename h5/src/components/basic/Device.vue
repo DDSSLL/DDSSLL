@@ -40,11 +40,11 @@
             </span>
             <span v-else>
               <span class="R">
-                <span class="RCircle" :class="[this.ActiveDevice.rcv_online == 1 ? (this.ActiveDevice.dev_push_status != '0' ? 'red' : 'green') : 'gray']"></span>
+                <span class="RCircle" :class="RCircleClass"></span>
                 R: {{ this.ActiveDevice.rcv_name }}
               </span>
               <span class="B" v-if="this.ActiveDevice['board_online'] && this.ActiveDevice['board_id'].length != 10">
-                <span class="BCircle" :class="[!this.ActiveDevice.board_online||this.ActiveDevice.board_online=='0' ? 'gray': this.ActiveDevice.dev_push_status!='0'?'red':'green']"></span>
+                <span class="BCircle" :class="BCircleClass"></span>
                 B: {{ this.ActiveDevice.board_id*1+1 }}
               </span>
             </span>
@@ -120,11 +120,11 @@
                     </span>
                     <span v-else>
                       <span class="R">
-                        <span class="RCircle" :class="[item.rcv_online == 1 ? (item.dev_push_status != '0' ? 'red' : 'green') : 'gray']"></span>
+                        <span class="RCircle" :class="item.RCircleClass"></span>
                         R: {{ item.rcv_name }}
                       </span>
                       <span class="B" v-if="item['board_online'] && item['board_id'].length != 10">
-                        <span class="BCircle" :class="[!item.board_online||item.board_online=='0' ? 'gray': item.dev_push_status!='0'?'red':'green']"></span>
+                        <span class="BCircle" :class="item.BCircleClass"></span>
                         B: {{ item.board_id*1+1 }}
                       </span>
                     </span>
@@ -251,6 +251,8 @@
         lockDisable:false,
         defaultFlg:false, //默认列表过滤状态
         TCircleClass:"",
+        RCircleClass:"",
+        BCircleClass:"",
         deviceList:[/*{online:'',dev_sn:"",dev_name:"",dev_push_status:"",rcv_online:"",rcv_name:""}*/],
         active:{},
         //当前选中设备的相关参数
@@ -742,6 +744,7 @@
                 row.statusCircle = 'gray';
               }
               row.TCircleClass = 'gray';
+              row.RCircleClass = 'gray';
               if (row.online == '1') {
                 if (row.videoInput !== 'NO INPUT') {
                   row.TCircleClass = 'green';
@@ -752,9 +755,28 @@
                   row.TCircleClass = 'red';
                 }
               }
+              if (row.rcv_online == '1') {
+                row.RCircleClass = 'green';
+                if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                  row.RCircleClass = 'red';
+                }
+              } else if (row.rcv_online == '0') {
+                row.RCircleClass = 'gray';
+              }
+              if (row.board_online && row.board_online != '0') {
+                row.BCircleClass = 'green';
+                if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                  row.BCircleClass = 'red';
+                }
+              } else if (row.board_online && row.board_online == '0') {
+                row.BCircleClass = 'gray';
+              }
+
+
               if(that.ActiveDevice 
                 && (row["dev_sn"] == that.ActiveDevice["dev_sn"] && row["dev_sn"]!="")){
                 that.refreshCurDevParam(row);
+                that.TCircleClass = 'gray';
                 if (row.online == '1') {
                   if (row.videoInput !== 'NO INPUT') {
                     that.TCircleClass = 'green';
@@ -765,6 +787,27 @@
                     that.TCircleClass = 'red';
                   }
                 }
+              }else if(row["dev_sn"] == ""){
+                that.TCircleClass = 'gray';
+                that.RCircleClass = 'gray';
+                that.BCircleClass = 'gray';
+                if (row.rcv_online == '1') {
+                  that.RCircleClass = 'green';
+                  if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                    that.RCircleClass = 'red';
+                  }
+                } else if (row.rcv_online == '0') {
+                  that.RCircleClass = 'gray';
+                }
+                if (row.board_online && row.board_online != '0') {
+                  that.BCircleClass = 'green';
+                  if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                    that.BCircleClass = 'red';
+                  }
+                } else if (row.board_online && row.board_online == '0') {
+                  that.BCircleClass = 'gray';
+                }
+
               }
               //在线且没在充电中，才显示电池电量低
               var online = row.online;
