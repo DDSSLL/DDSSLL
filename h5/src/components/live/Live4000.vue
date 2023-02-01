@@ -488,8 +488,8 @@
                 //this.getRcvParam();
                 this.getDevState();//源1
                 this.source2Show();//源2
-                this.showBoardMode();//2010R拉流
               }
+              this.showBoardMode();//2010R拉流
             }
           }
         }
