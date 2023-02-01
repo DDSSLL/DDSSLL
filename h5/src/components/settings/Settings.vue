@@ -1958,7 +1958,7 @@
             if(that.OPTIONS_VIDEOENCODE.length == 0){
               that.OPTIONS_VIDEOENCODE = [{value: "4",text: "H.264"}];
             }
-            //that.options.video_encode = '4';
+            that.options.video_encode = '4';
             paramArr.push('video_encode');
             valueArr.push('4');
             //HDR 时延隐藏
