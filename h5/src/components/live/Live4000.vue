@@ -176,7 +176,7 @@
                 <span :style="{color:options.boardColor}" style="word-break: break-all;line-height: .2rem;">{{ options.boardUrl }}</span>
               </div>
               <div class="GroupItemValue" v-if="!rcvParamLock">
-              	<mt-field label="" placeholder="" class="ItemTextArea" type="textarea" rows="5" v-model="options.boardUrl" @blur="changeBoardUrl"></mt-field>
+              	<mt-field label="" placeholder="" class="ItemTextArea" type="textarea" rows="5" v-model="options.boardUrl" @blur.native.capture="changeBoardUrl"></mt-field>
               	<!--<textarea class="ItemIpt byteIpt" rows="4"  v-model=""></textarea>-->
                 <!--<textarea type="text" class="ItemIpt byteIpt" v-model="options.boardUrl" @blur="changeBoardUrl" style="width:95%">-->
               </div>
@@ -521,7 +521,7 @@
           this.show.showPullParam = true;
           this.getBoardListData(rcvSn);
           this.getPushUrl = setInterval(function(){
-            if(rcvParamLock){
+            if(that.rcvParamLock){
               that.getBoardListData(rcvSn);  
             }
           },1000)
@@ -544,7 +544,6 @@
           UserId:that.userId
         })
         .then(function (response) {
-          console.log("getDevState")
           let res = response.data;
           var data = res.data;
           var color = '#ffffff';
@@ -770,10 +769,8 @@
           UserId:that.user.id
         })
         .then(function (response) {
-          console.log("getDevState")
           let res = response.data;
           var data = res.data[0];
-          console.log(data)
           //视频分发 源1 参数
           var br = data["dev_sr"] / 1000;
           //输出分辨率
@@ -817,7 +814,6 @@
       },
       //修改接收机锁定状态
       changeRcvLockState(data){
-        console.log("changeRcvLockState")
         if(this.hasRcvRight && (this.user.userGroup!=NORMAL)){
           if(data == "lock"){
             this.rcvParamLock = true;
@@ -828,7 +824,7 @@
           }  
         }
         this.getRcvParam()
-        console.log("this.rcvParamLock:"+this.rcvParamLock)
+        //console.log("this.rcvParamLock:"+this.rcvParamLock)
       },
       setRcvParamDisable(disFlg){
         if(disFlg){
@@ -879,12 +875,9 @@
       },
       //获取接收机相关数据
       getRcvParam() {
-        console.log("getRcvParam")
         var that = this;
         var rcv_sn = that.ActiveDevice.rcv_sn;
         var boardId = that.ActiveDevice.board_id;
-        console.log("boardId:"+boardId)
-        console.log("rcv_sn:"+rcv_sn)
         if(rcv_sn == "" || boardId.length == 10){//没有接收机或者虚拟接收机 隐藏二次分发
           that.show.pushUrl = false;//视频分发
           that.show.record = false;//录机
