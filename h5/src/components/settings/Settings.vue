@@ -539,6 +539,14 @@
                 <i class="titleIcon fa chevronStyle fa-chevron-right" style="height:.3rem; line-height:.3rem"></i>
               </div> -->
             </div>
+            <div class="GroupItemField">
+              <mt-radio
+                title=""
+                v-model="options.filePos"
+                :options="OPTIONS_FILE_POS"
+                @change="changeFilePos">
+              </mt-radio>
+            </div>
             <div class="GroupItemField" style="color:#fff">
               <template v-for="(item,i) in fileList">
                 <div class="cellItem" style="font-size:.16rem;padding:5px 0px;">
@@ -692,6 +700,8 @@
                                             {text: "混音",value: "1"}],*/
         OPTIONS_ACT_AUDIOOUT_1080: [],
         OPTIONS_SRT_TRANSPORT_PARAMS:[],//传输通道
+        OPTIONS_FILE_POS:[{label: "本地", value: "0"}, 
+                          {label: "USB", value: "1"}],
         options_old_264:{
           audio_input : "",
           AudioEnc : "",
@@ -766,6 +776,7 @@
           online:"",
           dev_push_status:"",
           devFileUpFlag:0,
+          filePos:0,
           //4000互动
 
           InteractiveMode:"",//互动模式
@@ -2636,6 +2647,21 @@
         if (this.options.devFileUpFlag == 1) {
           return;
         }
+        var type = this.options.back;//回传方式
+        var usbFlg = false;
+        if(this.options.filePos == 1){
+          usbFlg = true;
+        }
+        if(usbFlg && type!=3){//usb只有在 文件传输模式 下可以选择
+          this.$toast({
+            message: 'usb中的文件只能选择文件传输!',
+            position: 'middle',
+            duration: 2000
+          }); 
+          this.options.OffLinePushEnable = false;
+          return;
+        }
+
         //选择文件个数
         var selFile = [];
         for(var i=0; i<this.fileList.length; i++){
@@ -2646,6 +2672,17 @@
         if (selFile.length < 1) {
           this.$toast({
             message: '请选择一个文件!',
+            position: 'middle',
+            duration: 2000
+          }); 
+          setTimeout(function(){
+            that.options.OffLinePushEnable = false;  
+          },500)
+          return;
+        }
+        if(type == 3 && selFile.length>1){//文件传输，只支持一个文件
+          this.$toast({
+            message: '文件传输，只支持一个文件!',
             position: 'middle',
             duration: 2000
           }); 
@@ -2807,6 +2844,10 @@
           //$('#devfile').css('height', 'calc(100% - 3.4em)');
           this.getRecordIpList();
         }
+      },
+      //文件位置
+      changeFilePos(){
+        this.clickFileRefreshIcon();
       },
       //获取录机IP列表
       getRecordIpList(){
@@ -2972,8 +3013,23 @@
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
+            var data = [];
+            var type = that.options.filePos;
+            if(type == 0){
+              data = res.data.filter(function(item){
+                return item.fileName.indexOf("/")==-1
+              })  
+            }else if(type == 1){
+              data = res.data.filter(function(item){
+                return item.fileName.indexOf("/")!=-1
+              }).map(function(item){
+                var arr = item.fileName.split("/");
+                item.fileName = arr[arr.length-1];
+                return item;
+              })
+            }
             if (typeof(callback) == 'function') {
-              callback(res.data);
+              callback(data);
             }
           }
         })
