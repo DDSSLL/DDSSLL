@@ -671,7 +671,7 @@
         var actRcv = this.$global.getRcvMode(datas.rcv_sn.substr(-4)) == 'DV4004R' ? true:false;
         var WorkMode = datas.WorkMode;
         var PushTsType = datas.PushTsType;
-        if(!curRcvSeries){//没配接收机不显示接收机tab
+        if(!curRcvSeries || curRcvSeries==VIR_RCV){//没配接收机不显示接收机tab
         	this.SET_RCV_TAB_SHOW_FLG(false);
         }else{
         	this.SET_RCV_TAB_SHOW_FLG(true);
@@ -787,10 +787,7 @@
                     that.TCircleClass = 'red';
                   }
                 }
-              }else if(row["dev_sn"] == ""){
-                that.TCircleClass = 'gray';
                 that.RCircleClass = 'gray';
-                that.BCircleClass = 'gray';
                 if (row.rcv_online == '1') {
                   that.RCircleClass = 'green';
                   if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
@@ -799,6 +796,8 @@
                 } else if (row.rcv_online == '0') {
                   that.RCircleClass = 'gray';
                 }
+                
+                that.BCircleClass = 'gray';
                 if (row.board_online && row.board_online != '0') {
                   that.BCircleClass = 'green';
                   if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
@@ -807,7 +806,27 @@
                 } else if (row.board_online && row.board_online == '0') {
                   that.BCircleClass = 'gray';
                 }
-
+              }else if(row["dev_sn"] == ""){
+                that.TCircleClass = 'gray';
+                that.RCircleClass = 'gray';
+                if (row.rcv_online == '1') {
+                  that.RCircleClass = 'green';
+                  if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                    that.RCircleClass = 'red';
+                  }
+                } else if (row.rcv_online == '0') {
+                  that.RCircleClass = 'gray';
+                }
+                
+                that.BCircleClass = 'gray';
+                if (row.board_online && row.board_online != '0') {
+                  that.BCircleClass = 'green';
+                  if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                    that.BCircleClass = 'red';
+                  }
+                } else if (row.board_online && row.board_online == '0') {
+                  that.BCircleClass = 'gray';
+                }
               }
               //在线且没在充电中，才显示电池电量低
               var online = row.online;
