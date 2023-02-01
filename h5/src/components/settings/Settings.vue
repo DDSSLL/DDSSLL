@@ -1689,6 +1689,7 @@
               that.latencyShow = true;
               that.audioEncShow = true;
             }
+            that.options.video_encode_old = data['video_encode'];
           }
           //音频编码
           options = that.$global.getDevParamRange(devSN, '', 'audio_encode');
@@ -2146,6 +2147,8 @@
             that.options.latency = 0;
             paramArr.push('latency');
             valueArr.push(0);
+            //4000选标准时延时，码率控制为CBR,AVBR
+            that.OPTIONS_BITRATEMODE = this.$global.OPTIONS_BITRATEMODE;
             //HDR设置 不支持HLG
             that.OPTIONS_HDR = that.$global.OPTIONS_HDR_1080;
             that.options.hdr = 0; 
@@ -2183,8 +2186,6 @@
           //视频编码做切换后，记忆显示对应速率和延时的同时要对数据库做对应变更
           that.$global.setDevParamList(paramArr,valueArr);
         }
-
-
       },
       formatVideoEncode264(){
         var that = this;
