@@ -1699,7 +1699,7 @@
             options = that.$global.getDevParamRange(devSN, '', 'latency');
             var latencyVal = data['latency'];
             if(that.options.video_encode == '4' && options.length > 1){ //视频编码是H.264
-              that.OPTIONS_LATENCY = that.OPTIONS_LATENCY2_4000;
+              that.OPTIONS_LATENCY = that.$global.OPTIONS_LATENCY2_4000;
               if(data['latency'] == '1'){
                 latencyVal = '0';
                 that.$global.setDeviceParam('latency',latencyVal)
@@ -2143,6 +2143,7 @@
           } else {
             //H.265 编码分辨率选项只有自动
             that.OPTIONS_HDMI_FORMAT = [that.$global.OPTIONS_HDMI_FORMAT_4000[0]];
+            that.options.HdmiTransFormat = 0;
             paramArr.push('HdmiTransFormat');
             valueArr.push(0);
             //音频输入 支持 0-CH
