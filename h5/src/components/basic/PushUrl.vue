@@ -971,7 +971,12 @@
         this.activePushObj.sourceIndex = obj.sourceIndex;
         this.changeAddressType();
         this.activePushObj.url_error = "";
-        this.activePushObj.remark = obj.remark==""?("推流地址"+(index*1+1)):obj.remark;
+        if(this.workMode==1){//拉流
+          this.activePushObj.remark = obj.remark==""?("拉流地址"+(index*1+1)):obj.remark;
+        }else{
+          this.activePushObj.remark = obj.remark==""?("推流地址"+(index*1+1)):obj.remark;
+        }
+        
       },
       //提取SRT拉流地址参数
       getSrtParam(url){
