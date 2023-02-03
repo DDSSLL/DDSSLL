@@ -438,15 +438,16 @@ export default {
   cardIdArr_1080 : ['eth0', 'lte1', 'lte2', 'lte3', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'],
   cardIdArr_4000 : ['eth0', 'lte1', 'lte2', 'lte3', 'lte4', 'lte5', 'lte6', 'usb-lan', 'usb-5g1', 'usb-5g2', 'wifi'],
   BITRATE_MIN_1080 : 0.5, //Mbps   数据库里的dev_sr
-  BITRATE_MAX_1080 : 20,
+  BITRATE_MAX_1080 : 10,
   BITRATE_MIN_4000 : 0.5, //Mbps   数据库里的dev_sr
   BITRATE_MIN2_4000 : 8, //Mbps   超级时延，视频
   BITRATE_MAX_4000 : 100,
   BITRATE_MAX2_4000 : 40,
   BITRATE_MAX3_4000 : 20,
-  BITRATE_MIN_5000 : 0.1, //Mbps   数据库里的video_bitrate
+  BITRATE_MIN_5000 : 0.5, //Mbps   数据库里的video_bitrate
   BITRATE_MAX_5000 : 200,//单路0.1-200
   BITRATE_MAX2_5000 : 20,//多路编码视频比特率0.1-20
+  
   DELAY_MIN_4000 : 0.1, //s
   DELAY_MIN_1080 : 0.5, //s
   DELAY_MAX1 : 20,  //视频比特率<=40M
