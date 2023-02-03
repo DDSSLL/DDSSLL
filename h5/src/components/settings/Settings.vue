@@ -135,7 +135,7 @@
       <transition name="slide-fade">
         <div v-show="inputEncodeShow">
           <div v-if="dev1080Show">
-            <div class="GroupItem" v-if="this.user.id==this.SUPER"><!-- SEI -->
+            <div class="GroupItem"><!-- SEI -->
               <div class="GroupItemField">
                 <div class="GroupItemTitle">SEI</div>
                 <div class="GroupItemValue">
