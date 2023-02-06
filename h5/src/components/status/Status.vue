@@ -1804,7 +1804,11 @@ export default {
           var dataUpLoss = data[key][4]["dev_lost_br"]; //上行总丢包
           var TotalPktStr = data[key][1]["TotalSendPktStr"];
           var dataSrt = "";
-          if(that.curDevSeries == "4000" || that.curDevSeries === "1080_gjf"){
+          var curRcv = keyArr.filter(item => {
+            return item.split("/")[0] == key
+          })[0].split("/")[1];
+          var curDevSeries = this.$global.getRcvSeries(curRcv);
+          if(curDevSeries == "4000" || curDevSeries === "1080_gjf"){
             dataSrt = data[key][5] ? data[key][5]["SrtKbps"] : 0; //srt拉流速率
           }else{
             dataSrt = data[key][1] ? data[key][1]["SrtKbps"] : 0;
