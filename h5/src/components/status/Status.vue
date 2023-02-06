@@ -169,6 +169,8 @@ export default {
       showCardsChart:true,
       showDevSrt:false,
       InteractiveMode:0,//4000的互动模式
+      InteractOption:0,//互动选件
+      SrtSwitch:0,//4000的互动开关
       WorkMode:0,//背包工作模式
       //ActiveDevice:null,
       timer:null,
@@ -2078,13 +2080,9 @@ export default {
       var rcvSn = this.ActiveDevice.rcv_sn;
       var rcvMode =this.$global.getRcvMode(rcvSn.substr(-4));
       var showSrt = false;
-      if(devSeries === "4000"){
+      if(devSeries == "4000"){
         //背包是否显示SRT拉流曲线
-        var bShow = false;
-        if(rcvMode == 'DV4004R' || rcvMode == 'CM-IR6000T' || rcvMode == 'DV4013R'){
-          bShow = true;
-        }
-        if(bShow && this.InteractiveMode == 1){
+        if(this.InteractOption == 1 && this.SrtSwitch == 1){
           showSrt = true;
         }
       }
@@ -3035,6 +3033,8 @@ export default {
               that.showCardsChart = true;
             }
             that.InteractiveMode = dataDev["InteractiveMode"];
+            that.InteractOption = dataDev["InteractOption"];
+            that.SrtSwitch = dataDev["SrtSwitch"];
           });
           that.getCardChartShowContent(devSn,cardData)
         }else{

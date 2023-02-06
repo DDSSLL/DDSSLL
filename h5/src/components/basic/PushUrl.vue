@@ -55,7 +55,7 @@
                 <mt-field label="" placeholder="" type="textarea" rows="3" v-model="activePushObj.remark"></mt-field>
               </div>
             </div>
-            <div class="formItem" v-if="workMode == 0">
+            <div class="formItem" v-if="show.sourceIndex">
               <div class="formItemTitle">视频源</div>
               <div class="formItemVal">
                 <select class="ItemSelect2" v-model="activePushObj.sourceIndex" @change="changeVideoSource">
@@ -138,6 +138,7 @@
       return{
         SUPER:SUPER,
         ADMIN:ADMIN,
+        PREFIX:PREFIX,
         PRA_RCV:PRA_RCV,
         VIR_RCV:VIR_RCV,
         R1080_RCV:R1080_RCV,
@@ -172,6 +173,7 @@
           delShow:true,
           pullDelShow:true,
           showSubmitBtn:true,
+          sourceIndex:true,
         },
         dis:{
           urlEditable:false,
@@ -184,10 +186,6 @@
           PushCard:"",
         },*/
         pushUrlsEditVisible:false,
-        OPTIONS_URL_SOURCE: [{text: "自动",value: "0"}],
-        OPTIONS_URL_SOURCE1: [{text: "源1(背包透传)",value: "1"}],
-        OPTIONS_URL_SOURCE2: [{text: "源1(背包透传)",value: "1"},
-                              {text: "源2(板卡转码)",value: "2"}],
         OPTIONS_ADDRESS_TYPE: [{label: "RTMP",value: "0"}, 
                               {label: "SRT",value: "1"}],
       }
@@ -758,13 +756,13 @@
       },
       //修改视频源
       changeVideoSource(){
-        var urlId = this.activePushObj.id;
-        var sourceIndex = this.activePushObj.videoSource;
+        var urlId = this.activePushObj.urlId;
+        var sourceIndex = this.activePushObj.sourceIndex;
         this.editUrl(urlId,'sourceIndex',sourceIndex);
       },
       //修改地址类型
-      changeAddressType(){
-        var urlId = this.activePushObj.id;
+      changeAddressType(obj){
+        var urlId = this.activePushObj.urlId;
         if(this.activePushObj.addressType == 0){
           this.show.rtmp_url = true;
           this.show.srt_url = false;
@@ -775,24 +773,48 @@
         var rcvType = this.$global.getRcvSeries(this.ActiveDevice.rcv_sn);
         if(rcvType == this.PRA_RCV){//实体接收机 srt:源1，rtmp:自动
           if(this.activePushObj.addressType == 0){//rtmp
-            this.videoSource = this.OPTIONS_URL_SOURCE;
-            this.activePushObj.sourceIndex = 0;
-            this.editUrl(urlId,'sourceIndex',0);
+            if(this.user.prefix == PREFIX){
+              this.videoSource = this.$global.OPTIONS_URL_SOURCE3;
+              this.activePushObj.sourceIndex = obj.sourceIndex;
+            }else{
+              this.videoSource = this.$global.OPTIONS_URL_SOURCE;
+              this.activePushObj.sourceIndex = 0;  
+              if(obj.sourceIndex != 0){
+                this.editUrl(urlId,'sourceIndex',0);
+              }
+            }
           }else{
-            this.videoSource = this.OPTIONS_URL_SOURCE1;
+            this.videoSource = this.$global.OPTIONS_URL_SOURCE1;
             this.activePushObj.sourceIndex = 1;
-            this.editUrl(urlId,'sourceIndex',1);
+            if(obj.sourceIndex != 1){
+              this.editUrl(urlId,'sourceIndex',1);  
+            }
           }
         }else if(rcvType == this.R1080_RCV){//2010R--源1，源2，默认源2
-          this.videoSource = this.OPTIONS_URL_SOURCE2;
-          if(this.activePushObj.sourceIndex == 0){
-            this.activePushObj.sourceIndex = 2;
-            this.editUrl(urlId,'sourceIndex',2);
+          //公检法接收机，不选板卡，只有源1
+          if(this.activePushObj.boardID.length === 10 || this.activePushObj.boardID === ''){
+            this.videoSource = this.$global.OPTIONS_URL_SOURCE1;
+            this.activePushObj.sourceIndex = 1;
+            if(obj.sourceIndex != 1){
+              this.editUrl(urlId,'sourceIndex',1);  
+            } 
+          }else{
+            this.videoSource = this.$global.OPTIONS_URL_SOURCE2;
+            if(obj != ""){
+              if(this.activePushObj.sourceIndex == 0){
+                this.activePushObj.sourceIndex = 2;
+                this.editUrl(urlId,'sourceIndex',2);
+              }else{
+                this.activePushObj.sourceIndex = obj.sourceIndex;
+              } 
+            } 
           }
         }else{//虚拟接收机或无接收机--源1
-          this.videoSource = this.OPTIONS_URL_SOURCE1;
+          this.videoSource = this.$global.OPTIONS_URL_SOURCE1;
           this.activePushObj.sourceIndex = 1;
-          this.editUrl(urlId,'sourceIndex',1);
+          if(obj.sourceIndex != 1){
+            this.editUrl(urlId,'sourceIndex',1);
+          }
         }
       },
       //数据库编辑url
@@ -806,7 +828,7 @@
             col : col,
             value : value
           }),
-          Api:"editUrlStatus",
+          Api:"editUrl",
           AppId:"android",
           UserId:that.user.id
         })
@@ -914,8 +936,59 @@
       showEditUrls(obj, index){
         var that = this;
         this.pushUrlsEditVisible = true;
+        if(this.workMode == 0){//推流
+          this.show.sourceIndex = true;
+        }else{
+          this.show.sourceIndex = false;
+        }
+        this.activePushObj.addressType = obj.url_type==1?1:0;
+        //推流还是拉流
+        if(this.workMode == 0){//推流
+          this.activePushObj.urlId = obj.id;
+          this.activePushObj.rcvSn = obj.rcv_sn;
+          this.activePushObj.boardID = obj.board_id;
+          this.activePushObj.urlType = "推流地址";
+          /*$('#url_error').html('');
+          $('#url_remark').val(row.remark);*/          
+          if(obj.url_type == 1){
+            //提取srt地址参数
+            this.getSrtParam(obj.push_url);
+            this.activePushObj.push_srt_url = obj.push_url;
+            this.activePushObj.push_url = "";
+          } else{
+            this.activePushObj.push_srt_url = "";
+            this.activePushObj.push_url = obj.push_url;
+          }
+          if(!this.lockState && !this.dev_push_enable){
+            this.show.showSubmitBtn = true;
+          }else{
+            this.show.showSubmitBtn = false;
+          }
+        }
+        else if(this.workMode==1){//拉流
+          this.activePushObj.pull_urlId = obj.url_id;
+          this.activePushObj.pull_devSn = obj.dev_sn;
+          this.activePushObj.urlType = "拉流地址";
+        
+          if(obj.url_type == 1){
+            //提取srt地址参数
+            this.getSrtParam(obj.input_url);
+            this.activePushObj.push_srt_url = obj.input_url;
+            this.activePushObj.push_url = "";
+          }
+          else {
+            this.activePushObj.push_srt_url = "";
+            this.activePushObj.push_url = obj.input_url;
+          }
+          if(!this.lockState){
+            this.show.showSubmitBtn = true;
+          }else{
+            this.show.showSubmitBtn = false;
+          }
+        }
         //推流还是拉流
         if(this.workMode == 0){
+
           /*var isSrt = obj.push_url.indexOf('srt://');
           //虚拟接收机或SRT，只支持背包透传
           if((this.ActiveDevice.board_id && this.ActiveDevice.board_id.length == 10) || isSrt>=0){    
@@ -945,31 +1018,8 @@
             this.show.showSubmitBtn = false;
           }
         }
-        else if(this.workMode==1){
-          //拉流
-          this.activePushObj.pull_urlId = obj.url_id;
-          this.activePushObj.pull_devSn = obj.dev_sn;
-          this.activePushObj.urlType = "拉流地址";
-        
-          if(obj.url_type == 1){
-            //提取srt地址参数
-            this.getSrtParam(obj.input_url);
-            this.activePushObj.push_srt_url = obj.input_url;
-            this.activePushObj.push_url = "";
-          }
-          else {
-            this.activePushObj.push_srt_url = "";
-            this.activePushObj.push_url = obj.input_url;
-          }
-          if(!this.lockState){
-            this.show.showSubmitBtn = true;
-          }else{
-            this.show.showSubmitBtn = false;
-          }
-        }
-        this.activePushObj.addressType = obj.url_type?obj.url_type:0;
         this.activePushObj.sourceIndex = obj.sourceIndex;
-        this.changeAddressType();
+        this.changeAddressType(obj);
         this.activePushObj.url_error = "";
         if(this.workMode==1){//拉流
           this.activePushObj.remark = obj.remark==""?("拉流地址"+(index*1+1)):obj.remark;
@@ -1324,16 +1374,16 @@
           data:this.$qs.stringify({
             editUrl : id,
             col : col,
-            value : value,
+            value : value
           }),
-          Api:"editUrlStatus",
+          Api:"editUrl",
           AppId:"android",
           UserId:that.user.id
         })
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
-            //that.$global.getPushUrls(that.formatPushUrls);
+            
           }else{
             that.$toast({
               message: res.res.reason,
@@ -1346,7 +1396,7 @@
         .catch(function (error) {
           console.log(error)
         })
-      }
+      },
     }
   }
   
