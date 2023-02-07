@@ -693,7 +693,8 @@
         OPTIONS_ETH0_TYPE : [{text: "固定IP地址", value: "0"}, 
                             {text: "自动获取IP地址", value: "1"}],
         OPTIONS_BACK : [{text: "实时流", value: "1"}, 
-                            {text: "FTP", value: "2"}],
+                        {text: "FTP", value: "2"},
+                        {text: "文件传输", value: "3"}],
         //4000互动  切换
         OPTIONS_SRT_AUDIO_SWITCH_4000: [],
         /*OPTIONS_SRT_AUDIO_MODE_SWITCH_4000: [{text: "跟随",value: "0"}, 
@@ -772,7 +773,7 @@
           //文件
           fileTitle:"文件",
           OffLinePushEnable:false,
-          back:"",
+          back:"1",
           online:"",
           dev_push_status:"",
           devFileUpFlag:0,
@@ -1609,7 +1610,7 @@
           }
           that.options.OffLinePushEnable = back_enable_state;
           //回传方式
-          that.options.back = data['transtype'];
+          //that.options.back = data['transtype'];
         }
         else if(that.curDevSeries === "1080_gjf"){
           /*$("#delayShow").show();
@@ -2837,13 +2838,11 @@
       },
       //回传类型改变
       changeBackSel(){
-        if (this.options.back == '1') {
-          this.show.recordIp = false;
-          //$('#devfile').css('height', 'calc(100% - 2.25em)');
-        } else {
+        if (this.options.back == '2') {
           this.show.recordIp = true;
-          //$('#devfile').css('height', 'calc(100% - 3.4em)');
           this.getRecordIpList();
+        } else {
+          this.show.recordIp = false;
         }
       },
       //文件位置
