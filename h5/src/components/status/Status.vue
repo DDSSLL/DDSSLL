@@ -823,6 +823,10 @@ export default {
                       dataObj['lte6-recv'] = arr[29];
                       dataObj['lte6-rtt'] = arr[30];
                       dataObj['lte6-mode'] = arr[31];
+                      dataObj['eth0-send'] = arr[32];
+                      dataObj['eth0-recv'] = arr[33];
+                      dataObj['eth0-rtt'] = arr[34];
+                      
                     }else{
                       dataObj['lte1-send'] = 0;
                       dataObj['lte1-recv'] = 0;
@@ -848,6 +852,18 @@ export default {
                       dataObj['lte6-recv'] = 0;
                       dataObj['lte6-rtt'] = 0;
                       dataObj['lte6-mode'] = 0;
+                      dataObj['eth0-send'] = 0;
+                      dataObj['eth0-recv'] = 0;
+                      dataObj['eth0-rtt'] = 0;
+                    }
+                    if(arr.length > 35){
+                      dataObj['BR_Mbps'] = arr[35];
+                    }
+                    if(arr.length > 36){
+                      dataObj['Delay_s'] = arr[36];
+                    }
+                    if(arr.length > 37){
+                      dataObj['BR_Mode'] = arr[37];
                     }
                     if(dataObj['send'] != null){
                       dataArr.push(dataObj) 
@@ -898,6 +914,7 @@ export default {
       var that = this;
       var xLabelInterval = 0;
       var lostArr=[], lost2Arr=[], rcvArr=[], sendArr=[] ,timeArr=[],vInputArr = [],srtArr = [],avbrArr = [];
+      var BRArr=[],DelayArr=[],BRModeArr=[];
       if(!hisData || hisData.length == 0){
         data = [{lost: "0", lost2: "0", rcv: "0", send: "0", time: ""}]
       }else{
@@ -913,12 +930,17 @@ export default {
         vInputArr.push(data[i].VInput);
         srtArr.push(data[i].srt);
         avbrArr.push(data[i].avbr);
+        BRArr.push(data[i].BR_Mbps);
+        DelayArr.push(data[i].Delay_s);
+        if(data[i].BR_Mode == 0){
+          BRModeArr.push('固定码率');
+        }else if(data[i].BR_Mode == 1){
+          BRModeArr.push('可变码率');
+        }
       }
-      //4000背包是否显示SRT拉流曲线
-      var showDevSrt = false;
-      if(this.$global.getRcvMode(that.ActiveDevice.rcv_sn.substr(-4)) == 'DV4004R'){
-        showDevSrt = true;
-      }
+      //背包是否显示SRT拉流曲线
+      var showDevSrt = that.ifShowSrtLine();
+
       var series = [];
       series.push({
         name: "", //信号输入
@@ -1100,6 +1122,60 @@ export default {
           }
         },
         data: lost2Arr
+      },{
+        name: "比特率(Mbps)",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 1,
+        lineStyle: {
+          width: 0, // 线宽是0
+          color: 'rgba(0, 0, 0, 0)' // 线的颜色是透明的
+        },
+        emphasis:{
+          itemStyle:{
+            opacity:0
+          }
+        },
+        data: BRArr
+      },{
+        name: "延时(s)",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 1,
+        lineStyle: {
+          width: 0, // 线宽是0
+          color: 'rgba(0, 0, 0, 0)' // 线的颜色是透明的
+        },
+        emphasis:{
+          itemStyle:{
+            opacity:0
+          }
+        },
+        data: DelayArr
+      },{
+        name: "码率控制",
+        type: "line",
+        symbolSize: 3,
+        symbol: 'circle',
+        smooth: true,
+        showSymbol: false,
+        yAxisIndex: 1,
+        lineStyle: {
+          width: 0, // 线宽是0
+          color: 'rgba(0, 0, 0, 0)' // 线的颜色是透明的
+        },
+        emphasis:{
+          itemStyle:{
+            opacity:0
+          }
+        },
+        data: BRModeArr
       });
       var option = {
         title: { show:false },
@@ -1168,6 +1244,13 @@ export default {
               }
               if(showDevSrt && params[i].seriesName == that.$t('status.102004')/*'SRT拉流'*/){
                 str += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:'+params[i].color+';"></span>'+ params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data+'Mbps' : that.$t('status.102010')/*'暂无'*/) +'</br>';
+              }
+              if(params[i].seriesName === '比特率(Mbps)'){
+                str += params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data : that.$t('status.102010')) +'</br>';//'暂无'
+              } else if(params[i].seriesName === '延时(s)'){
+                str += params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data : that.$t('status.102010')) +'</br>';//'暂无'
+              } else if(params[i].seriesName === '码率控制'){
+                str += params[i].seriesName +'</span> : <span>'+ (params[i].data ? params[i].data : that.$t('status.102010')) +'</br>';//'暂无'
               }
             }
             return str;

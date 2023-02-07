@@ -168,6 +168,7 @@ export default {
   //项目公共方法或常量
   //代码中使用 this.$global.xxx 来访问方法或常量
   OPTIONS_HIS_CHART_4000 : [{text: "概览",value: "total"},
+                            {text: "ETH0",value: "eth0"},
                             {text: "SIM1",value: "lte1"},
                             {text: "SIM2",value: "lte2"},
                             {text: "SIM3",value: "lte3"},
@@ -175,6 +176,7 @@ export default {
                             {text: "SIM5",value: "lte5"},
                             {text: "SIM6",value: "lte6"}],
   OPTIONS_HIS_CHART_1080 : [{text: "概览",value: "total"},
+                            {text: "ETH0",value: "eth0"},
                             {text: "SIM1",value: "lte1"},
                             {text: "SIM2",value: "lte2"},
                             {text: "SIM3",value: "lte3"}],
