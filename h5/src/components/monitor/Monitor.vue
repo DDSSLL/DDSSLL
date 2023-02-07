@@ -372,6 +372,11 @@
         this.rtcUrl = url;
         this.options.muted = false;//$('#video-webrtc').prop('muted', false);
         this.insertBoardPush(pushIp,devSn,rcvSn,boardId);
+        if($("#playControl").hasClass("fa-pause")){//当前正在播放
+          this.webrtcClose();          
+          this.webrtcPlay();
+        }
+
       },
       insertBoardPush(ip,devSn,rcvSn,boardId){
         var that = this;

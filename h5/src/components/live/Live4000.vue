@@ -184,7 +184,7 @@
           </div>
           <div class="GroupItem"><!-- 拉流模式 -->
             <div class="GroupItemField">
-              <div class="GroupItemTitle">模式</div>
+              <div class="GroupItemTitle">启用</div>
               <div class="GroupItemValue" style="width:auto">
                 <mt-switch v-model="options.boardSwitch" @change="changeBoardSwitch" :disabled="rcvParamLock">
                 </mt-switch>

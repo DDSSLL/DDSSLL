@@ -3199,19 +3199,14 @@
       //4000的互动
       showDevSrt(showInteract){
         var bShow = false;
-        var rcvSn = this.ActiveDevice.rcv_sn;
-        var rcvMode =this.$global.getRcvMode(rcvSn.substr(-4));
-        if(rcvMode == 'DV4004R' || rcvMode == 'CM-IR6000T' || rcvMode == 'DV4013R'){
+        if(+showInteract === 1){
           bShow = true;
         }
         if(bShow){
-          if(showInteract==1){
-            this.show.act4000 = true;
-            this.getSrtTransPortList();
-          }else{
-            this.show.act4000 = false;
-          }
-        } else {
+          this.show.act4000 = true;
+          this.getSrtTransPortList();
+        }else{
+          this.show.act4000 = false;
           this.show.act4000 = false;
         }
       },
