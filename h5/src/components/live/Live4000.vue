@@ -519,6 +519,9 @@
         }
         if(this.$global.getRcvSeries(rcvSn) == R1080_RCV){ //2010R
           this.show.showPullParam = true;
+          if(this.getPushUrl){
+            clearInterval(this.getPushUrl);
+          }
           this.getBoardListData(rcvSn);
           this.getPushUrl = setInterval(function(){
             if(that.rcvParamLock){
