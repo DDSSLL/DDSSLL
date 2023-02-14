@@ -81,15 +81,15 @@
           </div>
           <div class="deviceListDiv">
             <div v-if="this.deviceModeCurName == '互动模式'">
-              <div style="text-align:left;padding:10px;display:inline-block;width:35%;">
-                <div style="display:inline-block;width:68%;">
+              <div style="text-align:left;padding:10px;display:inline-block;width:38%;">
+                <div style="display:inline-block;width:60%;">
                   <select class="ItemSelect" v-model="selectActGrp" @change="changeActGrp" style="width:100%">
                     <template v-for="item in OPTIONS_ACT_GROUP">
                       <option :value="item.value">{{ item.text }}</option>
                     </template>
                   </select>
                 </div>
-                <div class="addActGrp" @click="showAddActGrp" style="display:inline-block;">
+                <div class="addActGrp" @click="showAddActGrp" style="display:inline-block;margin-left:10px;">
                   <i class="titleIcon fa fa-plus-circle"></i>
                 </div>
                 <div class="delActGrp" @click="delActGroupClick" style="display:inline-block;">
@@ -103,7 +103,7 @@
                   <div v-if="show.serverIp"><a @click="">互动服务<span style="color:#fff">{{serverIpText}}</span></a></div>
                 </div>
               </div>
-              <div class="devListShow" v-if="selectActGrp!='all'"> 
+              <div class="devListShow" v-if="selectActGrp!='all'" style="border-bottom:1px solid #505054;margin-bottom:15px;"> 
                 <mt-cell title="组内背包">
                   <span style=""  @click="showAllDev" v-if="selectActGrp!='all'">编辑组内背包</span>
                 </mt-cell>
@@ -112,7 +112,7 @@
                     <span v-if="item.ActDevName!=''">互动背包:</span><span>{{item.ActDevName}}</span>
                   </span>
                 </mt-cell>
-                <div v-if="devListShow.length != 0">
+                <div v-if="devListShow.length != 0" style="border-top:1px solid #505054">
                   <button @click="clickActStartBtn" class="TypeSelect White" v-if="show.serverIp">一键开启</button>
                   <button @click="clickActStopBtn" class="TypeSelect White">一键关闭</button>  
                 </div>
