@@ -2308,6 +2308,8 @@
     .devListShow .mint-cell{
       background-color: transparent;
       color:#fff;
+      min-height: 48px;
+      display: block;
     }
 </style>
 <style>
@@ -2329,6 +2331,9 @@
   .devListVisible .mint-cell-wrapper{
     background-image:none;
     font-size:14px;
+  }
+  .devListShow .mint-cell-wrapper{
+    background-image: linear-gradient(180deg,#d9d9d9,#d9d9d9 50%,transparent 0) !important;
   }
   .channelList .mint-loadmore-text{color: #FFF;}
   .nowrap{
