@@ -80,6 +80,44 @@
             </div>
           </div>
           <div class="deviceListDiv">
+            <div v-if="this.deviceModeCurName == '互动模式'">
+              <div style="text-align:left;padding:10px;display:inline-block;width:35%;">
+                <div style="display:inline-block;width:68%;">
+                  <select class="ItemSelect" v-model="selectActGrp" @change="changeActGrp" style="width:100%">
+                    <template v-for="item in OPTIONS_ACT_GROUP">
+                      <option :value="item.value">{{ item.text }}</option>
+                    </template>
+                  </select>
+                </div>
+                <div class="addActGrp" @click="showAddActGrp" style="display:inline-block;">
+                  <i class="titleIcon fa fa-plus-circle"></i>
+                </div>
+                <div class="delActGrp" @click="delActGroupClick" style="display:inline-block;">
+                  <i class="titleIcon fa fa-trash-o"></i>
+                </div>
+              </div>
+              <div style="text-align:right;padding:10px;color:#fff;display:inline-block;width:50%">
+                <div v-if="selectActGrp=='all'">请选择一个互动组或互动背包</div>
+                <div v-else @click="actServerSetVisible = true;">
+                  <div v-if="show.serverNoIp"><a @click="">互动服务<span style="color:#ff0000">点击设置IP</span></a></div>
+                  <div v-if="show.serverIp"><a @click="">互动服务<span style="color:#fff">{{serverIpText}}</span></a></div>
+                </div>
+              </div>
+              <div class="devListShow" v-if="selectActGrp!='all'"> 
+                <mt-cell title="组内背包">
+                  <span style=""  @click="showAllDev" v-if="selectActGrp!='all'">编辑组内背包</span>
+                </mt-cell>
+                <mt-cell v-for="(item,i) in devListShow" :title="item.dev_name" v-on:click.native="editActDev(item)" is-link>
+                  <span style="color:#fff">
+                    <span v-if="item.ActDevName!=''">互动背包:</span><span>{{item.ActDevName}}</span>
+                  </span>
+                </mt-cell>
+                <div v-if="devListShow.length != 0">
+                  <button @click="clickActStartBtn" class="TypeSelect White" v-if="show.serverIp">一键开启</button>
+                  <button @click="clickActStopBtn" class="TypeSelect White">一键关闭</button>  
+                </div>
+              </div>
+            </div>
             <template v-for="(item,i) in deviceListShow">
               <div class="listChannel" @click="changeActiveDevice(item)" :class="[!!ActiveDevice?(ActiveDevice.dev_name == item.dev_name && ActiveDevice.rcv_name == item.rcv_name && ActiveDevice.board_id == item.board_id ? 'activeChanel' : ''):'']">
                 <div class="status">
@@ -227,6 +265,112 @@
           </mt-cell>
         </div>
       </mt-popup>
+      <mt-popup v-model="addActGrpVisible" popup-transition="popup-fade" class="addActGrpClass">
+        <div class="popupContainer">
+          <div class="popupTitle">
+            创建互动组
+            <i class="popupCloseBtn fa fa-times" @click="addActGrpVisible = false"></i>
+          </div>
+          <form action="" @submit.prevent="submitActGrpIdClick">
+            <div class="fGrp">
+              <div class="tl">创建用户</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="actGrp.userId" required>
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">互动组ID</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="actGrp.grpId" required placeholder="长度1~15，数字、字母"> 
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">互动组名</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="actGrp.grpName" required placeholder="长度1~15，中文、数字、字母、特殊符号"> 
+              </div>
+            </div>
+            <div class="fGrp" style="text-align: right">
+              <button class="modalBtn" type="button" @click="addActGrpVisible = false" style="margin-right: .06rem;">取消</button>
+              <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
+            </div>
+          </form>
+        </div>
+      </mt-popup> 
+      <mt-popup v-model="actServerSetVisible" popup-transition="popup-fade" class="addActGrpClass">
+        <div class="popupContainer">
+          <div class="popupTitle">
+            互动服务器设置
+            <i class="popupCloseBtn fa fa-times" @click="actServerSetVisible = false"></i>
+          </div>
+          <form action="" @submit.prevent="submitActServer">
+            <div class="fGrp">
+              <div class="tl">互动组</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="actServer.grpName" required>
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">IP地址</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="actServer.ip" required> 
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">端口</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="actServer.port" required> 
+              </div>
+            </div>
+            <div class="fGrp" style="text-align: right">
+              <button class="modalBtn" type="button" @click="actServerSetVisible = false" style="margin-right: .06rem;">取消</button>
+              <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
+            </div>
+          </form>
+        </div>
+      </mt-popup>
+      <!-- 组内背包列表 --> 
+      <mt-popup v-model="devListVisible" position="right" popup-transition="popup-fade" class="devListVisible">
+        <div style="overflow-y:auto; height:100%; color:#fff">
+          <div class="back" style="display:inline-block;width:100%;z-index:100">
+            <i class="fa fa-chevron-left size2" aria-hidden="true"  @click='devListVisible = false'></i>
+            <button size="small" type="primary" @click="addGrpDevClick">保存</button>
+          </div>
+          <div style="padding-top:30px"> 
+            <mt-checklist
+              :max="5"
+              align="right"
+              v-model="curGrpActDevSn"
+              :options="devListAll"
+              @change="getSelectActGrpDev">
+            </mt-checklist>  
+          </div>
+        </div>
+      </mt-popup>
+      <!-- 配置互动背包 -->
+      <mt-popup v-model="editActDevVisible" popup-transition="popup-fade" class="addActGrpClass">
+        <div class="popupContainer">
+          <div class="popupTitle">
+            <i class="popupCloseBtn fa fa-times" @click="editActDevVisible = false"></i>
+          </div>
+          <form action="" @submit.prevent="setActPullDev">
+            <div class="fGrp">
+              <div class="tl">互动背包</div>
+              <div class="vl">
+                <select class="ItemSelect" v-model="actDev" style="width:100%">
+                  <template v-for="item in ACT_DEVLIST_OPTIONS">
+                    <option :value="item.value">{{ item.text }}</option>
+                  </template>
+                </select>
+              </div>
+            </div>
+            <div class="fGrp" style="text-align: right">
+              <button class="modalBtn" type="button" @click="editActDevVisible = false" style="margin-right: .06rem;">取消</button>
+              <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
+            </div>
+          </form>
+        </div>
+      </mt-popup> 
     </div>
   </div>
 </template>
@@ -248,6 +392,10 @@
         NORMAL:NORMAL,
         popupVisible:false,
         popupTagsVisible:false,
+        addActGrpVisible:false,//添加互动组
+        actServerSetVisible:false,//互动服务器配置
+        devListVisible:false,//显示组内背包页面
+        editActDevVisible:false,//配互动背包页面
         lockDisable:false,
         defaultFlg:false, //默认列表过滤状态
         TCircleClass:"",
@@ -308,7 +456,31 @@
         show:{
           extBattery:false,
           deviceModeShow:true,
+          serverNoIp: false,
+          serverIp: true,
         },
+        OPTIONS_ACT_GROUP:[],
+        selectActGrp:"",
+        actGrp:{
+          userId:"",
+          grpId:"",
+          grpName:"",
+        },
+        serverIpText:"",
+        actServer:{
+          grpid:"",
+          ip:"",
+          port:"",
+        },
+        devListAll:[],
+        devListAllData:[],
+        curGrpActDev:[],
+        curGrpActDevSn:[],
+        curGrpActDevOld:[],
+        ACT_DEVLIST_OPTIONS:[],
+        actDev:"",//选中的互动背包
+        curDev:"",//当前选中的背包
+        ACT_PULL_LATENCY: '125',//互动拉流延时
       }
     },
     computed: {
@@ -589,6 +761,42 @@
         var that = this;
         that.SET_DEVICE_MODE_SELECT(that.deviceModeSelect);
         that.formatDeviceModeName();
+        if(this.deviceModeSelect == 2){
+          this.getLogUserActGrp(function(data){
+            that.selectActGrp = data;
+            that.changeActGrp();
+          });
+        }
+      },
+      getLogUserActGrp(cb){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getActIdList:true,
+            userId: that.user.id,
+          }),
+          Api:"getActIdList",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.OPTIONS_ACT_GROUP = res.data;
+            if(typeof(cb) == 'function'){
+              cb(res.data[0].value);
+            }
+          }else{
+            that.$toast({
+              message: res.res.reason
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
       },
       changeDeviceType(){
         var that = this;
@@ -733,12 +941,15 @@
             for(var j=0; j<len; j++){
               var row = that.deviceList[j];
               //汇聚模式背包汇聚都上线或单卡模式
-              if (row.match_used == '1' 
-                || (that.$global.getDevSeries(row.dev_sn) == "1080" && row.PushTsType == 1 )) {
-                if (row.dev_push_status != '0') {
-                  row.statusCircle = 'sk-spinner sk-spinner-three-bounce';
+              if (row.match_used == '1' || row.PushTsType == 1 ) {
+                if(row.online == '1'){
+                  if (row.dev_push_status != '0') {
+                    row.statusCircle = 'sk-spinner sk-spinner-three-bounce';
+                  }else{
+                    row.statusCircle = 'green';
+                  }  
                 }else{
-                  row.statusCircle = 'green';
+                  row.statusCircle = 'gray';
                 }
               } else {
                 row.statusCircle = 'gray';
@@ -854,8 +1065,11 @@
 
             that.filterDevice();
             if(that.deviceList.length == 0){
-              that.defaultFlg = true;
+              if(that.deviceModeSelect != 2){//互动 不清空过滤参数
+                that.defaultFlg = true;  
+              }
             }else{
+              that.defaultFlg = false;
               if(!that.ActiveDevice){
                 that.SET_ACTIVE_DEVICE(that.deviceListShow[0]); 
                 //that.deviceModeSelect = that.deviceListShow[0]["WorkMode"];
@@ -1073,23 +1287,19 @@
       * dev_push_status:1/2
       * */
       getDeviceFliter(defaultFilter){
-        var type = this.deviceTypeSelect.toString();;
+        var type = this.deviceTypeSelect.toString();
         var mode = this.deviceModeSelect.toString();
-        //var actGrpId = getCookie('uhd-actGrpId');
         var fliter = {device:'dev',online:'',WorkMode:'',dev_push_status:'',interact_grpid:'',curDevUpdate:true};
         if(defaultFilter){//默认状态
           this.deviceModeSelect = 'allMode';
           this.deviceTypeCurName = this.$t('device.103020')/*'全部背包'*/;
-          mode = 'allMode';
+          if(mode != 2){
+            mode = 'allMode'; 
+          }
           this.deviceType = 1;
           this.SET_DEVICE_TYPE_SELECT(this.deviceType);
           type = 1;
           this.deviceModeCurName = this.$t('device.103025')/*'全部模式'*/;
-          
-          /*fliter['online'] = '';
-          fliter['device'] = 'dev';
-          fliter['WorkMode'] = '';
-          return filter;*/
         }
         if(type == '5'){
           //实体接收机
@@ -1120,9 +1330,9 @@
             fliter['WorkMode'] = '';
           }
           //互动组过滤
-          /*if(mode === 'actMode' && actGrpId !== 'all'){
-            fliter['interact_grpid'] = actGrpId;
-          }*/
+          if(mode === '2' && this.selectActGrp !== 'all'){
+            fliter['interact_grpid'] = this.selectActGrp;
+          }
         }
 
         return fliter;
@@ -1182,6 +1392,654 @@
             that.deviceListShow = that.deviceListShow;
             break;
         }
+      },
+      changeActGrp(){
+        this.getActServAndDev(this.selectActGrp);
+      },
+      getActServAndDev(grpId){
+        var that = this;
+        if(grpId == 'all'){
+          this.$global.getDevOneParam(that.ActiveDevice.dev_sn, 'interact_grpid',function (data) {
+            //console.log(data)
+            that.getActServAndDev(data['interact_grpid']);
+          });
+          return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getActServAndDev: grpId,
+          }),
+          Api:"getActServAndDev",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var group = res['data']['group'];
+            var devList = res['data']['devList'];
+            let rcvList = res['data']['rcvList'];
+            that.devListShow = devList;
+            //互动服务
+            if(group['serv_ip'] !== '' && group['serv_port'] !== ''){
+              var ipPort = 'IP:'+group['serv_ip']+":"+group['serv_port'];
+              that.show.serverNoIp = false;
+              that.show.serverIp = true;
+              that.serverIpText = ipPort; 
+            } else{
+              that.show.serverNoIp = true;
+              that.show.serverIp = false;
+              that.serverIpText = '';
+            }
+            //弹窗
+            that.actServer.grpName = group['grpname'];
+            that.actServer.grpId = group['grpid'];
+            that.actServer.ip = group['serv_ip'];
+            that.actServer.port = group['serv_port'];
+            //组内背包
+            /*var pushEnable = false;
+            $('.actDevDiv').hide();
+            var showDom = getShowDom(devList.length);
+            for(var i=0; i<devList.length; i++){
+              //最多5个
+              if(i>=5){
+                break;
+              }
+              //颜色
+              var nameColor = colorACT[i];
+              if(devList[i].online === '0'){
+                nameColor = offlineCor;
+              }
+              var actDevColor = '#fff';
+              var className = '.index'+showDom[i];
+              $(className).attr('id',devList[i].dev_sn).show();
+              $(className+' .devNameInput').val(devList[i].dev_name).css('color',nameColor);
+              $(className+' .devOldNameSpan').text(devList[i].dev_name);
+              $(className+' .pushStatus').text(devList[i].dev_push_status);
+              $(className+' .onlineStatus').text(devList[i].online);
+              $(className+' .pullDevSn').text(devList[i].ActDev);
+              if(isValidSn(devList[i].ActDev)){
+                actDevColor = getDevNameColor(devList[i].ActDev,devList);
+              }
+              $(className+' .pullDevName').text(devList[i].ActDevName).css('color',actDevColor);
+              //左侧选中的背包，加亮
+              if(devList[i].dev_sn === dbClickDev){
+                $('#'+devList[i].dev_sn).removeClass('actBorder').addClass('highlight');
+              } else{
+                $('#'+devList[i].dev_sn).removeClass('highlight').addClass('actBorder');
+              }
+              //播放状态
+              if(devList[i].dev_push_status != '0'){
+                pushEnable = true;
+              }
+            }
+            //组内接收机
+            if(rcvList.length > 0){
+              showActRcvInfo();
+              getRcvPullAddr(rcvList[0].rcv_sn);
+              getActRcvPullStatus(rcvList[0].rcv_sn);
+            } else{
+              hideActRcvInfo();
+            }
+            //播放按钮
+            if(pushEnable){
+              $('#actStopBtn').show();
+              $('#actStartBtn').hide();
+            } else{
+              $('#actStopBtn').hide();
+              $('#actStartBtn').show();
+            }
+            */
+
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      getActDevByGrp(){
+        var that = this;
+        this.getDevListforAct(that.selectActGrp, function(data){
+          that.devListAllData = data;
+          that.devListAll = [];
+          var len = data.length;
+          for(var i=0; i<len; i++){
+            var obj = {};
+            obj.value = data[i]["dev_sn"];
+            var mode = "";
+            var online = "离线";
+            switch(data[i]["WorkMode"]){
+              case "0":
+                mode = "推流模式";
+                break;
+              case "1":
+                mode = "拉流模式";
+                break;
+              case "2":
+                mode = "互动模式";
+                break;
+            }
+            if(data[i]["online"]=="1"){
+              online = "在线";
+              if(data[i]["dev_push_status"] == "1"){
+                online = "直播";
+              }
+            }
+            obj.label = " ( "+data[i]["dev_sn"]+" , "+mode + " , "+ online +" ) "+data[i]["dev_name"];
+            that.devListAll.push(obj);
+            if(data[i]["enable"]){
+              that.curGrpActDevSn.push(data[i]["dev_sn"]);
+              that.curGrpActDev.push(data[i]);
+            }
+          }
+          that.curGrpActDevOld = that.curGrpActDev;
+        })
+      },
+      //获取能加入互动组的背包列表
+      getDevListforAct(GrpId,callback) {
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            getDevListforAct: true,
+            actGrpId: GrpId,
+          }),
+          Api:"getDevListforAct",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if(typeof(callback) === 'function'){
+              callback(res.data);
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      showAddActGrp(){
+        this.actGrp.userId = this.user.id;
+        this.actGrp.grpId = "";
+        this.actGrp.grpName = "";
+        this.addActGrpVisible = true;
+      },
+      submitActGrpIdClick(){
+        var that = this;
+        var userId = that.actGrp.userId
+        var userPrefix = that.user.prefix;
+        var grpId = that.actGrp.grpId;
+        var grpName = that.actGrp.grpName;
+        //组Id
+        if(!this.$global.isValidGrpId(grpId)){
+          this.$toast({
+            message: '长度1-15，仅支持数字字母'
+          });
+          return;
+        }
+        if(grpId === 'all'){
+          this.$toast({
+            message: '不能是all'
+          });
+          return;
+        }
+        //组名
+        if(!this.$global.isValidGrpName(grpName)){
+          this.$toast({
+            message: '长度1-15'
+          });
+          return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            addActGrpId: grpId,
+            grpName: grpName,
+            userId: userId,
+            prefix: userPrefix,
+          }),
+          Api:"addActGrpId",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            //showNewActGrp(res['data']['grpId'],res['data']['grpName']);
+            that.addActGrpVisible = false;
+            that.changeActGrp();
+            that.getLogUserActGrp(function(){
+              that.selectActGrp = res['data']['grpId'];
+            });
+
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //删除互动组
+      delActGroupClick(){
+        var that = this;
+        var grpId = that.selectActGrp;
+        if(grpId === '' || grpId === 'all'){
+          this.$toast({
+            message: '请选择一个组'
+          });
+          return;
+        }
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            delActGrp: true,
+            grpid: grpId,
+          }),
+          Api:"delActGrp",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.$toast({
+              message: '删除成功'
+            });
+            that.getLogUserActGrp(function(){
+              that.selectActGrp = 'all';
+            });
+          }else{
+            that.$toast({
+              message: res.res.reason
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //互动服务器
+      submitActServer(){
+        var that = this;
+        var grpid = this.actServer.grpid;
+        var ip = this.actServer.ip;
+        var port = this.actServer.port;
+        if(!this.$global.isValidIP(ip)){
+          this.$toast({
+            message: '请输入合法IP'
+          });
+          return;
+        }
+        if(!this.$global.isValidPort(port)){
+          this.$toast({
+            message: '请输入合法端口'
+          });
+          return;
+        }
+        this.setActServIp(grpid,ip,port,function (data){
+          that.actServerSetVisible = false;
+          var ipPort = 'IP:'+ip+":"+port;
+          that.show.serverNoIp = false;
+          that.show.serverIp = true;
+          that.serverIpText = ipPort; 
+        });
+      },
+      //设置互动服务器IP
+      setActServIp(grpId,ip,port,callback){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            setActServIp:grpId,
+            servIp:ip,
+            servPort:port,
+          }),
+          Api:"setActServIp",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if(typeof(callback) === 'function'){
+              callback(res['data']);
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      showAllDev(){
+        this.devListVisible = true;
+        this.getActDevByGrp();
+      },
+      getSelectActGrpDev(){
+      },
+      addGrpDevClick(){
+        var that = this;
+        //this.devListVisible = false;
+        var grpid = this.selectActGrp;
+        var addDev = [];
+        var delDev = [];
+        var oldDevs = this.curGrpActDevOld;
+        var devSns = this.curGrpActDevSn;
+        for(let i=0; i<oldDevs.length; i++){
+          var exist = false;
+          for(let j=0; j<devSns.length; j++){
+            if(oldDevs[i]["dev_sn"] == devSns[j]){
+              exist = true;
+              break;
+            }
+          }
+          if(!exist){
+            delDev.push(oldDevs[i]["dev_sn"])
+          }
+          /*if(devs.indexOf(oldDevs[i]) != -1 ){
+            delDev.push(oldDevs[i])
+          }*/
+        }
+        for(let i=0; i<devSns.length; i++){
+          var exist = false;
+          for(let j=0; j<oldDevs.length; j++){
+            if(devSns[i] == oldDevs[j]["dev_sn"]){
+              exist = true;
+              break;
+            }
+          }
+          if(!exist){
+            addDev.push(devSns[i])
+          }
+          /*if(oldDevs.indexOf(devs[i]) == -1 ){
+            addDev.push(devs[i])
+          }*/
+        }
+        if(delDev.length != 0){
+          for(let i=0; i<delDev.length; i++){
+            let index = i;
+            that.deleteActDevPillbox(delDev[index])
+          }  
+        }
+        if(addDev.length != 0){
+          //背包序列号集合:'8000012150,8000022150,...,80000102150'
+          var devSnArr = addDev/*.map((item)=>{
+            return item.dev_sn;
+          });*///this.curGrpActDevSn;
+          var devArr = [];//addDev;//this.curGrpActDev;
+          for(let i=0; i<addDev.length; i++){
+            var devData = that.devListAllData.filter(item => {
+              return item.dev_sn == addDev[i]
+            })
+            devArr.push(devData[0])
+          }
+          var snList = devSnArr.join(',');
+          //有其他模式的背包，需要二次确认切换模式
+          var bConfirm = false;
+          var changeArr = [];
+          for(var i=0; i<devArr.length; i++){
+            if(devArr[i].WorkMode !== '2'){
+              bConfirm = true;
+              changeArr.push(devArr[i].dev_sn);
+            }
+          }
+          if(bConfirm){
+            var text = '是否将其他模式的背包切换成互动模式？';
+            //询问
+            that.$messagebox.confirm(text).then(
+              action => {
+                //解除配对
+                for(var i=0; i<changeArr.length; i++){
+                  that.delDevMatch(changeArr[i]);
+                }
+                //设置互动组内背包
+                that.setActDevGrp(snList,grpid,function(grpid){
+                  //addPillBoxItem(rows,'#devPillbox');
+                  that.getActServAndDev(grpid);
+                });
+              },
+              action => {
+              } 
+            );        
+          }
+          else{
+            //所有背包都是互动模式，只设置互动组
+            that.setActDevGrp(snList,grpid,function(grpid){
+              //addPillBoxItem(rows,'#devPillbox');
+              that.getActServAndDev(grpid);
+            });
+          }
+        }
+      },
+      //从互动组中删除背包
+      deleteActDevPillbox(sn){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            clearDevActGrp:true,
+            devSn:sn,
+          }),
+          Api:"clearDevActGrp",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            that.changeActGrp();
+          }else{
+            this.$toast({
+              message: res.res.reason
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+
+        /*ajaxRequest(Api,url,data,function(res){
+          //更新背包项
+          var grpid = $('#actGrpID_input').val();
+          getActServAndDev(grpid);
+
+        },function(res){
+          showLayer(res.res.reason);
+          //把不能删除的背包加回去
+          var data = res.data;
+          $('#devPillbox').pillbox('addItems', 1, [{
+            text: data.dev_name,
+            value: data.dev_sn,
+            attr: {},
+            data: {}
+          }]);
+        },false);*/
+      },
+      //根据背包序列号删除配对
+      delDevMatch(devSn){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            delMatch:true,
+            dev_sn:devSn,
+          }),
+          Api:"delMatch",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+          }else{
+            this.$toast({
+              message: res.res.reason
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //设备背包互动组，非互动模式，切换到互动模式
+      setActDevGrp(devList,grpId,callback){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            setActDevGrp:grpId,
+            snList:devList,
+          }),
+          Api:"setActDevGrp",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if(typeof(callback) === 'function'){
+              callback(res['grpId']);  //返回grpId
+            }
+          }else{
+            this.$toast({
+              message: res.res.reason
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      editActDev(data){
+        if(this.show.serverNoIp){//没有设置互动服务
+          this.$toast({
+            message: '请先设置互动服务IP'
+          });
+          return;
+        }
+        this.editActDevVisible = true;
+        this.curDev = data["dev_sn"];
+        this.actDev = data["ActDev"];
+        var len = this.devListShow.length;
+        var obj = {};
+        this.ACT_DEVLIST_OPTIONS = [{text:"", value:""}];
+        for(var i=0; i<len; i++){
+          obj = {};
+          if(data["dev_sn"] != this.devListShow[i]["dev_sn"]){
+            obj.value = this.devListShow[i]["dev_sn"];
+            obj.text = this.devListShow[i]["dev_name"];
+            this.ACT_DEVLIST_OPTIONS.push(obj);
+          }
+        }
+      },
+      setActPullDev(){
+        var that = this;
+        if(this.actDev == ""){
+          this.$global.setDevParamList(['ActPullAddr','ActDev','param_lock'],["''","''","1"],this.curDev);
+          this.editActDevVisible = false;
+          this.changeActGrp();
+
+        }else{
+          var sourceSn=this.curDev;
+          var targetSn=this.actDev;
+          var pullLatency=this.ACT_PULL_LATENCY;
+          this.setActDevPullAddr(targetSn,sourceSn,pullLatency,function(targetSn,ActDevName,ActDev){
+            that.editActDevVisible = false;
+            that.changeActGrp();
+            //更新拉流背包名和颜色
+            /*var actDevColor = getDevNameColor(ActDev);
+            $('#'+targetSn+' .pullDevName').text(ActDevName).css('color',actDevColor);*/
+          });  
+        }
+      },
+      //设备互动背包拉流地址
+      //callback返回参数: data.
+      setActDevPullAddr(sourceSn,targetSn,latency,callback){
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            setActPullAddr:true,
+            sourceSn:sourceSn,
+            targetSn:targetSn,
+            latency:latency,
+          }),
+          Api:"setActPullAddr",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            if(typeof(callback) === 'function'){
+              callback(res['data']['targetSn'],res['data']['ActDevName'],res['data']['ActDev']);
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+      },
+      //互动一键开启
+      clickActStartBtn(){
+        var grpId = this.selectActGrp;
+        this.setActDevSwitch(grpId,'1');
+      },
+      //互动一键停止
+      clickActStopBtn(){
+        var grpId = this.selectActGrp;
+        this.setActDevSwitch(grpId,'0');
+      },
+      //设置互动组内背包的推流开关
+      //OnOff:0、1
+      setActDevSwitch(grpId,OnOff){
+        /*if(grpId === ''){
+          //showLayer('请选择互动组');
+          showLayer($.i18n.prop("mlang--101258"));//'请选择互动组'
+          return;
+        }*/
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            setActSwitch:grpId,
+            switch:OnOff,
+          }),
+          Api:"setActSwitch",
+          AppId:"android",
+          UserId:that.user.login_name
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+            var onOff = res['data']['switch'];
+            if(onOff === '1'){
+              //推流状态
+              that.$toast({
+                message: '一键开启成功'
+              });
+            } else{
+              //停止状态
+              that.$toast({
+                message: '一键关闭成功'
+              });
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
       }
     }
   }
@@ -1399,6 +2257,58 @@
       min-height: 48px !important;
       display: block !important;
     }
+    .addActGrpClass.mint-popup{
+      width: 90% !important;
+      max-height: 90% !important;
+      overflow-y: hidden !important;
+      height:auto;
+      border-radius: 4px !important;
+      background-color: #EEE !important;
+    }
+    .popupTitle{
+      padding: .1rem;
+      font-size: .14rem;
+    }
+    .popupCloseBtn{
+      float: right;
+      width: .24rem;
+      height: .24rem;
+      color: #B00;
+      font-size: .16rem;
+      margin-top: -2px;
+      text-align: right;
+    }
+    .popupContainer .fGrp{overflow: hidden;padding: .1rem;}
+    .popupContainer .fGrp .tl{width: 25%;float: left;  text-align: right;padding-top:0.07rem;margin-right: 5%;}
+    .popupContainer .fGrp .vl{width: 62%;float: left; text-align: right}
+    .popupContainer .fGrp button{padding: .02rem .1rem;width: .8rem;outline: none;border-radius: 4px;box-shadow:none;margin-top: .02rem;margin-right: .05rem;}
+    .modalBtn{
+        width: .6rem;
+        border: none;
+        outline: none;
+        box-shadow: none;
+        height: .26rem;
+        margin-top: .02rem;
+        margin-right: .05rem;
+    }
+    .popupContainer .modalBtn{
+      border: 1px solid rgb(61, 129, 241);
+    }
+    .ItemInput, .addActGrpClass select{
+      width:100%;
+      height: .22rem;
+      border: 1px solid #3d81f1;
+      outline: none;
+      box-shadow: none;
+      border-radius: 5px;
+      font-size: .12rem;
+      background-color: #FFFFFF;
+      color:#000;
+    }
+    .devListShow .mint-cell{
+      background-color: transparent;
+      color:#fff;
+    }
 </style>
 <style>
   .deviceFilterPop .mint-cell-wrapper{
@@ -1415,6 +2325,10 @@
   .devStatusDiv .mint-cell-wrapper{
     padding:0 10px !important;
     background-image: linear-gradient(180deg,#d9d9d9,#d9d9d9 50%,transparent 0) !important;
+  }
+  .devListVisible .mint-cell-wrapper{
+    background-image:none;
+    font-size:14px;
   }
   .channelList .mint-loadmore-text{color: #FFF;}
   .nowrap{

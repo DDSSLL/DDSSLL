@@ -227,7 +227,7 @@
             </div>
           </div>
         </div>
-        <div class="GroupItem">
+        <!-- <div class="GroupItem">
           <div class="GroupItemField">
             <div class="GroupItemTitle">互动背包</div>
             <div class="GroupItemValue">
@@ -238,7 +238,7 @@
               </select>
             </div>
           </div>
-        </div>
+        </div> -->
         <div class="GroupItem">
           <div class="GroupItemField">
             <div class="GroupItemTitle">视频比特率(Mbps)</div>

@@ -355,7 +355,8 @@
         </div>
       </transition>
     </div>
-    <div class="Group" v-if="show.act4000"><!-- 4000的互动 -->
+
+    <div class="Group" v-if="show.act4000 && dev4000Show"><!-- 4000的互动 -->
       <div class="GroupTitle" @click="show.act4000Show=!show.act4000Show">
         互动
         <i class="titleIcon fa" :class="[show.act4000Show == true ? 'fa-chevron-up': 'fa-chevron-down']"></i>
