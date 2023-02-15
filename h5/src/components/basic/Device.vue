@@ -364,6 +364,26 @@
                 </select>
               </div>
             </div>
+            <div class="fGrp">
+              <div class="tl">推流延时</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="actPushLatency" required style="width:auto">ms
+              </div>
+            </div>
+            <div class="fGrp">
+              <div class="tl">拉流延时</div>
+              <div class="vl">
+                <input type="text" class="ItemInput" v-model="actPullLatency" required style="width:auto">ms
+              </div>
+            </div>
+            <!-- <div class="GroupItem">
+              <div class="GroupItemField">
+                <div class="GroupItemTitle"></div>
+                <div class="GroupItemValue" style="margin-left:30%">
+                  <mt-button class="ItemBtn" @click="setActAddr" type="primary" :disabled="!pageLock?false:true">确定</mt-button>
+                </div>
+              </div>
+            </div> -->
             <div class="fGrp" style="text-align: right">
               <button class="modalBtn" type="button" @click="editActDevVisible = false" style="margin-right: .06rem;">取消</button>
               <button class="modalBtn" type="submit" style="background-color: #3d81f1;color:#fff;">确定</button>
@@ -469,6 +489,7 @@
         serverIpText:"",
         actServer:{
           grpid:"",
+          grpName:"",
           ip:"",
           port:"",
         },
@@ -481,6 +502,8 @@
         actDev:"",//选中的互动背包
         curDev:"",//当前选中的背包
         ACT_PULL_LATENCY: '125',//互动拉流延时
+        actPushLatency:"",
+        actPullLatency:"",
       }
     },
     computed: {
@@ -1269,6 +1292,35 @@
             console.log(error)
         })
       },
+      //通过序列号设置背包参数
+      setDevParamBySn(param, value, devSN) {
+        var that = this;
+        this.$axios({
+          method: 'post',
+          url:"/page/index/indexData.php",
+          data:this.$qs.stringify({
+            devSN: devSN,
+            devParamCol: param,
+            value: value+""
+          }),
+          Api:"SetDevParam",
+          AppId:"android",
+          UserId:that.user.id
+        })
+        .then(function (response) {
+          let res = response.data;
+          if(res.res.success){
+              
+          }else{
+            that.$toast({
+              message: res.res.reason
+            });
+          }
+        })
+        .catch(function (error) {
+            console.log(error)
+        })
+      }
       showDeviceList(){
         this.popupVisible = true;
         this.getDeviceList();
@@ -1423,21 +1475,23 @@
             let rcvList = res['data']['rcvList'];
             that.devListShow = devList;
             //互动服务
-            if(group['serv_ip'] !== '' && group['serv_port'] !== ''){
-              var ipPort = 'IP:'+group['serv_ip']+":"+group['serv_port'];
-              that.show.serverNoIp = false;
-              that.show.serverIp = true;
-              that.serverIpText = ipPort; 
-            } else{
-              that.show.serverNoIp = true;
-              that.show.serverIp = false;
-              that.serverIpText = '';
+            if(group){
+              if(group['serv_ip'] !== '' && group['serv_port'] !== ''){
+                var ipPort = 'IP:'+group['serv_ip']+":"+group['serv_port'];
+                that.show.serverNoIp = false;
+                that.show.serverIp = true;
+                that.serverIpText = ipPort; 
+              } else{
+                that.show.serverNoIp = true;
+                that.show.serverIp = false;
+                that.serverIpText = '';
+              }
+              //弹窗
+              that.actServer.grpName = group['grpname'];
+              that.actServer.grpid = group['grpid'];
+              that.actServer.ip = group['serv_ip'];
+              that.actServer.port = group['serv_port'];
             }
-            //弹窗
-            that.actServer.grpName = group['grpname'];
-            that.actServer.grpId = group['grpid'];
-            that.actServer.ip = group['serv_ip'];
-            that.actServer.port = group['serv_port'];
             //组内背包
             /*var pushEnable = false;
             $('.actDevDiv').hide();
@@ -1504,6 +1558,8 @@
         this.getDevListforAct(that.selectActGrp, function(data){
           that.devListAllData = data;
           that.devListAll = [];
+          that.curGrpActDev = [];
+          that.curGrpActDevSn = [];
           var len = data.length;
           for(var i=0; i<len; i++){
             var obj = {};
@@ -1613,9 +1669,9 @@
           if(res.res.success){
             //showNewActGrp(res['data']['grpId'],res['data']['grpName']);
             that.addActGrpVisible = false;
-            that.changeActGrp();
             that.getLogUserActGrp(function(){
               that.selectActGrp = res['data']['grpId'];
+              that.changeActGrp();
             });
 
           }
@@ -1939,7 +1995,9 @@
             obj.text = this.devListShow[i]["dev_name"];
             this.ACT_DEVLIST_OPTIONS.push(obj);
           }
-        }
+        };
+        this.actPushLatency = '125';
+        this.actPullLatency = '125';
       },
       setActPullDev(){
         var that = this;
@@ -1947,19 +2005,59 @@
           this.$global.setDevParamList(['ActPullAddr','ActDev','param_lock'],["''","''","1"],this.curDev);
           this.editActDevVisible = false;
           this.changeActGrp();
-
         }else{
-          var sourceSn=this.curDev;
-          var targetSn=this.actDev;
-          var pullLatency=this.ACT_PULL_LATENCY;
-          this.setActDevPullAddr(targetSn,sourceSn,pullLatency,function(targetSn,ActDevName,ActDev){
+          var sourceSn=this.actDev;
+          var targetSn=this.curDev;
+          var pullLatency=this.actPullLatency;
+          this.setActDevPullAddr(sourceSn,targetSn,pullLatency,function(targetSn,ActDevName,ActDev){
+            that.setActAddr();//设置互动推拉流地址
             that.editActDevVisible = false;
             that.changeActGrp();
+
             //更新拉流背包名和颜色
             /*var actDevColor = getDevNameColor(ActDev);
             $('#'+targetSn+' .pullDevName').text(ActDevName).css('color',actDevColor);*/
           });  
         }
+      },
+      //设置互动推拉流地址
+      setActAddr() {
+        console.log("setActAddr")
+        var that = this;
+        var devSN = this.curDev;
+        if (!devSN || !this.$global.isValidSn(devSN)) {
+          return;
+        }
+        var actIp= this.actServer.ip;
+        var actPort = this.actServer.port;
+        var actDev = this.actDev;
+        var pushLatency = this.actPushLatency;
+        var pullLatency = this.actPullLatency;
+        if(!this.$global.isValidSn(actDev)){
+          return;
+        }
+        if(!this.$global.isValidActLatency(pushLatency)){
+          that.$toast({
+            message: '延时50-3000ms'
+          });
+          return;
+        }
+        if(!this.$global.isValidActLatency(pullLatency)){
+           that.$toast({
+            message: '延时50-3000ms'
+          });
+          return;
+        }
+        //推流地址 本机序列号
+        var pushAddr = 'srt://'+actIp+':'+actPort+'?streamid=uplive.deviser.com.cn/live/'+devSN+'&latency='+pushLatency;
+        //拉流地址 互动背包序列号
+        var pullAddr = 'srt://'+actIp+':'+actPort+'?streamid=live.deviser.com.cn/live/'+actDev+'&latency='+pullLatency;
+        console.log("pushAddr:"+pushAddr)
+        console.log("pullAddr:"+pullAddr)
+        that.setDevParamBySn('ActPushAddr',pushAddr,devSN);
+        that.setDevParamBySn('ActPullAddr',pullAddr,devSN);
+        /*$('#actAddrPush').val(pushAddr);
+        $('#actAddrPull').val(pullAddr);*/
       },
       //设备互动背包拉流地址
       //callback返回参数: data.
@@ -2265,6 +2363,7 @@
       border-radius: 4px !important;
       background-color: #EEE !important;
     }
+
     .popupTitle{
       padding: .1rem;
       font-size: .14rem;
@@ -2282,6 +2381,12 @@
     .popupContainer .fGrp .tl{width: 25%;float: left;  text-align: right;padding-top:0.07rem;margin-right: 5%;}
     .popupContainer .fGrp .vl{width: 62%;float: left; text-align: right}
     .popupContainer .fGrp button{padding: .02rem .1rem;width: .8rem;outline: none;border-radius: 4px;box-shadow:none;margin-top: .02rem;margin-right: .05rem;}
+    .addActGrpClass .popupContainer .fGrp .vl{
+      text-align:left
+    }
+    .addActGrpClass .popupContainer .fGrp {
+      width:90%;
+    }
     .modalBtn{
         width: .6rem;
         border: none;

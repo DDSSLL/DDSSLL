@@ -319,7 +319,7 @@
             </div>
           </div>
         </div>
-        <div class="GroupItem">
+        <div class="GroupItem" v-if="false">
           <div class="GroupItemField">
             <div class="GroupItemTitle">流媒体内网IP</div>
             <div class="GroupItemValue">
@@ -327,7 +327,7 @@
             </div>
           </div>
         </div>
-        <div class="GroupItem">
+        <div class="GroupItem" v-if="false">
           <div class="GroupItemField">
             <div class="GroupItemTitle">端口</div>
             <div class="GroupItemValue">
