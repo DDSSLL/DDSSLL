@@ -1320,7 +1320,7 @@
         .catch(function (error) {
             console.log(error)
         })
-      }
+      },
       showDeviceList(){
         this.popupVisible = true;
         this.getDeviceList();
