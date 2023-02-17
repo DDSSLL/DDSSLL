@@ -988,6 +988,7 @@
       },
       //推流-HDMI输出
       changePushHdmiOut(){
+        var that = this;
         //推流中不能改
         var pushStatus = this.options.dev_push_enable;
         if(pushStatus == 1 ){
@@ -997,7 +998,7 @@
             duration: 2000
           });
           this.$global.getDevOneParam(this.ActiveDevice.dev_sn, 'PushMHdmiOut',function(data){
-            this.options.PushHdmiOut = data.PushMHdmiOut;
+            that.options.PushHdmiOut = data.PushMHdmiOut;
           });
         }else{
           var HDMIOut = this.options.PushHdmiOut;
