@@ -2070,7 +2070,7 @@
             this.options.audio_input = 1;
           }
         }
-        $global.setDeviceParam('audio_input',this.options.audio_input)
+        this.$global.setDeviceParam('audio_input',this.options.audio_input)
       },
       //输入自动
       changeVideoAuto(data){
