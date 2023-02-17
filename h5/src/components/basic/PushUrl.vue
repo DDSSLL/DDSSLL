@@ -762,7 +762,12 @@
       },
       //修改地址类型
       changeAddressType(obj){
-        var urlId = this.activePushObj.urlId;
+        var urlId = "";
+        if (this.workMode==0) {//推流
+          urlId = this.activePushObj.urlId;
+        } else if(this.workMode==1) {//拉流
+          urlId = this.activePushObj.pull_urlId;
+        }
         if(this.activePushObj.addressType == 0){
           this.show.rtmp_url = true;
           this.show.srt_url = false;
@@ -792,7 +797,7 @@
           }
         }else if(rcvType == this.R1080_RCV){//2010R--源1，源2，默认源2
           //公检法接收机，不选板卡，只有源1
-          if(this.activePushObj.boardID.length === 10 || this.activePushObj.boardID === ''){
+          if(!this.activePushObj.boardID || this.activePushObj.boardID.length === 10){
             this.videoSource = this.$global.OPTIONS_URL_SOURCE1;
             this.activePushObj.sourceIndex = 1;
             if(obj.sourceIndex != 1){
