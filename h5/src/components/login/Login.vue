@@ -732,7 +732,7 @@
             localStorage.setItem("DEVICE",that.activedevicetype);
             localStorage.setItem("SAVEM_1080",that.user.saveMe_1080);
             that.$axios.defaults.baseURL = that.DStreamer_BUILD;
-            that.vImg = that.$axios.defaults.baseURL+"/login/ValidationCode.class.php?num="+that.sessionId;
+            //that.vImg = that.$axios.defaults.baseURL+"/login/ValidationCode.class.php?num="+that.sessionId;
           }
         })
         .catch(function (error) {
