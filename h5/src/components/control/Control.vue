@@ -156,7 +156,7 @@
       <div class="Group">
         <div class="GroupItem">
           <div class="GroupItemField">
-            <div class="GroupItemTitle">HDMI视频输出</div>
+            <div class="GroupItemTitle">视频输出</div>
             <div class="GroupItemValue">
               <select class="ItemSelect" v-model="common.PullMHdmiOut" @change="changePullMHdmiOut"  :disabled="dis.PullMHdmiOut">
                 <template v-for="item in OPTIONS_PULL_MHDMIOUT_1080">
@@ -168,7 +168,7 @@
         </div>
         <div class="GroupItem">
           <div class="GroupItemField">
-            <div class="GroupItemTitle">HDMI音频输出</div>
+            <div class="GroupItemTitle">音频输出</div>
             <div class="GroupItemValue">
               <select class="ItemSelect" v-model="common.PullMHdmiAS" @change="changePullMHdmiAS"  :disabled="dis.PullMHdmiAS">
                 <template v-for="item in OPTIONS_PULL_HDMIOUT_1080">
