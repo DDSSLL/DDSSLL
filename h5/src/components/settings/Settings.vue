@@ -1946,9 +1946,12 @@
           valueArr.push(videoInput);
           if(videoInput === '1'){
             //HDMI不支持4声道
+            this.OPTIONS_AUDIOINPUT = this.$global.OPTIONS_AUDIOINPUT_1080;
             this.options.audio_input = 1;
             paramArr.push('audio_input');
             valueArr.push('1');
+          }else{
+            this.OPTIONS_AUDIOINPUT = this.$global.OPTIONS_AUDIOINPUT_2010T;
           }
           that.$global.setDevParamList(paramArr,valueArr);
         }else if(this.curDevSeries.indexOf("1080") >= 0){
