@@ -1005,7 +1005,11 @@ export default {
     }
     else if (param === 'audio_input'){
       if(isDV2010T){
-        res = that.OPTIONS_AUDIOINPUT_2010T;
+        if(related1 == '1'){//HDMI
+          res = that.OPTIONS_AUDIOINPUT_1080;
+        }else{
+          res = that.OPTIONS_AUDIOINPUT_2010T;
+        }
       }else if(devSeries === '1080'){
         res = that.OPTIONS_AUDIOINPUT_1080;
       }else if(devSeries === '4000'){
@@ -1677,11 +1681,18 @@ export default {
         min: this.BITRATE_MIN_5000,
         max: this.BITRATE_MAX_5000
       };
-    }else if(devSeries == "1080"){
-      res = {
-        min: this.BITRATE_MIN_1080,
-        max: this.BITRATE_MAX_1080
-      };
+    }else if(devSeries.indexOf("1080") != -1){
+      if(this.sameToDV2010T(devSn)){
+        res = {
+          min: this.BITRATE_MIN_1080,
+          max: this.BITRATE_MAX3_4000
+        };
+      }else{
+        res = {
+          min: this.BITRATE_MIN_1080,
+          max: this.BITRATE_MAX_1080
+        };
+      }
     }else if(devSeries == "4000"){
       res = {
         min: this.BITRATE_MIN_4000,
@@ -2094,5 +2105,22 @@ export default {
     } else {
       return false;
     }
-  }
+  },
+  //互动组组id验证
+  isValidGrpId(string){
+    if(string === '' || string === null){
+        return false;
+    }
+    var pattern = /^[A-Za-z0-9]{1,15}$/gi;
+    return pattern.test(string);
+  },
+  isValidGrpName(string){
+    if(string === '' || string === null){
+        return false;
+    }
+    if(string.length > 15){
+        return false;
+    }
+    return true;
+  },
 }
