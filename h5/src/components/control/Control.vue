@@ -1226,9 +1226,13 @@
       updateCardSelOptions(data){
         var that = this;
         var onlineArr = [];
-        for (var i = 0; i < data.length; i++) {
-          if ( data[i]["card_id"] == "lte1" || data[i]["card_id"] == "lte2" 
-            || data[i]["card_id"] == "lte3" || data[i]["card_id"] == "eth0"){
+        let isDV2010T = this.$global.sameToDV2010T(this.ActiveDevice.dev_sn);
+        var card1080 = ["eth0","lte1","lte2","lte3"];
+        var card2010 = ["eth0","lte1","lte2","lte3","lte4","lte5","lte6"];
+
+        for (var i = 0; i < data.length; i++) {  
+          if ((isDV2010T && card2010.indexOf(data[i]['card_id']) >-1 )
+            || card1080.indexOf(data[i]['card_id']) >-1){
             var state = "";
             if(data[i]["online"] == '1'){
               state = "在线";
@@ -1246,10 +1250,14 @@
         //更新标志
         var updateFlag = false;
         //是否更新
-        for (var k = 0; k < onlineArr.length; k++) {
-          if (onlineArr[k]["value"] != valueArr[k] || onlineArr[k]["text"] != nameArr[k]){
-            updateFlag = true;
-          }
+        if(that.OPTIONS_TRANS_PUSH_CARD.length != onlineArr.length){
+          updateFlag = true;
+        }else{
+          for (var k = 0; k < onlineArr.length; k++) {
+            if (onlineArr[k]["value"] != valueArr[k] || onlineArr[k]["text"] != nameArr[k]){
+              updateFlag = true;
+            }
+          }  
         }
         //更新下拉选项
         if(updateFlag){
