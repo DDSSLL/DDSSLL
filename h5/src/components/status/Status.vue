@@ -926,7 +926,11 @@ export default {
         lost2Arr.push(data[i].lost2);
         rcvArr.push(data[i].rcv);
         sendArr.push(data[i].send);
-        timeArr.push(data[i].time.split(" ")[1]);
+        var date = data[i].time.split(" ")[0];
+        var showDate = date.split("/")[1]+"-"+date.split("/")[2];
+        var time = data[i].time.split(" ")[1];
+        var showTime = showDate+" "+time; 
+        timeArr.push(showTime);
         vInputArr.push(data[i].VInput);
         srtArr.push(data[i].srt);
         avbrArr.push(data[i].avbr);
