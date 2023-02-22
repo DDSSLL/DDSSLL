@@ -2,7 +2,7 @@
   <div class="VirRcvMan">
     <div class="Group" style="height:100%">
       <div class="GroupTitle popListTitle" @click="changeVirRcvShow">
-        虚拟服务器
+        汇聚服务器
         <i class="titleIcon fa chevronStyle" :class="[ReceiverShow == true ? 'fa-chevron-left': 'fa-chevron-right']"></i>
       </div>
       <mt-popup v-model="ReceiverShow" position="right" popup-transition="popup-fade" class="rightPop">
@@ -11,7 +11,7 @@
             <div class="back">
               <div  @click="ReceiverShow=false" class="popTitleBack">
                 <i class="fa fa-chevron-left chevronWidth chevronColor" aria-hidden="true"></i>
-                <span style="color:#fff">虚拟服务器</span>
+                <span style="color:#fff">汇聚服务器</span>
               </div>
               <i class="titleIcon addBtn fa fa-refresh" @click.stop="getReceiverList"></i>
               <i class="titleIcon addBtn fa fa-plus-circle" @click.stop="addReceiver" v-if="rcvAddShow"></i>
@@ -138,7 +138,7 @@
     <mt-popup v-model="receiverConfigVisible" popup-transition="popup-fade">
       <div class="popupContainer">
         <div class="popupTitle">
-          虚拟服务器配置
+          汇聚服务器配置
           <i class="popupCloseBtn fa fa-times" @click="receiverConfigVisible = false"></i>
         </div>
         <form action="" @submit.prevent="submitReceiverConfig">
