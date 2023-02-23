@@ -589,7 +589,13 @@
         }else{
           text = "是否关闭板卡"+that.options.boardName+"的拉流模式？"
         }
-        that.$messagebox.confirm(text).then(
+        that.$messagebox({
+            $type:'confirm',
+            message:text,
+            closeOnClickModal:false,
+            showConfirmButton:true,
+            showCancelButton:true
+        }).then(
           action => {
             that.setBoardParam(that.ActiveDevice.rcv_sn,that.options.boardName-1,that.options.boardSwitch);
             //更新颜色
