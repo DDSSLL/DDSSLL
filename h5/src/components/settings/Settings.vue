@@ -903,9 +903,10 @@
     activated(){  //生命周期-缓存页面激活
       var that = this;
       this.curRcvSeries = this.$global.getRcvSeries(that.ActiveDevice.rcv_sn);
+      this.selectShow();//判断设备类型显示不同内容1080 or 4000
       this.getLockStates();
       //1080-4000显示初始化
-      this.selectShow();//判断设备类型显示不同内容1080 or 4000
+      
       //this.getSelectOptions();
       this.$global.getDeviceParam(that.formatData);
       this.initDevMatch();//背包配对的接收机

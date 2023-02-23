@@ -482,12 +482,15 @@
             if(this.$route.fullPath == "/live4000"){
               if(val){
                 var that = this;
-                this.$global.getDeviceParam(this.initDevParam);//获取设备参数
+                if(this.ActiveDevice.dev_sn){
+                  this.$global.getDeviceParam(this.initDevParam);//获取设备参数  
+                  this.getDevState();//源1
+                  this.source2Show();//源2
+                }
                 this.$global.getMbps();
                 console.log("dev sn change")
                 //this.getRcvParam();
-                this.getDevState();//源1
-                this.source2Show();//源2
+                
               }
               this.showBoardMode();//2010R拉流
             }
@@ -497,11 +500,14 @@
     },
     activated(){  //生命周期-缓存页面激活
       console.log("activated")
-      this.$global.getDeviceParam(this.initDevParam);//获取设备参数
+      if(this.ActiveDevice.dev_sn){
+        this.$global.getDeviceParam(this.initDevParam);//获取设备参数
+        this.getDevState();//源1
+        this.source2Show();//源2
+      }
       this.$global.getMbps();
       this.getRcvParam();
-      this.getDevState();//源1
-      this.source2Show();//源2
+      
       this.showBoardMode();//2010R拉流
     },
     deactivated(){   //生命周期-缓存页面失活
@@ -1506,36 +1512,38 @@
         .then(function (response) {
           let res = response.data;
           var data = res.data[0];
-          var format = that.convertM50Format(data['m50_format'], type);
-          var fr = that.convertM50Fr(data['m50_fr']);
-          if (select == 'framerate') {
-            that.options[type + '_framerate'] = fr;
-          } else if (select == 'resolution') {
-            that.options[type + '_resolution'] = format;
-          } else {
-            if(type == 'HDMI'){
-              var newOption = [];
-              if(format == 2 || format == 3){
-                for (var i = 0; i < that.$global.OPTIONS_FRAMERATE_6.length; i++) {
-                  if (i <= 2) {
+          if(data){
+            var format = that.convertM50Format(data['m50_format'], type);
+            var fr = that.convertM50Fr(data['m50_fr']);
+            if (select == 'framerate') {
+              that.options[type + '_framerate'] = fr;
+            } else if (select == 'resolution') {
+              that.options[type + '_resolution'] = format;
+            } else {
+              if(type == 'HDMI'){
+                var newOption = [];
+                if(format == 2 || format == 3){
+                  for (var i = 0; i < that.$global.OPTIONS_FRAMERATE_6.length; i++) {
+                    if (i <= 2) {
+                      newOption.push(that.$global.OPTIONS_FRAMERATE_6[i]);
+                    }
+                  }
+                  if(fr > 2){
+                    fr = 2;
+                  }
+                }else{
+                  for (var i = 0; i < that.$global.OPTIONS_FRAMERATE_6.length; i++) {
                     newOption.push(that.$global.OPTIONS_FRAMERATE_6[i]);
                   }
                 }
-                if(fr > 2){
-                  fr = 2;
-                }
-              }else{
-                for (var i = 0; i < that.$global.OPTIONS_FRAMERATE_6.length; i++) {
-                  newOption.push(that.$global.OPTIONS_FRAMERATE_6[i]);
-                }
+                that.OPTIONS_FRAMERATE_HDMI = newOption;
               }
-              that.OPTIONS_FRAMERATE_HDMI = newOption;
+              that.options[type + '_resolution'] = format;
+              that.options[type + '_framerate'] = fr;
             }
-            that.options[type + '_resolution'] = format;
-            that.options[type + '_framerate'] = fr;
-          }
-          if (typeof(callback) == 'function') {
-            callback(format, fr);
+            if (typeof(callback) == 'function') {
+              callback(format, fr);
+            }
           }
         })
         .catch(function (error) {
