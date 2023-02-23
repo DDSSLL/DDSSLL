@@ -1231,11 +1231,12 @@
           that.$global.getDevListOneParam('hardVer',function(data){
             if(data.hardVer != '' && data.hardVer != null){
               var hardVer = parseFloat(data.hardVer.split("-")[0]);
-              if(hardVer >= 1.3){//PCIE
+              that.OPTIONS_VIDEOINPUT = that.$global.getDevParamRange(dev_sn, '', 'video_input',hardVer);
+              /*if(hardVer >= 1.3){//PCIE
                 that.OPTIONS_VIDEOINPUT = that.$global.OPTIONS_VIDEOINPUT_PCIE_4000;
               }else{
                 that.OPTIONS_VIDEOINPUT = that.$global.OPTIONS_VIDEOINPUT_4000;
-              }
+              }*/
             }else{
               that.OPTIONS_VIDEOINPUT = that.$global.OPTIONS_VIDEOINPUT_4000;
             }

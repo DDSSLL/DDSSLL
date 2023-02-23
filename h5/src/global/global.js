@@ -231,7 +231,9 @@ export default {
                             {value: "3",text: "3G-SDI[1]"}, 
                             {value: "4",text: "HDMI"}],
   OPTIONS_VIDEOINPUT_3000 : [{value: "3",text: "3G-SDI[1]"}, 
-                        {value: "4",text: "HDMI"}],
+                            {value: "4",text: "HDMI"}],
+  OPTIONS_VIDEOINPUT_3000T_PRO : [{value: "0",text: "12G-SDI"},
+                                  {value: "4",text: "HDMI"}],
   OPTIONS_VIDEOINPUT_1080 : [{value: "0",text: "3G-SDI"}, 
                             {value: "1",text: "HDMI"}],
   OPTIONS_VIDEOINPUT_406 : [{value: "0",text: "SDI"}],
@@ -980,6 +982,8 @@ export default {
     else if (param == 'video_input') {
       if (devMode == 'DV3000T') {
         res = that.OPTIONS_VIDEOINPUT_3000;
+      }else if(devMode == 'DV3000T PRO'){
+        res = that.OPTIONS_VIDEOINPUT_3000T_PRO;
       }else if(devMode == 'DV406'){
         res = that.OPTIONS_VIDEOINPUT_406;
       }else if(devMode === 'DV5000T'){
