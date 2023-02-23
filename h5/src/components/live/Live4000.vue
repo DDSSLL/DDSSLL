@@ -172,10 +172,11 @@
           <div class="GroupItem"><!-- 拉流地址 -->
             <div class="GroupItemField">
               <div class="GroupItemTitle">{{"板卡"+options.boardName+"拉流地址"}}</div>
-              <div class="GroupItemValue" style="padding-top:7px" v-if="rcvParamLock">
+              <div class="GroupItemValue" style="padding-top:7px" v-if="!showEditPullAddr">
                 <span :style="{color:options.boardColor}" style="word-break: break-all;line-height: .2rem;">{{ options.boardUrl }}</span>
+                <i class="titleIcon fa fa-edit" style="margin-left:15px" @click="editPullAddress" v-show="!rcvParamLock"></i>
               </div>
-              <div class="GroupItemValue" v-if="!rcvParamLock">
+              <div class="GroupItemValue" v-if="showEditPullAddr">
               	<mt-field label="" placeholder="" class="ItemTextArea" type="textarea" rows="5" v-model="options.boardUrl" @blur.native.capture="changeBoardUrl"></mt-field>
               	<!--<textarea class="ItemIpt byteIpt" rows="4"  v-model=""></textarea>-->
                 <!--<textarea type="text" class="ItemIpt byteIpt" v-model="options.boardUrl" @blur="changeBoardUrl" style="width:95%">-->
@@ -446,6 +447,7 @@
         dev_push_enable:false,
         getPushUrl:"",//获取推流地址的intervalId
         timerAck:"",
+        showEditPullAddr:false,
       }
     },
     computed: {
@@ -691,10 +693,14 @@
           console.log(error)
         })  
       },
+      editPullAddress(){
+        this.showEditPullAddr = true;
+      },
       //下发板卡地址
       changeBoardUrl(){
         console.log("changeBoardUrl")
         var that = this;
+        that.showEditPullAddr = false;
         console.log("this.options.boardUrl:"+this.options.boardUrl)
         console.log("this.options.boardUrlOri:"+this.options.boardUrlOri)
         if(this.options.boardUrl == this.options.boardUrlOri){
