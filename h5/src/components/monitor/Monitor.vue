@@ -210,15 +210,22 @@
         })
       },
       changeMonitorType(){
+        var that = this;
+        this.webrtcClose();
+        $("#playControl").removeClass("fa-pause").addClass("fa-play");
         if(this.options.monitorType==0){
           this.show.customType = false;
-          this.setMonitorType(0)
+          this.setMonitorType(0, function(){
+            that.getMonitorParam(that.initVideo);
+          })
         }else{
           this.show.customType = true;
-          this.setMonitorType(1)
+          this.setMonitorType(1, function(){
+            that.getMonitorParam(that.initVideo);
+          })
         }
       },
-      setMonitorType(type){
+      setMonitorType(type, cb){
         var that = this;
         this.$axios({
           method: 'post',
@@ -229,13 +236,16 @@
             rcvSn: that.ActiveDevice.rcv_sn,
             devSn: that.ActiveDevice.dev_sn,
           }),
-          Api:"setRtmpParam",
+          Api:"setMonitorType",
           AppId:"android",
           UserId:that.user.login_name
         })
         .then(function (response) {
           let res = response.data;
           if(res.res.success){
+            if(typeof(cb) == 'function'){
+              cb();
+            }
           }
         })
         .catch(function (error) {
