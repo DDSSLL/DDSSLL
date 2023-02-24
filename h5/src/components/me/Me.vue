@@ -6,9 +6,15 @@
     <!-- 实体接收机 -->
     <RcvMan></RcvMan>
 
-    <!-- 虚拟服务器 -->
+    <!-- 汇聚服务器 -->
     <VirRcvMan></VirRcvMan>
-    
+
+    <!-- 代理服务器 -->
+    <ProxyMan></ProxyMan>
+
+    <!-- 网关 -->
+    <GateWayMan v-if="user.userGroup == ADMIN && user.prefix=='001'"></GateWayMan>
+
     <!-- 录机管理 -->
     <Record></Record>
     
@@ -47,6 +53,8 @@
   import DevMan from './dev';
   import RcvMan from './rcv';
   import VirRcvMan from './virrcv';
+  import ProxyMan from './proxy';
+  import GateWayMan from './gateway';
   import Record from './record';
   import UserMan from './user';
   import PrefixMan from './prefix';
@@ -70,7 +78,7 @@
       ...mapState(['user','navHide','ChartTimer'])
     },
     components: {
-      DevMan,RcvMan,VirRcvMan,Record,UserMan,PrefixMan,RoadTest,chartConf,systemConf
+      DevMan,RcvMan,VirRcvMan,Record,UserMan,PrefixMan,RoadTest,chartConf,systemConf,ProxyMan,GateWayMan
     },
     watch:{   //监听当前设备值变化
       '$store.state.ActiveDevice': {

@@ -1268,11 +1268,11 @@ export default {
   //判断接收机序列号是否有效
   isValidRcvSn(rcvSn) {
     var res = false;
-    if (rcvSn.length != 10) {
+    if (!rcvSn || rcvSn.length != 10) {
       return false;
     }
     var snStr = rcvSn.substr(-4); //序列号10位，如果后4位是2999，则前6位可以输入字母，表示虚拟接收机，若后4位不是2999，则前6位必须输入数字，表示实体接收机
-    if (snStr != "2999") { //实体接收机，10位必须都是数字
+    if (snStr != "2999" && snStr != "2998") { //实体接收机，10位必须都是数字
       if (/^[0-9]+$/.test(rcvSn)) {
         res = true;
       } else {
@@ -2127,4 +2127,15 @@ export default {
     }
     return true;
   },
+  //数字
+  checkInteger(value) {
+      var curValue = value;
+      curValue = curValue.replace(/[^\d]/g, ''); //清除“数字”和“.”以外的字符
+      if (curValue.indexOf(".") < 0 && curValue != "") { //以上已经过滤，此处控制的是如果没有小数点，首位不能为类似于 01、02
+          curValue = parseFloat(curValue);
+      }
+      if (value != curValue) {
+          value = curValue;
+      }
+  }
 }

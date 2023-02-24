@@ -947,8 +947,6 @@
           }else{
             that.devicePopupList = [];
           }
-          console.log("that.devicePopupList")
-          console.log(that.devicePopupList)
         })
         .catch(function (error) {
           console.log(error)
