@@ -1008,62 +1008,68 @@
 
 
               if(that.ActiveDevice 
-                && (row["dev_sn"] == that.ActiveDevice["dev_sn"] && row["dev_sn"]!="")){
-                that.refreshCurDevParam(row);
-                that.TCircleClass = 'gray';
-                if (row.online == '1') {
-                  if (row.videoInput !== 'NO INPUT') {
-                    that.TCircleClass = 'green';
-                  }else{
-                    that.TCircleClass = 'noInputColor';
+              if(that.ActiveDevice){//有选中项
+                if(that.ActiveDevice["dev_sn"] != ""){//选中项有背包
+                  if(row["dev_sn"] == that.ActiveDevice["dev_sn"]){
+                    that.refreshCurDevParam(row);
+                    that.TCircleClass = 'gray';
+                    if (row.online == '1') {
+                      if (row.videoInput !== 'NO INPUT') {
+                        that.TCircleClass = 'green';
+                      }else{
+                        that.TCircleClass = 'noInputColor';
+                      }
+                      if (row.dev_push_status != '0') {
+                        that.TCircleClass = 'red';
+                      }
+                    }
+                    that.RCircleClass = 'gray';
+                    if (row.rcv_online == '1') {
+                      that.RCircleClass = 'green';
+                      if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                        that.RCircleClass = 'red';
+                      }
+                    } else if (row.rcv_online == '0') {
+                      that.RCircleClass = 'gray';
+                    }
+                    that.BCircleClass = 'gray';
+                    if (row.board_online && row.board_online != '0') {
+                      that.BCircleClass = 'green';
+                      if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                        that.BCircleClass = 'red';
+                      }
+                    } else if (row.board_online && row.board_online == '0') {
+                      that.BCircleClass = 'gray';
+                    }
                   }
-                  if (row.dev_push_status != '0') {
-                    that.TCircleClass = 'red';
+                }else{//选中项没有背包
+                  that.TCircleClass = 'gray';
+                  if(row["rcv_sn"] == that.ActiveDevice["dev_sn"]
+                    && row["board_id"] == that.ActiveDevice["board_id"]){
+                    that.TCircleClass = 'gray';
+                    that.RCircleClass = 'gray';
+                    if (row.rcv_online == '1') {
+                      that.RCircleClass = 'green';
+                      if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                        that.RCircleClass = 'red';
+                      }
+                    } else if (row.rcv_online == '0') {
+                      that.RCircleClass = 'gray';
+                    }
+                    
+                    that.BCircleClass = 'gray';
+                    if (row.board_online && row.board_online != '0') {
+                      that.BCircleClass = 'green';
+                      if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
+                        that.BCircleClass = 'red';
+                      }
+                    } else if (row.board_online && row.board_online == '0') {
+                      that.BCircleClass = 'gray';
+                    }
                   }
-                }
-                that.RCircleClass = 'gray';
-                if (row.rcv_online == '1') {
-                  that.RCircleClass = 'green';
-                  if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
-                    that.RCircleClass = 'red';
-                  }
-                } else if (row.rcv_online == '0') {
-                  that.RCircleClass = 'gray';
-                }
-                
-                that.BCircleClass = 'gray';
-                if (row.board_online && row.board_online != '0') {
-                  that.BCircleClass = 'green';
-                  if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
-                    that.BCircleClass = 'red';
-                  }
-                } else if (row.board_online && row.board_online == '0') {
-                  that.BCircleClass = 'gray';
-                }
-              }else if(row["dev_sn"] == ""){
-                if(row["dev_sn"] == that.ActiveDevice["dev_sn"]){
-                that.TCircleClass = 'gray';
-                }
-                that.RCircleClass = 'gray';
-                if (row.rcv_online == '1') {
-                  that.RCircleClass = 'green';
-                  if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
-                    that.RCircleClass = 'red';
-                  }
-                } else if (row.rcv_online == '0') {
-                  that.RCircleClass = 'gray';
-                }
-                
-                that.BCircleClass = 'gray';
-                if (row.board_online && row.board_online != '0') {
-                  that.BCircleClass = 'green';
-                  if ((row.dev_push_status != '0' && row.WorkMode == '0' && row.PushTsType != '1') || row.pullStart != '0') {
-                    that.BCircleClass = 'red';
-                  }
-                } else if (row.board_online && row.board_online == '0') {
-                  that.BCircleClass = 'gray';
                 }
               }
+              
               //在线且没在充电中，才显示电池电量低
               var online = row.online;
               var fextBat = that.formatExtBat(row.ExtBat);
