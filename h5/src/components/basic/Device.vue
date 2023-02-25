@@ -1041,7 +1041,9 @@
                   that.BCircleClass = 'gray';
                 }
               }else if(row["dev_sn"] == ""){
+                if(row["dev_sn"] == that.ActiveDevice["dev_sn"]){
                 that.TCircleClass = 'gray';
+                }
                 that.RCircleClass = 'gray';
                 if (row.rcv_online == '1') {
                   that.RCircleClass = 'green';
