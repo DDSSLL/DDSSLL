@@ -3293,8 +3293,8 @@
             var jIndex = 0;
             var options = [];
             for (var i = 0; i < data.length; i++) {//传输通道，定时刷新获取在线的网卡
-              options[jIndex]={};
               if(data[i]["card_id"].indexOf("lte")!=-1 || data[i]["card_id"]=="eth0"){
+                options[jIndex]={};
                 if(data[i]["online"] != "0"){
                   options[jIndex]['text'] = "在线:"+data[i]["card_name"];    
                 }else{
