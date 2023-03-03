@@ -7,11 +7,11 @@
         <i class="tab tab-main" v-bind:class="{ 'tab-main-active': activeTab == 'status' }"></i>
         {{ $t('basic.status') }}
       </mt-tab-item>
-      <mt-tab-item id="control">
+      <mt-tab-item id="control" v-show="devParamShowFlg">
         <i class="tab tab-control" v-bind:class="{ 'tab-control-active': activeTab == 'control' }"></i>
         {{ $t('basic.control') }}
       </mt-tab-item>
-      <mt-tab-item id="settings">
+      <mt-tab-item id="settings" v-show="devParamShowFlg">
         <i class="tab tab-settings" v-bind:class="{ 'tab-settings-active': activeTab == 'settings' }"></i>
         {{ $t('basic.settings') }}
       </mt-tab-item>
@@ -19,7 +19,7 @@
         <i class="tab tab-live" v-bind:class="{ 'tab-live-active': activeTab == 'live' }"></i>
         <span>{{ $t('basic.live4000') }}</span>
       </mt-tab-item>
-      <mt-tab-item id="monitor" v-show="monitorFlg">
+      <mt-tab-item id="monitor" v-show="monitorFlg && devParamShowFlg">
         <i class="tab tab-monitor" v-bind:class="{ 'tab-monitor-active': activeTab == 'monitor' }"></i>
         <span>{{ $t('basic.monitor') }}</span>
       </mt-tab-item>
@@ -58,7 +58,7 @@
     },
     components: {Ad},
     computed: {
-      ...mapState(['user','navHide','activedevicetype','ActiveDevice','rcvTabShowFlg','monitorFlg'])
+      ...mapState(['user','navHide','activedevicetype','ActiveDevice','rcvTabShowFlg','monitorFlg','devParamShowFlg'])
     },
     mounted(){
       this.SET_NAV_STATUS(true);

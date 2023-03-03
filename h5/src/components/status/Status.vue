@@ -2084,7 +2084,7 @@ export default {
           if(!data[key] || data[key] < 2){
             continue;
           }
-          var dataRcv = data[key][2] ? data[key][2]["rcv_br"] : 0; //下行速率
+          var dataRcv = data[key]["rcv_br"]//data[key][2] ? data[key][2]["rcv_br"] : 0; //下行速率
           var curChartDevRcvBoard = "";//当前设备的 devsn/rcvsn/boardid
           for (var i = 0; i < keyArr.length; i++) {
             if (keyArr[i].split("/")[1]+"-"+keyArr[i].split("/")[2] == key) {

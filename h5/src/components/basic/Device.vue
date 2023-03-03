@@ -1013,7 +1013,6 @@
               }
 
 
-              if(that.ActiveDevice 
               if(that.ActiveDevice){//有选中项
                 if(that.ActiveDevice["dev_sn"] != ""){//选中项有背包
                   if(row["dev_sn"] == that.ActiveDevice["dev_sn"]){
@@ -1050,8 +1049,9 @@
                   }
                 }else{//选中项没有背包
                   that.TCircleClass = 'gray';
-                  if(row["rcv_sn"] == that.ActiveDevice["dev_sn"]
+                  if(row["rcv_sn"] == that.ActiveDevice["rcv_sn"]
                     && row["board_id"] == that.ActiveDevice["board_id"]){
+                    that.refreshCurDevParam(row);
                     that.TCircleClass = 'gray';
                     that.RCircleClass = 'gray';
                     if (row.rcv_online == '1') {
