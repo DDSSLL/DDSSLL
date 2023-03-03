@@ -75,5 +75,10 @@ export default {
     // 设置监控Tab显示标志位
     [types.SET_MONITOR_TAB_SHOW_FLG]: (state, datas) => {
         state.monitorFlg = datas
-    },    
+    },   
+    //设置背包相关参数页面显示标志位（包含控制，设置，监控） 
+    [types.SET_DEVPARAM_TAB_SHOW_FLG]: (state, datas) => {
+        state.devParamShowFlg = datas
+    },   
+    
 }

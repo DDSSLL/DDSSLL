@@ -397,7 +397,7 @@
 
 <script>
   import { mapState, mapMutations } from 'vuex';
-  import { SET_ACTIVE_DEVICE,SET_DEVICE_TYPE_SELECT,SET_DEVICE_MODE_SELECT,SET_DEVICE_PREFIX_SELECT,SET_PARAM_LOCK_ACK,SET_PARAM_LOCK,SET_LOCK_USERID,SET_RCV_TAB_SHOW_FLG,SET_MONITOR_TAB_SHOW_FLG } from '../../store/mutation-types';
+  import { SET_ACTIVE_DEVICE,SET_DEVICE_TYPE_SELECT,SET_DEVICE_MODE_SELECT,SET_DEVICE_PREFIX_SELECT,SET_PARAM_LOCK_ACK,SET_PARAM_LOCK,SET_LOCK_USERID,SET_RCV_TAB_SHOW_FLG,SET_MONITOR_TAB_SHOW_FLG,SET_DEVPARAM_TAB_SHOW_FLG } from '../../store/mutation-types';
   import $ from 'jquery';
   export default {
     name: "Device",
@@ -534,7 +534,8 @@
         SET_PARAM_LOCK,
         SET_LOCK_USERID,
         SET_RCV_TAB_SHOW_FLG,
-        SET_MONITOR_TAB_SHOW_FLG
+        SET_MONITOR_TAB_SHOW_FLG,
+        SET_DEVPARAM_TAB_SHOW_FLG 
       }),
       backToActivePage(){
         if(this.deviceListShow.length == 0){
@@ -902,6 +903,11 @@
         var actRcv = this.$global.getRcvMode(datas.rcv_sn.substr(-4)) == 'DV4004R' ? true:false;
         var WorkMode = datas.WorkMode;
         var PushTsType = datas.PushTsType;
+        if(!datas.dev_sn){
+          this.SET_DEVPARAM_TAB_SHOW_FLG(false);
+        }else{
+          this.SET_DEVPARAM_TAB_SHOW_FLG(true);
+        }
         if(!curRcvSeries || curRcvSeries==VIR_RCV){//没配接收机不显示接收机tab
         	this.SET_RCV_TAB_SHOW_FLG(false);
         }else{

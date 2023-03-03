@@ -35,4 +35,5 @@ export default {
     },*/
     rcvTabShowFlg:false,//接收机Tab显示标志位
     monitorFlg:true,//监控Tab显示标志位
+    devParamShowFlg:true,//背包相关参数页面显示标志位（包含控制，设置，监控） 
 }
