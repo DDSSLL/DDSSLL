@@ -1286,6 +1286,9 @@
             that.updateParam(data);
             that.setBtnDisabled(false);//插件enable
           }else{
+            if(data["dev_push_enable"] == '0'){
+              that.common.dev_push_enableVal = false;
+            }
             if (data['OffLinePushEnable'] == '1'){//文件回传中，输入编码下的参数不能编辑
               that.setEncodeParamDisabled(true);
             }else{
@@ -2388,7 +2391,6 @@
         } else{
           this.$set(this.spinClass,cardId, '');  
         }
-        console.log(this.spinClass)
       }
     }
   }
