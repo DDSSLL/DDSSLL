@@ -10,7 +10,8 @@
     <div class="chartArea">
       <div class="mainChart" id="mainChart">
         <div id="totalChart" class="totalChart"></div>
-      </div>
+        <div id="totalChartPie" class="totalChart" v-show="user.prefix==PREFIX && WorkMode == 0"></div>
+      </div> 
       <div id="cardsChart" class="cardsChart" @click="showBigChart" v-if="showCardsChart">
         <div class="lteChart" v-if="eth0Show" :class="chartStyle">
           <div class="chartTitle"></div>
@@ -163,6 +164,8 @@ export default {
   name: 'Status',
   data(){
     return{
+      PREFIX : PREFIX,
+      defaultPie:true,
       progress:"",
       curDevSeries:"",
       cardIdArr:[],
@@ -175,6 +178,7 @@ export default {
       //ActiveDevice:null,
       timer:null,
       myChartTotal:null,
+      myChartTotalPie:null,
       lteChart : null,
       showCardNum:0,
       eth0Show:false,
@@ -1951,6 +1955,8 @@ export default {
               seriesDataDown[dataAll[i]["card_id"]] = {};
               seriesDataDown[dataAll[i]["card_id"]]["ip"] = "";
               seriesDataDown[dataAll[i]["card_id"]]["name"] = "";
+              seriesDataDown[dataAll[i]["card_id"]]["CardSendPkt"] = "";
+              seriesDataDown[dataAll[i]["card_id"]]["CardSendPktStr"] = "";
               seriesDataDown[dataAll[i]["card_id"]]["data"] = new Array(xSplit).fill(0);
             }
             //网卡丢包率
@@ -1966,6 +1972,8 @@ export default {
             seriesDataUp[dataAll[i]["card_id"]]["data"].pop();
             seriesDataDown[dataAll[i]["card_id"]]["ip"] = dataAll[i]["card_ip"];
             seriesDataDown[dataAll[i]["card_id"]]["name"] = dataAll[i]["card_name"];
+            seriesDataDown[dataAll[i]["card_id"]]["CardSendPkt"] = dataAll[i]["CardSendPkt"];
+            seriesDataDown[dataAll[i]["card_id"]]["CardSendPktStr"] = dataAll[i]["CardSendPktStr"];
             seriesDataDown[dataAll[i]["card_id"]]["data"].unshift(dataAll[i]["receive_br_10"]);
             seriesDataDown[dataAll[i]["card_id"]]["data"].pop();
             seriesCardLost[dataAll[i]["card_id"]]["data"].unshift(dataAll[i]["card_lost_br"]);
@@ -2027,6 +2035,8 @@ export default {
                 validSeriesDataDown[key2] = {};
                 validSeriesDataDown[key2]["ip"] = seriesDataDown[key2]["ip"];
                 validSeriesDataDown[key2]["name"] = seriesDataDown[key2]["name"];
+                validSeriesDataDown[key2]["CardSendPkt"] = seriesDataDown[key2]["CardSendPkt"];
+                validSeriesDataDown[key2]["CardSendPktStr"] = seriesDataDown[key2]["CardSendPktStr"];
                 validSeriesDataDown[key2]["data"] = seriesDataDown[key2]["data"];
               }
             }
@@ -2144,8 +2154,10 @@ export default {
           that.judgeCardShow(showCard);
           break;
         default:
-          $("#mainChart").css("height","34%")
-          $("#cardsChart").css("height","66%")
+          // $("#mainChart").css("height","34%")
+          // $("#cardsChart").css("height","66%")
+          $("#mainChart").css("height","40%")
+          $("#cardsChart").css("height","60%")
           that.judgeCardShow(showCard);
           break;
       }
@@ -2305,18 +2317,19 @@ export default {
         maxRcvLoss = 0;
       }
       maxLoss = maxDevLoss>maxRcvLoss?maxDevLoss:maxRcvLoss;
-      if(that.user.prefix == PREFIX){
-        if(maxLoss >= 4){
-          maxLoss = 30;
-        }else if(maxLoss < 2){
-          maxLoss = 3;
-        }else{
-          maxLoss = 5;
-        }
-      }
-      else{
-        maxLoss = 30;
-      }
+      // if(that.user.prefix == PREFIX){
+      //   if(maxLoss >= 4){
+      //     maxLoss = 30;
+      //   }else if(maxLoss < 2){
+      //     maxLoss = 3;
+      //   }else{
+      //     maxLoss = 5;
+      //   }
+      // }
+      // else{
+      //   maxLoss = 30;
+      // }
+      maxLoss = 30;
       //信号输入
       series.push({
         name: '',
@@ -2449,6 +2462,8 @@ export default {
       if(that.curDevSeries == "4000"){
         yAxisOption3 = that.copy(that.commonOptionYAxis3);
       }
+      var grid = that.copy(that.commonOptionGrid);
+      grid.bottom = 0;
       var option = {
         title: that.commonOptionTitle,
         legend: {
@@ -2471,7 +2486,7 @@ export default {
           },
           data: legendName
         },
-        grid: that.commonOptionGrid,
+        grid: grid,
         tooltip: that.commonOptionTooltipFalse,
         xAxis: Object.assign(that.commonOptionXAxis[0], {data: that.xData}),
         yAxis: (that.curDevSeries=="4000")?[yAxisOption1, yAxisOption2, yAxisOption3]:[yAxisOption1, yAxisOption2],
@@ -2551,6 +2566,64 @@ export default {
         }
       }*/
       that.myChartTotal.setOption(option, true);
+    },
+    initChartTotalPie(cardData) {
+      var that = this;
+      var seriesDataDown = cardData.seriesDataDown;
+      var cardPieSeries = [];
+      for(var key in seriesDataDown){
+        if(this.defaultPie){
+          cardPieSeries.push({
+            "name":seriesDataDown[key]["name"],//.split(" ")[0],//+" "+(seriesDataDown[key]["data"][0]/1000).toFixed(3)+"Mbps",
+            "value":seriesDataDown[key]["data"][0]
+          })
+        }else{
+          cardPieSeries.push({
+            "name":seriesDataDown[key]["name"].split(" ")[0]+" "+(seriesDataDown[key]["data"][0]/1000).toFixed(3)+"Mbps",
+            "value":seriesDataDown[key]["CardSendPkt"],
+            "valueStr":seriesDataDown[key]["CardSendPktStr"],
+          })
+        }
+      }
+      if (!this.myChartTotalPie) {
+        this.myChartTotalPie = echarts.init(document.getElementById('totalChartPie'));
+      }
+      that.myChartTotalPie.resize();
+      
+      var series = [];
+      series.push({
+        type: 'pie',
+        center: ['50%', '50%'],
+        radius: '55%',
+        data:cardPieSeries,
+        itemStyle: {
+          borderColor: '#08979c',
+        },
+        tooltip:{
+          show:false,
+          formatter:function(param){
+            if(this.defaultPie){
+              return param.name+" "+(param.value/1000).toFixed(3)+"Mbps";
+            }else{
+              return param.name+" "+param.data.valueStr;
+            }
+            
+          }
+        }
+      })
+      var option = {
+        color:["#b5f5ec","#87e8de","#5cdbd3","#36cfc9","#13c2c2","#08979c"],
+        //grid: commonOptionGrid,
+        series: series,
+        animation: false
+      };
+  
+
+      this.myChartTotalPie.setOption(option, true);
+      this.myChartTotalPie.off('click')
+      this.myChartTotalPie.on('click', function(aa) {
+        that.defaultPie = !that.defaultPie;
+      });
     },
     initChartTotalRcv(cardData) {
       var that = this;
@@ -3165,6 +3238,13 @@ export default {
             //that.chartCardView[key.replace(/_/,"-")] = data[key];
           }
           //that.SET_CHART_CARD_VIEW(chartCardView);
+          if(that.user.prefix==that.PREFIX && that.WorkMode == 0){
+            $("#totalChart").css("height","60%")
+            $("#totalChartPie").css("height","40%")
+            that.initChartTotalPie(cardData);  
+          }else{
+            $("#totalChart").css("height","100%")
+          }
           that.initChartTotal(cardData);
           that.initChartCards(cardData);
         }else{
